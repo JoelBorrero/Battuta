@@ -1,0 +1,141 @@
+/// Battuta — Repertoire state management provider.
+///
+/// An [AsyncNotifier] powered by Riverpod code-generation that manages
+/// the lifecycle of the song repertoire list. Handles loading, CRUD
+/// operations, and search, exposing state as [AsyncValue<List<Song>>]
+/// so the UI can react to loading / error / data states declaratively.
+library;
+
+import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
+import 'package:battuta/features/repertoire/domain/entities/song.dart';
+import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'repertoire_provider.g.dart';
+
+/// Provides the singleton [SongRepository] instance to the app.
+///
+/// Can be overridden in tests or swapped for Drift in ticket #86e3yy41r.
+final songRepositoryProvider = Provider<SongRepository>((ref) {
+  return InMemorySongRepository();
+});
+
+/// Provides the current repertoire list and exposes mutation methods.
+///
+/// Usage in a widget:
+/// ```dart
+/// final repertoire = ref.watch(repertoireProvider);
+/// repertoire.when(
+///   data: (songs) => SongListView(songs: songs),
+///   loading: () => const CircularProgressIndicator(),
+///   error: (e, st) => ErrorMessage(e),
+/// );
+/// ```
+@riverpod
+class Repertoire extends _$Repertoire {
+  /// Loads all songs from the repository on first access.
+  @override
+  Future<List<Song>> build() async {
+    final repository = ref.watch(songRepositoryProvider);
+    final result = await repository.getAllSongs();
+    return result.fold(
+      (failure) => throw failure,
+      (songs) => songs,
+    );
+  }
+
+  /// Adds a new [song] to the repertoire.
+  ///
+  /// Optimistically updates the local state and rolls back on failure.
+  Future<void> addSong(Song song) async {
+    final repository = ref.read(songRepositoryProvider);
+    final previousState = state;
+
+    // Optimistic update
+    state = AsyncData([...?state.value, song]);
+
+    final result = await repository.saveSong(song);
+    result.fold(
+      (failure) {
+        state = previousState; // rollback
+        state = AsyncError(failure, StackTrace.current);
+      },
+      (saved) {
+        final current = state.value ?? [];
+        state = AsyncData([
+          for (final s in current)
+            if (s.id == song.id) saved else s,
+        ]);
+      },
+    );
+  }
+
+  /// Updates an existing [song] in the repertoire.
+  ///
+  /// Replaces the song with a matching [Song.id] in the local state.
+  Future<void> updateSong(Song song) async {
+    final repository = ref.read(songRepositoryProvider);
+    final previousState = state;
+
+    // Optimistic update
+    state = AsyncData([
+      for (final s in state.value ?? [])
+        if (s.id == song.id) song else s,
+    ]);
+
+    final result = await repository.saveSong(song);
+    result.fold(
+      (failure) {
+        state = previousState; // rollback
+        state = AsyncError(failure, StackTrace.current);
+      },
+      (saved) {
+        state = AsyncData([
+          for (final s in state.value ?? [])
+            if (s.id == song.id) saved else s,
+        ]);
+      },
+    );
+  }
+
+  /// Removes the song with the given [songId] from the repertoire.
+  Future<void> deleteSong(String songId) async {
+    final repository = ref.read(songRepositoryProvider);
+    final previousState = state;
+
+    // Optimistic removal
+    state = AsyncData([
+      for (final s in state.value ?? [])
+        if (s.id != songId) s,
+    ]);
+
+    final result = await repository.deleteSong(songId);
+    result.fold(
+      (failure) {
+        state = previousState; // rollback
+        state = AsyncError(failure, StackTrace.current);
+      },
+      (_) {/* already removed optimistically */},
+    );
+  }
+
+  /// Filters the repertoire by [query], matching title, artist, or tags.
+  ///
+  /// Replaces the current state with the search results. Pass an empty
+  /// string to reload the full list.
+  Future<void> searchSongs(String query) async {
+    final repository = ref.read(songRepositoryProvider);
+
+    state = const AsyncLoading();
+
+    final result = query.isEmpty
+        ? await repository.getAllSongs()
+        : await repository.searchSongs(query);
+
+    state = result.fold(
+      (failure) => AsyncError(failure, StackTrace.current),
+      AsyncData.new,
+    );
+  }
+}
