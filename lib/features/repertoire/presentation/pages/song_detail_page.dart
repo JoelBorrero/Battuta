@@ -13,6 +13,7 @@ import 'package:battuta/features/repertoire/domain/services/song_transposer.dart
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
+import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,9 +32,16 @@ class SongDetailPage extends ConsumerStatefulWidget {
 }
 
 class _SongDetailPageState extends ConsumerState<SongDetailPage> {
+  final _toneSynthesizer = ToneSynthesizer();
   int _transpositionSemitones = 0;
   bool _isExporting = false;
   bool _showStaffNotation = false;
+
+  @override
+  void dispose() {
+    _toneSynthesizer.dispose();
+    super.dispose();
+  }
 
   void _showTransposeDialog(Song originalSong) {
     showModalBottomSheet<void>(
@@ -477,6 +485,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                           height: 380,
                           child: StaffCanvas(
                             score: activeSong.toScore(),
+                            onNoteTapped: (note) =>
+                                _toneSynthesizer.playPitch(note.pitch),
                           ),
                         ),
                       ],

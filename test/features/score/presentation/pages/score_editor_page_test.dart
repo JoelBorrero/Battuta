@@ -6,6 +6,7 @@ import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/score/presentation/pages/score_editor_page.dart';
 import 'package:battuta/features/score/presentation/widgets/rhythm_toolbar.dart';
+import 'package:battuta/features/score/presentation/widgets/score_playback_bar.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,7 +72,41 @@ void main() {
         findsOneWidget,
       );
       expect(find.byType(StaffCanvas), findsOneWidget);
+      expect(find.byType(ScorePlaybackBar), findsOneWidget);
       expect(find.byType(RhythmToolbar), findsOneWidget);
+    });
+
+    testWidgets('ScorePlaybackBar play and mute buttons toggle state',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject(songId: 'score-song-1'));
+      await tester.pumpAndSettle();
+
+      // Play button starts playback
+      final playBtn = find.byKey(const Key('score_play_pause_btn'));
+      expect(playBtn, findsOneWidget);
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+
+      await tester.tap(playBtn);
+      await tester.pump();
+
+      expect(find.byIcon(Icons.pause), findsOneWidget);
+
+      // Stop button halts playback
+      await tester.tap(find.byKey(const Key('score_stop_btn')));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+
+      // Mute button toggles mute state
+      final muteBtn = find.byKey(const Key('score_mute_btn'));
+      await tester.tap(muteBtn);
+      await tester.pump();
+
+      expect(find.byIcon(Icons.volume_off), findsOneWidget);
     });
 
     testWidgets('shows song not found for non-existent songId', (tester) async {

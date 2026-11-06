@@ -9,7 +9,11 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/score/domain/entities/pitch.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:battuta/features/score/presentation/providers/rhythm_editor_controller.dart';
+import 'package:battuta/features/score/presentation/rendering/rendered_note_box.dart';
+import 'package:battuta/features/score/presentation/services/score_preview_player.dart';
+import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
 import 'package:battuta/features/score/presentation/widgets/rhythm_toolbar.dart';
+import 'package:battuta/features/score/presentation/widgets/score_playback_bar.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,9 +23,11 @@ class ScoreEditorPage extends ConsumerStatefulWidget {
   const ScoreEditorPage({
     required this.songId,
     super.key,
+    this.synthesizer,
   });
 
   final String songId;
+  final ToneSynthesizer? synthesizer;
 
   @override
   ConsumerState<ScoreEditorPage> createState() => _ScoreEditorPageState();
@@ -29,30 +35,77 @@ class ScoreEditorPage extends ConsumerStatefulWidget {
 
 class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
   RhythmEditorController? _controller;
+  ScorePreviewPlayer? _previewPlayer;
+  ToneSynthesizer? _synthesizer;
   Score? _activeScore;
   bool _isSaving = false;
 
   void _initScore(Score score) {
     if (_activeScore == null) {
       _activeScore = score;
+      _synthesizer ??= widget.synthesizer ?? ToneSynthesizer();
       _controller = RhythmEditorController(initialScore: score);
       _controller!.addListener(_onControllerChanged);
+      _previewPlayer = ScorePreviewPlayer(
+        score: score,
+        synthesizer: _synthesizer,
+      );
+      _previewPlayer!.addListener(_onPreviewPlayerChanged);
     }
   }
 
   void _onControllerChanged() {
     if (mounted) {
-      setState(() {
-        _activeScore = _controller?.state.score;
-      });
+      final updatedScore = _controller?.state.score;
+      if (updatedScore != null && updatedScore != _activeScore) {
+        setState(() {
+          _activeScore = updatedScore;
+        });
+        _previewPlayer?.updateScore(updatedScore);
+      } else {
+        setState(() {});
+      }
+    }
+  }
+
+  void _onPreviewPlayerChanged() {
+    if (mounted) {
+      if (_previewPlayer != null && _previewPlayer!.isPlaying) {
+        final cur = _previewPlayer!.currentCursor;
+        if (cur != null && cur != _controller?.state.cursor) {
+          _controller?.setCursor(
+            sectionId: cur.sectionId,
+            measureNumber: cur.measureNumber,
+            eventIndex: cur.eventIndex,
+          );
+        }
+      }
+      setState(() {});
     }
   }
 
   @override
   void dispose() {
+    _previewPlayer?.removeListener(_onPreviewPlayerChanged);
+    _previewPlayer?.dispose();
     _controller?.removeListener(_onControllerChanged);
     _controller?.dispose();
+    if (widget.synthesizer == null) {
+      _synthesizer?.dispose();
+    }
     super.dispose();
+  }
+
+  void _onNoteTapped(RenderedNoteBox note) {
+    // Audition sound on note tap
+    _synthesizer?.playPitch(note.pitch);
+
+    // Sync editing cursor
+    _controller?.setCursor(
+      sectionId: note.sectionId,
+      measureNumber: note.measureNumber,
+      eventIndex: note.eventIndex,
+    );
   }
 
   void _onNotePitchChanged(
@@ -62,6 +115,9 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
     Pitch newPitch,
   ) {
     if (_activeScore == null) return;
+
+    // Instant sound audition as note snaps to new pitch
+    _synthesizer?.playPitch(newPitch);
 
     final updatedSections = _activeScore!.sections.map((section) {
       if (section.id != sectionId) return section;
@@ -85,6 +141,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
     setState(() {
       _activeScore = newScore;
       _controller?.setScore(newScore);
+      _previewPlayer?.updateScore(newScore);
       _controller?.setCursor(
         sectionId: sectionId,
         measureNumber: measureNumber,
@@ -206,6 +263,10 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
               // Dynamic Selected Note / Instructions Banner
               _buildHintBanner(theme),
 
+              // Audio Playback & Sound Control Bar
+              if (_previewPlayer != null)
+                ScorePlaybackBar(player: _previewPlayer!),
+
               // Staff Canvas
               Expanded(
                 child: _activeScore != null
@@ -213,13 +274,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
                         score: _controller?.state.score ?? _activeScore!,
                         selectedCursor: _controller?.state.cursor,
                         onNotePitchChanged: _onNotePitchChanged,
-                        onNoteTapped: (note) {
-                          _controller?.setCursor(
-                            sectionId: note.sectionId,
-                            measureNumber: note.measureNumber,
-                            eventIndex: note.eventIndex,
-                          );
-                        },
+                        onNoteTapped: _onNoteTapped,
                       )
                     : const SizedBox.shrink(),
               ),
