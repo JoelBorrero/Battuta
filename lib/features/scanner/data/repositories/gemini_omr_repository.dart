@@ -11,8 +11,12 @@ import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/core/services/api_key_service.dart';
 import 'package:battuta/features/scanner/domain/entities/full_sheet_mapper.dart';
 import 'package:battuta/features/scanner/domain/entities/full_sheet_schema.dart';
+import 'package:battuta/features/scanner/domain/entities/pitch_only_mapper.dart';
+import 'package:battuta/features/scanner/domain/entities/pitch_only_result.dart';
+import 'package:battuta/features/scanner/domain/entities/pitch_only_schema.dart';
 import 'package:battuta/features/scanner/domain/repositories/omr_repository.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/features/score/domain/entities/time_signature.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -128,6 +132,64 @@ class GeminiOmrRepository implements OmrRepository {
     } catch (e, st) {
       return Left(ServerFailure(
         message: 'Gemini OMR extraction failed: $e',
+        stackTrace: st,
+      ));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PitchOnlyResult>> extractPitchOnlySection({
+    required Uint8List imageBytes,
+    required String mimeType,
+    TimeSignature timeSignature = TimeSignature.fourFour,
+    String? modelName,
+  }) async {
+    try {
+      final apiKey = await apiKeyService.getActiveGeminiKey();
+      if (apiKey == null || apiKey.trim().isEmpty) {
+        return const Left(PermissionFailure(
+          message:
+              'Gemini API key is not configured. Please configure your key in Settings.',
+        ));
+      }
+
+      final responseText = await _client.generateContent(
+        modelName: modelName ?? defaultModel,
+        apiKey: apiKey.trim(),
+        imageBytes: imageBytes,
+        mimeType: mimeType,
+        responseSchema: PitchOnlySchema.schema,
+        systemInstruction: PitchOnlySchema.systemInstruction,
+        prompt:
+            'Extract melodic noteheads and chords ignoring rhythm. Assume Treble Clef (G4).',
+      );
+
+      if (responseText == null || responseText.trim().isEmpty) {
+        return const Left(UnexpectedFailure(
+          message: 'Gemini returned an empty response.',
+        ));
+      }
+
+      final dynamic decoded = jsonDecode(responseText);
+      if (decoded is! Map<String, dynamic>) {
+        return const Left(UnexpectedFailure(
+          message: 'Expected a JSON object from Gemini response.',
+        ));
+      }
+
+      final result = PitchOnlyMapper.mapToResult(
+        decoded,
+        timeSignature: timeSignature,
+      );
+      return Right(result);
+    } on FormatException catch (e, st) {
+      return Left(UnexpectedFailure(
+        message: 'Failed to parse Gemini JSON output: ${e.message}',
+        stackTrace: st,
+      ));
+    } catch (e, st) {
+      return Left(ServerFailure(
+        message: 'Gemini OMR pitch-only extraction failed: $e',
         stackTrace: st,
       ));
     }
