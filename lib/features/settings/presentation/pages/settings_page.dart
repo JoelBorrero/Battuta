@@ -4,6 +4,8 @@
 /// API key management (placeholder), version display, and about info.
 library;
 
+import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,6 +23,7 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final apiKeyState = ref.watch(apiKeyNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -70,17 +73,18 @@ class SettingsPage extends ConsumerWidget {
           const _SectionHeader(title: 'API Configuration'),
           ListTile(
             leading: const Icon(Icons.key),
-            title: const Text('API Key'),
-            subtitle: const Text('Configure your Gemini API key'),
+            title: const Text('Gemini API Key'),
+            subtitle: Text(
+              apiKeyState.when(
+                data: (s) => s.isConfigured
+                    ? '${s.maskedKey} (${s.isUserCustom ? 'Custom' : 'Dev .env'})'
+                    : 'Not configured — tap to enter key',
+                loading: () => 'Loading status...',
+                error: (_, _) => 'Error loading key',
+              ),
+            ),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to API key configuration page.
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('API key configuration coming soon'),
-                ),
-              );
-            },
+            onTap: () => ApiKeyDialog.show(context),
           ),
 
           const Divider(),
