@@ -38,6 +38,8 @@ dependencies:
   drift_flutter: ^0.3.1
   sqlite3_flutter_libs: ^0.6.0+eol
   google_generative_ai: ^0.4.7
+  image_picker: ^1.2.4
+  image_cropper: ^13.0.0
 
 dev_dependencies:
   flutter_test:
