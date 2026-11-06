@@ -49,7 +49,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      // Tap Sarah Jenkins (member-1) status badge to cycle Scheduled -> Unavailable
+      // Tap Sarah Jenkins (member-1) status badge to cycle Confirmed -> Unavailable
       await tester.tap(find.byKey(const ValueKey('member_status_member-1')));
       await tester.pumpAndSettle();
 
@@ -205,6 +205,76 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Sarah Jenkins'), findsOneWidget);
+    });
+
+    testWidgets('switches to Band Calendar tab and renders periodic services',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Verify calendar sections and periodic events
+      expect(find.textContaining('Periodic & Upcoming Services'), findsOneWidget);
+      expect(find.text('Sunday Morning Worship'), findsWidgets);
+      expect(find.text('Midweek Band Rehearsal'), findsOneWidget);
+      expect(find.text('NEXT SERVICE'), findsOneWidget);
+      expect(find.textContaining('Sarah Jenkins'), findsWidgets);
+      expect(find.text('Auto-Sundays'), findsOneWidget);
+    });
+
+    testWidgets('adds a new service event in Band Calendar', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Tap New Service FAB
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'New Service'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Service / Rehearsal'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Sunday Morning Worship'),
+        'Youth Worship Night',
+      );
+
+      await tester.tap(find.byKey(const ValueKey('add_service_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Youth Worship Night'), findsOneWidget);
+    });
+
+    testWidgets('auto-generates periodic upcoming Sundays', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Tap Auto-Sundays button
+      await tester.tap(find.text('Auto-Sundays'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Auto-generated next 4 Sunday services!'), findsOneWidget);
     });
   });
 }
