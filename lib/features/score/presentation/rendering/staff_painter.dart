@@ -8,6 +8,7 @@ library;
 import 'package:battuta/features/score/domain/entities/measure.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:battuta/features/score/domain/entities/section.dart';
+import 'package:battuta/features/score/presentation/rendering/notehead_painter.dart';
 import 'package:battuta/features/score/presentation/rendering/section_layout_index.dart';
 import 'package:battuta/features/score/presentation/rendering/smufl_glyphs.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_metrics.dart';
@@ -19,6 +20,7 @@ class StaffPainter extends CustomPainter {
     required this.score,
     this.metrics = const StaffMetrics(),
     this.layoutIndex,
+    this.measureWarnings,
   });
 
   /// The score domain tree containing sections and measures to paint.
@@ -29,6 +31,9 @@ class StaffPainter extends CustomPainter {
 
   /// Optional layout index to register section Y-offsets for instant scrolling.
   final SectionLayoutIndex? layoutIndex;
+
+  /// Optional map of measure numbers to Gemini advertencia warnings.
+  final Map<int, String>? measureWarnings;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -206,6 +211,19 @@ class StaffPainter extends CustomPainter {
           // 5. Chords & Volta Repeat Endings
           // -------------------------------------------------------------------
           _paintChords(canvas, measure, measureLeft, measureWidth, staffTop);
+
+          // -------------------------------------------------------------------
+          // 6. Notes, Stems, Ledger Lines & Warning Badges
+          // -------------------------------------------------------------------
+          NoteheadPainter.paintMeasureNotes(
+            canvas,
+            measure: measure,
+            measureLeft: measureLeft,
+            measureRight: measureRight,
+            staffBottomY: staffBottom,
+            metrics: metrics,
+            measureWarning: measureWarnings?[measure.number],
+          );
         }
 
         currentY += metrics.systemRowHeight;
@@ -437,6 +455,7 @@ class StaffPainter extends CustomPainter {
   bool shouldRepaint(covariant StaffPainter oldDelegate) {
     return oldDelegate.score != score ||
         oldDelegate.metrics != metrics ||
-        oldDelegate.layoutIndex != layoutIndex;
+        oldDelegate.layoutIndex != layoutIndex ||
+        oldDelegate.measureWarnings != measureWarnings;
   }
 }

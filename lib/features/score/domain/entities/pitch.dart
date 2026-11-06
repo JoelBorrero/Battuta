@@ -80,6 +80,9 @@ class Pitch implements Comparable<Pitch> {
   /// Scientific pitch octave (e.g., 4 for C4).
   final int octave;
 
+  /// Absolute diatonic step index from C0 (C0 = 0, D0 = 1, ... C4 = 28, E4 = 30).
+  int get diatonicStepIndex => (octave * 7) + step.stepIndex;
+
   /// Converts this [Pitch] to a JSON-encodable map.
   Map<String, dynamic> toJson() => {
         'step': step.symbol,

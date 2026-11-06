@@ -20,6 +20,7 @@ class StaffCanvas extends StatefulWidget {
     this.metrics = const StaffMetrics(),
     this.scrollController,
     this.layoutIndex,
+    this.measureWarnings,
     this.onLayoutReady,
   });
 
@@ -34,6 +35,9 @@ class StaffCanvas extends StatefulWidget {
 
   /// Layout index registering section vertical coordinates.
   final SectionLayoutIndex? layoutIndex;
+
+  /// Optional map of measure numbers to Gemini advertencia warnings.
+  final Map<int, String>? measureWarnings;
 
   /// Callback invoked after layout offsets are registered.
   final void Function(SectionLayoutIndex index)? onLayoutReady;
@@ -120,6 +124,7 @@ class StaffCanvasState extends State<StaffCanvas> {
               score: widget.score,
               metrics: widget.metrics,
               layoutIndex: _layoutIndex,
+              measureWarnings: widget.measureWarnings,
             ),
           ),
         );
