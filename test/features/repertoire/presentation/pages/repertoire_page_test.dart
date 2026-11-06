@@ -59,6 +59,34 @@ void main() {
       expect(find.text('Your repertoire is empty'), findsOneWidget);
       expect(find.text('Tap the + button to add your first song'), findsOneWidget);
     });
+
+    testWidgets('search button opens search, filters songs, and clears back', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Type to search songs…'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Grace');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Amazing Grace'), findsOneWidget);
+
+      // Tap clear
+      await tester.tap(find.byIcon(Icons.clear));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Type to search songs…'), findsOneWidget);
+
+      // Tap back to return to main page
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Repertoire'), findsOneWidget);
+      expect(find.text('Amazing Grace'), findsOneWidget);
+    });
   });
 }
 

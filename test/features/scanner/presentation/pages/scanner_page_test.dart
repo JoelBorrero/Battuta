@@ -1,0 +1,90 @@
+import 'dart:typed_data';
+
+import 'package:battuta/features/scanner/data/services/image_capture_service.dart';
+import 'package:battuta/features/scanner/domain/repositories/omr_repository.dart';
+import 'package:battuta/features/scanner/presentation/pages/scanner_page.dart';
+import 'package:battuta/features/scanner/presentation/providers/omr_provider.dart';
+import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
+import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockImageCaptureService extends Mock implements ImageCaptureService {}
+class MockOmrRepository extends Mock implements OmrRepository {}
+
+final kTransparent1x1Png = Uint8List.fromList([
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+  0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
+  0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+  0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
+  0x42, 0x60, 0x82,
+]);
+
+void main() {
+  late MockImageCaptureService mockCaptureService;
+  late MockOmrRepository mockOmrRepo;
+
+  setUp(() {
+    mockCaptureService = MockImageCaptureService();
+    mockOmrRepo = MockOmrRepository();
+    when(() => mockCaptureService.captureFromCamera()).thenAnswer((_) async => kTransparent1x1Png);
+    when(() => mockCaptureService.pickFromGallery()).thenAnswer((_) async => kTransparent1x1Png);
+  });
+
+  Widget buildSubject() {
+    return ProviderScope(
+      overrides: [
+        imageCaptureServiceProvider.overrideWithValue(mockCaptureService),
+        omrRepositoryProvider.overrideWithValue(mockOmrRepo),
+      ],
+      child: const MaterialApp(
+        home: ScannerPage(),
+      ),
+    );
+  }
+
+  group('ScannerPage', () {
+    testWidgets('renders camera and gallery action buttons enabled', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('OMR Scanner'), findsOneWidget);
+      expect(find.byKey(const Key('open_camera_button')), findsOneWidget);
+      expect(find.byKey(const Key('choose_gallery_button')), findsOneWidget);
+
+      final cameraBtn = tester.widget<FilledButton>(find.byKey(const Key('open_camera_button')));
+      final galleryBtn = tester.widget<OutlinedButton>(find.byKey(const Key('choose_gallery_button')));
+
+      expect(cameraBtn.onPressed, isNotNull);
+      expect(galleryBtn.onPressed, isNotNull);
+    });
+
+    testWidgets('tapping Open Camera launches scan flow modal', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('open_camera_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ScanFlowModal), findsOneWidget);
+      verify(() => mockCaptureService.captureFromCamera()).called(1);
+    });
+
+    testWidgets('tapping Choose from Library launches scan flow modal with gallery picker', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('choose_gallery_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ScanFlowModal), findsOneWidget);
+      verify(() => mockCaptureService.pickFromGallery()).called(1);
+    });
+  });
+}

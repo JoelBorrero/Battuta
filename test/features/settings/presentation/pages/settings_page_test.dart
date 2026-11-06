@@ -98,4 +98,32 @@ void main() {
 
     expect(find.byType(AlertDialog), findsNothing);
   });
+
+  testWidgets('Tapping theme segmented button updates selection', (
+    WidgetTester tester,
+  ) async {
+    final fakeStorage = FakeApiKeyStorage();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(fakeStorage),
+        ],
+        child: const MaterialApp(
+          home: SettingsPage(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap 'Dark'
+    await tester.tap(find.text('Dark'));
+    await tester.pumpAndSettle();
+
+    final segmentedBtn = tester.widget<SegmentedButton<ThemeMode>>(
+      find.byType(SegmentedButton<ThemeMode>),
+    );
+    expect(segmentedBtn.selected, equals({ThemeMode.dark}));
+  });
 }

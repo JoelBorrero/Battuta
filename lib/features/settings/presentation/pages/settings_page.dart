@@ -4,6 +4,7 @@
 /// API key management (placeholder), version display, and about info.
 library;
 
+import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
 import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class SettingsPage extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final apiKeyState = ref.watch(apiKeyNotifierProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -59,9 +61,9 @@ class SettingsPage extends ConsumerWidget {
                     label: Text('System'),
                   ),
                 ],
-                selected: const {ThemeMode.system},
+                selected: {themeMode},
                 onSelectionChanged: (modes) {
-                  // TODO: Wire to a theme-mode provider.
+                  ref.read(themeModeProvider.notifier).setThemeMode(modes.first);
                 },
               ),
             ),

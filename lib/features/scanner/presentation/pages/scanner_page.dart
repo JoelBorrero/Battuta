@@ -1,22 +1,64 @@
-/// Scanner feature — OMR camera capture placeholder.
+/// Scanner feature — OMR camera capture and photo recognition page.
 ///
-/// This page will eventually host the Gemini-powered Optical Music
-/// Recognition (OMR) camera capture flow (tickets #86e3yy41t and
-/// #86e3yy421).
+/// Hosts the Gemini-powered Optical Music Recognition (OMR) flow
+/// (tickets #86e3yy41t, #86e3yy421, and #86e3yy428).
 library;
 
+import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/scanner/domain/entities/pitch_only_result.dart';
+import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
+import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
+import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-/// Placeholder page for the OMR scanner feature.
-///
-/// Will be expanded to include:
-/// - Camera viewfinder for capturing lead sheet photos
-/// - Photo library import option
-/// - Crop & enhance pre-processing
-/// - Gemini API integration for music recognition
+/// Full screen landing page for the OMR scanner feature.
 class ScannerPage extends ConsumerWidget {
   const ScannerPage({super.key});
+
+  void _openScanModal(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool fromCamera,
+  }) {
+    ScanFlowModal.show(
+      context,
+      onScoreExtracted: (Score score) async {
+        final song = score.toSong();
+        await ref.read(repertoireProvider.notifier).addSong(song);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Added "${song.title}" to Repertoire!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          context.go('/repertoire/${song.id}');
+        }
+      },
+      onSectionExtracted: (PitchOnlyResult result) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Extracted ${result.totalMeasures} measures for "${result.sectionName}".',
+              ),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+    );
+
+    final controller = ref.read(scanControllerProvider.notifier);
+    if (fromCamera) {
+      controller.captureFromCamera();
+    } else {
+      controller.pickFromGallery();
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,11 +82,13 @@ class ScannerPage extends ConsumerWidget {
               const SizedBox(height: 24),
               Text(
                 'OMR Scanner',
-                style: theme.textTheme.headlineSmall,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
-                'Point your camera at a lead sheet to extract\n'
+                'Point your camera at a lead sheet or pick an image to extract\n'
                 'chords, melody, and structure using Gemini AI.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -53,13 +97,15 @@ class ScannerPage extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
               FilledButton.icon(
-                onPressed: null, // TODO: implement camera capture
+                key: const Key('open_camera_button'),
+                onPressed: () => _openScanModal(context, ref, fromCamera: true),
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Open Camera'),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                onPressed: null, // TODO: implement photo library import
+                key: const Key('choose_gallery_button'),
+                onPressed: () => _openScanModal(context, ref, fromCamera: false),
                 icon: const Icon(Icons.photo_library_outlined),
                 label: const Text('Choose from Library'),
               ),
@@ -70,4 +116,3 @@ class ScannerPage extends ConsumerWidget {
     );
   }
 }
-

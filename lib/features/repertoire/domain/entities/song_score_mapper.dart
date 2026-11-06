@@ -5,7 +5,10 @@
 /// printed via PdfLeadSheetGenerator, or exported via MidiFileExporter.
 library;
 
+import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
+import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/score/domain/entities/chord_symbol.dart';
 import 'package:battuta/features/score/domain/entities/measure.dart';
 import 'package:battuta/features/score/domain/entities/note_event.dart';
@@ -143,5 +146,52 @@ extension SongScoreMapper on Song {
     } catch (_) {
       return Pitch.middleC;
     }
+  }
+}
+
+/// Extension adding reverse [toSong] mapping capability to [Score].
+extension ScoreSongMapper on Score {
+  /// Converts a [Score] into a Repertoire [Song] entity.
+  Song toSong() {
+    final noteMeta = metadata['notes'];
+    final tagsMeta = metadata['tags'];
+
+    return Song(
+      id: id,
+      title: title.isNotEmpty ? title : 'Untitled Sheet Music',
+      artist: (artist != null && artist!.isNotEmpty)
+          ? artist!
+          : ((composer != null && composer!.isNotEmpty)
+              ? composer!
+              : 'Unknown Artist'),
+      key: keySignature.isNotEmpty ? keySignature : 'C',
+      tempo: tempo > 0 ? tempo : 120,
+      timeSignature: (timeSignature.numerator, timeSignature.denominator),
+      notes: noteMeta is String ? noteMeta : null,
+      tags: tagsMeta is List ? List<String>.from(tagsMeta) : const [],
+      sections: [
+        for (var sIdx = 0; sIdx < sections.length; sIdx++)
+          SongSection(
+            id: sections[sIdx].id.isNotEmpty ? sections[sIdx].id : 'sec-$sIdx',
+            name: sections[sIdx].name.isNotEmpty ? sections[sIdx].name : 'Section ${sIdx + 1}',
+            repeatCount: sections[sIdx].repeatCount > 0 ? sections[sIdx].repeatCount : 1,
+            orderIndex: sIdx,
+            chords: [
+              for (final m in sections[sIdx].measures)
+                for (final c in m.chords)
+                  ChordCell(
+                    root: c.root,
+                    quality: ChordQuality.values.firstWhere(
+                      (q) => q.symbol == c.quality,
+                      orElse: () => ChordQuality.major,
+                    ),
+                    bass: c.bass,
+                  ),
+            ],
+          ),
+      ],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
   }
 }

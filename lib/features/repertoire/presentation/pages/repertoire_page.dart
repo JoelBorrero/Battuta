@@ -171,26 +171,31 @@ class _SongSearchDelegate extends SearchDelegate<String> {
   Widget buildSuggestions(BuildContext context) => _buildSearchResults();
 
   Widget _buildSearchResults() {
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       return const Center(
         child: Text('Type to search songs…'),
       );
     }
 
-    // Trigger a search through the provider.
-    _ref.read(repertoireProvider.notifier).searchSongs(query);
     final repertoire = _ref.watch(repertoireProvider);
 
     return repertoire.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(child: Text('Error: $error')),
       data: (songs) {
-        if (songs.isEmpty) {
+        final q = query.trim().toLowerCase();
+        final matches = songs.where((s) {
+          return s.title.toLowerCase().contains(q) ||
+              s.artist.toLowerCase().contains(q) ||
+              s.tags.any((t) => t.toLowerCase().contains(q));
+        }).toList();
+
+        if (matches.isEmpty) {
           return const Center(child: Text('No songs found'));
         }
         return ListView.builder(
-          itemCount: songs.length,
-          itemBuilder: (context, index) => SongCard(song: songs[index]),
+          itemCount: matches.length,
+          itemBuilder: (context, index) => SongCard(song: matches[index]),
         );
       },
     );

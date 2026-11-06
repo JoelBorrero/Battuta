@@ -83,6 +83,46 @@ void main() {
       expect(score.sections.first.measures.length, equals(1));
       expect(score.sections.first.measures.first.events.first.isRest, isTrue);
     });
+
+    test('converts Score back to Song using ScoreSongMapper', () {
+      final song = Song(
+        id: 'round-trip-1',
+        title: 'Amazing Grace',
+        artist: 'John Newton',
+        key: 'G',
+        tempo: 80,
+        timeSignature: (3, 4),
+        tags: const ['hymn'],
+        notes: 'Classic melody',
+        sections: const [
+          SongSection(
+            id: 'verse-1',
+            name: 'Verse 1',
+            orderIndex: 0,
+            repeatCount: 1,
+            chords: [
+              ChordCell(root: 'G', quality: ChordQuality.major, beats: 3),
+              ChordCell(root: 'C', quality: ChordQuality.major, beats: 3),
+            ],
+          ),
+        ],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final score = song.toScore();
+      final roundTripSong = score.toSong();
+
+      expect(roundTripSong.title, equals('Amazing Grace'));
+      expect(roundTripSong.artist, equals('John Newton'));
+      expect(roundTripSong.key, equals('G'));
+      expect(roundTripSong.tempo, equals(80));
+      expect(roundTripSong.timeSignature, equals((3, 4)));
+      expect(roundTripSong.sections.length, equals(1));
+      expect(roundTripSong.sections.first.chords.length, equals(2));
+      expect(roundTripSong.sections.first.chords[0].root, equals('G'));
+      expect(roundTripSong.sections.first.chords[1].root, equals('C'));
+    });
   });
 }
 
