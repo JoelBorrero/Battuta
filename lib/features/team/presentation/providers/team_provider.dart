@@ -54,7 +54,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
       TeamMember(
         id: 'member-1',
         name: 'Sarah Jenkins',
-        role: TeamRole.leadVocal,
+        roles: [TeamRole.leadVocal],
         vocalRange: VocalTessitura.soprano,
         availability: AvailabilityStatus.scheduled,
         notes: 'Available for 1st service',
@@ -63,16 +63,16 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
       TeamMember(
         id: 'member-2',
         name: 'David Chen',
-        role: TeamRole.acousticGuitar,
+        roles: [TeamRole.acousticGuitar, TeamRole.backingVocal],
         vocalRange: VocalTessitura.tenor,
         availability: AvailabilityStatus.scheduled,
-        notes: 'Leading acoustic set',
+        notes: 'Leading acoustic set & harmony vocals',
         email: 'david.c@worship.org',
       ),
       TeamMember(
         id: 'member-3',
         name: 'Marcus Miller',
-        role: TeamRole.bass,
+        roles: [TeamRole.bass],
         vocalRange: VocalTessitura.none,
         availability: AvailabilityStatus.available,
         notes: 'Brought 5-string bass',
@@ -81,16 +81,16 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
       TeamMember(
         id: 'member-4',
         name: 'Elena Rostova',
-        role: TeamRole.keys,
+        roles: [TeamRole.keys, TeamRole.backingVocal],
         vocalRange: VocalTessitura.alto,
         availability: AvailabilityStatus.available,
-        notes: 'Main synth & pads',
+        notes: 'Main synth & alto vocals',
         email: 'elena.r@worship.org',
       ),
       TeamMember(
         id: 'member-5',
         name: 'James Wilson',
-        role: TeamRole.drums,
+        roles: [TeamRole.drums],
         vocalRange: VocalTessitura.none,
         availability: AvailabilityStatus.available,
         notes: 'In-ear click track master',
@@ -99,7 +99,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
       TeamMember(
         id: 'member-6',
         name: 'Mateo Rodriguez',
-        role: TeamRole.electricGuitar,
+        roles: [TeamRole.electricGuitar, TeamRole.backingVocal],
         vocalRange: VocalTessitura.baritone,
         availability: AvailabilityStatus.unavailable,
         notes: 'Traveling this Sunday',
@@ -108,4 +108,3 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
     ];
   }
 }
-

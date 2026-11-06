@@ -1,7 +1,7 @@
 /// Battuta — Team Members Page.
 ///
 /// Provides complete band and worship team roster management,
-/// showing instrument roles, vocal tessitura ranges, and scheduling statuses.
+/// showing multi-instrument roles, vocal tessitura ranges, and scheduling statuses.
 library;
 
 import 'package:battuta/features/team/domain/entities/team_member.dart';
@@ -20,70 +20,234 @@ class TeamPage extends ConsumerStatefulWidget {
 class _TeamPageState extends ConsumerState<TeamPage> {
   String _selectedFilter = 'All';
 
-  void _showAddMemberDialog() {
-    final nameController = TextEditingController();
-    final notesController = TextEditingController();
-    TeamRole selectedRole = TeamRole.leadVocal;
-    VocalTessitura selectedRange = VocalTessitura.soprano;
+  void _showMemberDialog({TeamMember? memberToEdit}) {
+    final isEditing = memberToEdit != null;
+    final nameController =
+        TextEditingController(text: memberToEdit?.name ?? '');
+    final notesController =
+        TextEditingController(text: memberToEdit?.notes ?? '');
+
+    // Multi-role selection: defaults to Keys (an instrument) for new members
+    final selectedRoles = <TeamRole>{
+      ...?memberToEdit?.roles,
+    };
+    if (selectedRoles.isEmpty) {
+      selectedRoles.add(TeamRole.keys);
+    }
+
+    // Vocal tessitura: if only instruments are selected, discard (none)
+    VocalTessitura selectedRange;
+    if (isEditing) {
+      selectedRange = memberToEdit.vocalRange;
+    } else {
+      final hasVocal = selectedRoles.any((r) => r.isVocal);
+      selectedRange = hasVocal ? VocalTessitura.soprano : VocalTessitura.none;
+    }
+
+    AvailabilityStatus selectedAvailability =
+        memberToEdit?.availability ?? AvailabilityStatus.available;
 
     showDialog<void>(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
+            final theme = Theme.of(dialogCtx);
+            final hasVocalRole = selectedRoles.any((r) => r.isVocal);
+
+            void toggleRole(TeamRole role) {
+              setDialogState(() {
+                if (selectedRoles.contains(role)) {
+                  if (selectedRoles.length > 1) {
+                    selectedRoles.remove(role);
+                  }
+                } else {
+                  selectedRoles.add(role);
+                }
+
+                // Automatic vocal tessitura discard logic:
+                // When selecting only instruments, vocal tessitura is automatically discarded.
+                final nowHasVocal = selectedRoles.any((r) => r.isVocal);
+                if (!nowHasVocal) {
+                  selectedRange = VocalTessitura.none;
+                } else if (selectedRange == VocalTessitura.none) {
+                  selectedRange = VocalTessitura.soprano;
+                }
+              });
+            }
+
             return AlertDialog(
-              title: const Text('Add Team Member'),
+              title: Text(isEditing ? 'Edit Team Member' : 'Add Team Member'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextField(
                       controller: nameController,
+                      autofocus: !isEditing,
                       decoration: const InputDecoration(
                         labelText: 'Full Name *',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.person),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<TeamRole>(
-                      initialValue: selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Role / Instrument',
-                        border: OutlineInputBorder(),
+                    const SizedBox(height: 16),
+
+                    // ── Multi-Role Selection Section ──
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Roles & Instruments *',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${selectedRoles.length} selected',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Tap to toggle roles (e.g. Pianist + Singer + Guitarist):',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
-                      items: TeamRole.values.map((r) {
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: TeamRole.values.map((r) {
+                        final isSelected = selectedRoles.contains(r);
+                        return FilterChip(
+                          key: ValueKey('role_chip_${r.name}'),
+                          avatar: Icon(
+                            _getRoleIcon(r),
+                            size: 16,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          label: Text(r.displayName),
+                          selected: isSelected,
+                          onSelected: (_) => toggleRole(r),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ── Vocal Tessitura Section ──
+                    if (hasVocalRole) ...[
+                      DropdownButtonFormField<VocalTessitura>(
+                        key: const ValueKey('vocal_tessitura_dropdown'),
+                        initialValue: selectedRange == VocalTessitura.none
+                            ? VocalTessitura.soprano
+                            : selectedRange,
+                        decoration: const InputDecoration(
+                          labelText: 'Vocal Tessitura (Range)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.record_voice_over_outlined),
+                        ),
+                        items: VocalTessitura.values
+                            .where((v) => v != VocalTessitura.none)
+                            .map((v) {
+                          return DropdownMenuItem(
+                            value: v,
+                            child: Text('${v.displayName} (${v.rangeLabel})'),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setDialogState(() => selectedRange = val);
+                          }
+                        },
+                      ),
+                    ] else ...[
+                      Container(
+                        key: const ValueKey('vocal_range_discarded_info'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: theme.colorScheme.outlineVariant
+                                .withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.music_off_outlined,
+                              size: 20,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Vocal Tessitura: Discarded (Instrumental)',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Automatically omitted because only instruments or production roles are selected.',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color:
+                                          theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+
+                    // ── Availability Status ──
+                    DropdownButtonFormField<AvailabilityStatus>(
+                      initialValue: selectedAvailability,
+                      decoration: const InputDecoration(
+                        labelText: 'Availability Status',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.event_available_outlined),
+                      ),
+                      items: AvailabilityStatus.values.map((a) {
                         return DropdownMenuItem(
-                          value: r,
-                          child: Text(r.displayName),
+                          value: a,
+                          child: Text(a.displayName),
                         );
                       }).toList(),
                       onChanged: (val) {
                         if (val != null) {
-                          setDialogState(() => selectedRole = val);
+                          setDialogState(() => selectedAvailability = val);
                         }
                       },
                     ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<VocalTessitura>(
-                      initialValue: selectedRange,
-                      decoration: const InputDecoration(
-                        labelText: 'Vocal Tessitura',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: VocalTessitura.values.map((v) {
-                        return DropdownMenuItem(
-                          value: v,
-                          child: Text('${v.displayName} (${v.rangeLabel})'),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setDialogState(() => selectedRange = val);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
+
+                    // ── Notes / Assignment ──
                     TextField(
                       controller: notesController,
                       decoration: const InputDecoration(
@@ -101,28 +265,63 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
+                  key: ValueKey(
+                    isEditing ? 'save_member_btn' : 'add_member_btn',
+                  ),
                   onPressed: () {
                     final name = nameController.text.trim();
                     if (name.isEmpty) return;
 
-                    final newMember = TeamMember(
-                      id: 'member_${DateTime.now().millisecondsSinceEpoch}',
-                      name: name,
-                      role: selectedRole,
-                      vocalRange: selectedRange,
-                      availability: AvailabilityStatus.available,
-                      notes: notesController.text.trim().isEmpty
-                          ? null
-                          : notesController.text.trim(),
-                    );
+                    final rolesToSave = selectedRoles.isEmpty
+                        ? [TeamRole.keys]
+                        : selectedRoles.toList();
 
-                    ref.read(teamMembersProvider.notifier).addMember(newMember);
-                    Navigator.of(dialogCtx).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Added $name to the team!')),
-                    );
+                    final vocalToSave = rolesToSave.any((r) => r.isVocal)
+                        ? (selectedRange == VocalTessitura.none
+                            ? VocalTessitura.soprano
+                            : selectedRange)
+                        : VocalTessitura.none;
+
+                    if (isEditing) {
+                      final updatedMember = memberToEdit.copyWith(
+                        name: name,
+                        roles: rolesToSave,
+                        vocalRange: vocalToSave,
+                        availability: selectedAvailability,
+                        notes: notesController.text.trim().isEmpty
+                            ? null
+                            : notesController.text.trim(),
+                      );
+
+                      ref
+                          .read(teamMembersProvider.notifier)
+                          .updateMember(updatedMember);
+                      Navigator.of(dialogCtx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Updated ${updatedMember.name}')),
+                      );
+                    } else {
+                      final newMember = TeamMember(
+                        id: 'member_${DateTime.now().millisecondsSinceEpoch}',
+                        name: name,
+                        roles: rolesToSave,
+                        vocalRange: vocalToSave,
+                        availability: selectedAvailability,
+                        notes: notesController.text.trim().isEmpty
+                            ? null
+                            : notesController.text.trim(),
+                      );
+
+                      ref
+                          .read(teamMembersProvider.notifier)
+                          .addMember(newMember);
+                      Navigator.of(dialogCtx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Added $name to the team!')),
+                      );
+                    }
                   },
-                  child: const Text('Add Member'),
+                  child: Text(isEditing ? 'Save Changes' : 'Add Member'),
                 ),
               ],
             );
@@ -130,6 +329,25 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         );
       },
     );
+  }
+
+  void _showAddMemberDialog() => _showMemberDialog();
+
+  void _showEditMemberDialog(TeamMember member) =>
+      _showMemberDialog(memberToEdit: member);
+
+  static IconData _getRoleIcon(TeamRole role) {
+    return switch (role) {
+      TeamRole.director => Icons.menu_book,
+      TeamRole.leadVocal => Icons.mic,
+      TeamRole.backingVocal => Icons.mic_none,
+      TeamRole.acousticGuitar => Icons.music_note,
+      TeamRole.electricGuitar => Icons.bolt,
+      TeamRole.bass => Icons.graphic_eq,
+      TeamRole.keys => Icons.piano,
+      TeamRole.drums => Icons.album_outlined,
+      TeamRole.sound => Icons.headphones,
+    };
   }
 
   @override
@@ -147,14 +365,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     final filteredMembers = members.where((m) {
       if (_selectedFilter == 'All') return true;
       if (_selectedFilter == 'Vocals') {
-        return m.role == TeamRole.leadVocal ||
-            m.role == TeamRole.backingVocal ||
-            m.vocalRange != VocalTessitura.none;
+        return m.hasVocalRole || m.vocalRange != VocalTessitura.none;
       }
       if (_selectedFilter == 'Band') {
-        return m.role != TeamRole.leadVocal &&
-            m.role != TeamRole.backingVocal &&
-            m.role != TeamRole.sound;
+        return m.hasInstrumentRole;
       }
       if (_selectedFilter == 'Scheduled') {
         return m.availability == AvailabilityStatus.scheduled;
@@ -252,6 +466,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             for (final member in filteredMembers)
               _MemberCard(
                 member: member,
+                onTap: () => _showEditMemberDialog(member),
+                onEdit: () => _showEditMemberDialog(member),
                 onStatusTap: () => ref
                     .read(teamMembersProvider.notifier)
                     .cycleAvailability(member.id),
@@ -312,11 +528,15 @@ class _SummaryStat extends StatelessWidget {
 class _MemberCard extends StatelessWidget {
   const _MemberCard({
     required this.member,
+    required this.onTap,
+    required this.onEdit,
     required this.onStatusTap,
     required this.onDelete,
   });
 
   final TeamMember member;
+  final VoidCallback onTap;
+  final VoidCallback onEdit;
   final VoidCallback onStatusTap;
   final VoidCallback onDelete;
 
@@ -339,12 +559,17 @@ class _MemberCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      elevation: 1,
+      elevation: 0,
       child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 4,
+        ),
         leading: CircleAvatar(
           backgroundColor: theme.colorScheme.primaryContainer,
           child: Text(
-            initials,
+            initials.isEmpty ? '?' : initials,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onPrimaryContainer,
@@ -364,27 +589,44 @@ class _MemberCard extends StatelessWidget {
               runSpacing: 4,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    member.role.displayName,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                for (final role in member.roles)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      role.displayName,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
                 if (member.vocalRange != VocalTessitura.none)
-                  Text(
-                    member.vocalRange.rangeLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5A93C).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: const Color(0xFFE5A93C).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      member.vocalRange.rangeLabel,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFE5A93C),
+                      ),
                     ),
                   ),
               ],
@@ -430,20 +672,35 @@ class _MemberCard extends StatelessWidget {
               ),
             ),
             PopupMenuButton<String>(
+              key: ValueKey('member_menu_${member.id}'),
               icon: const Icon(Icons.more_vert, size: 20),
+              tooltip: 'Member options',
               onSelected: (val) {
-                if (val == 'delete') {
+                if (val == 'edit') {
+                  onEdit();
+                } else if (val == 'delete') {
                   onDelete();
                 }
               },
               itemBuilder: (_) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18),
+                      SizedBox(width: 8),
+                      Text('Edit Member'),
+                    ],
+                  ),
+                ),
                 const PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     children: [
                       Icon(Icons.delete_outline, size: 18, color: Colors.red),
                       SizedBox(width: 8),
-                      Text('Remove Member', style: TextStyle(color: Colors.red)),
+                      Text('Remove Member',
+                          style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),

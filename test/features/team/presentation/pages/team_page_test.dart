@@ -1,3 +1,4 @@
+import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,8 @@ void main() {
   }
 
   group('TeamPage', () {
-    testWidgets('renders team roster, statistics, and filter chips', (tester) async {
+    testWidgets('renders team roster, statistics, and filter chips',
+        (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -76,6 +78,120 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Grace Hopper'), findsOneWidget);
+    });
+
+    testWidgets('edits an existing team member through dialog', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Tap Sarah Jenkins card to edit
+      await tester.tap(find.text('Sarah Jenkins'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit Team Member'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'Sarah Jenkins'), findsOneWidget);
+
+      // Edit name
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Sarah Jenkins'),
+        'Sarah Jenkins-Smith',
+      );
+
+      // Add Keys / Piano role (so she sings and plays piano)
+      await tester.tap(find.byKey(ValueKey('role_chip_${TeamRole.keys.name}')));
+      await tester.pumpAndSettle();
+
+      // Tap Save Changes
+      await tester.tap(find.byKey(const ValueKey('save_member_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sarah Jenkins-Smith'), findsOneWidget);
+      expect(find.text('Lead Vocalist'), findsWidgets);
+      expect(find.text('Keys / Piano'), findsWidgets);
+    });
+
+    testWidgets(
+        'automatically discards vocal tessitura when only instrument roles are selected',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Open Add dialog
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      // By default Keys (an instrument) is selected -> vocal range is discarded
+      expect(find.byKey(const ValueKey('vocal_range_discarded_info')),
+          findsOneWidget);
+      expect(
+          find.byKey(const ValueKey('vocal_tessitura_dropdown')), findsNothing);
+
+      // Select Lead Vocalist -> vocal tessitura becomes available
+      await tester
+          .tap(find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('vocal_tessitura_dropdown')),
+          findsOneWidget);
+      expect(find.byKey(const ValueKey('vocal_range_discarded_info')),
+          findsNothing);
+
+      // Deselect Lead Vocalist -> vocal tessitura is automatically discarded again
+      await tester
+          .tap(find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('vocal_range_discarded_info')),
+          findsOneWidget);
+      expect(
+          find.byKey(const ValueKey('vocal_tessitura_dropdown')), findsNothing);
+    });
+
+    testWidgets(
+        'supports adding multiple roles (pianist who is also a singer and guitarist)',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Open Add dialog
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Full Name *'),
+        'Jordan Blake',
+      );
+
+      // Keys is already selected, let's also select Lead Vocalist and Acoustic Guitar
+      await tester
+          .tap(find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+          find.byKey(ValueKey('role_chip_${TeamRole.acousticGuitar.name}')));
+      await tester.pumpAndSettle();
+
+      // Save new member
+      await tester.tap(find.byKey(const ValueKey('add_member_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Jordan Blake'), findsOneWidget);
+      // All three roles are displayed as badges for Jordan Blake
+      expect(find.text('Keys / Piano'), findsWidgets);
+      expect(find.text('Lead Vocalist'), findsWidgets);
+      expect(find.text('Acoustic Guitar'), findsWidgets);
     });
 
     testWidgets('renders team cards without overflow on narrow width screens',
