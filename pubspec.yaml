@@ -64,8 +64,7 @@ flutter:
     - assets/fonts/
     - assets/images/
 
-  # Fonts will be added when Bravura SMuFL is bundled (ticket #86e3yy422)
-  # fonts:
-  #   - family: Bravura
-  #     fonts:
-  #       - asset: assets/fonts/Bravura.otf
+  fonts:
+    - family: Bravura
+      fonts:
+        - asset: assets/fonts/Bravura.otf
