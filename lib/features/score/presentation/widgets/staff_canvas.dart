@@ -7,6 +7,7 @@ library;
 
 import 'package:battuta/features/score/domain/entities/pitch.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/features/score/presentation/providers/rhythm_editor_controller.dart';
 import 'package:battuta/features/score/presentation/rendering/rendered_note_box.dart';
 import 'package:battuta/features/score/presentation/rendering/section_layout_index.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_metrics.dart';
@@ -25,6 +26,10 @@ class StaffCanvas extends StatefulWidget {
     this.layoutIndex,
     this.spatialIndex,
     this.measureWarnings,
+    this.selectedCursor,
+    this.selectedSectionId,
+    this.selectedMeasureNumber,
+    this.selectedEventIndex,
     this.onLayoutReady,
     this.onNotePitchChanged,
     this.onNoteTapped,
@@ -48,6 +53,18 @@ class StaffCanvas extends StatefulWidget {
 
   /// Optional map of measure numbers to Gemini advertencia warnings.
   final Map<int, String>? measureWarnings;
+
+  /// Optional rhythm cursor identifying the selected note.
+  final RhythmCursor? selectedCursor;
+
+  /// Optional section ID of the selected note event.
+  final String? selectedSectionId;
+
+  /// Optional measure number of the selected note event.
+  final int? selectedMeasureNumber;
+
+  /// Optional event index of the selected note within its measure.
+  final int? selectedEventIndex;
 
   /// Callback invoked after layout offsets are registered.
   final void Function(SectionLayoutIndex index)? onLayoutReady;
@@ -78,6 +95,27 @@ class StaffCanvasState extends State<StaffCanvas> {
 
   /// The currently active note being dragged vertically.
   RenderedNoteBox? _draggedNote;
+
+  /// The currently selected note (fallback when external cursor is not provided).
+  RenderedNoteBox? _selectedNote;
+
+  String? get _activeSectionId =>
+      _draggedNote?.sectionId ??
+      widget.selectedCursor?.sectionId ??
+      widget.selectedSectionId ??
+      _selectedNote?.sectionId;
+
+  int? get _activeMeasureNumber =>
+      _draggedNote?.measureNumber ??
+      widget.selectedCursor?.measureNumber ??
+      widget.selectedMeasureNumber ??
+      _selectedNote?.measureNumber;
+
+  int? get _activeEventIndex =>
+      _draggedNote?.eventIndex ??
+      widget.selectedCursor?.eventIndex ??
+      widget.selectedEventIndex ??
+      _selectedNote?.eventIndex;
 
   @override
   void initState() {
@@ -142,6 +180,11 @@ class StaffCanvasState extends State<StaffCanvas> {
           }
         });
 
+        final theme = Theme.of(context);
+        final effectiveMetrics = widget.metrics != const StaffMetrics()
+            ? widget.metrics
+            : StaffMetrics.fromTheme(theme);
+
         return SingleChildScrollView(
           controller: _scrollController,
           // When actively dragging a notehead, lock canvas scroll to ensure buttery dragging
@@ -155,7 +198,9 @@ class StaffCanvasState extends State<StaffCanvas> {
               if (hitNote != null) {
                 setState(() {
                   _draggedNote = hitNote;
+                  _selectedNote = hitNote;
                 });
+                widget.onNoteTapped?.call(hitNote);
               }
             },
             onPointerMove: (event) {
@@ -189,6 +234,7 @@ class StaffCanvasState extends State<StaffCanvas> {
                       lineSpacing: note.lineSpacing,
                       pitch: snappedPitch,
                     );
+                    _selectedNote = _draggedNote;
                   });
                 }
               }
@@ -198,6 +244,7 @@ class StaffCanvasState extends State<StaffCanvas> {
                 final wasDragged = _draggedNote!;
                 setState(() {
                   _draggedNote = null;
+                  _selectedNote = wasDragged;
                 });
                 widget.onDragCompleted?.call();
                 widget.onNoteTapped?.call(wasDragged);
@@ -214,10 +261,14 @@ class StaffCanvasState extends State<StaffCanvas> {
               size: Size(availableWidth, totalHeight),
               painter: StaffPainter(
                 score: widget.score,
-                metrics: widget.metrics,
+                metrics: effectiveMetrics,
                 layoutIndex: _layoutIndex,
                 spatialIndex: _spatialIndex,
                 measureWarnings: widget.measureWarnings,
+                selectedSectionId: _activeSectionId,
+                selectedMeasureNumber: _activeMeasureNumber,
+                selectedEventIndex: _activeEventIndex,
+                isDragging: _draggedNote != null,
               ),
             ),
           ),

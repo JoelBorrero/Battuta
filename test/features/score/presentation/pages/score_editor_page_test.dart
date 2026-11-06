@@ -96,5 +96,23 @@ void main() {
 
       expect(find.text('Notation changes saved to Song!'), findsOneWidget);
     });
+
+    testWidgets('displays selected note details in header banner and passes cursor to StaffCanvas',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject(songId: 'score-song-1'));
+      await tester.pumpAndSettle();
+
+      // Controller auto-selects first unassigned note or first note (D4 for chord D)
+      expect(find.textContaining('Selected: M1'), findsOneWidget);
+      expect(find.textContaining('Pitch: D4'), findsOneWidget);
+
+      final canvas = tester.widget<StaffCanvas>(find.byType(StaffCanvas));
+      expect(canvas.selectedCursor, isNotNull);
+      expect(canvas.selectedCursor?.measureNumber, equals(1));
+    });
   });
 }

@@ -7,6 +7,7 @@ library;
 
 import 'package:battuta/features/score/domain/entities/measure.dart';
 import 'package:battuta/features/score/domain/entities/note_event.dart';
+import 'package:battuta/features/score/domain/entities/pitch.dart';
 import 'package:battuta/features/score/presentation/rendering/rendered_note_box.dart';
 import 'package:battuta/features/score/presentation/rendering/smufl_glyphs.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_metrics.dart';
@@ -35,6 +36,8 @@ abstract final class NoteheadPainter {
     String? sectionId,
     SpatialNoteIndex? spatialIndex,
     String? measureWarning,
+    int? selectedEventIndex,
+    bool isDragging = false,
   }) {
     // -------------------------------------------------------------------------
     // 1. Draw Gemini Advertencia Warning Badge (if present)
@@ -56,6 +59,7 @@ abstract final class NoteheadPainter {
 
     for (var i = 0; i < events.length; i++) {
       final event = events[i];
+      final isSelected = selectedEventIndex == i;
 
       // Calculate horizontal X position
       double noteX;
@@ -75,6 +79,7 @@ abstract final class NoteheadPainter {
           x: noteX,
           staffBottomY: staffBottomY,
           metrics: metrics,
+          isSelected: isSelected,
         );
       } else if (event.pitch != null) {
         final noteBox = _paintNote(
@@ -86,6 +91,10 @@ abstract final class NoteheadPainter {
           sectionId: sectionId ?? '',
           measureNumber: measure.number,
           eventIndex: i,
+          measureLeft: measureLeft,
+          measureRight: measureRight,
+          isSelected: isSelected,
+          isDragging: isSelected && isDragging,
         );
         if (noteBox != null) {
           spatialIndex?.register(noteBox);
@@ -103,16 +112,66 @@ abstract final class NoteheadPainter {
     required String sectionId,
     required int measureNumber,
     required int eventIndex,
+    double? measureLeft,
+    double? measureRight,
+    bool isSelected = false,
+    bool isDragging = false,
   }) {
     final pitch = event.pitch!;
     final isUnassigned = event.rhythmicValue.isUnassigned;
-    final noteColor = isUnassigned ? unassignedNoteColor : metrics.staffColor;
+    final noteColor = isSelected
+        ? metrics.selectedNoteColor
+        : (isUnassigned ? unassignedNoteColor : metrics.staffColor);
 
     final noteY = StaffPitchMapper.yCoordinateForPitch(
       pitch,
       staffBottomY: staffBottomY,
       lineSpacing: metrics.lineSpacing,
     );
+
+    // -------------------------------------------------------------------------
+    // Selection Halo & Glowing Border (Behind notehead)
+    // -------------------------------------------------------------------------
+    if (isSelected) {
+      final auraRadius = metrics.lineSpacing * (isDragging ? 1.35 : 1.15);
+      final centerOffset = Offset(x, noteY);
+
+      // 1. Soft glowing aura fill
+      final selectionFill = Paint()
+        ..color = isDragging
+            ? metrics.selectedHaloColor.withValues(alpha: 0.5)
+            : metrics.selectedHaloColor
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(centerOffset, auraRadius, selectionFill);
+
+      // 2. High-contrast accent border ring
+      final selectionBorder = Paint()
+        ..color = isDragging
+            ? metrics.selectedNoteColor
+            : metrics.selectedBorderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = isDragging ? 2.0 : 1.5;
+      canvas.drawCircle(centerOffset, auraRadius, selectionBorder);
+
+      // 3. Subtle outer pulse ring
+      final outerRing = Paint()
+        ..color = metrics.selectedNoteColor
+            .withValues(alpha: isDragging ? 0.35 : 0.18)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      canvas.drawCircle(centerOffset, auraRadius + 3.0, outerRing);
+
+      // 4. Drag guideline if dragging
+      if (isDragging && measureLeft != null && measureRight != null) {
+        _paintDragGuideLine(
+          canvas,
+          y: noteY,
+          measureLeft: measureLeft,
+          measureRight: measureRight,
+          metrics: metrics,
+        );
+      }
+    }
 
     // -------------------------------------------------------------------------
     // Ledger Lines
@@ -125,7 +184,9 @@ abstract final class NoteheadPainter {
       );
 
       final ledgerPaint = Paint()
-        ..color = metrics.staffColor
+        ..color = isSelected
+            ? metrics.selectedNoteColor.withValues(alpha: 0.8)
+            : metrics.staffColor
         ..strokeWidth = metrics.lineThickness
         ..style = PaintingStyle.stroke;
 
@@ -182,7 +243,7 @@ abstract final class NoteheadPainter {
     );
 
     // Distinct style for unassigned notes: highlight halo and rhythm reminder
-    if (isUnassigned) {
+    if (isUnassigned && !isSelected) {
       final haloPaint = Paint()
         ..color = unassignedHaloColor
         ..style = PaintingStyle.fill;
@@ -216,7 +277,7 @@ abstract final class NoteheadPainter {
       final stemLength = metrics.lineSpacing * 3.5;
       final stemPaint = Paint()
         ..color = noteColor
-        ..strokeWidth = metrics.lineThickness
+        ..strokeWidth = metrics.lineThickness * (isSelected ? 1.3 : 1.0)
         ..style = PaintingStyle.stroke;
 
       final stemX =
@@ -301,6 +362,21 @@ abstract final class NoteheadPainter {
       );
     }
 
+    // -------------------------------------------------------------------------
+    // Floating Pitch Indicator Badge (When note is selected)
+    // -------------------------------------------------------------------------
+    if (isSelected) {
+      _paintPitchBadge(
+        canvas,
+        pitch: pitch,
+        noteX: x,
+        noteY: noteY,
+        staffBottomY: staffBottomY,
+        metrics: metrics,
+        isDragging: isDragging,
+      );
+    }
+
     return RenderedNoteBox(
       noteId: event.id,
       sectionId: sectionId,
@@ -325,16 +401,36 @@ abstract final class NoteheadPainter {
     required double x,
     required double staffBottomY,
     required StaffMetrics metrics,
+    bool isSelected = false,
   }) {
     final restGlyph = SmuflGlyphs.glyphForRest(event.rhythmicValue);
+    final restColor =
+        isSelected ? metrics.selectedNoteColor : metrics.staffColor;
     final restPainter = SmuflGlyphs.createPainter(
       glyph: restGlyph,
       fontSize: metrics.lineSpacing * 2.8,
-      color: metrics.staffColor,
+      color: restColor,
     );
 
     // Center rest vertically in the staff (around line 3, middle line B4)
     final middleLineY = staffBottomY - (metrics.lineSpacing * 2.0);
+
+    if (isSelected) {
+      final auraRadius = metrics.lineSpacing * 1.25;
+      final centerOffset = Offset(x, middleLineY);
+
+      final selectionFill = Paint()
+        ..color = metrics.selectedHaloColor
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(centerOffset, auraRadius, selectionFill);
+
+      final selectionBorder = Paint()
+        ..color = metrics.selectedBorderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5;
+      canvas.drawCircle(centerOffset, auraRadius, selectionBorder);
+    }
+
     restPainter.paint(
       canvas,
       Offset(
@@ -342,6 +438,118 @@ abstract final class NoteheadPainter {
         middleLineY - (restPainter.height / 2.0),
       ),
     );
+  }
+
+  static void _paintPitchBadge(
+    Canvas canvas, {
+    required Pitch pitch,
+    required double noteX,
+    required double noteY,
+    required double staffBottomY,
+    required StaffMetrics metrics,
+    required bool isDragging,
+  }) {
+    final accidentalSymbol = switch (pitch.accidental) {
+      1 => '♯',
+      -1 => '♭',
+      2 => '𝄪',
+      -2 => '𝄫',
+      _ => '',
+    };
+    final pitchLabel = '${pitch.step.symbol}$accidentalSymbol${pitch.octave}';
+
+    final textSpan = TextSpan(
+      text: pitchLabel,
+      style: TextStyle(
+        fontSize: 10.5,
+        fontWeight: FontWeight.bold,
+        color: metrics.selectedBadgeTextColor,
+        letterSpacing: 0.5,
+      ),
+    );
+
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    const paddingH = 6.0;
+    const paddingV = 2.5;
+    final badgeWidth = textPainter.width + (paddingH * 2);
+    final badgeHeight = textPainter.height + (paddingV * 2);
+
+    final staffTopY = staffBottomY - metrics.staffHeight;
+    final highestRefY = noteY < staffTopY ? noteY : staffTopY;
+    final badgeTopY =
+        highestRefY - metrics.lineSpacing - badgeHeight - 4.0;
+    final badgeLeft = noteX - (badgeWidth / 2.0);
+
+    final badgeRRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(badgeLeft, badgeTopY, badgeWidth, badgeHeight),
+      const Radius.circular(6.0),
+    );
+
+    // Badge Background
+    final bgPaint = Paint()
+      ..color = metrics.selectedBadgeBgColor
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(badgeRRect, bgPaint);
+
+    // Badge Border
+    final borderPaint = Paint()
+      ..color = metrics.selectedBorderColor
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    canvas.drawRRect(badgeRRect, borderPaint);
+
+    // Text
+    textPainter.paint(
+      canvas,
+      Offset(badgeLeft + paddingH, badgeTopY + paddingV),
+    );
+
+    // Pointer caret
+    final pointerPath = Path()
+      ..moveTo(noteX - 3.0, badgeTopY + badgeHeight)
+      ..lineTo(noteX, badgeTopY + badgeHeight + 3.0)
+      ..lineTo(noteX + 3.0, badgeTopY + badgeHeight)
+      ..close();
+    canvas.drawPath(pointerPath, bgPaint);
+    canvas.drawLine(
+      Offset(noteX - 3.0, badgeTopY + badgeHeight),
+      Offset(noteX, badgeTopY + badgeHeight + 3.0),
+      borderPaint,
+    );
+    canvas.drawLine(
+      Offset(noteX, badgeTopY + badgeHeight + 3.0),
+      Offset(noteX + 3.0, badgeTopY + badgeHeight),
+      borderPaint,
+    );
+  }
+
+  static void _paintDragGuideLine(
+    Canvas canvas, {
+    required double y,
+    required double measureLeft,
+    required double measureRight,
+    required StaffMetrics metrics,
+  }) {
+    final guidePaint = Paint()
+      ..color = metrics.selectedNoteColor.withValues(alpha: 0.35)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    const dashWidth = 4.0;
+    const dashSpace = 4.0;
+    var currentX = measureLeft + 4.0;
+    final endX = measureRight - 4.0;
+
+    while (currentX < endX) {
+      final segEnd =
+          (currentX + dashWidth < endX) ? currentX + dashWidth : endX;
+      canvas.drawLine(Offset(currentX, y), Offset(segEnd, y), guidePaint);
+      currentX += dashWidth + dashSpace;
+    }
   }
 
   static void _paintWarningBadge(

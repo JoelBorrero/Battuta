@@ -98,11 +98,23 @@ void main() {
       expect(metrics.lineSpacing, equals(10.0));
       expect(metrics.staffHeight, equals(40.0));
       expect(metrics.measuresPerSystem, equals(4));
+      expect(metrics.selectedNoteColor, equals(const Color(0xFFE5A93C)));
 
-      final updated = metrics.copyWith(measuresPerSystem: 3, lineSpacing: 12.0);
+      final updated = metrics.copyWith(
+        measuresPerSystem: 3,
+        lineSpacing: 12.0,
+        selectedNoteColor: const Color(0xFFFFB800),
+      );
       expect(updated.measuresPerSystem, equals(3));
       expect(updated.lineSpacing, equals(12.0));
       expect(updated.staffHeight, equals(48.0));
+      expect(updated.selectedNoteColor, equals(const Color(0xFFFFB800)));
+
+      // Theme-adaptive metrics
+      final darkMetrics = StaffMetrics.fromTheme(ThemeData.dark());
+      expect(darkMetrics.selectedNoteColor, isNotNull);
+      final lightMetrics = StaffMetrics.fromTheme(ThemeData.light());
+      expect(lightMetrics.selectedNoteColor, isNotNull);
     });
   });
 
@@ -225,6 +237,34 @@ void main() {
       await canvasState.scrollToSection('sec-interludio',
           duration: Duration.zero);
       await tester.pumpAndSettle();
+    });
+
+    test('StaffPainter shouldRepaint triggers on selection change', () {
+      final painter1 = StaffPainter(
+        score: testScore,
+        selectedSectionId: 'sec-intro',
+        selectedMeasureNumber: 1,
+        selectedEventIndex: 0,
+      );
+
+      final painter2 = StaffPainter(
+        score: testScore,
+        selectedSectionId: 'sec-intro',
+        selectedMeasureNumber: 1,
+        selectedEventIndex: 1, // Different event index
+      );
+
+      expect(painter1.shouldRepaint(painter2), isTrue);
+
+      final painter3 = StaffPainter(
+        score: testScore,
+        selectedSectionId: 'sec-intro',
+        selectedMeasureNumber: 1,
+        selectedEventIndex: 0,
+        isDragging: true, // Different drag state
+      );
+
+      expect(painter1.shouldRepaint(painter3), isTrue);
     });
   });
 }

@@ -23,6 +23,10 @@ class StaffPainter extends CustomPainter {
     this.layoutIndex,
     this.spatialIndex,
     this.measureWarnings,
+    this.selectedSectionId,
+    this.selectedMeasureNumber,
+    this.selectedEventIndex,
+    this.isDragging = false,
   });
 
   /// The score domain tree containing sections and measures to paint.
@@ -39,6 +43,18 @@ class StaffPainter extends CustomPainter {
 
   /// Optional map of measure numbers to Gemini advertencia warnings.
   final Map<int, String>? measureWarnings;
+
+  /// Optional section ID of the selected note event.
+  final String? selectedSectionId;
+
+  /// Optional measure number of the selected note event.
+  final int? selectedMeasureNumber;
+
+  /// Optional index of the selected note event within its measure.
+  final int? selectedEventIndex;
+
+  /// Whether the selected note is currently being dragged.
+  final bool isDragging;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -221,6 +237,9 @@ class StaffPainter extends CustomPainter {
           // -------------------------------------------------------------------
           // 6. Notes, Stems, Ledger Lines & Warning Badges
           // -------------------------------------------------------------------
+          final isMeasureSelected = (section.id == selectedSectionId &&
+              measure.number == selectedMeasureNumber);
+
           NoteheadPainter.paintMeasureNotes(
             canvas,
             measure: measure,
@@ -231,6 +250,8 @@ class StaffPainter extends CustomPainter {
             sectionId: section.id,
             spatialIndex: spatialIndex,
             measureWarning: measureWarnings?[measure.number],
+            selectedEventIndex: isMeasureSelected ? selectedEventIndex : null,
+            isDragging: isMeasureSelected && isDragging,
           );
         }
 
@@ -465,6 +486,10 @@ class StaffPainter extends CustomPainter {
         oldDelegate.metrics != metrics ||
         oldDelegate.layoutIndex != layoutIndex ||
         oldDelegate.spatialIndex != spatialIndex ||
-        oldDelegate.measureWarnings != measureWarnings;
+        oldDelegate.measureWarnings != measureWarnings ||
+        oldDelegate.selectedSectionId != selectedSectionId ||
+        oldDelegate.selectedMeasureNumber != selectedMeasureNumber ||
+        oldDelegate.selectedEventIndex != selectedEventIndex ||
+        oldDelegate.isDragging != isDragging;
   }
 }

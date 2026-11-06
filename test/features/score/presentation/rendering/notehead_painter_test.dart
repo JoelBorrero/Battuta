@@ -240,5 +240,62 @@ void main() {
       expect(picture, isNotNull);
       picture.dispose();
     });
+
+    test('paintMeasureNotes renders selected note with halo, border, and pitch badge', () {
+      final measure = Measure(
+        number: 1,
+        timeSignature: TimeSignature.fourFour,
+        events: [
+          NoteEvent.note(
+            id: 'e1',
+            pitch: Pitch.parse('C4'),
+            rhythmicValue: RhythmicValue.quarter,
+            tickOffset: 0,
+          ),
+          NoteEvent.note(
+            id: 'e2',
+            pitch: Pitch.parse('F#5'),
+            rhythmicValue: RhythmicValue.half,
+            tickOffset: 480,
+          ),
+          const NoteEvent.rest(
+            id: 'e3',
+            rhythmicValue: RhythmicValue.quarter,
+            tickOffset: 1440,
+          ),
+        ],
+      );
+
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      // Paint with event 0 selected and dragging
+      NoteheadPainter.paintMeasureNotes(
+        canvas,
+        measure: measure,
+        measureLeft: 20.0,
+        measureRight: 200.0,
+        staffBottomY: 100.0,
+        metrics: const StaffMetrics(),
+        selectedEventIndex: 0,
+        isDragging: true,
+      );
+
+      // Paint with event 2 (rest) selected
+      NoteheadPainter.paintMeasureNotes(
+        canvas,
+        measure: measure,
+        measureLeft: 20.0,
+        measureRight: 200.0,
+        staffBottomY: 100.0,
+        metrics: const StaffMetrics(),
+        selectedEventIndex: 2,
+        isDragging: false,
+      );
+
+      final picture = recorder.endRecording();
+      expect(picture, isNotNull);
+      picture.dispose();
+    });
   });
 }

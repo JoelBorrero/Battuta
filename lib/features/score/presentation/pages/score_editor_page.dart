@@ -36,7 +36,23 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
     if (_activeScore == null) {
       _activeScore = score;
       _controller = RhythmEditorController(initialScore: score);
+      _controller!.addListener(_onControllerChanged);
     }
+  }
+
+  void _onControllerChanged() {
+    if (mounted) {
+      setState(() {
+        _activeScore = _controller?.state.score;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_onControllerChanged);
+    _controller?.dispose();
+    super.dispose();
   }
 
   void _onNotePitchChanged(
@@ -69,15 +85,21 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
     setState(() {
       _activeScore = newScore;
       _controller?.setScore(newScore);
+      _controller?.setCursor(
+        sectionId: sectionId,
+        measureNumber: measureNumber,
+        eventIndex: eventIndex,
+      );
     });
   }
 
   Future<void> _saveNotation() async {
-    if (_activeScore == null) return;
+    final scoreToSave = _controller?.state.score ?? _activeScore;
+    if (scoreToSave == null) return;
     setState(() => _isSaving = true);
 
     try {
-      final updatedSong = _activeScore!.toSong();
+      final updatedSong = scoreToSave.toSong();
       await ref.read(repertoireProvider.notifier).updateSong(updatedSong);
 
       if (mounted) {
@@ -99,6 +121,48 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
         setState(() => _isSaving = false);
       }
     }
+  }
+
+  Widget _buildHintBanner(ThemeData theme) {
+    final activeEvent = _controller?.state.activeEvent;
+    final activeMeasure = _controller?.state.activeMeasure;
+
+    final String infoText;
+    if (activeEvent != null && activeMeasure != null) {
+      final pitchText = activeEvent.pitch != null
+          ? 'Pitch: ${activeEvent.pitch!.scientificNotation}'
+          : (activeEvent.isRest ? 'Rest' : 'Note');
+      final rhythmText = activeEvent.rhythmicValue.isUnassigned
+          ? 'Unassigned rhythm'
+          : '${activeEvent.rhythmicValue.name} (${activeEvent.rhythmicValue.ticks}t)';
+      infoText =
+          'Selected: M${activeMeasure.number} • $pitchText • $rhythmText. Drag noteheads vertically to change pitch (C4–B5), or tap toolbar to assign rhythm.';
+    } else {
+      infoText =
+          'Tap or drag any notehead to select. Drag noteheads vertically to change pitch (C4–B5). Use the toolbar below to assign rhythmic values.';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Row(
+        children: [
+          Icon(
+            activeEvent != null ? Icons.music_note : Icons.touch_app,
+            size: 18,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              infoText,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -139,36 +203,15 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
           ),
           body: Column(
             children: [
-              // Hint Banner
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.touch_app,
-                      size: 18,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Drag noteheads vertically to change pitch (C4–B5). '
-                        'Use the toolbar below to assign rhythmic values.',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Dynamic Selected Note / Instructions Banner
+              _buildHintBanner(theme),
 
               // Staff Canvas
               Expanded(
                 child: _activeScore != null
                     ? StaffCanvas(
-                        score: _activeScore!,
+                        score: _controller?.state.score ?? _activeScore!,
+                        selectedCursor: _controller?.state.cursor,
                         onNotePitchChanged: _onNotePitchChanged,
                         onNoteTapped: (note) {
                           _controller?.setCursor(
