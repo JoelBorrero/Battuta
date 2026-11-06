@@ -292,7 +292,7 @@ void main() {
     });
 
     test('Renders 3/4 time signature and compound meters cleanly', () async {
-      final score = Score(
+      const score = Score(
         id: 'score-3-4',
         title: 'Great Are You Lord',
         keySignature: 'A',
@@ -307,8 +307,8 @@ void main() {
               Measure(
                 number: 1,
                 timeSignature: TimeSignature.threeFour,
-                chords: const [ChordSymbol(root: 'D')],
-                events: const [
+                chords: [ChordSymbol(root: 'D')],
+                events: [
                   NoteEvent.note(
                     id: 'e1',
                     pitch: Pitch(step: PitchStep.d, octave: 4),
@@ -319,8 +319,8 @@ void main() {
               Measure(
                 number: 2,
                 timeSignature: TimeSignature.threeFour,
-                chords: const [ChordSymbol(root: 'F#m7')],
-                events: const [
+                chords: [ChordSymbol(root: 'F#m7')],
+                events: [
                   NoteEvent.note(
                     id: 'e2',
                     pitch: Pitch(step: PitchStep.c, octave: 5, accidental: 1),
