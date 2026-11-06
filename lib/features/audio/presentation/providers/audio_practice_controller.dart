@@ -141,3 +141,4 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
     state = state.copyWith(audioSourceTitle: sourceName);
   }
 }
+

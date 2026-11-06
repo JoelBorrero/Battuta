@@ -68,3 +68,4 @@ class InMemorySetlistRepository implements SetlistRepository {
     _controller.close();
   }
 }
+
