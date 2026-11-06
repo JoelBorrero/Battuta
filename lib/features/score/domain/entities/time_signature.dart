@@ -58,6 +58,15 @@ class TimeSignature {
   /// Cut Time alias for 2/2.
   static const TimeSignature cutTime = twoTwo;
 
+  /// 5/4 Complex / Asymmetric meter (2400 ticks).
+  static const TimeSignature fiveFour = TimeSignature(5, 4);
+
+  /// 5/8 Complex / Asymmetric meter (1200 ticks).
+  static const TimeSignature fiveEight = TimeSignature(5, 8);
+
+  /// 7/8 Complex / Asymmetric meter (1680 ticks).
+  static const TimeSignature sevenEight = TimeSignature(7, 8);
+
   // ---------------------------------------------------------------------------
   // Capacity & Metric Calculations
   // ---------------------------------------------------------------------------
@@ -82,6 +91,15 @@ class TimeSignature {
   /// Number of macro beats in compound meters (e.g. 2 for 6/8, 4 for 12/8)
   /// or simple beats for simple meters.
   int get beatCount => isCompound ? numerator ~/ 3 : numerator;
+
+  /// Duration of a primary macro beat in MIDI ticks.
+  ///
+  /// In compound meters (e.g. 6/8), a macro beat is 3 eighth notes (720 ticks).
+  /// In simple meters, a macro beat equals [ticksPerBeat].
+  int get macroBeatTicks => isCompound ? ticksPerBeat * 3 : ticksPerBeat;
+
+  /// Checks whether a given [tickDuration] fits within a single measure of this meter.
+  bool canAccommodateTicks(int tickDuration) => tickDuration <= maxTicks;
 
   /// Parses a string representation such as `"4/4"`, `"3/4"`, `"C"`, or `"cut"`.
   factory TimeSignature.parse(String text) {

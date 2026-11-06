@@ -56,6 +56,41 @@ class Measure {
   /// Whether this measure contains no note events.
   bool get isEmpty => events.isEmpty;
 
+  /// Number of note events with [RhythmicValue.unassigned] (0 ticks).
+  int get unassignedCount =>
+      events.where((e) => e.rhythmicValue.isUnassigned).length;
+
+  /// Whether any note event in this measure has unassigned rhythm.
+  bool get hasUnassignedEvents =>
+      events.any((e) => e.rhythmicValue.isUnassigned);
+
+  /// Fraction of measure capacity filled (0.0 to 1.0).
+  double get fillRatio =>
+      maxTicks == 0 ? 0.0 : (totalTicks / maxTicks).clamp(0.0, 1.0);
+
+  /// Checks if assigning [rhythm] to [eventIndex] would fit within [maxTicks].
+  bool canFitRhythmAt(int eventIndex, RhythmicValue rhythm) {
+    if (eventIndex < 0 || eventIndex >= events.length) return false;
+    final currentTicks = events[eventIndex].rhythmicValue.ticks;
+    return (totalTicks - currentTicks + rhythm.ticks) <= maxTicks;
+  }
+
+  /// Checks if adding an event of [durationTicks] would fit within [maxTicks].
+  bool canFitDuration(int durationTicks) =>
+      (totalTicks + durationTicks) <= maxTicks;
+
+  /// Throws [MeasureOverflowException] if [hasOverflow] is `true`.
+  void validateMeasureCapacity() {
+    if (hasOverflow) {
+      throw MeasureOverflowException(
+        message: 'Measure #$number exceeds time signature capacity: '
+            '$totalTicks ticks > $maxTicks ticks ($timeSignature).',
+        maxTicks: maxTicks,
+        attemptedTicks: totalTicks,
+      );
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Factory Constructors
   // ---------------------------------------------------------------------------
