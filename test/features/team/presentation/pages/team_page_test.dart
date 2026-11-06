@@ -77,5 +77,18 @@ void main() {
 
       expect(find.text('Grace Hopper'), findsOneWidget);
     });
+
+    testWidgets('renders team cards without overflow on narrow width screens',
+        (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Sarah Jenkins'), findsOneWidget);
+    });
   });
 }

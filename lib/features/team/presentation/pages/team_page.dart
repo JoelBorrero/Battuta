@@ -179,26 +179,32 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           // ── Summary Status Card ──
           Card(
             elevation: 0,
+            margin: const EdgeInsets.only(bottom: 12),
             color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _SummaryStat(
-                    count: '${members.length}',
-                    label: 'Total Roster',
-                    color: theme.colorScheme.primary,
+                  Expanded(
+                    child: _SummaryStat(
+                      count: '${members.length}',
+                      label: 'Total Roster',
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
-                  _SummaryStat(
-                    count: '$scheduledCount',
-                    label: 'Scheduled',
-                    color: Colors.green,
+                  Expanded(
+                    child: _SummaryStat(
+                      count: '$scheduledCount',
+                      label: 'Scheduled',
+                      color: Colors.green,
+                    ),
                   ),
-                  _SummaryStat(
-                    count: '$availableCount',
-                    label: 'Available',
-                    color: Colors.blue,
+                  Expanded(
+                    child: _SummaryStat(
+                      count: '$availableCount',
+                      label: 'Available',
+                      color: Colors.blue,
+                    ),
                   ),
                 ],
               ),
@@ -280,18 +286,23 @@ class _SummaryStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           count,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(fontSize: 12),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 11),
         ),
       ],
     );
@@ -348,7 +359,10 @@ class _MemberCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Row(
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
                   padding:
@@ -365,8 +379,7 @@ class _MemberCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (member.vocalRange != VocalTessitura.none) ...[
-                  const SizedBox(width: 6),
+                if (member.vocalRange != VocalTessitura.none)
                   Text(
                     member.vocalRange.rangeLabel,
                     style: TextStyle(
@@ -374,7 +387,6 @@ class _MemberCard extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                ],
               ],
             ),
             if (member.notes != null) ...[
