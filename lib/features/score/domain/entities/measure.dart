@@ -197,6 +197,38 @@ class Measure {
     return copyWith(events: List.unmodifiable(updatedEvents));
   }
 
+  /// Toggles rest state for the note event at [eventIndex].
+  Measure toggleRestAt(int eventIndex, {Pitch defaultPitch = Pitch.middleC}) {
+    if (eventIndex < 0 || eventIndex >= events.length) {
+      throw RangeError.index(eventIndex, events, 'eventIndex');
+    }
+
+    final oldEvent = events[eventIndex];
+    final updatedEvent = oldEvent.isRest
+        ? oldEvent.copyWith(pitch: defaultPitch)
+        : oldEvent.copyWith(clearPitch: true);
+
+    final updatedList = List<NoteEvent>.from(events);
+    updatedList[eventIndex] = updatedEvent;
+
+    return copyWith(events: List.unmodifiable(updatedList));
+  }
+
+  /// Toggles tie state for the note event at [eventIndex].
+  Measure toggleTieAt(int eventIndex) {
+    if (eventIndex < 0 || eventIndex >= events.length) {
+      throw RangeError.index(eventIndex, events, 'eventIndex');
+    }
+
+    final oldEvent = events[eventIndex];
+    final updatedEvent = oldEvent.copyWith(isTied: !oldEvent.isTied);
+
+    final updatedList = List<NoteEvent>.from(events);
+    updatedList[eventIndex] = updatedEvent;
+
+    return copyWith(events: List.unmodifiable(updatedList));
+  }
+
   /// Updates the pitch of the note event at [eventIndex] during vertical drag-and-snap editing.
   ///
   /// Snaps noteheads to lines or spaces and updates the score tree in real time,
