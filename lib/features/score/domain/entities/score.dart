@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/features/score/domain/entities/measure.dart';
+import 'package:battuta/features/score/domain/entities/pitch.dart';
 import 'package:battuta/features/score/domain/entities/section.dart';
 import 'package:battuta/features/score/domain/entities/time_signature.dart';
 
@@ -124,6 +125,25 @@ class Score {
       if (section.externalSyncId == syncId) return section;
     }
     return null;
+  }
+
+  /// Immutably updates the pitch of a note in the score tree at the specified coordinates.
+  Score updateNotePitch({
+    required String sectionId,
+    required int measureNumber,
+    required int eventIndex,
+    required Pitch newPitch,
+  }) {
+    final updatedSections = sections.map((sec) {
+      if (sec.id != sectionId) return sec;
+      final updatedMeasures = sec.measures.map((meas) {
+        if (meas.number != measureNumber) return meas;
+        return meas.dragPitchAt(eventIndex, newPitch);
+      }).toList();
+      return sec.copyWith(measures: List.unmodifiable(updatedMeasures));
+    }).toList();
+
+    return copyWith(sections: List.unmodifiable(updatedSections));
   }
 
   /// Creates a copy of this [Score] with optional updated fields.

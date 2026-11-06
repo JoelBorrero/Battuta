@@ -197,6 +197,26 @@ class Measure {
     return copyWith(events: List.unmodifiable(updatedEvents));
   }
 
+  /// Updates the pitch of the note event at [eventIndex] during vertical drag-and-snap editing.
+  ///
+  /// Snaps noteheads to lines or spaces and updates the score tree in real time,
+  /// preserving rhythmic value, lyrics, ties, and contiguous offsets.
+  Measure dragPitchAt(int eventIndex, Pitch newPitch) {
+    if (eventIndex < 0 || eventIndex >= events.length) {
+      throw RangeError.index(eventIndex, events, 'eventIndex');
+    }
+
+    final oldEvent = events[eventIndex];
+    final updatedEvent = oldEvent.copyWith(
+      pitch: newPitch,
+    );
+
+    final updatedEvents = List<NoteEvent>.from(events);
+    updatedEvents[eventIndex] = updatedEvent;
+
+    return copyWith(events: List.unmodifiable(updatedEvents));
+  }
+
   /// Appends a new [event] to this measure.
   ///
   /// When [validateCapacity] is `true`, throws [MeasureOverflowException] if the event

@@ -1,17 +1,20 @@
-/// Battuta — StaffCanvas widget.
+/// Battuta — StaffCanvas widget with Vertical Drag-and-Snap GestureDetector.
 ///
-/// Wraps [StaffPainter] in a scrollable container with automatic layout index
-/// registration, enabling instant scrolling to rehearsal marks and section headers
-/// for live performance and remote v1.1 presentation synchronization.
+/// Wraps [StaffPainter] in a scrollable container with spatial hit-testing,
+/// allowing musicians to drag noteheads vertically with a finger or Apple Pencil,
+/// mathematically snapping them to half-staff-space increments in real time.
 library;
 
+import 'package:battuta/features/score/domain/entities/pitch.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/features/score/presentation/rendering/rendered_note_box.dart';
 import 'package:battuta/features/score/presentation/rendering/section_layout_index.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_metrics.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_painter.dart';
+import 'package:battuta/features/score/presentation/rendering/staff_pitch_mapper.dart';
 import 'package:flutter/material.dart';
 
-/// Interactive score canvas rendering staves, barlines, chords, and navigation boxes.
+/// Interactive score canvas rendering staves, barlines, chords, notes, and drag-and-snap gesture editing.
 class StaffCanvas extends StatefulWidget {
   /// Creates a [StaffCanvas].
   const StaffCanvas({
@@ -20,8 +23,12 @@ class StaffCanvas extends StatefulWidget {
     this.metrics = const StaffMetrics(),
     this.scrollController,
     this.layoutIndex,
+    this.spatialIndex,
     this.measureWarnings,
     this.onLayoutReady,
+    this.onNotePitchChanged,
+    this.onNoteTapped,
+    this.onDragCompleted,
   });
 
   /// The active score to render.
@@ -36,11 +43,28 @@ class StaffCanvas extends StatefulWidget {
   /// Layout index registering section vertical coordinates.
   final SectionLayoutIndex? layoutIndex;
 
+  /// Spatial index registering note bounding boxes for hit-testing.
+  final SpatialNoteIndex? spatialIndex;
+
   /// Optional map of measure numbers to Gemini advertencia warnings.
   final Map<int, String>? measureWarnings;
 
   /// Callback invoked after layout offsets are registered.
   final void Function(SectionLayoutIndex index)? onLayoutReady;
+
+  /// Callback invoked in real time when a notehead is dragged to a new pitch.
+  final void Function(
+    String sectionId,
+    int measureNumber,
+    int eventIndex,
+    Pitch newPitch,
+  )? onNotePitchChanged;
+
+  /// Callback invoked when a notehead is tapped.
+  final void Function(RenderedNoteBox note)? onNoteTapped;
+
+  /// Callback invoked when a drag gesture finishes.
+  final VoidCallback? onDragCompleted;
 
   @override
   State<StaffCanvas> createState() => StaffCanvasState();
@@ -49,7 +73,11 @@ class StaffCanvas extends StatefulWidget {
 class StaffCanvasState extends State<StaffCanvas> {
   late final ScrollController _scrollController;
   late final SectionLayoutIndex _layoutIndex;
+  late final SpatialNoteIndex _spatialIndex;
   bool _ownsController = false;
+
+  /// The currently active note being dragged vertically.
+  RenderedNoteBox? _draggedNote;
 
   @override
   void initState() {
@@ -61,6 +89,7 @@ class StaffCanvasState extends State<StaffCanvas> {
       _ownsController = true;
     }
     _layoutIndex = widget.layoutIndex ?? SectionLayoutIndex();
+    _spatialIndex = widget.spatialIndex ?? SpatialNoteIndex();
   }
 
   @override
@@ -72,9 +101,6 @@ class StaffCanvasState extends State<StaffCanvas> {
   }
 
   /// Instantly or smoothly scrolls the canvas to the specified section header.
-  ///
-  /// [identifier] can be a section ID, external sync ID (e.g. ProPresenter UUID),
-  /// or section display name (e.g. "Verse 1", "Chorus").
   Future<void> scrollToSection(
     String identifier, {
     Duration duration = const Duration(milliseconds: 300),
@@ -118,13 +144,81 @@ class StaffCanvasState extends State<StaffCanvas> {
 
         return SingleChildScrollView(
           controller: _scrollController,
-          child: CustomPaint(
-            size: Size(availableWidth, totalHeight),
-            painter: StaffPainter(
-              score: widget.score,
-              metrics: widget.metrics,
-              layoutIndex: _layoutIndex,
-              measureWarnings: widget.measureWarnings,
+          // When actively dragging a notehead, lock canvas scroll to ensure buttery dragging
+          physics: _draggedNote != null
+              ? const NeverScrollableScrollPhysics()
+              : const AlwaysScrollableScrollPhysics(),
+          child: Listener(
+            behavior: HitTestBehavior.opaque,
+            onPointerDown: (event) {
+              final hitNote = _spatialIndex.findNoteAt(event.localPosition);
+              if (hitNote != null) {
+                setState(() {
+                  _draggedNote = hitNote;
+                });
+              }
+            },
+            onPointerMove: (event) {
+              if (_draggedNote != null) {
+                final note = _draggedNote!;
+                // Mathematically snap Y coordinate to closest half-staff-space increment
+                final snappedPitch = StaffPitchMapper.pitchForYCoordinate(
+                  event.localPosition.dy,
+                  staffBottomY: note.staffBottomY,
+                  lineSpacing: note.lineSpacing,
+                  accidental: note.pitch.accidental,
+                );
+
+                if (snappedPitch != note.pitch) {
+                  widget.onNotePitchChanged?.call(
+                    note.sectionId,
+                    note.measureNumber,
+                    note.eventIndex,
+                    snappedPitch,
+                  );
+
+                  setState(() {
+                    _draggedNote = RenderedNoteBox(
+                      noteId: note.noteId,
+                      sectionId: note.sectionId,
+                      measureNumber: note.measureNumber,
+                      eventIndex: note.eventIndex,
+                      bounds: note.bounds,
+                      center: note.center,
+                      staffBottomY: note.staffBottomY,
+                      lineSpacing: note.lineSpacing,
+                      pitch: snappedPitch,
+                    );
+                  });
+                }
+              }
+            },
+            onPointerUp: (event) {
+              if (_draggedNote != null) {
+                final wasDragged = _draggedNote!;
+                setState(() {
+                  _draggedNote = null;
+                });
+                widget.onDragCompleted?.call();
+                widget.onNoteTapped?.call(wasDragged);
+              }
+            },
+            onPointerCancel: (_) {
+              if (_draggedNote != null) {
+                setState(() {
+                  _draggedNote = null;
+                });
+              }
+            },
+            child: CustomPaint(
+              size: Size(availableWidth, totalHeight),
+              painter: StaffPainter(
+                score: widget.score,
+                metrics: widget.metrics,
+                layoutIndex: _layoutIndex,
+                spatialIndex: _spatialIndex,
+                measureWarnings: widget.measureWarnings,
+              ),
             ),
           ),
         );

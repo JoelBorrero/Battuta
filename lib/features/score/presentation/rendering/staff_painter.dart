@@ -9,6 +9,7 @@ import 'package:battuta/features/score/domain/entities/measure.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:battuta/features/score/domain/entities/section.dart';
 import 'package:battuta/features/score/presentation/rendering/notehead_painter.dart';
+import 'package:battuta/features/score/presentation/rendering/rendered_note_box.dart';
 import 'package:battuta/features/score/presentation/rendering/section_layout_index.dart';
 import 'package:battuta/features/score/presentation/rendering/smufl_glyphs.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_metrics.dart';
@@ -20,6 +21,7 @@ class StaffPainter extends CustomPainter {
     required this.score,
     this.metrics = const StaffMetrics(),
     this.layoutIndex,
+    this.spatialIndex,
     this.measureWarnings,
   });
 
@@ -32,11 +34,15 @@ class StaffPainter extends CustomPainter {
   /// Optional layout index to register section Y-offsets for instant scrolling.
   final SectionLayoutIndex? layoutIndex;
 
+  /// Optional spatial note index for finger & Apple Pencil hit-testing.
+  final SpatialNoteIndex? spatialIndex;
+
   /// Optional map of measure numbers to Gemini advertencia warnings.
   final Map<int, String>? measureWarnings;
 
   @override
   void paint(Canvas canvas, Size size) {
+    spatialIndex?.clear();
     if (score.sections.isEmpty) return;
 
     final staffPaint = Paint()
@@ -222,6 +228,8 @@ class StaffPainter extends CustomPainter {
             measureRight: measureRight,
             staffBottomY: staffBottom,
             metrics: metrics,
+            sectionId: section.id,
+            spatialIndex: spatialIndex,
             measureWarning: measureWarnings?[measure.number],
           );
         }
@@ -456,6 +464,7 @@ class StaffPainter extends CustomPainter {
     return oldDelegate.score != score ||
         oldDelegate.metrics != metrics ||
         oldDelegate.layoutIndex != layoutIndex ||
+        oldDelegate.spatialIndex != spatialIndex ||
         oldDelegate.measureWarnings != measureWarnings;
   }
 }

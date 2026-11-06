@@ -7,6 +7,7 @@ library;
 
 import 'package:battuta/features/score/domain/entities/measure.dart';
 import 'package:battuta/features/score/domain/entities/note_event.dart';
+import 'package:battuta/features/score/presentation/rendering/rendered_note_box.dart';
 import 'package:battuta/features/score/presentation/rendering/smufl_glyphs.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_metrics.dart';
 import 'package:battuta/features/score/presentation/rendering/staff_pitch_mapper.dart';
@@ -31,6 +32,8 @@ abstract final class NoteheadPainter {
     required double measureRight,
     required double staffBottomY,
     required StaffMetrics metrics,
+    String? sectionId,
+    SpatialNoteIndex? spatialIndex,
     String? measureWarning,
   }) {
     // -------------------------------------------------------------------------
@@ -74,23 +77,32 @@ abstract final class NoteheadPainter {
           metrics: metrics,
         );
       } else if (event.pitch != null) {
-        _paintNote(
+        final noteBox = _paintNote(
           canvas,
           event: event,
           x: noteX,
           staffBottomY: staffBottomY,
           metrics: metrics,
+          sectionId: sectionId ?? '',
+          measureNumber: measure.number,
+          eventIndex: i,
         );
+        if (noteBox != null) {
+          spatialIndex?.register(noteBox);
+        }
       }
     }
   }
 
-  static void _paintNote(
+  static RenderedNoteBox? _paintNote(
     Canvas canvas, {
     required NoteEvent event,
     required double x,
     required double staffBottomY,
     required StaffMetrics metrics,
+    required String sectionId,
+    required int measureNumber,
+    required int eventIndex,
   }) {
     final pitch = event.pitch!;
     final isUnassigned = event.rhythmicValue.isUnassigned;
@@ -288,6 +300,23 @@ abstract final class NoteheadPainter {
         Offset(x - (lyricPainter.width / 2.0), staffBottomY + 14.0),
       );
     }
+
+    return RenderedNoteBox(
+      noteId: event.id,
+      sectionId: sectionId,
+      measureNumber: measureNumber,
+      eventIndex: eventIndex,
+      bounds: Rect.fromLTWH(
+        noteheadOffset.dx,
+        noteheadOffset.dy,
+        noteheadPainter.width,
+        noteheadPainter.height,
+      ),
+      center: Offset(x, noteY),
+      staffBottomY: staffBottomY,
+      lineSpacing: metrics.lineSpacing,
+      pitch: pitch,
+    );
   }
 
   static void _paintRest(
