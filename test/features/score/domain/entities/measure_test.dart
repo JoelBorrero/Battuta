@@ -123,6 +123,60 @@ void main() {
       expect(measure.chords.first.root, equals('C'));
     });
 
+    test('canFitRhythmAt and canFitDuration helper validations', () {
+      final raw = Measure.fromGeminiPitchList(['C4', 'E4']);
+      expect(raw.canFitRhythmAt(0, RhythmicValue.whole), isTrue); // 1920 ticks fits
+      expect(raw.canFitRhythmAt(0, RhythmicValue.doubleWhole), isFalse); // 3840 ticks > 1920
+      expect(raw.canFitRhythmAt(5, RhythmicValue.quarter), isFalse); // index out of bounds
+
+      final m1 = raw.assignRhythmAt(0, RhythmicValue.half); // 960 ticks
+      expect(m1.canFitRhythmAt(1, RhythmicValue.half), isTrue); // 960 + 960 = 1920 fits
+      expect(m1.canFitRhythmAt(1, RhythmicValue.whole), isFalse); // 960 + 1920 = 2880 > 1920
+
+      expect(m1.canFitDuration(960), isTrue);
+      expect(m1.canFitDuration(961), isFalse);
+    });
+
+    test('tracks unassigned events and fillRatio metrics', () {
+      final measure = Measure.fromGeminiPitchList(['C4', 'D4', 'E4', 'F4']);
+      expect(measure.unassignedCount, equals(4));
+      expect(measure.hasUnassignedEvents, isTrue);
+      expect(measure.fillRatio, equals(0.0));
+
+      final halfFilled = measure
+          .assignRhythmAt(0, RhythmicValue.quarter)
+          .assignRhythmAt(1, RhythmicValue.quarter);
+      expect(halfFilled.unassignedCount, equals(2));
+      expect(halfFilled.hasUnassignedEvents, isTrue);
+      expect(halfFilled.fillRatio, equals(0.5)); // 960 / 1920 = 0.5
+    });
+
+    test('validateMeasureCapacity throws MeasureOverflowException only on overflow', () {
+      const normal = Measure(number: 1, timeSignature: TimeSignature.fourFour);
+      expect(() => normal.validateMeasureCapacity(), returnsNormally);
+
+      final overflowMeasure = Measure(
+        number: 2,
+        timeSignature: TimeSignature.fourFour,
+        events: [
+          NoteEvent.note(
+            id: 'e1',
+            pitch: Pitch.parse('C4'),
+            rhythmicValue: RhythmicValue.doubleWhole, // 3840 ticks > 1920
+          ),
+        ],
+      );
+      expect(overflowMeasure.hasOverflow, isTrue);
+      expect(
+        () => overflowMeasure.validateMeasureCapacity(),
+        throwsA(isA<MeasureOverflowException>().having(
+          (e) => e.attemptedTicks,
+          'attemptedTicks',
+          equals(3840),
+        )),
+      );
+    });
+
     test('equality and toString', () {
       const m1 = Measure(number: 1, timeSignature: TimeSignature.fourFour);
       const m2 = Measure(number: 1, timeSignature: TimeSignature.fourFour);

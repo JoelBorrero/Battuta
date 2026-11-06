@@ -29,6 +29,27 @@ void main() {
 
       // 2/2 = 2 * 960 = 1920 ticks
       expect(TimeSignature.twoTwo.maxTicks, equals(1920));
+
+      // 5/4 = 5 * 480 = 2400 ticks
+      expect(TimeSignature.fiveFour.maxTicks, equals(2400));
+
+      // 7/8 = 7 * 240 = 1680 ticks
+      expect(TimeSignature.sevenEight.maxTicks, equals(1680));
+
+      // 5/8 = 5 * 240 = 1200 ticks
+      expect(TimeSignature.fiveEight.maxTicks, equals(1200));
+    });
+
+    test('calculates macroBeatTicks and evaluates tick accommodation', () {
+      // 4/4 simple macro beat is quarter note (480 ticks)
+      expect(TimeSignature.fourFour.macroBeatTicks, equals(480));
+      expect(TimeSignature.fourFour.canAccommodateTicks(1920), isTrue);
+      expect(TimeSignature.fourFour.canAccommodateTicks(1921), isFalse);
+
+      // 6/8 compound macro beat is dotted quarter (720 ticks)
+      expect(TimeSignature.sixEight.macroBeatTicks, equals(720));
+      expect(TimeSignature.sixEight.canAccommodateTicks(1440), isTrue);
+      expect(TimeSignature.sixEight.canAccommodateTicks(1441), isFalse);
     });
 
     test('parse handles fraction strings and common shorthand', () {
