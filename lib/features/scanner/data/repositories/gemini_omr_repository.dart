@@ -70,10 +70,8 @@ class DefaultGeminiOmrClient implements GeminiOmrClient {
 /// Concrete [OmrRepository] powered by Google Gemini multimodal models.
 class GeminiOmrRepository implements OmrRepository {
   /// Creates a [GeminiOmrRepository].
-  GeminiOmrRepository({
-    required this.apiKeyService,
-    GeminiOmrClient? client,
-  }) : _client = client ?? const DefaultGeminiOmrClient();
+  GeminiOmrRepository({required this.apiKeyService, GeminiOmrClient? client})
+    : _client = client ?? const DefaultGeminiOmrClient();
 
   /// Service managing active API keys.
   final ApiKeyService apiKeyService;
@@ -81,7 +79,7 @@ class GeminiOmrRepository implements OmrRepository {
   final GeminiOmrClient _client;
 
   /// Default multimodal Gemini model for lead sheet recognition.
-  static const String defaultModel = 'gemini-2.5-flash';
+  static const String defaultModel = 'gemini-3.8-flash';
 
   @override
   Future<Either<Failure, Score>> extractFullLeadSheet({
@@ -92,10 +90,11 @@ class GeminiOmrRepository implements OmrRepository {
     try {
       final apiKey = await apiKeyService.getActiveGeminiKey();
       if (apiKey == null || apiKey.trim().isEmpty) {
-        return const Left(PermissionFailure(
-          message:
-              'Gemini API key is not configured. Please configure your key in Settings.',
-        ));
+        return const Left(
+          PermissionFailure(
+            message: 'Gemini API key is not configured. Please configure your key in Settings.',
+          ),
+        );
       }
 
       final responseText = await _client.generateContent(
@@ -105,35 +104,40 @@ class GeminiOmrRepository implements OmrRepository {
         mimeType: mimeType,
         responseSchema: FullSheetSchema.schema,
         systemInstruction: FullSheetSchema.systemInstruction,
-        prompt:
-            'Transcribe this sheet music image into structured JSON adhering to the schema.',
+        prompt: 'Transcribe this sheet music image into structured JSON adhering to the schema.',
       );
 
       if (responseText == null || responseText.trim().isEmpty) {
-        return const Left(UnexpectedFailure(
-          message: 'Gemini returned an empty response.',
-        ));
+        return const Left(
+          UnexpectedFailure(message: 'Gemini returned an empty response.'),
+        );
       }
 
       final dynamic decoded = jsonDecode(responseText);
       if (decoded is! Map<String, dynamic>) {
-        return const Left(UnexpectedFailure(
-          message: 'Expected a JSON object from Gemini response.',
-        ));
+        return const Left(
+          UnexpectedFailure(
+            message: 'Expected a JSON object from Gemini response.',
+          ),
+        );
       }
 
       final score = FullSheetMapper.mapToScore(decoded);
       return Right(score);
     } on FormatException catch (e, st) {
-      return Left(UnexpectedFailure(
-        message: 'Failed to parse Gemini JSON output: ${e.message}',
-        stackTrace: st,
-      ));
+      return Left(
+        UnexpectedFailure(
+          message: 'Failed to parse Gemini JSON output: ${e.message}',
+          stackTrace: st,
+        ),
+      );
     } catch (e, st) {
-      return Left(ServerFailure(
-        message: 'Gemini OMR extraction failed: $e',
-        stackTrace: st,
-      ));
+      return Left(
+        ServerFailure(
+          message: 'Gemini OMR extraction failed: $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
@@ -147,10 +151,11 @@ class GeminiOmrRepository implements OmrRepository {
     try {
       final apiKey = await apiKeyService.getActiveGeminiKey();
       if (apiKey == null || apiKey.trim().isEmpty) {
-        return const Left(PermissionFailure(
-          message:
-              'Gemini API key is not configured. Please configure your key in Settings.',
-        ));
+        return const Left(
+          PermissionFailure(
+            message: 'Gemini API key is not configured. Please configure your key in Settings.',
+          ),
+        );
       }
 
       final responseText = await _client.generateContent(
@@ -160,21 +165,22 @@ class GeminiOmrRepository implements OmrRepository {
         mimeType: mimeType,
         responseSchema: PitchOnlySchema.schema,
         systemInstruction: PitchOnlySchema.systemInstruction,
-        prompt:
-            'Extract melodic noteheads and chords ignoring rhythm. Assume Treble Clef (G4).',
+        prompt: 'Extract melodic noteheads and chords ignoring rhythm. Assume Treble Clef (G4).',
       );
 
       if (responseText == null || responseText.trim().isEmpty) {
-        return const Left(UnexpectedFailure(
-          message: 'Gemini returned an empty response.',
-        ));
+        return const Left(
+          UnexpectedFailure(message: 'Gemini returned an empty response.'),
+        );
       }
 
       final dynamic decoded = jsonDecode(responseText);
       if (decoded is! Map<String, dynamic>) {
-        return const Left(UnexpectedFailure(
-          message: 'Expected a JSON object from Gemini response.',
-        ));
+        return const Left(
+          UnexpectedFailure(
+            message: 'Expected a JSON object from Gemini response.',
+          ),
+        );
       }
 
       final result = PitchOnlyMapper.mapToResult(
@@ -183,15 +189,19 @@ class GeminiOmrRepository implements OmrRepository {
       );
       return Right(result);
     } on FormatException catch (e, st) {
-      return Left(UnexpectedFailure(
-        message: 'Failed to parse Gemini JSON output: ${e.message}',
-        stackTrace: st,
-      ));
+      return Left(
+        UnexpectedFailure(
+          message: 'Failed to parse Gemini JSON output: ${e.message}',
+          stackTrace: st,
+        ),
+      );
     } catch (e, st) {
-      return Left(ServerFailure(
-        message: 'Gemini OMR pitch-only extraction failed: $e',
-        stackTrace: st,
-      ));
+      return Left(
+        ServerFailure(
+          message: 'Gemini OMR pitch-only extraction failed: $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 }
