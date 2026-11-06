@@ -83,3 +83,20 @@ final class UnexpectedException extends AppException {
   /// The original error object.
   final Object? originalError;
 }
+
+/// Thrown when rhythmic operations in a measure exceed the measure's time signature capacity.
+final class MeasureOverflowException extends AppException {
+  /// Creates a [MeasureOverflowException].
+  const MeasureOverflowException({
+    required super.message,
+    super.stackTrace,
+    this.maxTicks,
+    this.attemptedTicks,
+  });
+
+  /// Maximum allowed ticks for the measure according to its time signature.
+  final int? maxTicks;
+
+  /// Attempted total ticks that caused the overflow.
+  final int? attemptedTicks;
+}

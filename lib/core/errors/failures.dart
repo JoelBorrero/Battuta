@@ -102,3 +102,20 @@ final class UnexpectedFailure extends Failure {
   /// The original exception or error object, if available.
   final Object? originalError;
 }
+
+/// A failure representing a measure capacity overflow.
+final class MeasureOverflowFailure extends Failure {
+  /// Creates a [MeasureOverflowFailure].
+  const MeasureOverflowFailure({
+    required super.message,
+    super.stackTrace,
+    this.maxTicks,
+    this.attemptedTicks,
+  });
+
+  /// The maximum allowed ticks for the measure.
+  final int? maxTicks;
+
+  /// The attempted ticks that caused the overflow.
+  final int? attemptedTicks;
+}
