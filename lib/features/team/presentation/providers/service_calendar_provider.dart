@@ -340,3 +340,4 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     ];
   }
 }
+

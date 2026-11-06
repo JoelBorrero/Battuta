@@ -196,3 +196,4 @@ class ServiceEvent {
       notes.hashCode ^
       setlistId.hashCode;
 }
+
