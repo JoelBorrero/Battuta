@@ -80,6 +80,20 @@ class Pitch implements Comparable<Pitch> {
   /// Scientific pitch octave (e.g., 4 for C4).
   final int octave;
 
+  /// Converts this [Pitch] to a JSON-encodable map.
+  Map<String, dynamic> toJson() => {
+        'step': step.symbol,
+        'accidental': accidental,
+        'octave': octave,
+      };
+
+  /// Constructs a [Pitch] from a JSON map.
+  factory Pitch.fromJson(Map<String, dynamic> json) => Pitch(
+        step: PitchStep.fromSymbol(json['step'] as String),
+        accidental: json['accidental'] as int? ?? 0,
+        octave: json['octave'] as int,
+      );
+
   // ---------------------------------------------------------------------------
   // Scientific Pitch String Parsing
   // ---------------------------------------------------------------------------
@@ -314,3 +328,4 @@ class Pitch implements Comparable<Pitch> {
   @override
   String toString() => scientificNotation;
 }
+

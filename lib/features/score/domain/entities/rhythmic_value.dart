@@ -52,6 +52,22 @@ class RhythmicValue implements Comparable<RhythmicValue> {
   /// Whether this duration represents a triplet subdivision (2/3 of normal duration).
   final bool isTriplet;
 
+  /// Converts this [RhythmicValue] to a JSON map.
+  Map<String, dynamic> toJson() => {
+        'ticks': ticks,
+        'name': name,
+        'isDotted': isDotted,
+        'isTriplet': isTriplet,
+      };
+
+  /// Constructs a [RhythmicValue] from a JSON map.
+  factory RhythmicValue.fromJson(Map<String, dynamic> json) => RhythmicValue(
+        ticks: json['ticks'] as int,
+        name: json['name'] as String,
+        isDotted: json['isDotted'] as bool? ?? false,
+        isTriplet: json['isTriplet'] as bool? ?? false,
+      );
+
   // ---------------------------------------------------------------------------
   // Standard Note Durations
   // ---------------------------------------------------------------------------
@@ -228,3 +244,4 @@ class RhythmicValue implements Comparable<RhythmicValue> {
   @override
   String toString() => 'RhythmicValue($name, ${ticks}t)';
 }
+

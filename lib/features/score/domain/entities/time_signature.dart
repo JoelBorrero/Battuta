@@ -27,6 +27,16 @@ class TimeSignature {
   /// Beat unit represented as an inverted fraction (e.g., 4 for quarter note, 8 for eighth note).
   final int denominator;
 
+  /// Converts this [TimeSignature] to a JSON map.
+  Map<String, dynamic> toJson() => {
+        'numerator': numerator,
+        'denominator': denominator,
+      };
+
+  /// Constructs a [TimeSignature] from a JSON map.
+  factory TimeSignature.fromJson(Map<String, dynamic> json) =>
+      TimeSignature(json['numerator'] as int, json['denominator'] as int);
+
   // ---------------------------------------------------------------------------
   // Common Predefined Meters
   // ---------------------------------------------------------------------------

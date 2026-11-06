@@ -29,6 +29,22 @@ class ChordSymbol {
   /// Complete chord display string (e.g., `"C#m7"`, `"Bb/D"`, `"G"`).
   String get text => '$root$quality${bass != null ? '/$bass' : ''}';
 
+  /// Converts this [ChordSymbol] to a JSON map.
+  Map<String, dynamic> toJson() => {
+        'root': root,
+        'quality': quality,
+        'bass': bass,
+        'tickOffset': tickOffset,
+      };
+
+  /// Constructs a [ChordSymbol] from a JSON map.
+  factory ChordSymbol.fromJson(Map<String, dynamic> json) => ChordSymbol(
+        root: json['root'] as String,
+        quality: json['quality'] as String? ?? '',
+        bass: json['bass'] as String?,
+        tickOffset: json['tickOffset'] as int? ?? 0,
+      );
+
   // ---------------------------------------------------------------------------
   // Parsing
   // ---------------------------------------------------------------------------
@@ -102,3 +118,4 @@ class ChordSymbol {
   @override
   String toString() => 'ChordSymbol($text, @${tickOffset}t)';
 }
+

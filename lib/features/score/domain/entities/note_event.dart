@@ -76,6 +76,31 @@ class NoteEvent {
   /// Duration of this note event in MIDI ticks.
   int get ticks => rhythmicValue.ticks;
 
+  /// Converts this [NoteEvent] to a JSON map.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'pitch': pitch?.toJson(),
+        'rhythmicValue': rhythmicValue.toJson(),
+        'tickOffset': tickOffset,
+        'isTied': isTied,
+        'lyric': lyric,
+        'velocity': velocity,
+      };
+
+  /// Constructs a [NoteEvent] from a JSON map.
+  factory NoteEvent.fromJson(Map<String, dynamic> json) => NoteEvent(
+        id: json['id'] as String,
+        pitch: json['pitch'] != null
+            ? Pitch.fromJson(json['pitch'] as Map<String, dynamic>)
+            : null,
+        rhythmicValue: RhythmicValue.fromJson(
+            json['rhythmicValue'] as Map<String, dynamic>),
+        tickOffset: json['tickOffset'] as int? ?? 0,
+        isTied: json['isTied'] as bool? ?? false,
+        lyric: json['lyric'] as String?,
+        velocity: json['velocity'] as int? ?? 80,
+      );
+
   /// Creates a copy of this [NoteEvent] with optional updated fields.
   NoteEvent copyWith({
     String? id,
@@ -131,3 +156,4 @@ class NoteEvent {
     return 'NoteEvent($pitch, $rhythmicValue, @${tickOffset}t${isTied ? ', tied' : ''})';
   }
 }
+

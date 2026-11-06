@@ -33,6 +33,29 @@ class Measure {
   /// Harmonic chord symbols positioned in this measure.
   final List<ChordSymbol> chords;
 
+  /// Converts this [Measure] to a JSON map.
+  Map<String, dynamic> toJson() => {
+        'number': number,
+        'timeSignature': timeSignature.toJson(),
+        'events': events.map((e) => e.toJson()).toList(),
+        'chords': chords.map((c) => c.toJson()).toList(),
+      };
+
+  /// Constructs a [Measure] from a JSON map.
+  factory Measure.fromJson(Map<String, dynamic> json) => Measure(
+        number: json['number'] as int,
+        timeSignature:
+            TimeSignature.fromJson(json['timeSignature'] as Map<String, dynamic>),
+        events: (json['events'] as List<dynamic>?)
+                ?.map((e) => NoteEvent.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const [],
+        chords: (json['chords'] as List<dynamic>?)
+                ?.map((c) => ChordSymbol.fromJson(c as Map<String, dynamic>))
+                .toList() ??
+            const [],
+      );
+
   // ---------------------------------------------------------------------------
   // Capacity & Duration Metrics
   // ---------------------------------------------------------------------------

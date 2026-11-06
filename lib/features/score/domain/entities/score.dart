@@ -50,6 +50,38 @@ class Score {
   /// Additional extensible metadata (e.g., CCLI license number, copyright, tags).
   final Map<String, dynamic> metadata;
 
+  /// Converts this [Score] to a JSON map.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'composer': composer,
+        'artist': artist,
+        'timeSignature': timeSignature.toJson(),
+        'keySignature': keySignature,
+        'tempo': tempo,
+        'sections': sections.map((s) => s.toJson()).toList(),
+        'metadata': metadata,
+      };
+
+  /// Constructs a [Score] from a JSON map.
+  factory Score.fromJson(Map<String, dynamic> json) => Score(
+        id: json['id'] as String,
+        title: json['title'] as String,
+        composer: json['composer'] as String?,
+        artist: json['artist'] as String?,
+        timeSignature: json['timeSignature'] != null
+            ? TimeSignature.fromJson(
+                json['timeSignature'] as Map<String, dynamic>)
+            : TimeSignature.fourFour,
+        keySignature: json['keySignature'] as String? ?? 'C',
+        tempo: json['tempo'] as int? ?? 120,
+        sections: (json['sections'] as List<dynamic>?)
+                ?.map((s) => Section.fromJson(s as Map<String, dynamic>))
+                .toList() ??
+            const [],
+        metadata: (json['metadata'] as Map<String, dynamic>?) ?? const {},
+      );
+
   // ---------------------------------------------------------------------------
   // Traversal & Metric Helpers
   // ---------------------------------------------------------------------------
@@ -158,3 +190,4 @@ class Score {
     return true;
   }
 }
+
