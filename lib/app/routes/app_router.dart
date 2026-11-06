@@ -12,7 +12,9 @@ import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.d
 import 'package:battuta/features/repertoire/presentation/pages/song_detail_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/song_editor_page.dart';
 import 'package:battuta/features/scanner/presentation/pages/scanner_page.dart';
+import 'package:battuta/features/score/presentation/pages/score_editor_page.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
+import 'package:battuta/features/team/presentation/pages/team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -67,12 +69,39 @@ GoRouter appRouter(Ref ref) {
                       return SongEditorPage(songId: songId);
                     },
                   ),
+                  // Score / Staff notation editor
+                  GoRoute(
+                    path: 'notation',
+                    name: 'scoreNotation',
+                    builder: (context, state) {
+                      final songId = state.pathParameters['songId']!;
+                      return ScoreEditorPage(songId: songId);
+                    },
+                  ),
                 ],
               ),
             ],
           ),
 
-          // Tab 2 — Live session
+          // Tab 2 — Scanner
+          GoRoute(
+            path: AppRoutes.scanner,
+            name: 'scanner',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ScannerPage(),
+            ),
+          ),
+
+          // Tab 3 — Team
+          GoRoute(
+            path: AppRoutes.team,
+            name: 'team',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TeamPage(),
+            ),
+          ),
+
+          // Tab 4 — Live session
           GoRoute(
             path: AppRoutes.live,
             name: 'live',
@@ -88,7 +117,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Tab 3 — Settings
+          // Tab 5 — Settings
           GoRoute(
             path: AppRoutes.settings,
             name: 'settings',
@@ -97,13 +126,6 @@ GoRouter appRouter(Ref ref) {
             ),
           ),
         ],
-      ),
-
-      // ── Top-level routes (no bottom nav) ───────────────────────────
-      GoRoute(
-        path: AppRoutes.scanner,
-        name: 'scanner',
-        builder: (context, state) => const ScannerPage(),
       ),
     ],
   );

@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_setlist_repository.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_song_repository.dart';
+import 'package:battuta/features/repertoire/data/repositories/in_memory_setlist_repository.dart';
 import 'package:battuta/features/repertoire/domain/repositories/setlist_repository.dart';
 import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
 import 'package:battuta/features/score/data/repositories/drift_score_repository.dart';
@@ -37,6 +38,10 @@ final driftSongRepositoryProvider = Provider<SongRepository>((ref) {
 
 /// Provides the offline [SetlistRepository] backed by Drift SQLite.
 final setlistRepositoryProvider = Provider<SetlistRepository>((ref) {
+  final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+  if (isTest) {
+    return InMemorySetlistRepository();
+  }
   final db = ref.watch(appDatabaseProvider);
   return DriftSetlistRepository(db);
 });

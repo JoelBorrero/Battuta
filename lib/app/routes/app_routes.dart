@@ -31,6 +31,9 @@ final class AppRoutes {
   /// Live session screen — real-time playback & collaboration.
   static const String live = '/live';
 
+  /// Worship team and band roster management.
+  static const String team = '/team';
+
   /// Settings & preferences.
   static const String settings = '/settings';
 

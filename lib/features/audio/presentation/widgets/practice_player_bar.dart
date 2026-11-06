@@ -1,0 +1,272 @@
+/// Battuta — Practice Audio Player Bar.
+///
+/// An interactive rehearsal player with real-time audio scrubbing,
+/// variable speed controls, pitch-shifting, section-practice loops,
+/// and tempo-synchronized visual metronome.
+library;
+
+import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
+import 'package:battuta/features/repertoire/domain/entities/song.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class PracticePlayerBar extends ConsumerWidget {
+  const PracticePlayerBar({
+    required this.song,
+    super.key,
+  });
+
+  final Song song;
+
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes;
+    final seconds = d.inSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  void _showAttachAudioDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController(text: 'Acoustic_Guide_Track.mp3');
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Attach Reference Audio'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Audio Track Source',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.audio_file),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                ref
+                    .read(audioPracticeControllerProvider.notifier)
+                    .attachAudioSource(controller.text.trim());
+              }
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Attach Track'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final audioState = ref.watch(audioPracticeControllerProvider);
+    final notifier = ref.read(audioPracticeControllerProvider.notifier);
+
+    final position = audioState.position;
+    final duration = audioState.duration;
+    final progress = duration.inMilliseconds > 0
+        ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Track Title & Quick Actions ──
+            Row(
+              children: [
+                Icon(
+                  Icons.headphones,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        audioState.audioSourceTitle ??
+                            '${song.title} (Practice Reference)',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Tempo: ${song.tempo} BPM • Key: ${song.key}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Metronome Toggle
+                IconButton.filledTonal(
+                  icon: Icon(
+                    audioState.metronomeEnabled
+                        ? Icons.timer
+                        : Icons.timer_outlined,
+                    color: audioState.metronomeEnabled
+                        ? theme.colorScheme.primary
+                        : null,
+                  ),
+                  tooltip: 'Metronome Click (${song.tempo} BPM)',
+                  onPressed: notifier.toggleMetronome,
+                ),
+
+                // Attach audio button
+                IconButton(
+                  icon: const Icon(Icons.add_link),
+                  tooltip: 'Attach Audio Track',
+                  onPressed: () => _showAttachAudioDialog(context, ref),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // ── Scrubber Slider ──
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 4,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              ),
+              child: Slider(
+                value: progress,
+                onChanged: (val) {
+                  final targetMs = (val * duration.inMilliseconds).round();
+                  notifier.seek(Duration(milliseconds: targetMs));
+                },
+              ),
+            ),
+
+            // Timestamps
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(_formatDuration(position),
+                      style: theme.textTheme.bodySmall),
+                  if (audioState.activeLoopSection != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Looping: ${audioState.activeLoopSection}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                  Text(_formatDuration(duration),
+                      style: theme.textTheme.bodySmall),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // ── Primary Controls ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Speed Selector
+                PopupMenuButton<double>(
+                  tooltip: 'Playback Speed',
+                  initialValue: audioState.speed,
+                  onSelected: notifier.setSpeed,
+                  itemBuilder: (_) => [
+                    for (final s in [0.5, 0.75, 1.0, 1.25, 1.5])
+                      PopupMenuItem(
+                        value: s,
+                        child: Text('$s× Speed'),
+                      ),
+                  ],
+                  child: Chip(
+                    label: Text('${audioState.speed}×'),
+                    avatar: const Icon(Icons.speed, size: 16),
+                  ),
+                ),
+
+                // Rewind 10s
+                IconButton(
+                  icon: const Icon(Icons.replay_10),
+                  tooltip: 'Rewind 10 seconds',
+                  onPressed: () => notifier
+                      .seek(position - const Duration(seconds: 10)),
+                ),
+
+                // Play / Pause Button
+                IconButton.filled(
+                  iconSize: 36,
+                  icon: Icon(
+                    audioState.isPlaying ? Icons.pause : Icons.play_arrow,
+                  ),
+                  tooltip: audioState.isPlaying ? 'Pause' : 'Play',
+                  onPressed: notifier.togglePlay,
+                ),
+
+                // Forward 10s
+                IconButton(
+                  icon: const Icon(Icons.forward_10),
+                  tooltip: 'Forward 10 seconds',
+                  onPressed: () => notifier
+                      .seek(position + const Duration(seconds: 10)),
+                ),
+
+                // Practice Loop Selector
+                PopupMenuButton<String?>(
+                  tooltip: 'Loop Section',
+                  onSelected: notifier.setLoop,
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      value: null,
+                      child: Text('No Loop (Full Song)'),
+                    ),
+                    for (final section in song.sections)
+                      PopupMenuItem(
+                        value: section.name,
+                        child: Text('Loop: ${section.name}'),
+                      ),
+                  ],
+                  child: Chip(
+                    label: Text(audioState.activeLoopSection ?? 'Loop'),
+                    avatar: const Icon(Icons.repeat, size: 16),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

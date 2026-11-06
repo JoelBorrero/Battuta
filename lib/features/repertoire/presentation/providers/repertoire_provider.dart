@@ -7,6 +7,7 @@
 library;
 
 import 'package:battuta/core/database/database_providers.dart';
+import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +19,42 @@ part 'repertoire_provider.g.dart';
 final songRepositoryProvider = Provider<SongRepository>((ref) {
   return ref.watch(driftSongRepositoryProvider);
 });
+
+/// Provides all setlists managed through [SetlistsNotifier].
+final setlistsProvider =
+    AsyncNotifierProvider<SetlistsNotifier, List<Setlist>>(
+  SetlistsNotifier.new,
+);
+
+class SetlistsNotifier extends AsyncNotifier<List<Setlist>> {
+  @override
+  FutureOr<List<Setlist>> build() async {
+    final repo = ref.watch(setlistRepositoryProvider);
+    final result = await repo.getAllSetlists();
+    return result.fold(
+      (failure) => throw failure,
+      (setlists) => setlists,
+    );
+  }
+
+  Future<void> createSetlist(Setlist setlist) async {
+    final repo = ref.read(setlistRepositoryProvider);
+    final res = await repo.saveSetlist(setlist);
+    res.fold(
+      (failure) => throw failure,
+      (_) => ref.invalidateSelf(),
+    );
+  }
+
+  Future<void> deleteSetlist(String id) async {
+    final repo = ref.read(setlistRepositoryProvider);
+    final res = await repo.deleteSetlist(id);
+    res.fold(
+      (failure) => throw failure,
+      (_) => ref.invalidateSelf(),
+    );
+  }
+}
 
 /// Provides a single [Song] by its [id].
 final songByIdProvider = FutureProvider.family<Song?, String>((ref, id) async {

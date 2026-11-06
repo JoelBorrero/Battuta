@@ -1,35 +1,117 @@
 /// Battuta — Repertoire page.
 ///
-/// The main screen for browsing the user's song library. Displays a
-/// searchable, scrollable list of [SongCard] widgets and provides a
-/// floating action button to create new songs.
+/// The main screen for browsing the user's song library and setlists. Displays
+/// a searchable, scrollable list of [SongCard] widgets, a Setlist manager,
+/// and provides floating action buttons to create new songs or setlists.
 library;
 
+import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// The primary repertoire list page.
-///
-/// Watches the [repertoireProvider] and renders the appropriate state:
-/// - **Loading** — centered progress indicator
-/// - **Error** — centered error message with a retry button
-/// - **Empty** — friendly empty-state illustration
-/// - **Data** — scrollable list of [SongCard]s
-class RepertoirePage extends ConsumerWidget {
+/// The primary repertoire and setlists list page.
+class RepertoirePage extends ConsumerStatefulWidget {
   /// Creates a [RepertoirePage].
   const RepertoirePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RepertoirePage> createState() => _RepertoirePageState();
+}
+
+class _RepertoirePageState extends ConsumerState<RepertoirePage> {
+  int _selectedTabIndex = 0; // 0: Songs, 1: Setlists
+
+  void _showCreateSetlistDialog() {
+    final titleController = TextEditingController();
+    final descController = TextEditingController();
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Create New Setlist'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Setlist Title *',
+                hintText: 'e.g. Sunday Morning - Easter',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descController,
+              decoration: const InputDecoration(
+                labelText: 'Notes / Service Theme',
+                hintText: 'e.g. Acoustic setup, communion song in D',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final title = titleController.text.trim();
+              if (title.isEmpty) return;
+
+              final setlist = Setlist(
+                id: 'setlist_${DateTime.now().millisecondsSinceEpoch}',
+                title: title,
+                description: descController.text.trim().isEmpty
+                    ? null
+                    : descController.text.trim(),
+                eventDate: DateTime.now().add(const Duration(days: 3)),
+                items: const [],
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              );
+
+              await ref.read(setlistsProvider.notifier).createSetlist(setlist);
+              if (ctx.mounted) {
+                Navigator.of(ctx).pop();
+              }
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Created setlist "$title"')),
+                );
+              }
+            },
+            child: const Text('Create Setlist'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final repertoire = ref.watch(repertoireProvider);
+    final setlistsAsync = ref.watch(setlistsProvider);
+
+    final songCount = repertoire.value?.length ?? 0;
+    final setlistCount = setlistsAsync.value?.length ?? 0;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Repertoire'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.document_scanner_outlined),
+            tooltip: 'Scan sheet music',
+            onPressed: () => context.push('/scanner'),
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Search songs',
@@ -37,93 +119,235 @@ class RepertoirePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: repertoire.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.error,
+      body: Column(
+        children: [
+          // ── View Mode Switcher: Songs vs Setlists ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: SegmentedButton<int>(
+              segments: [
+                ButtonSegment(
+                  value: 0,
+                  icon: const Icon(Icons.music_note),
+                  label: Text('Songs ($songCount)'),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load repertoire',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () => ref.invalidate(repertoireProvider),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
+                ButtonSegment(
+                  value: 1,
+                  icon: const Icon(Icons.playlist_play),
+                  label: Text('Setlists ($setlistCount)'),
                 ),
               ],
+              selected: {_selectedTabIndex},
+              onSelectionChanged: (vals) {
+                setState(() => _selectedTabIndex = vals.first);
+              },
             ),
           ),
+
+          // ── Content Area ──
+          Expanded(
+            child: _selectedTabIndex == 0
+                ? _buildSongsView(repertoire, theme)
+                : _buildSetlistsView(setlistsAsync, theme),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        tooltip: _selectedTabIndex == 0 ? 'Add song' : 'Create setlist',
+        onPressed: _selectedTabIndex == 0
+            ? () => context.push('/repertoire/new')
+            : _showCreateSetlistDialog,
+        icon: const Icon(Icons.add),
+        label: Text(_selectedTabIndex == 0 ? 'New Song' : 'New Setlist'),
+      ),
+    );
+  }
+
+  Widget _buildSongsView(AsyncValue<List<dynamic>> repertoire, ThemeData theme) {
+    return repertoire.when(
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (error, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: theme.colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load repertoire',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                error.toString(),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () => ref.invalidate(repertoireProvider),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
-        data: (songs) {
-          if (songs.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.library_music_outlined,
-                      size: 80,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.3),
+      ),
+      data: (songs) {
+        if (songs.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.library_music_outlined,
+                    size: 80,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Your repertoire is empty',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap the + button to add your first song',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Your repertoire is empty',
-                      style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FilledButton.icon(
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Song'),
+                        onPressed: () => context.push('/repertoire/new'),
+                      ),
+                      const SizedBox(width: 12),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.document_scanner_outlined),
+                        label: const Text('Scan Score'),
+                        onPressed: () => context.push('/scanner'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          itemCount: songs.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          itemBuilder: (context, index) => SongCard(song: songs[index]),
+        );
+      },
+    );
+  }
+
+  Widget _buildSetlistsView(
+    AsyncValue<List<Setlist>> setlistsAsync,
+    ThemeData theme,
+  ) {
+    return setlistsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error loading setlists: $e')),
+      data: (setlists) {
+        if (setlists.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.playlist_play,
+                    size: 72,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Setlists Yet',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Create an ordered setlist for Sunday services or rehearsals.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tap the + button to add your first song',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.6),
-                          ),
-                    ),
-                  ],
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('Create Setlist'),
+                    onPressed: _showCreateSetlistDialog,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          itemCount: setlists.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final setlist = setlists[index];
+            return Card(
+              elevation: 1,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.playlist_play,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
                 ),
+                title: Text(
+                  setlist.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  '${setlist.songCount} songs • ${setlist.description ?? "Upcoming service"}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 20),
+                  tooltip: 'Delete setlist',
+                  onPressed: () async {
+                    await ref
+                        .read(setlistsProvider.notifier)
+                        .deleteSetlist(setlist.id);
+                  },
+                ),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Opening setlist: ${setlist.title}')),
+                  );
+                },
               ),
             );
-          }
-
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            itemCount: songs.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, index) => SongCard(song: songs[index]),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add song',
-        onPressed: () => context.push('/repertoire/new'),
-        child: const Icon(Icons.add),
-      ),
+          },
+        );
+      },
     );
   }
 

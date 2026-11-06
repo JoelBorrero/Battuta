@@ -5,6 +5,7 @@
 /// MIDI generation, and direct navigation to edit or delete.
 library;
 
+import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
@@ -12,6 +13,7 @@ import 'package:battuta/features/repertoire/domain/services/song_transposer.dart
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
+import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +33,7 @@ class SongDetailPage extends ConsumerStatefulWidget {
 class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   int _transpositionSemitones = 0;
   bool _isExporting = false;
+  bool _showStaffNotation = false;
 
   void _showTransposeDialog(Song originalSong) {
     showModalBottomSheet<void>(
@@ -302,6 +305,11 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                 onPressed: () => _showTransposeDialog(song),
               ),
               IconButton(
+                icon: const Icon(Icons.queue_music),
+                tooltip: 'Notation Editor',
+                onPressed: () => context.push('/repertoire/${song.id}/notation'),
+              ),
+              IconButton(
                 icon: const Icon(Icons.picture_as_pdf_outlined),
                 tooltip: 'Export PDF Lead Sheet',
                 onPressed: _isExporting ? null : () => _exportPdf(activeSong),
@@ -400,22 +408,91 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+
+              // ── Practice Audio Player Bar ──
+              PracticePlayerBar(song: activeSong),
+              const SizedBox(height: 12),
+
+              // ── View Mode Selector (Chord Chart vs Staff Notation) ──
+              Center(
+                child: SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(
+                      value: false,
+                      icon: Icon(Icons.grid_view),
+                      label: Text('Chord Chart'),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      icon: Icon(Icons.queue_music),
+                      label: Text('Musical Staff'),
+                    ),
+                  ],
+                  selected: {_showStaffNotation},
+                  onSelectionChanged: (modes) {
+                    setState(() => _showStaffNotation = modes.first);
+                  },
+                ),
+              ),
               const SizedBox(height: 16),
 
-              // ── Sections Lead Sheet Display ──
-              if (activeSong.sections.isEmpty)
-                const Center(
+              // ── Main Content: Chord Cards or Staff Notation ──
+              if (_showStaffNotation)
+                Card(
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text('This song has no sections yet.'),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Interactive Notation View',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            FilledButton.tonalIcon(
+                              icon: const Icon(Icons.edit, size: 16),
+                              label: const Text('Edit in Notation Editor'),
+                              onPressed: () => context
+                                  .push('/repertoire/${song.id}/notation'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 380,
+                          child: StaffCanvas(
+                            score: activeSong.toScore(),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
-              else
-                for (final section in activeSong.sections)
-                  _SectionDisplayCard(
-                    section: section,
-                    key: ValueKey(section.id),
-                  ),
+              else ...[
+                // Sections Lead Sheet Display
+                if (activeSong.sections.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Text('This song has no sections yet.'),
+                    ),
+                  )
+                else
+                  for (final section in activeSong.sections)
+                    _SectionDisplayCard(
+                      section: section,
+                      key: ValueKey(section.id),
+                    ),
+              ],
 
               const SizedBox(height: 32),
             ],
