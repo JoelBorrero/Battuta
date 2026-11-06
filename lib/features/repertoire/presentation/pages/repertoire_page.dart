@@ -9,6 +9,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// The primary repertoire list page.
 ///
@@ -120,9 +121,7 @@ class RepertoirePage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add song',
-        onPressed: () {
-          // TODO: Navigate to the song editor page.
-        },
+        onPressed: () => context.push('/repertoire/new'),
         child: const Icon(Icons.add),
       ),
     );

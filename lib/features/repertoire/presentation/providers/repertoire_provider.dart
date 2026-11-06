@@ -6,7 +6,7 @@
 /// so the UI can react to loading / error / data states declaratively.
 library;
 
-import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
+import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,11 +14,24 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'repertoire_provider.g.dart';
 
-/// Provides the singleton [SongRepository] instance to the app.
-///
-/// Can be overridden in tests or swapped for Drift in ticket #86e3yy41r.
+/// Provides the active [SongRepository] instance (backed by Drift SQLite).
 final songRepositoryProvider = Provider<SongRepository>((ref) {
-  return InMemorySongRepository();
+  return ref.watch(driftSongRepositoryProvider);
+});
+
+/// Provides a single [Song] by its [id].
+final songByIdProvider = FutureProvider.family<Song?, String>((ref, id) async {
+  final repertoire = ref.watch(repertoireProvider).value;
+  if (repertoire != null) {
+    final cached = repertoire.where((s) => s.id == id).firstOrNull;
+    if (cached != null) return cached;
+  }
+  final repository = ref.watch(songRepositoryProvider);
+  final result = await repository.getSongById(id);
+  return result.fold(
+    (failure) => throw failure,
+    (song) => song,
+  );
 });
 
 /// Provides the current repertoire list and exposes mutation methods.

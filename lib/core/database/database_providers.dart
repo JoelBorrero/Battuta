@@ -4,6 +4,8 @@
 /// for songs, setlists, and scores.
 library;
 
+import 'dart:io';
+
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_setlist_repository.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_song_repository.dart';
@@ -11,6 +13,7 @@ import 'package:battuta/features/repertoire/domain/repositories/setlist_reposito
 import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
 import 'package:battuta/features/score/data/repositories/drift_score_repository.dart';
 import 'package:battuta/features/score/domain/repositories/score_repository.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Provides the active [AppDatabase] instance.
@@ -20,7 +23,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// appDatabaseProvider.overrideWithValue(AppDatabase(NativeDatabase.memory()))
 /// ```
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase();
+  final isTest = Platform.environment.containsKey('FLUTTER_TEST');
+  final db = isTest ? AppDatabase(NativeDatabase.memory()) : AppDatabase();
   ref.onDispose(db.close);
   return db;
 });
@@ -42,3 +46,4 @@ final scoreRepositoryProvider = Provider<ScoreRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return DriftScoreRepository(db);
 });
+
