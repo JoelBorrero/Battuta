@@ -72,6 +72,26 @@ void main() {
 
       expect(find.textContaining('Acoustic_Guide_Track.mp3'), findsOneWidget);
     });
+
+    testWidgets('renders without overflow on narrow 320px screen and loop selected', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      // Select a section loop to ensure activeLoopSection chip doesn't overflow
+      await tester.tap(find.byTooltip('Loop Section'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Loop: Chorus').last);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Chorus'), findsWidgets);
+    });
   });
 }
 

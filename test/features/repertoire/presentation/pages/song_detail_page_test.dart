@@ -126,5 +126,22 @@ void main() {
       final found = songRes.fold<Song?>((_) => null, (s) => s);
       expect(found, isNull);
     });
+
+    testWidgets('switches to Musical Staff mode on narrow 360px screen without layout overflow', (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject(songId: 'song-detail-1'));
+      await tester.pumpAndSettle();
+
+      // Switch to Musical Staff
+      await tester.tap(find.text('Musical Staff'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Interactive Notation View'), findsOneWidget);
+      expect(find.text('Edit in Notation Editor'), findsOneWidget);
+    });
   });
 }

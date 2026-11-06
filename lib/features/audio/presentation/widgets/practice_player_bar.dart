@@ -87,7 +87,7 @@ class PracticePlayerBar extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -123,6 +123,7 @@ class PracticePlayerBar extends ConsumerWidget {
 
                 // Metronome Toggle
                 IconButton.filledTonal(
+                  visualDensity: VisualDensity.compact,
                   icon: Icon(
                     audioState.metronomeEnabled
                         ? Icons.timer
@@ -137,6 +138,7 @@ class PracticePlayerBar extends ConsumerWidget {
 
                 // Attach audio button
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.add_link),
                   tooltip: 'Attach Audio Track',
                   onPressed: () => _showAttachAudioDialog(context, ref),
@@ -163,26 +165,31 @@ class PracticePlayerBar extends ConsumerWidget {
 
             // Timestamps
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(_formatDuration(position),
                       style: theme.textTheme.bodySmall),
                   if (audioState.activeLoopSection != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Looping: ${audioState.activeLoopSection}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSecondaryContainer,
+                    Flexible(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Looping: ${audioState.activeLoopSection}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
                         ),
                       ),
                     ),
@@ -195,74 +202,154 @@ class PracticePlayerBar extends ConsumerWidget {
             const SizedBox(height: 8),
 
             // ── Primary Controls ──
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Speed Selector
-                PopupMenuButton<double>(
-                  tooltip: 'Playback Speed',
-                  initialValue: audioState.speed,
-                  onSelected: notifier.setSpeed,
-                  itemBuilder: (_) => [
-                    for (final s in [0.5, 0.75, 1.0, 1.25, 1.5])
-                      PopupMenuItem(
-                        value: s,
-                        child: Text('$s× Speed'),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Speed Selector
+                  PopupMenuButton<double>(
+                    tooltip: 'Playback Speed',
+                    initialValue: audioState.speed,
+                    onSelected: notifier.setSpeed,
+                    itemBuilder: (_) => [
+                      for (final s in [0.5, 0.75, 1.0, 1.25, 1.5])
+                        PopupMenuItem(
+                          value: s,
+                          child: Text('$s× Speed'),
+                        ),
+                    ],
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color:
+                              theme.colorScheme.outline.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
                       ),
-                  ],
-                  child: Chip(
-                    label: Text('${audioState.speed}×'),
-                    avatar: const Icon(Icons.speed, size: 16),
-                  ),
-                ),
-
-                // Rewind 10s
-                IconButton(
-                  icon: const Icon(Icons.replay_10),
-                  tooltip: 'Rewind 10 seconds',
-                  onPressed: () => notifier
-                      .seek(position - const Duration(seconds: 10)),
-                ),
-
-                // Play / Pause Button
-                IconButton.filled(
-                  iconSize: 36,
-                  icon: Icon(
-                    audioState.isPlaying ? Icons.pause : Icons.play_arrow,
-                  ),
-                  tooltip: audioState.isPlaying ? 'Pause' : 'Play',
-                  onPressed: notifier.togglePlay,
-                ),
-
-                // Forward 10s
-                IconButton(
-                  icon: const Icon(Icons.forward_10),
-                  tooltip: 'Forward 10 seconds',
-                  onPressed: () => notifier
-                      .seek(position + const Duration(seconds: 10)),
-                ),
-
-                // Practice Loop Selector
-                PopupMenuButton<String?>(
-                  tooltip: 'Loop Section',
-                  onSelected: notifier.setLoop,
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
-                      value: null,
-                      child: Text('No Loop (Full Song)'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.speed,
+                              size: 14,
+                              color: theme.colorScheme.onSurfaceVariant),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${audioState.speed}×',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    for (final section in song.sections)
-                      PopupMenuItem(
-                        value: section.name,
-                        child: Text('Loop: ${section.name}'),
-                      ),
-                  ],
-                  child: Chip(
-                    label: Text(audioState.activeLoopSection ?? 'Loop'),
-                    avatar: const Icon(Icons.repeat, size: 16),
                   ),
-                ),
-              ],
+
+                  const SizedBox(width: 4),
+
+                  // Rewind 10s
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.replay_10),
+                    tooltip: 'Rewind 10 seconds',
+                    onPressed: () => notifier
+                        .seek(position - const Duration(seconds: 10)),
+                  ),
+
+                  // Play / Pause Button
+                  IconButton.filled(
+                    visualDensity: VisualDensity.compact,
+                    iconSize: 32,
+                    icon: Icon(
+                      audioState.isPlaying ? Icons.pause : Icons.play_arrow,
+                    ),
+                    tooltip: audioState.isPlaying ? 'Pause' : 'Play',
+                    onPressed: notifier.togglePlay,
+                  ),
+
+                  // Forward 10s
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.forward_10),
+                    tooltip: 'Forward 10 seconds',
+                    onPressed: () => notifier
+                        .seek(position + const Duration(seconds: 10)),
+                  ),
+
+                  const SizedBox(width: 4),
+
+                  // Practice Loop Selector
+                  PopupMenuButton<String?>(
+                    tooltip: 'Loop Section',
+                    onSelected: notifier.setLoop,
+                    itemBuilder: (_) => [
+                      const PopupMenuItem(
+                        value: null,
+                        child: Text('No Loop (Full Song)'),
+                      ),
+                      for (final section in song.sections)
+                        PopupMenuItem(
+                          value: section.name,
+                          child: Text('Loop: ${section.name}'),
+                        ),
+                    ],
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: audioState.activeLoopSection != null
+                            ? theme.colorScheme.primaryContainer
+                                .withValues(alpha: 0.6)
+                            : theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: audioState.activeLoopSection != null
+                              ? theme.colorScheme.primary
+                                  .withValues(alpha: 0.4)
+                              : theme.colorScheme.outline
+                                  .withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.repeat,
+                            size: 14,
+                            color: audioState.activeLoopSection != null
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 4),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 70),
+                            child: Text(
+                              audioState.activeLoopSection ?? 'Loop',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: audioState.activeLoopSection != null
+                                    ? theme.colorScheme.primary
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

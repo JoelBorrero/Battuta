@@ -449,8 +449,11 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
                             Text(
                               'Interactive Notation View',
@@ -459,6 +462,9 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                               ),
                             ),
                             FilledButton.tonalIcon(
+                              style: FilledButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                              ),
                               icon: const Icon(Icons.edit, size: 16),
                               label: const Text('Edit in Notation Editor'),
                               onPressed: () => context
@@ -575,13 +581,18 @@ class _SectionDisplayCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  section.name as String,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    section.name as String,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (repeatCount > 1)
+                if (repeatCount > 1) ...[
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -600,6 +611,7 @@ class _SectionDisplayCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                ],
               ],
             ),
 
