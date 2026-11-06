@@ -28,32 +28,39 @@ class SettingsPage extends ConsumerWidget {
         children: [
           // ── Appearance ──
           const _SectionHeader(title: 'Appearance'),
-          ListTile(
-            leading: const Icon(Icons.brightness_6),
-            title: const Text('Theme'),
-            subtitle: const Text('Choose light or dark mode'),
-            trailing: SegmentedButton<ThemeMode>(
-              segments: const [
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode),
-                  label: Text('Light'),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode),
-                  label: Text('Dark'),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  icon: Icon(Icons.settings_suggest),
-                  label: Text('System'),
-                ),
-              ],
-              selected: const {ThemeMode.system},
-              onSelectionChanged: (modes) {
-                // TODO: Wire to a theme-mode provider.
-              },
+          const ListTile(
+            leading: Icon(Icons.brightness_6),
+            title: Text('Theme'),
+            subtitle: Text('Choose light, dark, or system mode'),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<ThemeMode>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(
+                    value: ThemeMode.light,
+                    icon: Icon(Icons.light_mode),
+                    label: Text('Light'),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.dark,
+                    icon: Icon(Icons.dark_mode),
+                    label: Text('Dark'),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.system,
+                    icon: Icon(Icons.settings_suggest),
+                    label: Text('System'),
+                  ),
+                ],
+                selected: const {ThemeMode.system},
+                onSelectionChanged: (modes) {
+                  // TODO: Wire to a theme-mode provider.
+                },
+              ),
             ),
           ),
 
