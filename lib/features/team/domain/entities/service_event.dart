@@ -22,16 +22,221 @@ enum ServiceType {
   final IconData icon;
 }
 
-/// Periodic recurrence rule for calendar services.
+/// Periodic recurrence rule for calendar services and band rehearsals.
 enum EventRecurrence {
   none('One-time Event', 'None'),
-  weekly('Weekly (Every Sunday)', 'Weekly'),
+  weekly('Every Sunday (Weekly)', 'Weekly Sun'),
+  weeklyThursday('Every Thursday (Weekly Rehearsal)', 'Weekly Thu'),
   biweekly('Bi-weekly (Every 2 weeks)', 'Bi-weekly'),
-  monthly('Monthly', 'Monthly');
+  firstSundayOfMonth('1st Sunday of the Month (e.g. Communion)', '1st Sun'),
+  secondSundayOfMonth('2nd Sunday of the Month', '2nd Sun'),
+  thirdSundayOfMonth('3rd Sunday of the Month', '3rd Sun'),
+  lastSundayOfMonth('Last Sunday of the Month', 'Last Sun'),
+  monthly('Monthly on same day', 'Monthly');
 
   const EventRecurrence(this.displayName, this.shortName);
   final String displayName;
   final String shortName;
+
+  /// Whether this rule is a repeating schedule.
+  bool get isRepeating => this != EventRecurrence.none;
+}
+
+/// Computes recurrence occurrences mathematically across calendars.
+extension EventRecurrenceCalculator on EventRecurrence {
+  /// Computes the list of upcoming [DateTime] occurrences starting on or after [fromDateTime].
+  List<DateTime> generateOccurrences({
+    required DateTime fromDateTime,
+    int count = 6,
+  }) {
+    if (this == EventRecurrence.none) {
+      return [fromDateTime];
+    }
+
+    final results = <DateTime>[];
+    final baseTime = TimeOfDay(
+      hour: fromDateTime.hour,
+      minute: fromDateTime.minute,
+    );
+
+    switch (this) {
+      case EventRecurrence.none:
+        results.add(fromDateTime);
+
+      case EventRecurrence.weekly:
+        var cursor = _nextWeekday(fromDateTime, DateTime.sunday);
+        for (var i = 0; i < count; i++) {
+          results.add(DateTime(
+            cursor.year,
+            cursor.month,
+            cursor.day,
+            baseTime.hour,
+            baseTime.minute,
+          ));
+          cursor = cursor.add(const Duration(days: 7));
+        }
+
+      case EventRecurrence.weeklyThursday:
+        var cursor = _nextWeekday(fromDateTime, DateTime.thursday);
+        for (var i = 0; i < count; i++) {
+          results.add(DateTime(
+            cursor.year,
+            cursor.month,
+            cursor.day,
+            baseTime.hour,
+            baseTime.minute,
+          ));
+          cursor = cursor.add(const Duration(days: 7));
+        }
+
+      case EventRecurrence.biweekly:
+        var cursor = fromDateTime;
+        for (var i = 0; i < count; i++) {
+          results.add(DateTime(
+            cursor.year,
+            cursor.month,
+            cursor.day,
+            baseTime.hour,
+            baseTime.minute,
+          ));
+          cursor = cursor.add(const Duration(days: 14));
+        }
+
+      case EventRecurrence.firstSundayOfMonth:
+        results.addAll(_generateNthWeekdayOfMonths(
+          fromDateTime: fromDateTime,
+          weekday: DateTime.sunday,
+          ordinal: 1,
+          count: count,
+          baseTime: baseTime,
+        ));
+
+      case EventRecurrence.secondSundayOfMonth:
+        results.addAll(_generateNthWeekdayOfMonths(
+          fromDateTime: fromDateTime,
+          weekday: DateTime.sunday,
+          ordinal: 2,
+          count: count,
+          baseTime: baseTime,
+        ));
+
+      case EventRecurrence.thirdSundayOfMonth:
+        results.addAll(_generateNthWeekdayOfMonths(
+          fromDateTime: fromDateTime,
+          weekday: DateTime.sunday,
+          ordinal: 3,
+          count: count,
+          baseTime: baseTime,
+        ));
+
+      case EventRecurrence.lastSundayOfMonth:
+        results.addAll(_generateNthWeekdayOfMonths(
+          fromDateTime: fromDateTime,
+          weekday: DateTime.sunday,
+          ordinal: -1,
+          count: count,
+          baseTime: baseTime,
+        ));
+
+      case EventRecurrence.monthly:
+        var cursor = fromDateTime;
+        for (var i = 0; i < count; i++) {
+          results.add(DateTime(
+            cursor.year,
+            cursor.month,
+            cursor.day,
+            baseTime.hour,
+            baseTime.minute,
+          ));
+          final nextYear = cursor.year + (cursor.month == 12 ? 1 : 0);
+          final nextMonth = cursor.month == 12 ? 1 : cursor.month + 1;
+          final maxDays = DateTime(nextYear, nextMonth + 1, 0).day;
+          final nextDay = cursor.day > maxDays ? maxDays : cursor.day;
+          cursor = DateTime(nextYear, nextMonth, nextDay);
+        }
+    }
+
+    return results;
+  }
+
+  static DateTime _nextWeekday(DateTime from, int targetWeekday) {
+    var cursor = DateTime(from.year, from.month, from.day);
+    while (cursor.weekday != targetWeekday) {
+      cursor = cursor.add(const Duration(days: 1));
+    }
+    return cursor;
+  }
+
+  static List<DateTime> _generateNthWeekdayOfMonths({
+    required DateTime fromDateTime,
+    required int weekday,
+    required int ordinal,
+    required int count,
+    required TimeOfDay baseTime,
+  }) {
+    final list = <DateTime>[];
+    var currentYear = fromDateTime.year;
+    var currentMonth = fromDateTime.month;
+
+    while (list.length < count) {
+      final occurrence = _findNthWeekdayOfMonth(
+        year: currentYear,
+        month: currentMonth,
+        weekday: weekday,
+        ordinal: ordinal,
+      );
+
+      final fullDateTime = DateTime(
+        occurrence.year,
+        occurrence.month,
+        occurrence.day,
+        baseTime.hour,
+        baseTime.minute,
+      );
+
+      final fromDayStart = DateTime(
+        fromDateTime.year,
+        fromDateTime.month,
+        fromDateTime.day,
+      );
+
+      if (!occurrence.isBefore(fromDayStart)) {
+        list.add(fullDateTime);
+      }
+
+      if (currentMonth == 12) {
+        currentYear++;
+        currentMonth = 1;
+      } else {
+        currentMonth++;
+      }
+    }
+
+    return list;
+  }
+
+  static DateTime _findNthWeekdayOfMonth({
+    required int year,
+    required int month,
+    required int weekday,
+    required int ordinal,
+  }) {
+    if (ordinal > 0) {
+      var date = DateTime(year, month, 1);
+      while (date.weekday != weekday) {
+        date = date.add(const Duration(days: 1));
+      }
+      date = date.add(Duration(days: 7 * (ordinal - 1)));
+      return date;
+    } else {
+      final lastDay = DateTime(year, month + 1, 0).day;
+      var date = DateTime(year, month, lastDay);
+      while (date.weekday != weekday) {
+        date = date.subtract(const Duration(days: 1));
+      }
+      return date;
+    }
+  }
 }
 
 /// Confirmation and attendance status for a team member on a specific service date.
@@ -196,4 +401,3 @@ class ServiceEvent {
       notes.hashCode ^
       setlistId.hashCode;
 }
-

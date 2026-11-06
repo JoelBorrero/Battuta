@@ -276,5 +276,86 @@ void main() {
 
       expect(find.text('Auto-generated next 4 Sunday services!'), findsOneWidget);
     });
+
+    testWidgets('schedules recurring service series via Recurring Schedule modal',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Tap Recurring Schedule button
+      await tester.tap(find.text('Recurring Schedule'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Schedule Recurring Series'), findsOneWidget);
+      expect(find.text('Communion Sunday Service'), findsOneWidget);
+      expect(find.textContaining('1st Sunday of every month'), findsOneWidget);
+
+      // Select Communion Sunday Service (1st Sunday of month) template
+      await tester.tap(find.text('Communion Sunday Service'));
+      await tester.pumpAndSettle();
+
+      // Tap Generate Series button
+      await tester.tap(find.byKey(const ValueKey('generate_series_btn')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Generated 6 services for Communion Sunday Service!'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+        'schedules recurring series from Add Service dialog with occurrence selector',
+        (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Tap New Service FAB
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'New Service'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Sunday Morning Worship'),
+        'First Sunday Prayer & Praise',
+      );
+
+      // Recurrence is already 'Every Sunday (Weekly)' by default -> series count dropdown should be visible
+      expect(find.byKey(const ValueKey('series_count_dropdown')), findsOneWidget);
+      expect(find.text('Create Service'), findsOneWidget);
+
+      // Select 6 occurrences
+      await tester.tap(find.byKey(const ValueKey('series_count_dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('6 occurrences (~1.5 months)').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Create Series (6)'), findsOneWidget);
+
+      // Tap Create Series
+      await tester.tap(find.text('Create Series (6)'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(
+            'Scheduled 6 recurring services for First Sunday Prayer & Praise!'),
+        findsOneWidget,
+      );
+    });
   });
 }

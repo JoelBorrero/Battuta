@@ -363,6 +363,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       hour: eventToEdit?.dateTime.hour ?? 9,
       minute: eventToEdit?.dateTime.minute ?? 0,
     );
+    var seriesCount = 1;
 
     showDialog<void>(
       context: context,
@@ -428,6 +429,30 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         }
                       },
                     ),
+                    if (selectedRecurrence.isRepeating && !isEditing) ...[
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<int>(
+                        key: const ValueKey('series_count_dropdown'),
+                        initialValue: seriesCount,
+                        decoration: const InputDecoration(
+                          labelText: 'Occurrences to Generate',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.date_range_outlined),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 1, child: Text('1 service (Single date only)')),
+                          DropdownMenuItem(value: 4, child: Text('4 occurrences (~1 month)')),
+                          DropdownMenuItem(value: 6, child: Text('6 occurrences (~1.5 months)')),
+                          DropdownMenuItem(value: 12, child: Text('12 occurrences (~3 months)')),
+                          DropdownMenuItem(value: 24, child: Text('24 occurrences (~6 months)')),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setDialogState(() => seriesCount = val);
+                          }
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -524,6 +549,28 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Updated ${updated.title}')),
                       );
+                    } else if (selectedRecurrence.isRepeating && seriesCount > 1) {
+                      final created = ref
+                          .read(serviceCalendarProvider.notifier)
+                          .scheduleRecurringSeries(
+                            title: title,
+                            type: selectedType,
+                            recurrence: selectedRecurrence,
+                            startDateTime: eventDateTime,
+                            location: locationController.text.trim(),
+                            notes: notesController.text.trim().isEmpty
+                                ? null
+                                : notesController.text.trim(),
+                            count: seriesCount,
+                          );
+                      Navigator.of(dialogCtx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Scheduled ${created.length} recurring services for $title!',
+                          ),
+                        ),
+                      );
                     } else {
                       final newEvent = ServiceEvent(
                         id: 'event_${DateTime.now().millisecondsSinceEpoch}',
@@ -543,7 +590,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       );
                     }
                   },
-                  child: Text(isEditing ? 'Save Changes' : 'Create Service'),
+                  child: Text(
+                    isEditing
+                        ? 'Save Changes'
+                        : (!isEditing && selectedRecurrence.isRepeating && seriesCount > 1
+                            ? 'Create Series ($seriesCount)'
+                            : 'Create Service'),
+                  ),
                 ),
               ],
             );
@@ -667,6 +720,228 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   child: const Text('Assign to Lineup'),
                 ),
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RECURRING EVENT SERIES TEMPLATES MODAL
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  void _showRecurringSeriesModal() {
+    var selectedTemplateIndex = 0;
+    var seriesCount = 6;
+
+    final templates = [
+      (
+        title: 'Sunday Morning Worship',
+        type: ServiceType.sundayService,
+        recurrence: EventRecurrence.weekly,
+        time: const TimeOfDay(hour: 9, minute: 0),
+        location: 'Main Sanctuary',
+        notes: '9:00 AM & 11:15 AM Services • Call time: 7:45 AM',
+        icon: Icons.church_outlined,
+        description: 'Every Sunday (Weekly morning service)',
+      ),
+      (
+        title: 'Communion Sunday Service',
+        type: ServiceType.sundayService,
+        recurrence: EventRecurrence.firstSundayOfMonth,
+        time: const TimeOfDay(hour: 9, minute: 0),
+        location: 'Main Sanctuary',
+        notes: 'Communion table setup & extended worship set.',
+        icon: Icons.wine_bar_outlined,
+        description: '1st Sunday of every month',
+      ),
+      (
+        title: 'Midweek Band Rehearsal',
+        type: ServiceType.rehearsal,
+        recurrence: EventRecurrence.weeklyThursday,
+        time: const TimeOfDay(hour: 19, minute: 0),
+        location: 'Rehearsal Hall B',
+        notes: 'Full band rehearsal & vocal harmony check.',
+        icon: Icons.music_note_outlined,
+        description: 'Every Thursday evening rehearsal',
+      ),
+      (
+        title: 'Youth & Young Adults Night',
+        type: ServiceType.youthService,
+        recurrence: EventRecurrence.lastSundayOfMonth,
+        time: const TimeOfDay(hour: 18, minute: 0),
+        location: 'Youth Auditorium',
+        notes: 'High-energy contemporary praise set.',
+        icon: Icons.local_fire_department_outlined,
+        description: 'Last Sunday of every month',
+      ),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (bottomSheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            final theme = Theme.of(ctx);
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.repeat, color: Color(0xFFE5A93C)),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Schedule Recurring Series',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Choose a common repetitive template or schedule pattern:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Templates List
+                    for (var i = 0; i < templates.length; i++) ...[
+                      InkWell(
+                        onTap: () => setModalState(() => selectedTemplateIndex = i),
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: selectedTemplateIndex == i
+                                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: selectedTemplateIndex == i
+                                  ? const Color(0xFFE5A93C)
+                                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                              width: selectedTemplateIndex == i ? 1.5 : 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                templates[i].icon,
+                                color: selectedTemplateIndex == i
+                                    ? const Color(0xFFE5A93C)
+                                    : theme.colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      templates[i].title,
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${templates[i].description} • ${templates[i].time.format(ctx)}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (selectedTemplateIndex == i)
+                                const Icon(Icons.check_circle, color: Color(0xFFE5A93C), size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+
+                    const SizedBox(height: 12),
+                    // Occurrences Selector
+                    DropdownButtonFormField<int>(
+                      key: const ValueKey('recurring_modal_count_dropdown'),
+                      initialValue: seriesCount,
+                      decoration: const InputDecoration(
+                        labelText: 'Occurrences to Generate',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.date_range),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 4, child: Text('4 occurrences (~1 month)')),
+                        DropdownMenuItem(value: 6, child: Text('6 occurrences (~1.5 months)')),
+                        DropdownMenuItem(value: 12, child: Text('12 occurrences (~3 months)')),
+                        DropdownMenuItem(value: 24, child: Text('24 occurrences (~6 months)')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setModalState(() => seriesCount = val);
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        key: const ValueKey('generate_series_btn'),
+                        icon: const Icon(Icons.auto_awesome),
+                        label: Text('Generate $seriesCount Recurring Events'),
+                        onPressed: () {
+                          final template = templates[selectedTemplateIndex];
+                          final now = DateTime.now();
+                          final startDateTime = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                            template.time.hour,
+                            template.time.minute,
+                          );
+
+                          final created = ref
+                              .read(serviceCalendarProvider.notifier)
+                              .scheduleRecurringSeries(
+                                title: template.title,
+                                type: template.type,
+                                recurrence: template.recurrence,
+                                startDateTime: startDateTime,
+                                location: template.location,
+                                notes: template.notes,
+                                count: seriesCount,
+                              );
+
+                          Navigator.of(bottomSheetCtx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Generated ${created.length} services for ${template.title}!',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );
@@ -1129,19 +1404,30 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                   ),
                 ),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.auto_awesome, size: 16),
-                  label: const Text('Auto-Sundays'),
-                  onPressed: () {
-                    ref
-                        .read(serviceCalendarProvider.notifier)
-                        .generatePeriodicSundays(count: 4);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Auto-generated next 4 Sunday services!'),
-                      ),
-                    );
-                  },
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.repeat, size: 16),
+                      label: const Text('Recurring Schedule'),
+                      onPressed: _showRecurringSeriesModal,
+                    ),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.auto_awesome, size: 16),
+                      label: const Text('Auto-Sundays'),
+                      onPressed: () {
+                        ref
+                            .read(serviceCalendarProvider.notifier)
+                            .generatePeriodicSundays(count: 4);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Auto-generated next 4 Sunday services!'),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

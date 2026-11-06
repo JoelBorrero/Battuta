@@ -124,6 +124,44 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     }
   }
 
+  /// Schedules a series of repetitive recurring events (e.g. Every Sunday, 1st Sunday of the Month).
+  List<ServiceEvent> scheduleRecurringSeries({
+    required String title,
+    required ServiceType type,
+    required EventRecurrence recurrence,
+    required DateTime startDateTime,
+    required String location,
+    String? notes,
+    int count = 6,
+    List<ServiceAssignment> defaultAssignments = const [],
+  }) {
+    final occurrences = recurrence.generateOccurrences(
+      fromDateTime: startDateTime,
+      count: count,
+    );
+
+    final newEvents = <ServiceEvent>[];
+    for (final dt in occurrences) {
+      newEvents.add(
+        ServiceEvent(
+          id: 'event_${dt.millisecondsSinceEpoch}_${newEvents.length}',
+          title: title,
+          dateTime: dt,
+          type: type,
+          recurrence: recurrence,
+          location: location,
+          notes: notes,
+          assignments: defaultAssignments,
+        ),
+      );
+    }
+
+    state = [...state, ...newEvents]
+      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+
+    return newEvents;
+  }
+
   /// Generates the next [count] periodic Sunday morning services automatically.
   void generatePeriodicSundays({int count = 4}) {
     final now = DateTime.now();
