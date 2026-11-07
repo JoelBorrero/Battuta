@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/app/app.dart';
+import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -21,6 +22,13 @@ Future<void> main() async {
     await dotenv.load(fileName: '.env');
   } catch (e) {
     AppLogger.info('.env file not found or not loaded: $e');
+  }
+
+  // Attempt Supabase cloud client initialization (safe offline fallback)
+  try {
+    await SupabaseClientManager().initialize();
+  } catch (e) {
+    AppLogger.info('Supabase cloud initialization skipped or offline: $e');
   }
 
   AppLogger.info('Starting Battuta…');

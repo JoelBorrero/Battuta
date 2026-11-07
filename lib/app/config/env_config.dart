@@ -6,6 +6,8 @@
 /// through the top-level [envConfig] getter.
 library;
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// The three deployment environments the app can target.
 enum Environment {
   /// Local development — verbose logging, mock services allowed.
@@ -44,6 +46,12 @@ sealed class EnvConfig {
 
   /// Whether verbose network/database logging should be emitted.
   bool get enableVerboseLogging;
+
+  /// Supabase project URL for cloud synchronization (optional).
+  String get supabaseUrl;
+
+  /// Supabase anon public key (optional).
+  String get supabaseAnonKey;
 
   /// The [Environment] enum value this config represents.
   Environment get environment;
@@ -99,6 +107,16 @@ final class DevConfig extends EnvConfig {
   bool get enableVerboseLogging => true;
 
   @override
+  String get supabaseUrl => dotenv.isInitialized
+      ? (dotenv.env['SUPABASE_URL'] ?? 'https://placeholder.supabase.co')
+      : 'https://placeholder.supabase.co';
+
+  @override
+  String get supabaseAnonKey => dotenv.isInitialized
+      ? (dotenv.env['SUPABASE_ANON_KEY'] ?? 'placeholder-anon-key')
+      : 'placeholder-anon-key';
+
+  @override
   Environment get environment => Environment.dev;
 }
 
@@ -119,6 +137,16 @@ final class StagingConfig extends EnvConfig {
   bool get enableVerboseLogging => false;
 
   @override
+  String get supabaseUrl => dotenv.isInitialized
+      ? (dotenv.env['SUPABASE_URL'] ?? 'https://staging.supabase.co')
+      : 'https://staging.supabase.co';
+
+  @override
+  String get supabaseAnonKey => dotenv.isInitialized
+      ? (dotenv.env['SUPABASE_ANON_KEY'] ?? 'staging-anon-key')
+      : 'staging-anon-key';
+
+  @override
   Environment get environment => Environment.staging;
 }
 
@@ -137,6 +165,16 @@ final class ProdConfig extends EnvConfig {
 
   @override
   bool get enableVerboseLogging => false;
+
+  @override
+  String get supabaseUrl => dotenv.isInitialized
+      ? (dotenv.env['SUPABASE_URL'] ?? 'https://prod.supabase.co')
+      : 'https://prod.supabase.co';
+
+  @override
+  String get supabaseAnonKey => dotenv.isInitialized
+      ? (dotenv.env['SUPABASE_ANON_KEY'] ?? 'prod-anon-key')
+      : 'prod-anon-key';
 
   @override
   Environment get environment => Environment.prod;

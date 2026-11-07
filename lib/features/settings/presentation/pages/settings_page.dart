@@ -5,8 +5,12 @@
 library;
 
 import 'package:battuta/app/theme/theme_provider.dart';
+import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
 import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
+import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
+import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
+import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +30,8 @@ class SettingsPage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final apiKeyState = ref.watch(apiKeyNotifierProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final currentUser = ref.watch(currentUserProvider);
+    final syncState = ref.watch(cloudSyncProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -69,6 +75,66 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
             ),
+          ),
+
+          const Divider(),
+
+          // ── Cloud Synchronization (Supabase) ──
+          const _SectionHeader(title: 'Cloud Synchronization (Supabase)'),
+          ListTile(
+            key: const ValueKey('supabase_account_tile'),
+            leading: const Icon(Icons.cloud_sync_outlined),
+            title: const Text('Cloud Account'),
+            subtitle: Text(
+              currentUser != null
+                  ? '${currentUser.email}${currentUser.displayName != null ? ' (${currentUser.displayName})' : ''}'
+                  : 'Not signed in — Offline SQLite active',
+            ),
+            trailing: currentUser != null
+                ? TextButton(
+                    onPressed: () =>
+                        ref.read(authControllerProvider.notifier).signOut(),
+                    child: const Text('Sign Out'),
+                  )
+                : const Icon(Icons.chevron_right),
+            onTap: currentUser == null
+                ? () => SupabaseAuthDialog.show(context)
+                : null,
+          ),
+          ListTile(
+            key: const ValueKey('supabase_config_tile'),
+            leading: const Icon(Icons.settings_ethernet),
+            title: const Text('Supabase Connection'),
+            subtitle: const Text('Configure Project URL & Anon Key'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => SupabaseConfigDialog.show(context),
+          ),
+          ListTile(
+            key: const ValueKey('supabase_sync_status_tile'),
+            leading: const Icon(Icons.sync),
+            title: const Text('Sync Status'),
+            subtitle: Text(
+              syncState.isSyncing
+                  ? 'Synchronizing local Drift database with cloud…'
+                  : syncState.status == CloudSyncStatus.success &&
+                          syncState.lastSyncedAt != null
+                      ? 'Last synced: ${syncState.lastSyncedAt!.toLocal().hour.toString().padLeft(2, '0')}:${syncState.lastSyncedAt!.toLocal().minute.toString().padLeft(2, '0')}'
+                      : syncState.isOffline
+                          ? 'Offline: Local changes safely cached'
+                          : syncState.errorMessage ?? 'Ready to sync',
+            ),
+            trailing: syncState.isSyncing
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : FilledButton.tonal(
+                    key: const ValueKey('sync_now_btn'),
+                    onPressed: () =>
+                        ref.read(cloudSyncProvider.notifier).triggerSync(),
+                    child: const Text('Sync Now'),
+                  ),
           ),
 
           const Divider(),

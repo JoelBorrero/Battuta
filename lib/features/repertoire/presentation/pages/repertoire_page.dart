@@ -10,6 +10,7 @@ import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
+import 'package:battuta/features/sync/presentation/widgets/cloud_sync_status_indicator.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -145,6 +146,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
       appBar: AppBar(
         title: const Text('Repertoire'),
         actions: [
+          const CloudSyncStatusIndicator(compact: true),
           IconButton(
             icon: const Icon(Icons.document_scanner_outlined),
             tooltip: 'Scan sheet music',
