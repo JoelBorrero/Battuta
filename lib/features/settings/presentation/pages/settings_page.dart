@@ -4,6 +4,7 @@
 /// API key management (placeholder), version display, and about info.
 library;
 
+import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
@@ -11,6 +12,7 @@ import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.da
 import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
 import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,17 +34,19 @@ class SettingsPage extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final currentUser = ref.watch(currentUserProvider);
     final syncState = ref.watch(cloudSyncProvider);
+    final languageOption = ref.watch(appLanguageOptionProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n?.settingsTitle ?? 'Settings')),
       body: ListView(
         children: [
           // ── Appearance ──
-          const _SectionHeader(title: 'Appearance'),
-          const ListTile(
-            leading: Icon(Icons.brightness_6),
-            title: Text('Theme'),
-            subtitle: Text('Choose light, dark, or system mode'),
+          _SectionHeader(title: l10n?.appearanceSection ?? 'Appearance'),
+          ListTile(
+            leading: const Icon(Icons.brightness_6),
+            title: Text(l10n?.themeLabel ?? 'Theme'),
+            subtitle: Text(l10n?.themeSubtitle ?? 'Choose light, dark, or system mode'),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -50,21 +54,21 @@ class SettingsPage extends ConsumerWidget {
               width: double.infinity,
               child: SegmentedButton<ThemeMode>(
                 showSelectedIcon: false,
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: ThemeMode.light,
-                    icon: Icon(Icons.light_mode),
-                    label: Text('Light'),
+                    icon: const Icon(Icons.light_mode),
+                    label: Text(l10n?.themeLight ?? 'Light'),
                   ),
                   ButtonSegment(
                     value: ThemeMode.dark,
-                    icon: Icon(Icons.dark_mode),
-                    label: Text('Dark'),
+                    icon: const Icon(Icons.dark_mode),
+                    label: Text(l10n?.themeDark ?? 'Dark'),
                   ),
                   ButtonSegment(
                     value: ThemeMode.system,
-                    icon: Icon(Icons.settings_suggest),
-                    label: Text('System'),
+                    icon: const Icon(Icons.settings_suggest),
+                    label: Text(l10n?.themeSystem ?? 'System'),
                   ),
                 ],
                 selected: {themeMode},
@@ -77,14 +81,60 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
 
+          // ── Language / Idioma ──
+          _SectionHeader(title: l10n?.languageSection ?? 'Language / Idioma'),
+          ListTile(
+            key: const ValueKey('language_tile'),
+            leading: const Icon(Icons.language),
+            title: Text(l10n?.languageLabel ?? 'Language'),
+            subtitle: Text(
+              l10n?.languageSubtitle ?? 'Choose English, Spanish, or System Default',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<AppLanguageOption>(
+                key: const ValueKey('language_segmented_btn'),
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                    value: AppLanguageOption.system,
+                    icon: const Icon(Icons.settings_suggest),
+                    label: Text(l10n?.languageAuto ?? 'Auto'),
+                  ),
+                  ButtonSegment(
+                    value: AppLanguageOption.english,
+                    icon: const Icon(Icons.language),
+                    label: Text(l10n?.languageEnglish ?? 'English'),
+                  ),
+                  ButtonSegment(
+                    value: AppLanguageOption.spanish,
+                    icon: const Icon(Icons.translate),
+                    label: Text(l10n?.languageSpanish ?? 'Español'),
+                  ),
+                ],
+                selected: {languageOption},
+                onSelectionChanged: (options) {
+                  ref
+                      .read(appLanguageOptionProvider.notifier)
+                      .setLanguage(options.first);
+                },
+              ),
+            ),
+          ),
+
           const Divider(),
 
           // ── Cloud Synchronization (Supabase) ──
-          const _SectionHeader(title: 'Cloud Synchronization (Supabase)'),
+          _SectionHeader(
+            title: l10n?.cloudSyncSection ?? 'Cloud Synchronization (Supabase)',
+          ),
           ListTile(
             key: const ValueKey('supabase_account_tile'),
             leading: const Icon(Icons.cloud_sync_outlined),
-            title: const Text('Cloud Account'),
+            title: Text(l10n?.cloudAccountLabel ?? 'Cloud Account'),
             subtitle: Text(
               currentUser != null
                   ? '${currentUser.email}${currentUser.displayName != null ? ' (${currentUser.displayName})' : ''}'
@@ -94,7 +144,7 @@ class SettingsPage extends ConsumerWidget {
                 ? TextButton(
                     onPressed: () =>
                         ref.read(authControllerProvider.notifier).signOut(),
-                    child: const Text('Sign Out'),
+                    child: Text(l10n?.signOut ?? 'Sign Out'),
                   )
                 : const Icon(Icons.chevron_right),
             onTap: currentUser == null
@@ -104,7 +154,7 @@ class SettingsPage extends ConsumerWidget {
           ListTile(
             key: const ValueKey('supabase_config_tile'),
             leading: const Icon(Icons.settings_ethernet),
-            title: const Text('Supabase Connection'),
+            title: Text(l10n?.supabaseConnectionLabel ?? 'Supabase Connection'),
             subtitle: const Text('Configure Project URL & Anon Key'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => SupabaseConfigDialog.show(context),
@@ -112,7 +162,7 @@ class SettingsPage extends ConsumerWidget {
           ListTile(
             key: const ValueKey('supabase_sync_status_tile'),
             leading: const Icon(Icons.sync),
-            title: const Text('Sync Status'),
+            title: Text(l10n?.syncStatusLabel ?? 'Sync Status'),
             subtitle: Text(
               syncState.isSyncing
                   ? 'Synchronizing local Drift database with cloud…'
@@ -133,7 +183,7 @@ class SettingsPage extends ConsumerWidget {
                     key: const ValueKey('sync_now_btn'),
                     onPressed: () =>
                         ref.read(cloudSyncProvider.notifier).triggerSync(),
-                    child: const Text('Sync Now'),
+                    child: Text(l10n?.syncNow ?? 'Sync Now'),
                   ),
           ),
 

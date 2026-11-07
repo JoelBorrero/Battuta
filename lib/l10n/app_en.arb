@@ -1,0 +1,193 @@
+{
+  "@@locale": "en",
+  "appName": "Battuta",
+  "@appName": {
+    "description": "Application name"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Generic cancel button text"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Generic confirm button text"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Generic save button text"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Generic delete button text"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Generic edit button text"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Generic close button text"
+  },
+  "done": "Done",
+  "@done": {
+    "description": "Generic done button text"
+  },
+  "dismiss": "Dismiss",
+  "@dismiss": {
+    "description": "Generic dismiss button text"
+  },
+  "search": "Search",
+  "@search": {
+    "description": "Generic search placeholder text"
+  },
+  "all": "All",
+  "@all": {
+    "description": "All filter option"
+  },
+
+  "navRepertoire": "Repertoire",
+  "@navRepertoire": {
+    "description": "Bottom nav item for Repertoire"
+  },
+  "navScan": "Scan",
+  "@navScan": {
+    "description": "Bottom nav item for Scan"
+  },
+  "navSetlists": "Setlists",
+  "@navSetlists": {
+    "description": "Bottom nav item for Setlists"
+  },
+  "navTeam": "Team",
+  "@navTeam": {
+    "description": "Bottom nav item for Team and Band Calendar"
+  },
+  "navLive": "Live",
+  "@navLive": {
+    "description": "Bottom nav item for Live Session"
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Bottom nav item for Settings"
+  },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings page header title"
+  },
+  "appearanceSection": "Appearance",
+  "@appearanceSection": {
+    "description": "Section header for appearance settings"
+  },
+  "themeLabel": "Theme",
+  "@themeLabel": {
+    "description": "Theme tile title"
+  },
+  "themeSubtitle": "Choose light, dark, or system mode",
+  "@themeSubtitle": {
+    "description": "Theme tile subtitle"
+  },
+  "themeLight": "Light",
+  "@themeLight": {
+    "description": "Light theme mode button"
+  },
+  "themeDark": "Dark",
+  "@themeDark": {
+    "description": "Dark theme mode button"
+  },
+  "themeSystem": "System",
+  "@themeSystem": {
+    "description": "System theme mode button"
+  },
+
+  "languageSection": "Language / Idioma",
+  "@languageSection": {
+    "description": "Section header for language settings"
+  },
+  "languageLabel": "Language",
+  "@languageLabel": {
+    "description": "Language tile title"
+  },
+  "languageSubtitle": "Select your preferred application language",
+  "@languageSubtitle": {
+    "description": "Language tile subtitle"
+  },
+  "languageAuto": "Auto",
+  "@languageAuto": {
+    "description": "Auto/System language option"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "languageSpanish": "Español",
+  "@languageSpanish": {
+    "description": "Spanish language option"
+  },
+
+  "cloudSyncSection": "Cloud Synchronization (Supabase)",
+  "@cloudSyncSection": {
+    "description": "Supabase cloud sync section header"
+  },
+  "cloudAccountLabel": "Cloud Account",
+  "@cloudAccountLabel": {
+    "description": "Cloud account tile label"
+  },
+  "supabaseConnectionLabel": "Supabase Connection",
+  "@supabaseConnectionLabel": {
+    "description": "Supabase connection tile label"
+  },
+  "syncStatusLabel": "Sync Status",
+  "@syncStatusLabel": {
+    "description": "Sync status tile label"
+  },
+  "syncNow": "Sync Now",
+  "@syncNow": {
+    "description": "Sync now action button"
+  },
+  "signOut": "Sign Out",
+  "@signOut": {
+    "description": "Sign out action button"
+  },
+
+  "aboutSection": "About",
+  "@aboutSection": {
+    "description": "About section header"
+  },
+  "versionLabel": "Version",
+  "@versionLabel": {
+    "description": "Version label"
+  },
+
+  "teamRosterTab": "Team Roster",
+  "@teamRosterTab": {
+    "description": "Tab title for team roster"
+  },
+  "bandCalendarTab": "Band Calendar",
+  "@bandCalendarTab": {
+    "description": "Tab title for band calendar"
+  },
+  "addMusician": "Add Musician",
+  "@addMusician": {
+    "description": "Button to add a musician"
+  },
+  "addService": "Add Service",
+  "@addService": {
+    "description": "Button to add a service event"
+  },
+  "recurringSchedules": "Recurring Schedules",
+  "@recurringSchedules": {
+    "description": "Button to open recurring schedules manager"
+  },
+  "periodicServicesTitle": "Periodic & Upcoming Services",
+  "@periodicServicesTitle": {
+    "description": "Heading for recurring and upcoming services list"
+  },
+  "nextService": "NEXT SERVICE",
+  "@nextService": {
+    "description": "Badge for immediate next upcoming service"
+  },
+  "findCover": "Find Cover",
+  "@findCover": {
+    "description": "Action button to find substitute musician"
+  }
+}

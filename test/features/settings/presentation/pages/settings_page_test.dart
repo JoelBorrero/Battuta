@@ -48,14 +48,19 @@ void main() {
       expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Choose light, dark, or system mode'), findsOneWidget);
 
-      // Verify API Configuration section
-      expect(find.text('API Configuration'), findsOneWidget);
-      expect(find.text('Gemini API Key'), findsOneWidget);
-
       // Verify SegmentedButton options
       expect(find.text('Light'), findsOneWidget);
       expect(find.text('Dark'), findsOneWidget);
       expect(find.text('System'), findsOneWidget);
+
+      // Verify Language section
+      expect(find.byKey(const ValueKey('language_tile')), findsOneWidget);
+      expect(find.byKey(const ValueKey('language_segmented_btn')), findsOneWidget);
+
+      // Verify API Configuration section
+      await tester.scrollUntilVisible(find.text('Gemini API Key'), 100);
+      expect(find.text('API Configuration'), findsOneWidget);
+      expect(find.text('Gemini API Key'), findsOneWidget);
 
       expect(tester.takeException(), isNull);
     },
@@ -76,6 +81,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap the Gemini API Key tile
+    await tester.scrollUntilVisible(find.text('Gemini API Key'), 100);
     await tester.tap(find.text('Gemini API Key'));
     await tester.pumpAndSettle();
 
