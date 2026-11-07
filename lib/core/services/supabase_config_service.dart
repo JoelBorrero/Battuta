@@ -46,7 +46,9 @@ class SupabaseConfigService {
       return customKey.trim();
     }
     if (dotenv.isInitialized) {
-      final envKey = dotenv.env['SUPABASE_ANON_KEY']?.trim();
+      final envKey = (dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
+              dotenv.env['SUPABASE_ANON_KEY'])
+          ?.trim();
       if (envKey != null && envKey.isNotEmpty) {
         return envKey;
       }
