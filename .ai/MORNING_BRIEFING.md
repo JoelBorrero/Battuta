@@ -36,3 +36,14 @@
   - `lib/features/audio/presentation/widgets/practice_player_bar.dart`: Responsive `Wrap` controls for Set A, Set B, and Clear Loop with `#E5A93C` amber active state and Anti-Material 0-elevation design.
   - `test/features/audio/ab_loop_and_stems_test.dart`: Comprehensive unit and widget tests covering boundary guards, click-free fades, multi-track stem file management, and interactive A/B loop toggling.
 - **Architectural Notes**: Pure Dart implementation without external C++ FFI plugins, preserving test suite determinism.
+
+### ✅ TASK-104: v1.3 Polyphonic Chord Stack Model & Shared-Stem Layout Calculator
+- **Status**: Complete & Verified
+- **Tests**: 303 / 303 passing (+10 new tests)
+- **Static Analysis**: 0 issues
+- **Files Created/Modified**:
+  - `lib/features/score/domain/entities/polyphonic_voice_cluster.dart`: Clean domain entity for simultaneous chord pitches sharing a single stem and duration, with sorting, JSON serialization, and note conversion.
+  - `lib/features/score/domain/entities/note_event.dart`: Extended backward-compatibly with `pitches` and `isChord` accessors.
+  - `lib/features/score/domain/services/chord_stem_layout_calculator.dart`: Pure Dart geometry calculator implementing standard engraving rules (extreme distance from middle line B4 for stem direction, collision offsets for unisons and adjacent seconds, zero offset for thirds/triads).
+  - `test/features/score/chord_stem_layout_calculator_test.dart`: Exhaustive unit tests for stem directions, single notes, high/low chords, equidistant ties, unisons, second collisions (up/down displacements), alternating clusters, and triads.
+- **Architectural Notes**: 100% backward-compatible with all score entities and serialization formats. Pure Dart geometry with zero external dependencies.

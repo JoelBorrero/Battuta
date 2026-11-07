@@ -41,7 +41,7 @@
 
 ---
 
-## [ ] TASK-104: v1.3 Polyphonic Chord Stack Model & Shared-Stem Layout Calculator
+## [x] TASK-104: v1.3 Polyphonic Chord Stack Model & Shared-Stem Layout Calculator
 - **Epic**: Epic 3 — Notation Engine Polyphony & Multi-Page View (v1.3)
 - **Scope**:
   1. Extend `lib/features/score/domain/` (backward-compatibly so all existing 275 tests pass) or add `PolyphonicVoiceCluster` to allow multiple `Pitch` instances on the same beat sharing a single stem and `RhythmicValue`.

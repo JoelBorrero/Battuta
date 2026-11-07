@@ -77,6 +77,12 @@ class NoteEvent {
   /// Whether this event is a sounding note (`pitch != null`).
   bool get isNote => pitch != null;
 
+  /// List of sounding pitches in this event (single pitch or empty if rest).
+  List<Pitch> get pitches => pitch != null ? [pitch!] : const [];
+
+  /// Whether this note event contains multiple simultaneous pitches.
+  bool get isChord => false;
+
   /// Duration of this note event in MIDI ticks.
   int get ticks => rhythmicValue.ticks;
 

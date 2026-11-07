@@ -1,30 +1,40 @@
-# Step Spec: TASK-103 A/B Practice Loop Engine & Local Stem Storage Manager
+# Step Spec: TASK-104 Polyphonic Chord Stack Model & Shared-Stem Layout Calculator
 
 ## Exact Files to Create / Modify
-- `lib/features/audio/domain/models/ab_loop_region.dart` (Create)
-- `lib/features/audio/data/local_stem_storage_service.dart` (Create)
-- `lib/features/audio/presentation/providers/audio_practice_controller.dart` (Modify)
-- `lib/features/audio/presentation/widgets/practice_player_bar.dart` (Modify)
-- `test/features/audio/ab_loop_and_stems_test.dart` (Create)
+- `lib/features/score/domain/entities/polyphonic_voice_cluster.dart` (Create)
+- `lib/features/score/domain/entities/note_event.dart` (Extend backward-compatibly with pitches/isChord)
+- `lib/features/score/domain/services/chord_stem_layout_calculator.dart` (Create)
+- `test/features/score/chord_stem_layout_calculator_test.dart` (Create)
 
-## Domain & Data Architecture
-- `AbLoopRegion`:
-  - `startMicros`, `endMicros`, `fadeWindowMicros` (sub-millisecond precision).
-  - Validation: `startMicros < endMicros`, minimum duration guard (e.g. >= 100,000 micros / 100ms).
-  - Fade calculation: `calculateFadeCoefficients(int sampleCount)`.
-- `StemTrack` & `LocalStemStorageService`:
-  - `StemTrack(id, name, relativePath, volume, isMuted, isSolo)`.
-  - `LocalStemStorageService({required Directory Function() baseDirResolver})` allowing in-memory/temp testing.
-  - JSON persistence per song (`stems_<songId>.json`).
-- `AudioPracticeController`:
-  - Add `loopPointA`, `loopPointB`, `setLoopPointA()`, `setLoopPointB()`, `clearAbLoop()`.
-  - Loop boundary enforcement during playback scrubbing/advancement.
-- `PracticePlayerBar`:
-  - A/B Loop action bar with buttons for "A", "B", and "Clear".
-  - Active buttons highlighted in `#E5A93C` amber.
-  - Touch targets >= 44x44pt; elevation: 0.
+## Domain Architecture
+- `PolyphonicVoiceCluster`:
+  - `id`: String
+  - `pitches`: List<Pitch> (sorted)
+  - `rhythmicValue`: RhythmicValue
+  - `tickOffset`: int, `isTied`: bool, `lyric`: String?, `velocity`: int
+  - `isChord`, `isRest`, `lowestPitch`, `highestPitch`
+  - `toJson()`, `fromJson()`, `operator ==`, `hashCode`
+- `NoteEvent`:
+  - Add `List<Pitch> get pitches => pitch != null ? [pitch!] : const [];`
+  - Add `bool get isChord => false;`
+- `ChordStemLayoutCalculator`:
+  - Standard reference line: Treble Clef B4 (`diatonicStepIndex = 34`).
+  - `calculateStemDirection(List<Pitch> pitches)`:
+    - Farthest note from B4 determines stem direction (below B4 -> up; above B4 -> down; tie -> down).
+  - `calculateLayout(List<Pitch> pitches)`:
+    - Computes `StemDirection`.
+    - Detects diatonic unisons (diff == 0) and seconds (diff == 1).
+    - Shifts noteheads:
+      - Stem Up: lower note normal, upper note shifts right.
+      - Stem Down: upper note normal, lower note shifts left.
+      - Thirds/Triads: no shift (all normal).
+    - Returns `ChordStemLayout` with notehead placements, stem direction, and bounds.
 
 ## Tests
-- `AbLoopRegion` boundary validation and click-free fade calculation tests.
-- `LocalStemStorageService` multi-stem registration, retrieval, and isolation tests using temp directory.
-- `PracticePlayerBar` A/B loop UI toggle and amber styling widget tests.
+- Stem direction: single notes below B4 (up), above B4 (down), middle B4 (down).
+- Stem direction for chords: chord predominantly below B4 (up), chord predominantly above B4 (down), equidistant (down).
+- Unisons: second notehead shifted right.
+- Seconds: C4+D4 stem up (D4 shifted right), C4+D4 stem down (C4 shifted left).
+- Triads: C4-E4-G4 (all normal, zero horizontal offset).
+- Multi-note clusters: alternating second offset avoiding collisions.
+- PolyphonicVoiceCluster serialization and entity behavior.
