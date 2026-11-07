@@ -41,13 +41,13 @@ enum QuantizationGrid {
 
   /// Corresponding [RhythmicValue] for this quantization subdivision.
   RhythmicValue get rhythmicValue => switch (this) {
-        QuantizationGrid.quarter => RhythmicValue.quarter,
-        QuantizationGrid.dottedEighth => RhythmicValue.dottedEighth,
-        QuantizationGrid.eighth => RhythmicValue.eighth,
-        QuantizationGrid.sixteenth => RhythmicValue.sixteenth,
-        QuantizationGrid.thirtySecond => RhythmicValue.thirtySecond,
-        _ => RhythmicValue.custom(ticks: ticks),
-      };
+    QuantizationGrid.quarter => RhythmicValue.quarter,
+    QuantizationGrid.dottedEighth => RhythmicValue.dottedEighth,
+    QuantizationGrid.eighth => RhythmicValue.eighth,
+    QuantizationGrid.sixteenth => RhythmicValue.sixteenth,
+    QuantizationGrid.thirtySecond => RhythmicValue.thirtySecond,
+    _ => RhythmicValue.custom(ticks: ticks),
+  };
 }
 
 /// Raw unquantized musical input event from touch, tap, or virtual piano.
@@ -58,9 +58,11 @@ class RawMusicalInput {
     required this.rawTick,
     this.pitch,
     this.velocity = 80,
-  })  : assert(rawTick >= 0, 'rawTick cannot be negative'),
-        assert(velocity >= 1 && velocity <= 127,
-            'velocity must be between 1 and 127');
+  }) : assert(rawTick >= 0, 'rawTick cannot be negative'),
+       assert(
+         velocity >= 1 && velocity <= 127,
+         'velocity must be between 1 and 127',
+       );
 
   /// Wall-clock timestamp when tap occurred.
   final DateTime timestamp;

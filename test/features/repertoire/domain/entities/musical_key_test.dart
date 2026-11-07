@@ -74,30 +74,48 @@ void main() {
     group('transposition', () {
       test('transposing C Major by +7 semitones yields G Major', () {
         final transposed = MusicalKey.cMajor.transpose(7);
-        expect(transposed.semitoneIndex, equals(MusicalKey.gMajor.semitoneIndex));
+        expect(
+          transposed.semitoneIndex,
+          equals(MusicalKey.gMajor.semitoneIndex),
+        );
         expect(transposed.isMinor, isFalse);
       });
 
       test('transposing C Major by +2 semitones yields D Major', () {
         final transposed = MusicalKey.cMajor.transpose(2);
-        expect(transposed.semitoneIndex, equals(MusicalKey.dMajor.semitoneIndex));
+        expect(
+          transposed.semitoneIndex,
+          equals(MusicalKey.dMajor.semitoneIndex),
+        );
       });
 
       test('transposing with negative semitones shifts downwards', () {
         // C - 2 semitones = Bb
         final transposed = MusicalKey.cMajor.transpose(-2);
-        expect(transposed.semitoneIndex, equals(MusicalKey.bbMajor.semitoneIndex));
+        expect(
+          transposed.semitoneIndex,
+          equals(MusicalKey.bbMajor.semitoneIndex),
+        );
       });
 
-      test('transposing by full octave (12 semitones) preserves pitch class', () {
-        final transposed = MusicalKey.eMajor.transpose(12);
-        expect(transposed.semitoneIndex, equals(MusicalKey.eMajor.semitoneIndex));
-      });
+      test(
+        'transposing by full octave (12 semitones) preserves pitch class',
+        () {
+          final transposed = MusicalKey.eMajor.transpose(12);
+          expect(
+            transposed.semitoneIndex,
+            equals(MusicalKey.eMajor.semitoneIndex),
+          );
+        },
+      );
 
       test('transposing minor keys maintains minor quality', () {
         final transposed = MusicalKey.aMinor.transpose(7);
         expect(transposed.isMinor, isTrue);
-        expect(transposed.semitoneIndex, equals(MusicalKey.eMinor.semitoneIndex));
+        expect(
+          transposed.semitoneIndex,
+          equals(MusicalKey.eMinor.semitoneIndex),
+        );
       });
     });
 

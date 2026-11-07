@@ -53,12 +53,11 @@ enum PitchStep {
 /// chromatic transposition, and standard MIDI / frequency queries.
 class Pitch implements Comparable<Pitch> {
   /// Creates an immutable [Pitch].
-  const Pitch({
-    required this.step,
-    this.accidental = 0,
-    required this.octave,
-  }) : assert(accidental >= -2 && accidental <= 2,
-            'Accidental must be between -2 (double flat) and 2 (double sharp)');
+  const Pitch({required this.step, this.accidental = 0, required this.octave})
+    : assert(
+        accidental >= -2 && accidental <= 2,
+        'Accidental must be between -2 (double flat) and 2 (double sharp)',
+      );
 
   /// Creates a Middle C (C4) instance.
   static const Pitch middleC = Pitch(step: PitchStep.c, octave: 4);
@@ -85,24 +84,25 @@ class Pitch implements Comparable<Pitch> {
 
   /// Converts this [Pitch] to a JSON-encodable map.
   Map<String, dynamic> toJson() => {
-        'step': step.symbol,
-        'accidental': accidental,
-        'octave': octave,
-      };
+    'step': step.symbol,
+    'accidental': accidental,
+    'octave': octave,
+  };
 
   /// Constructs a [Pitch] from a JSON map.
   factory Pitch.fromJson(Map<String, dynamic> json) => Pitch(
-        step: PitchStep.fromSymbol(json['step'] as String),
-        accidental: json['accidental'] as int? ?? 0,
-        octave: json['octave'] as int,
-      );
+    step: PitchStep.fromSymbol(json['step'] as String),
+    accidental: json['accidental'] as int? ?? 0,
+    octave: json['octave'] as int,
+  );
 
   // ---------------------------------------------------------------------------
   // Scientific Pitch String Parsing
   // ---------------------------------------------------------------------------
 
-  static final RegExp _pitchRegex =
-      RegExp(r'^([A-Ga-g])([#b♯♭x𝄪𝄫]*)(-?\d+)$');
+  static final RegExp _pitchRegex = RegExp(
+    r'^([A-Ga-g])([#b♯♭x𝄪𝄫]*)(-?\d+)$',
+  );
 
   /// Parses a scientific pitch notation string (e.g., `'F5'`, `'C#4'`, `'Bb4'`).
   ///
@@ -154,12 +154,10 @@ class Pitch implements Comparable<Pitch> {
   // ---------------------------------------------------------------------------
 
   /// Standard MIDI note number (C4 = 60, A4 = 69).
-  int get midiNumber =>
-      (octave + 1) * 12 + step.semitoneOffset + accidental;
+  int get midiNumber => (octave + 1) * 12 + step.semitoneOffset + accidental;
 
   /// Fundamental acoustic frequency in Hertz (A4 = 440 Hz in equal temperament).
-  double get frequencyHz =>
-      440.0 * math.pow(2.0, (midiNumber - 69) / 12.0);
+  double get frequencyHz => 440.0 * math.pow(2.0, (midiNumber - 69) / 12.0);
 
   /// String accidental representation (`"#"`, `"b"`, `"##"`, `"bb"`, or `""`).
   String get accidentalString {
@@ -178,8 +176,7 @@ class Pitch implements Comparable<Pitch> {
   }
 
   /// Full scientific pitch string (e.g., `"C#4"`, `"Bb4"`, `"F5"`).
-  String get scientificNotation =>
-      '${step.symbol}$accidentalString$octave';
+  String get scientificNotation => '${step.symbol}$accidentalString$octave';
 
   // ---------------------------------------------------------------------------
   // Transposition
@@ -208,11 +205,7 @@ class Pitch implements Comparable<Pitch> {
     final newOctave = (targetTotalSteps / 7).floor();
     final newStep = PitchStep.fromIndex(targetTotalSteps);
 
-    return Pitch(
-      step: newStep,
-      accidental: accidental,
-      octave: newOctave,
-    );
+    return Pitch(step: newStep, accidental: accidental, octave: newOctave);
   }
 
   /// Transposes this pitch chromatically by a given number of [semitones].
@@ -298,11 +291,7 @@ class Pitch implements Comparable<Pitch> {
         throw StateError('Invalid semitone calculation: $semitoneInOctave');
     }
 
-    return Pitch(
-      step: step,
-      accidental: accidental,
-      octave: octave,
-    );
+    return Pitch(step: step, accidental: accidental, octave: octave);
   }
 
   @override
@@ -331,4 +320,3 @@ class Pitch implements Comparable<Pitch> {
   @override
   String toString() => scientificNotation;
 }
-

@@ -9,10 +9,7 @@ import 'package:flutter/material.dart';
 
 /// Floating or docked playback control bar for previewing musical notation.
 class ScorePlaybackBar extends StatelessWidget {
-  const ScorePlaybackBar({
-    required this.player,
-    super.key,
-  });
+  const ScorePlaybackBar({required this.player, super.key});
 
   /// The active [ScorePreviewPlayer] orchestrating timeline playback.
   final ScorePreviewPlayer player;
@@ -94,7 +91,9 @@ class ScorePlaybackBar extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.6,
+            ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isPlaying
@@ -114,9 +113,7 @@ class ScorePlaybackBar extends StatelessWidget {
                   key: const Key('score_play_pause_btn'),
                   visualDensity: VisualDensity.compact,
                   iconSize: 22,
-                  icon: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                  ),
+                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
                   tooltip: isPlaying ? 'Pause Melody' : 'Play / Preview Melody',
                   onPressed: player.togglePlay,
                 ),
@@ -136,11 +133,15 @@ class ScorePlaybackBar extends StatelessWidget {
 
                 // Status & Note Playing Badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: isPlaying
-                        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.7)
+                        ? theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.7,
+                          )
                         : theme.colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -183,13 +184,17 @@ class ScorePlaybackBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   onTap: () => _showTempoDialog(context),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.15),
+                        color: theme.colorScheme.outline.withValues(
+                          alpha: 0.15,
+                        ),
                       ),
                     ),
                     child: Row(

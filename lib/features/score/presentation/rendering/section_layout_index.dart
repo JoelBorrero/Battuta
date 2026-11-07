@@ -89,14 +89,14 @@ class SectionLayoutIndex {
 
   /// Map of all section IDs to their vertical Y-offsets.
   Map<String, double> get allOffsets => {
-        for (final entry in _entries.entries) entry.key: entry.value.yOffset,
-      };
+    for (final entry in _entries.entries) entry.key: entry.value.yOffset,
+  };
 
   /// Map of all section IDs to their registered [GlobalKey]s.
   Map<String, GlobalKey> get allKeys => {
-        for (final entry in _entries.entries)
-          if (entry.value.key != null) entry.key: entry.value.key!,
-      };
+    for (final entry in _entries.entries)
+      if (entry.value.key != null) entry.key: entry.value.key!,
+  };
 
   /// Count of registered sections.
   int get length => _entries.length;

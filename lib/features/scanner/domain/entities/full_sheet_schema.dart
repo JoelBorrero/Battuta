@@ -32,8 +32,7 @@ Guidelines:
 
   /// The Gemini structured output Schema for full lead sheet recognition.
   static final Schema schema = Schema.object(
-    description:
-        'Complete lead sheet structure containing metadata, sections, chords, and staves',
+    description: 'Complete lead sheet structure containing metadata, sections, chords, and staves',
     properties: {
       'metadatos': Schema.object(
         description: 'Lead sheet metadata',
@@ -74,8 +73,7 @@ Guidelines:
                   'Section name (e.g. "Intro", "Verse 1", "Chorus", "Bridge")',
             ),
             'caja_navegacion': Schema.string(
-              description:
-                  'Rehearsal mark or navigation box (e.g. "[A]", "[B]", "To Coda", "D.S.")',
+              description: 'Rehearsal mark or navigation box (e.g. "[A]", "[B]", "To Coda", "D.S.")',
               nullable: true,
             ),
             'repeticiones': Schema.integer(
@@ -106,17 +104,14 @@ Guidelines:
                       description: 'A chord symbol with placement',
                       properties: {
                         'cifrado': Schema.string(
-                          description:
-                              'Chord symbol (e.g. "G", "Am7", "C#m7/G#", "D/F#")',
+                          description: 'Chord symbol (e.g. "G", "Am7", "C#m7/G#", "D/F#")',
                         ),
                         'posicion_pulso': Schema.number(
-                          description:
-                              'Beat position in measure (1.0 for beat 1, 2.5 for beat 2 &)',
+                          description: 'Beat position in measure (1.0 for beat 1, 2.5 for beat 2 &)',
                           nullable: true,
                         ),
                         'tick_offset': Schema.integer(
-                          description:
-                              'Start offset within measure in MIDI ticks (480 ticks/quarter)',
+                          description: 'Start offset within measure in MIDI ticks (480 ticks/quarter)',
                           nullable: true,
                         ),
                       },
@@ -129,17 +124,14 @@ Guidelines:
                       description: 'Individual note or rest event',
                       properties: {
                         'tono': Schema.string(
-                          description:
-                              'Scientific pitch (e.g. "C4", "C#4", "Bb4", "F5") or "rest" for rests',
+                          description: 'Scientific pitch (e.g. "C4", "C#4", "Bb4", "F5") or "rest" for rests',
                         ),
                         'duracion': Schema.string(
-                          description:
-                              'Note duration name: whole, half, quarter, eighth, sixteenth',
+                          description: 'Note duration name: whole, half, quarter, eighth, sixteenth',
                           nullable: true,
                         ),
                         'duracion_ticks': Schema.integer(
-                          description:
-                              'Duration in MIDI ticks (e.g. 480 for quarter, 240 for eighth)',
+                          description: 'Duration in MIDI ticks (e.g. 480 for quarter, 240 for eighth)',
                           nullable: true,
                         ),
                         'letra': Schema.string(

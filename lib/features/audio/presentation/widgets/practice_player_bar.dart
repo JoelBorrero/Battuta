@@ -11,10 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PracticePlayerBar extends ConsumerWidget {
-  const PracticePlayerBar({
-    required this.song,
-    super.key,
-  });
+  const PracticePlayerBar({required this.song, super.key});
 
   final Song song;
 
@@ -169,14 +166,18 @@ class PracticePlayerBar extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(_formatDuration(position),
-                      style: theme.textTheme.bodySmall),
+                  Text(
+                    _formatDuration(position),
+                    style: theme.textTheme.bodySmall,
+                  ),
                   if (audioState.activeLoopSection != null)
                     Flexible(
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.secondaryContainer,
                           borderRadius: BorderRadius.circular(6),
@@ -193,8 +194,10 @@ class PracticePlayerBar extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  Text(_formatDuration(duration),
-                      style: theme.textTheme.bodySmall),
+                  Text(
+                    _formatDuration(duration),
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ],
               ),
             ),
@@ -216,30 +219,32 @@ class PracticePlayerBar extends ConsumerWidget {
                     onSelected: notifier.setSpeed,
                     itemBuilder: (_) => [
                       for (final s in [0.5, 0.75, 1.0, 1.25, 1.5])
-                        PopupMenuItem(
-                          value: s,
-                          child: Text('$s× Speed'),
-                        ),
+                        PopupMenuItem(value: s, child: Text('$s× Speed')),
                     ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 6),
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHighest
                             .withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color:
-                              theme.colorScheme.outline.withValues(alpha: 0.2),
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.2,
+                          ),
                           width: 1,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.speed,
-                              size: 14,
-                              color: theme.colorScheme.onSurfaceVariant),
+                          Icon(
+                            Icons.speed,
+                            size: 14,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${audioState.speed}×',
@@ -259,8 +264,8 @@ class PracticePlayerBar extends ConsumerWidget {
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.replay_10),
                     tooltip: 'Rewind 10 seconds',
-                    onPressed: () => notifier
-                        .seek(position - const Duration(seconds: 10)),
+                    onPressed: () =>
+                        notifier.seek(position - const Duration(seconds: 10)),
                   ),
 
                   // Play / Pause Button
@@ -279,8 +284,8 @@ class PracticePlayerBar extends ConsumerWidget {
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.forward_10),
                     tooltip: 'Forward 10 seconds',
-                    onPressed: () => notifier
-                        .seek(position + const Duration(seconds: 10)),
+                    onPressed: () =>
+                        notifier.seek(position + const Duration(seconds: 10)),
                   ),
 
                   const SizedBox(width: 4),
@@ -302,20 +307,23 @@ class PracticePlayerBar extends ConsumerWidget {
                     ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 6),
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: audioState.activeLoopSection != null
-                            ? theme.colorScheme.primaryContainer
-                                .withValues(alpha: 0.6)
+                            ? theme.colorScheme.primaryContainer.withValues(
+                                alpha: 0.6,
+                              )
                             : theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.6),
+                                  .withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: audioState.activeLoopSection != null
-                              ? theme.colorScheme.primary
-                                  .withValues(alpha: 0.4)
-                              : theme.colorScheme.outline
-                                  .withValues(alpha: 0.2),
+                              ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                              : theme.colorScheme.outline.withValues(
+                                  alpha: 0.2,
+                                ),
                           width: 1,
                         ),
                       ),

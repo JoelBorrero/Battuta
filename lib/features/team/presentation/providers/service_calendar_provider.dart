@@ -10,8 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final serviceCalendarProvider =
     NotifierProvider<ServiceCalendarNotifier, List<ServiceEvent>>(
-  ServiceCalendarNotifier.new,
-);
+      ServiceCalendarNotifier.new,
+    );
 
 class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
   @override
@@ -50,11 +50,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
           event.copyWith(
             assignments: [
               ...event.assignments.where((a) => a.memberId != memberId),
-              ServiceAssignment(
-                memberId: memberId,
-                role: role,
-                status: status,
-              ),
+              ServiceAssignment(memberId: memberId, role: role, status: status),
             ],
           )
         else
@@ -71,8 +67,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
       for (final event in state)
         if (event.id == eventId)
           event.copyWith(
-            assignments:
-                event.assignments.where((a) => a.memberId != memberId).toList(),
+            assignments: event.assignments
+                .where((a) => a.memberId != memberId)
+                .toList(),
           )
         else
           event,
@@ -87,8 +84,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     if (upcoming.isEmpty) return;
 
     final nextEvent = upcoming.first;
-    final existingIndex =
-        nextEvent.assignments.indexWhere((a) => a.memberId == memberId);
+    final existingIndex = nextEvent.assignments.indexWhere(
+      (a) => a.memberId == memberId,
+    );
 
     if (existingIndex < 0) {
       // Member not currently scheduled for next event -> schedule them!
@@ -378,4 +376,3 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     ];
   }
 }
-

@@ -23,46 +23,43 @@ class FakeApiKeyStorage extends ApiKeyStorage {
 }
 
 void main() {
-  testWidgets('SettingsPage renders theme options and sections without overflow', (
-    WidgetTester tester,
-  ) async {
-    tester.view.physicalSize = const Size(375, 812);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+  testWidgets(
+    'SettingsPage renders theme options and sections without overflow',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(375, 812);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-    final fakeStorage = FakeApiKeyStorage();
+      final fakeStorage = FakeApiKeyStorage();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          apiKeyStorageProvider.overrideWithValue(fakeStorage),
-        ],
-        child: const MaterialApp(
-          home: SettingsPage(),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
+          child: const MaterialApp(home: SettingsPage()),
         ),
-      ),
-    );
+      );
 
-    // Allow async providers to settle
-    await tester.pumpAndSettle();
+      // Allow async providers to settle
+      await tester.pumpAndSettle();
 
-    // Verify sections and items
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Appearance'), findsOneWidget);
-    expect(find.text('Theme'), findsOneWidget);
-    expect(find.text('Choose light, dark, or system mode'), findsOneWidget);
+      // Verify sections and items
+      expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
+      expect(find.text('Choose light, dark, or system mode'), findsOneWidget);
 
-    // Verify API Configuration section
-    expect(find.text('API Configuration'), findsOneWidget);
-    expect(find.text('Gemini API Key'), findsOneWidget);
+      // Verify API Configuration section
+      expect(find.text('API Configuration'), findsOneWidget);
+      expect(find.text('Gemini API Key'), findsOneWidget);
 
-    // Verify SegmentedButton options
-    expect(find.text('Light'), findsOneWidget);
-    expect(find.text('Dark'), findsOneWidget);
-    expect(find.text('System'), findsOneWidget);
+      // Verify SegmentedButton options
+      expect(find.text('Light'), findsOneWidget);
+      expect(find.text('Dark'), findsOneWidget);
+      expect(find.text('System'), findsOneWidget);
 
-    expect(tester.takeException(), isNull);
-  });
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Tapping Gemini API Key opens ApiKeyDialog', (
     WidgetTester tester,
@@ -71,12 +68,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStorageProvider.overrideWithValue(fakeStorage),
-        ],
-        child: const MaterialApp(
-          home: SettingsPage(),
-        ),
+        overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
+        child: const MaterialApp(home: SettingsPage()),
       ),
     );
 
@@ -106,12 +99,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStorageProvider.overrideWithValue(fakeStorage),
-        ],
-        child: const MaterialApp(
-          home: SettingsPage(),
-        ),
+        overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
+        child: const MaterialApp(home: SettingsPage()),
       ),
     );
 

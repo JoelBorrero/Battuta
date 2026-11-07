@@ -26,13 +26,14 @@ abstract class ApiKeyStorage {
 /// Production implementation of [ApiKeyStorage] backed by [FlutterSecureStorage].
 class SecureApiKeyStorage extends ApiKeyStorage {
   SecureApiKeyStorage({FlutterSecureStorage? storage})
-      : _storage = storage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions.defaultOptions,
-              iOptions: IOSOptions(
-                accessibility: KeychainAccessibility.first_unlock,
-              ),
-            );
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions.defaultOptions,
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.first_unlock,
+            ),
+          );
 
   final FlutterSecureStorage _storage;
 

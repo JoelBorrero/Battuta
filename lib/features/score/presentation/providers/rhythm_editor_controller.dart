@@ -43,10 +43,7 @@ class RhythmCursor {
 
 /// State of the active rhythm editing session.
 class RhythmEditorState {
-  const RhythmEditorState({
-    required this.score,
-    this.cursor,
-  });
+  const RhythmEditorState({required this.score, this.cursor});
 
   final Score score;
   final RhythmCursor? cursor;
@@ -112,7 +109,7 @@ class RhythmEditorState {
 /// Controller managing rhythm input actions and cursor advancement.
 class RhythmEditorController extends ChangeNotifier {
   RhythmEditorController({required Score initialScore})
-      : _state = RhythmEditorState(score: initialScore) {
+    : _state = RhythmEditorState(score: initialScore) {
     _autoSelectFirstUnassignedNote();
   }
 
@@ -266,8 +263,9 @@ class RhythmEditorController extends ChangeNotifier {
   void _autoSelectFirstUnassignedNote() {
     for (final section in _state.score.sections) {
       for (final measure in section.measures) {
-        final unassignedIdx =
-            measure.events.indexWhere((e) => e.rhythmicValue.isUnassigned);
+        final unassignedIdx = measure.events.indexWhere(
+          (e) => e.rhythmicValue.isUnassigned,
+        );
         if (unassignedIdx != -1) {
           _state = _state.copyWith(
             cursor: RhythmCursor(
@@ -305,9 +303,11 @@ class RhythmEditorController extends ChangeNotifier {
     // 1. Search remaining notes in current measure
     final currentMeasure = _state.activeMeasure;
     if (currentMeasure != null) {
-      for (var i = cursor.eventIndex + 1;
-          i < currentMeasure.events.length;
-          i++) {
+      for (
+        var i = cursor.eventIndex + 1;
+        i < currentMeasure.events.length;
+        i++
+      ) {
         if (currentMeasure.events[i].rhythmicValue.isUnassigned) {
           _state = _state.copyWith(
             cursor: RhythmCursor(
@@ -332,8 +332,9 @@ class RhythmEditorController extends ChangeNotifier {
           continue;
         }
 
-        final unassignedIdx =
-            m.events.indexWhere((e) => e.rhythmicValue.isUnassigned);
+        final unassignedIdx = m.events.indexWhere(
+          (e) => e.rhythmicValue.isUnassigned,
+        );
         if (unassignedIdx != -1) {
           _state = _state.copyWith(
             cursor: RhythmCursor(

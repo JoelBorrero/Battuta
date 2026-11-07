@@ -65,15 +65,16 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                     children: [
                       Text(
                         'Transpose Song',
-                        style: Theme.of(modalCtx).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(modalCtx).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       TextButton(
                         onPressed: _transpositionSemitones == 0
                             ? null
                             : () {
-                                setModalState(() => _transpositionSemitones = 0);
+                                setModalState(
+                                  () => _transpositionSemitones = 0,
+                                );
                                 setState(() {});
                               },
                         child: const Text('Reset'),
@@ -88,9 +89,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(modalCtx)
-                            .colorScheme
-                            .primaryContainer
+                        color: Theme.of(modalCtx).colorScheme.primaryContainer
                             .withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -98,9 +97,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                         children: [
                           Text(
                             transposedSong.key,
-                            style: Theme.of(modalCtx)
-                                .textTheme
-                                .displaySmall
+                            style: Theme.of(modalCtx).textTheme.displaySmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(modalCtx)
@@ -179,9 +176,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
       await generator.shareLeadSheet(score);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to export PDF: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to export PDF: $e')));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -196,9 +192,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
       await exporter.shareMidiFile(score);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to export MIDI: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to export MIDI: $e')));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -233,9 +228,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     if (confirmed == true && mounted) {
       await ref.read(repertoireProvider.notifier).deleteSong(song.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deleted "${song.title}"')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Deleted "${song.title}"')));
         try {
           context.go('/repertoire');
         } catch (_) {
@@ -253,9 +247,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     final songAsync = ref.watch(songByIdProvider(widget.songId));
 
     return songAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, _) => Scaffold(
         appBar: AppBar(title: const Text('Song Detail')),
         body: Center(
@@ -264,12 +257,17 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: theme.colorScheme.error,
+                ),
                 const SizedBox(height: 12),
                 Text('Error loading song: $err', textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: () => ref.invalidate(songByIdProvider(widget.songId)),
+                  onPressed: () =>
+                      ref.invalidate(songByIdProvider(widget.songId)),
                   child: const Text('Retry'),
                 ),
               ],
@@ -315,7 +313,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               IconButton(
                 icon: const Icon(Icons.queue_music),
                 tooltip: 'Notation Editor',
-                onPressed: () => context.push('/repertoire/${song.id}/notation'),
+                onPressed: () =>
+                    context.push('/repertoire/${song.id}/notation'),
               ),
               IconButton(
                 icon: const Icon(Icons.picture_as_pdf_outlined),
@@ -345,7 +344,9 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               // ── Header Metadata Card ──
               Card(
                 elevation: 0,
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -475,8 +476,9 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                               ),
                               icon: const Icon(Icons.edit, size: 16),
                               label: const Text('Edit in Notation Editor'),
-                              onPressed: () => context
-                                  .push('/repertoire/${song.id}/notation'),
+                              onPressed: () => context.push(
+                                '/repertoire/${song.id}/notation',
+                              ),
                             ),
                           ],
                         ),
@@ -653,7 +655,9 @@ class _SectionDisplayCard extends StatelessWidget {
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       child: Column(
@@ -692,9 +696,7 @@ class _SectionDisplayCard extends StatelessWidget {
                 ),
                 child: Text(
                   lyrics,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    height: 1.5,
-                  ),
+                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
                 ),
               ),
             ],

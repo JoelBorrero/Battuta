@@ -136,72 +136,73 @@ abstract final class AppTheme {
 
   /// Dark mode [ColorScheme].
   static ColorScheme get darkColorScheme => const ColorScheme(
-        brightness: Brightness.dark,
-        primary: amberAccent,
-        onPrimary: obsidianText,
-        primaryContainer: Color(0xFF2E291B),
-        onPrimaryContainer: Color(0xFFFFD580),
-        secondary: textMuted,
-        onSecondary: slateBackground,
-        secondaryContainer: slateSurfaceLight,
-        onSecondaryContainer: textOffWhite,
-        tertiary: goldAccent,
-        onTertiary: obsidianText,
-        tertiaryContainer: Color(0xFF332710),
-        onTertiaryContainer: Color(0xFFFFE082),
-        surface: slateSurface,
-        onSurface: textOffWhite,
-        surfaceContainerLow: obsidian,
-        surfaceContainer: slateSurface,
-        surfaceContainerHigh: slateSurfaceLight,
-        surfaceContainerHighest: Color(0xFF33373E),
-        onSurfaceVariant: textMuted,
-        outline: slateBorder,
-        outlineVariant: slateBorderSubtle,
-        error: stageRed,
-        onError: obsidianText,
-        errorContainer: Color(0xFF3E1E1E),
-        onErrorContainer: Color(0xFFFFB4AB),
-        shadow: Colors.transparent, // Anti-Material: No drop shadows
-        scrim: Color(0xCC0E1013),
-      );
+    brightness: Brightness.dark,
+    primary: amberAccent,
+    onPrimary: obsidianText,
+    primaryContainer: Color(0xFF2E291B),
+    onPrimaryContainer: Color(0xFFFFD580),
+    secondary: textMuted,
+    onSecondary: slateBackground,
+    secondaryContainer: slateSurfaceLight,
+    onSecondaryContainer: textOffWhite,
+    tertiary: goldAccent,
+    onTertiary: obsidianText,
+    tertiaryContainer: Color(0xFF332710),
+    onTertiaryContainer: Color(0xFFFFE082),
+    surface: slateSurface,
+    onSurface: textOffWhite,
+    surfaceContainerLow: obsidian,
+    surfaceContainer: slateSurface,
+    surfaceContainerHigh: slateSurfaceLight,
+    surfaceContainerHighest: Color(0xFF33373E),
+    onSurfaceVariant: textMuted,
+    outline: slateBorder,
+    outlineVariant: slateBorderSubtle,
+    error: stageRed,
+    onError: obsidianText,
+    errorContainer: Color(0xFF3E1E1E),
+    onErrorContainer: Color(0xFFFFB4AB),
+    shadow: Colors.transparent, // Anti-Material: No drop shadows
+    scrim: Color(0xCC0E1013),
+  );
 
   /// Light mode [ColorScheme] (Pearl, Pure White, Charcoal, and Amber).
   static ColorScheme get lightColorScheme => const ColorScheme(
-        brightness: Brightness.light,
-        primary: amberAccent,
-        onPrimary: obsidianText,
-        primaryContainer: Color(0xFFFFF3D6),
-        onPrimaryContainer: Color(0xFF5C3C00),
-        secondary: charcoalMuted,
-        onSecondary: pureWhiteSurface,
-        secondaryContainer: pearlSurfaceLight,
-        onSecondaryContainer: charcoalText,
-        tertiary: goldAccent,
-        onTertiary: obsidianText,
-        tertiaryContainer: Color(0xFFFFF8E1),
-        onTertiaryContainer: Color(0xFF664D00),
-        surface: pureWhiteSurface,
-        onSurface: charcoalText,
-        surfaceContainerLow: pearlBackground,
-        surfaceContainer: pureWhiteSurface,
-        surfaceContainerHigh: pearlSurfaceLight,
-        surfaceContainerHighest: Color(0xFFE9ECEF),
-        onSurfaceVariant: charcoalMuted,
-        outline: pearlBorder,
-        outlineVariant: pearlBorderSubtle,
-        error: stageRed,
-        onError: pureWhiteSurface,
-        errorContainer: Color(0xFFFFEBEE),
-        onErrorContainer: Color(0xFFC62828),
-        shadow: Colors.transparent, // Anti-Material: No drop shadows
-        scrim: Color(0x66000000),
-      );
+    brightness: Brightness.light,
+    primary: amberAccent,
+    onPrimary: obsidianText,
+    primaryContainer: Color(0xFFFFF3D6),
+    onPrimaryContainer: Color(0xFF5C3C00),
+    secondary: charcoalMuted,
+    onSecondary: pureWhiteSurface,
+    secondaryContainer: pearlSurfaceLight,
+    onSecondaryContainer: charcoalText,
+    tertiary: goldAccent,
+    onTertiary: obsidianText,
+    tertiaryContainer: Color(0xFFFFF8E1),
+    onTertiaryContainer: Color(0xFF664D00),
+    surface: pureWhiteSurface,
+    onSurface: charcoalText,
+    surfaceContainerLow: pearlBackground,
+    surfaceContainer: pureWhiteSurface,
+    surfaceContainerHigh: pearlSurfaceLight,
+    surfaceContainerHighest: Color(0xFFE9ECEF),
+    onSurfaceVariant: charcoalMuted,
+    outline: pearlBorder,
+    outlineVariant: pearlBorderSubtle,
+    error: stageRed,
+    onError: pureWhiteSurface,
+    errorContainer: Color(0xFFFFEBEE),
+    onErrorContainer: Color(0xFFC62828),
+    shadow: Colors.transparent, // Anti-Material: No drop shadows
+    scrim: Color(0x66000000),
+  );
 
   // ── 5. TextTheme Builder ─────────────────────────────────────────────
 
   /// Default dark [TextTheme].
-  static TextTheme get textTheme => _buildTextTheme(brightness: Brightness.dark);
+  static TextTheme get textTheme =>
+      _buildTextTheme(brightness: Brightness.dark);
 
   static TextTheme _buildTextTheme({required Brightness brightness}) {
     final bool isDark = brightness == Brightness.dark;
@@ -358,11 +359,9 @@ abstract final class AppTheme {
     return BoxDecoration(
       color: color ?? (isDark ? slateSurface : pureWhiteSurface),
       borderRadius: borderRadius ?? BorderRadius.circular(10),
-      border: border ??
-          Border.all(
-            color: isDark ? slateBorder : pearlBorder,
-            width: 1,
-          ),
+      border:
+          border ??
+          Border.all(color: isDark ? slateBorder : pearlBorder, width: 1),
     );
   }
 
@@ -428,9 +427,7 @@ abstract final class AppTheme {
           disabledForegroundColor: textDim,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -449,9 +446,7 @@ abstract final class AppTheme {
           foregroundColor: obsidianText,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -468,9 +463,7 @@ abstract final class AppTheme {
           side: const BorderSide(color: slateBorder, width: 1),
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -485,9 +478,7 @@ abstract final class AppTheme {
           foregroundColor: amberAccent,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -560,9 +551,7 @@ abstract final class AppTheme {
         backgroundColor: slateBackground,
         foregroundColor: textOffWhite,
         surfaceTintColor: Colors.transparent,
-        shape: const Border(
-          bottom: BorderSide(color: slateBorder, width: 1),
-        ),
+        shape: const Border(bottom: BorderSide(color: slateBorder, width: 1)),
         titleTextStyle: typography.titleLarge?.copyWith(
           color: textOffWhite,
           fontWeight: FontWeight.w500,
@@ -628,9 +617,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: slateBorder, width: 1),
         ),
-        titleTextStyle: typography.titleLarge?.copyWith(
-          color: textOffWhite,
-        ),
+        titleTextStyle: typography.titleLarge?.copyWith(color: textOffWhite),
       ),
 
       // ── Input Decoration Theme ───────────────────────────────────────
@@ -657,9 +644,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: stageRed, width: 1),
         ),
-        hintStyle: typography.bodyMedium?.copyWith(
-          color: textDim,
-        ),
+        hintStyle: typography.bodyMedium?.copyWith(color: textDim),
       ),
 
       // ── Segmented Button Theme ───────────────────────────────────────
@@ -683,9 +668,7 @@ abstract final class AppTheme {
             BorderSide(color: slateBorder, width: 1),
           ),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
         ),
       ),
@@ -696,12 +679,8 @@ abstract final class AppTheme {
         pressElevation: 0,
         backgroundColor: slateSurface,
         selectedColor: amberMuted,
-        labelStyle: typography.labelMedium?.copyWith(
-          color: textOffWhite,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        labelStyle: typography.labelMedium?.copyWith(color: textOffWhite),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         side: const BorderSide(color: slateBorder, width: 1),
       ),
 
@@ -713,9 +692,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(8),
           side: const BorderSide(color: slateBorder, width: 1),
         ),
-        textStyle: typography.bodyMedium?.copyWith(
-          color: textOffWhite,
-        ),
+        textStyle: typography.bodyMedium?.copyWith(color: textOffWhite),
       ),
 
       // ── SnackBar Theme ───────────────────────────────────────────────
@@ -727,9 +704,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(8),
           side: const BorderSide(color: slateBorder, width: 1),
         ),
-        contentTextStyle: typography.bodyMedium?.copyWith(
-          color: textOffWhite,
-        ),
+        contentTextStyle: typography.bodyMedium?.copyWith(color: textOffWhite),
       ),
 
       // ── Floating Action Button Theme ─────────────────────────────────
@@ -741,9 +716,7 @@ abstract final class AppTheme {
         backgroundColor: amberAccent,
         foregroundColor: obsidianText,
         splashColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -795,9 +768,7 @@ abstract final class AppTheme {
           disabledForegroundColor: charcoalDim,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -816,9 +787,7 @@ abstract final class AppTheme {
           foregroundColor: obsidianText,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -835,9 +804,7 @@ abstract final class AppTheme {
           side: const BorderSide(color: pearlBorder, width: 1),
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -852,9 +819,7 @@ abstract final class AppTheme {
           foregroundColor: amberAccentLightText,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
@@ -929,9 +894,7 @@ abstract final class AppTheme {
         backgroundColor: pearlBackground,
         foregroundColor: charcoalText,
         surfaceTintColor: Colors.transparent,
-        shape: const Border(
-          bottom: BorderSide(color: pearlBorder, width: 1),
-        ),
+        shape: const Border(bottom: BorderSide(color: pearlBorder, width: 1)),
         titleTextStyle: typography.titleLarge?.copyWith(
           color: charcoalText,
           fontWeight: FontWeight.w500,
@@ -997,9 +960,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: pearlBorder, width: 1),
         ),
-        titleTextStyle: typography.titleLarge?.copyWith(
-          color: charcoalText,
-        ),
+        titleTextStyle: typography.titleLarge?.copyWith(color: charcoalText),
       ),
 
       // ── Input Decoration Theme ───────────────────────────────────────
@@ -1026,9 +987,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: stageRed, width: 1),
         ),
-        hintStyle: typography.bodyMedium?.copyWith(
-          color: charcoalDim,
-        ),
+        hintStyle: typography.bodyMedium?.copyWith(color: charcoalDim),
       ),
 
       // ── Segmented Button Theme ───────────────────────────────────────
@@ -1052,9 +1011,7 @@ abstract final class AppTheme {
             BorderSide(color: pearlBorder, width: 1),
           ),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
         ),
       ),
@@ -1065,12 +1022,8 @@ abstract final class AppTheme {
         pressElevation: 0,
         backgroundColor: pureWhiteSurface,
         selectedColor: amberMuted,
-        labelStyle: typography.labelMedium?.copyWith(
-          color: charcoalText,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        labelStyle: typography.labelMedium?.copyWith(color: charcoalText),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         side: const BorderSide(color: pearlBorder, width: 1),
       ),
 
@@ -1082,9 +1035,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(8),
           side: const BorderSide(color: pearlBorder, width: 1),
         ),
-        textStyle: typography.bodyMedium?.copyWith(
-          color: charcoalText,
-        ),
+        textStyle: typography.bodyMedium?.copyWith(color: charcoalText),
       ),
 
       // ── SnackBar Theme ───────────────────────────────────────────────
@@ -1096,9 +1047,7 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(8),
           side: const BorderSide(color: slateBorder, width: 1),
         ),
-        contentTextStyle: typography.bodyMedium?.copyWith(
-          color: textOffWhite,
-        ),
+        contentTextStyle: typography.bodyMedium?.copyWith(color: textOffWhite),
       ),
 
       // ── Floating Action Button Theme ─────────────────────────────────
@@ -1110,9 +1059,7 @@ abstract final class AppTheme {
         backgroundColor: amberAccent,
         foregroundColor: obsidianText,
         splashColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

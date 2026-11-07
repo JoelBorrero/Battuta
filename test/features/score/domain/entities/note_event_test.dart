@@ -75,7 +75,10 @@ void main() {
       expect(e1.hashCode, equals(e2.hashCode));
       expect(e1.toString(), contains('C4'));
 
-      const rest = NoteEvent.rest(id: 'r1', rhythmicValue: RhythmicValue.quarter);
+      const rest = NoteEvent.rest(
+        id: 'r1',
+        rhythmicValue: RhythmicValue.quarter,
+      );
       expect(rest.toString(), contains('rest'));
     });
   });

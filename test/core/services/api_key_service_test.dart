@@ -53,10 +53,7 @@ void main() {
         when(() => mockStorage.read(geminiStorageKey))
             .thenAnswer((_) async => null);
 
-        final service = ApiKeyService(
-          storage: mockStorage,
-          envOverrides: {},
-        );
+        final service = ApiKeyService(storage: mockStorage, envOverrides: {});
 
         final key = await service.getActiveGeminiKey();
         final source = await service.getGeminiKeySource();
@@ -72,10 +69,7 @@ void main() {
         when(() => mockStorage.write(geminiStorageKey, any()))
             .thenAnswer((_) async {});
 
-        final service = ApiKeyService(
-          storage: mockStorage,
-          envOverrides: {},
-        );
+        final service = ApiKeyService(storage: mockStorage, envOverrides: {});
 
         await service.setCustomGeminiKey(validKey);
 
@@ -83,10 +77,7 @@ void main() {
       });
 
       test('throws ArgumentError on invalid key formats', () async {
-        final service = ApiKeyService(
-          storage: mockStorage,
-          envOverrides: {},
-        );
+        final service = ApiKeyService(storage: mockStorage, envOverrides: {});
 
         // Too short (< 20 chars)
         expect(
@@ -101,10 +92,7 @@ void main() {
         );
 
         // Empty
-        expect(
-          () => service.setCustomGeminiKey(''),
-          throwsArgumentError,
-        );
+        expect(() => service.setCustomGeminiKey(''), throwsArgumentError);
 
         verifyNever(() => mockStorage.write(any(), any()));
       });
@@ -113,10 +101,7 @@ void main() {
         when(() => mockStorage.delete(geminiStorageKey))
             .thenAnswer((_) async {});
 
-        final service = ApiKeyService(
-          storage: mockStorage,
-          envOverrides: {},
-        );
+        final service = ApiKeyService(storage: mockStorage, envOverrides: {});
 
         await service.clearCustomGeminiKey();
 

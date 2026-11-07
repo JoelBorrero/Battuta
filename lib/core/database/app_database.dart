@@ -70,7 +70,7 @@ class Scores extends Table {
 @DriftDatabase(tables: [Songs, Setlists, Scores])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
-      : super(executor ?? driftDatabase(name: 'battuta_offline_db'));
+    : super(executor ?? driftDatabase(name: 'battuta_offline_db'));
 
   @override
   int get schemaVersion => 1;

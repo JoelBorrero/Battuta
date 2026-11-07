@@ -37,11 +37,9 @@ abstract class ImageCaptureService {
 
 /// Concrete [ImageCaptureService] utilizing [ImagePicker] and [ImageCropper].
 class DefaultImageCaptureService implements ImageCaptureService {
-  DefaultImageCaptureService({
-    ImagePicker? picker,
-    ImageCropper? cropper,
-  })  : _picker = picker ?? ImagePicker(),
-        _cropper = cropper ?? ImageCropper();
+  DefaultImageCaptureService({ImagePicker? picker, ImageCropper? cropper})
+    : _picker = picker ?? ImagePicker(),
+      _cropper = cropper ?? ImageCropper();
 
   final ImagePicker _picker;
   final ImageCropper _cropper;

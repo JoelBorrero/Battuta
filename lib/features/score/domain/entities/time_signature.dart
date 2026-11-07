@@ -16,10 +16,12 @@ class TimeSignature {
   /// [numerator] is the count of beats per measure (must be > 0).
   /// [denominator] is the note value representing one beat (must be a power of 2).
   const TimeSignature(this.numerator, this.denominator)
-      : assert(numerator > 0, 'Numerator must be greater than zero'),
-        assert(denominator > 0, 'Denominator must be greater than zero'),
-        assert((denominator & (denominator - 1)) == 0,
-            'Denominator must be a power of 2 (1, 2, 4, 8, 16, 32)');
+    : assert(numerator > 0, 'Numerator must be greater than zero'),
+      assert(denominator > 0, 'Denominator must be greater than zero'),
+      assert(
+        (denominator & (denominator - 1)) == 0,
+        'Denominator must be a power of 2 (1, 2, 4, 8, 16, 32)',
+      );
 
   /// Number of beats per measure (e.g., 4 in 4/4, 3 in 3/4, 6 in 6/8).
   final int numerator;
@@ -29,9 +31,9 @@ class TimeSignature {
 
   /// Converts this [TimeSignature] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'numerator': numerator,
-        'denominator': denominator,
-      };
+    'numerator': numerator,
+    'denominator': denominator,
+  };
 
   /// Constructs a [TimeSignature] from a JSON map.
   factory TimeSignature.fromJson(Map<String, dynamic> json) =>
@@ -135,7 +137,8 @@ class TimeSignature {
 
     if (num == null || den == null) {
       throw FormatException(
-          'Time signature components must be integers: "$text"');
+        'Time signature components must be integers: "$text"',
+      );
     }
 
     return TimeSignature(num, den);

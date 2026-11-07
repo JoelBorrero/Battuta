@@ -62,12 +62,8 @@ class PitchOnlyResult {
           _listEquals(measures, other.measures);
 
   @override
-  int get hashCode => Object.hash(
-        sectionName,
-        assumedClef,
-        warning,
-        Object.hashAll(measures),
-      );
+  int get hashCode =>
+      Object.hash(sectionName, assumedClef, warning, Object.hashAll(measures));
 
   @override
   String toString() =>

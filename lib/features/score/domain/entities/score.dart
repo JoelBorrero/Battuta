@@ -22,7 +22,7 @@ class Score {
     this.tempo = 120,
     this.sections = const [],
     this.metadata = const {},
-  })  : assert(tempo > 0 && tempo <= 400, 'tempo must be between 1 and 400 BPM');
+  }) : assert(tempo > 0 && tempo <= 400, 'tempo must be between 1 and 400 BPM');
 
   /// Unique identifier for this score.
   final String id;
@@ -53,35 +53,35 @@ class Score {
 
   /// Converts this [Score] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'composer': composer,
-        'artist': artist,
-        'timeSignature': timeSignature.toJson(),
-        'keySignature': keySignature,
-        'tempo': tempo,
-        'sections': sections.map((s) => s.toJson()).toList(),
-        'metadata': metadata,
-      };
+    'id': id,
+    'title': title,
+    'composer': composer,
+    'artist': artist,
+    'timeSignature': timeSignature.toJson(),
+    'keySignature': keySignature,
+    'tempo': tempo,
+    'sections': sections.map((s) => s.toJson()).toList(),
+    'metadata': metadata,
+  };
 
   /// Constructs a [Score] from a JSON map.
   factory Score.fromJson(Map<String, dynamic> json) => Score(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        composer: json['composer'] as String?,
-        artist: json['artist'] as String?,
-        timeSignature: json['timeSignature'] != null
-            ? TimeSignature.fromJson(
-                json['timeSignature'] as Map<String, dynamic>)
-            : TimeSignature.fourFour,
-        keySignature: json['keySignature'] as String? ?? 'C',
-        tempo: json['tempo'] as int? ?? 120,
-        sections: (json['sections'] as List<dynamic>?)
-                ?.map((s) => Section.fromJson(s as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        metadata: (json['metadata'] as Map<String, dynamic>?) ?? const {},
-      );
+    id: json['id'] as String,
+    title: json['title'] as String,
+    composer: json['composer'] as String?,
+    artist: json['artist'] as String?,
+    timeSignature: json['timeSignature'] != null
+        ? TimeSignature.fromJson(json['timeSignature'] as Map<String, dynamic>)
+        : TimeSignature.fourFour,
+    keySignature: json['keySignature'] as String? ?? 'C',
+    tempo: json['tempo'] as int? ?? 120,
+    sections:
+        (json['sections'] as List<dynamic>?)
+            ?.map((s) => Section.fromJson(s as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    metadata: (json['metadata'] as Map<String, dynamic>?) ?? const {},
+  );
 
   // ---------------------------------------------------------------------------
   // Traversal & Metric Helpers
@@ -104,8 +104,8 @@ class Score {
     if (tempo == 0 || totalTicks == 0) return Duration.zero;
     // 480 ticks = 1 quarter-note beat.
     // seconds = (ticks / 480) * (60 / tempo)
-    final totalMilliseconds =
-        ((totalTicks / 480.0) * (60000.0 / tempo)).round();
+    final totalMilliseconds = ((totalTicks / 480.0) * (60000.0 / tempo))
+        .round();
     return Duration(milliseconds: totalMilliseconds);
   }
 
@@ -187,15 +187,15 @@ class Score {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        title,
-        composer,
-        artist,
-        timeSignature,
-        keySignature,
-        tempo,
-        Object.hashAll(sections),
-      );
+    id,
+    title,
+    composer,
+    artist,
+    timeSignature,
+    keySignature,
+    tempo,
+    Object.hashAll(sections),
+  );
 
   @override
   String toString() =>
@@ -210,4 +210,3 @@ class Score {
     return true;
   }
 }
-

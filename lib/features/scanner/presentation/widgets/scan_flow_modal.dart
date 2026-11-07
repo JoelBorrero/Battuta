@@ -37,7 +37,9 @@ class ScanFlowModal extends ConsumerWidget {
       return showDialog<void>(
         context: context,
         builder: (_) => Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 580, maxHeight: 680),
             child: ScanFlowModal(
@@ -152,7 +154,9 @@ class ScanFlowModal extends ConsumerWidget {
                   const SizedBox(height: 20),
                   Card(
                     elevation: 0,
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
@@ -307,7 +311,9 @@ class ScanFlowModal extends ConsumerWidget {
                         const SizedBox(height: 8),
                         if (state.extractedScore != null) ...[
                           Text('Title: ${state.extractedScore!.title}'),
-                          Text('Sections: ${state.extractedScore!.sections.length}'),
+                          Text(
+                            'Sections: ${state.extractedScore!.sections.length}',
+                          ),
                           const SizedBox(height: 12),
                           FilledButton.tonal(
                             onPressed: () {
@@ -317,12 +323,18 @@ class ScanFlowModal extends ConsumerWidget {
                             child: const Text('Open in Repertoire'),
                           ),
                         ] else if (state.extractedPitchResult != null) ...[
-                          Text('Section: ${state.extractedPitchResult!.sectionName}'),
-                          Text('Measures: ${state.extractedPitchResult!.totalMeasures}'),
+                          Text(
+                            'Section: ${state.extractedPitchResult!.sectionName}',
+                          ),
+                          Text(
+                            'Measures: ${state.extractedPitchResult!.totalMeasures}',
+                          ),
                           const SizedBox(height: 12),
                           FilledButton.tonal(
                             onPressed: () {
-                              onSectionExtracted?.call(state.extractedPitchResult!);
+                              onSectionExtracted?.call(
+                                state.extractedPitchResult!,
+                              );
                               Navigator.of(context).pop();
                             },
                             child: const Text('Open in Rhythm Editor'),

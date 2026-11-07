@@ -67,10 +67,8 @@ class SystemAudioTonePlayer implements AudioTonePlayer {
 
 /// Synthesizes acoustic musical tones for pitch auditioning and score playback.
 class ToneSynthesizer {
-  ToneSynthesizer({
-    AudioTonePlayer? player,
-    this.sampleRate = 44100,
-  }) : player = player ?? SystemAudioTonePlayer();
+  ToneSynthesizer({AudioTonePlayer? player, this.sampleRate = 44100})
+    : player = player ?? SystemAudioTonePlayer();
 
   final AudioTonePlayer player;
   final int sampleRate;
@@ -96,8 +94,8 @@ class ToneSynthesizer {
     required Duration duration,
     double volume = 0.85,
   }) {
-    final numSamples =
-        (sampleRate * (duration.inMicroseconds / 1000000.0)).round();
+    final numSamples = (sampleRate * (duration.inMicroseconds / 1000000.0))
+        .round();
     final dataSize = numSamples * 2; // 16-bit mono = 2 bytes per sample
     final totalFileSize = 36 + dataSize;
 
@@ -138,8 +136,10 @@ class ToneSynthesizer {
     final totalSeconds = duration.inMicroseconds / 1000000.0;
     const attackTime = 0.008; // 8ms linear attack to eliminate clicks
     const releaseTime = 0.015; // 15ms linear release
-    final sustainTime =
-        math.max(0.001, totalSeconds - attackTime - releaseTime);
+    final sustainTime = math.max(
+      0.001,
+      totalSeconds - attackTime - releaseTime,
+    );
 
     final omega = 2.0 * math.pi * frequencyHz;
 

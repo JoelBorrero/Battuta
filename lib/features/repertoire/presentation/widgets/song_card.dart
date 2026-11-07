@@ -148,10 +148,8 @@ class _Badge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(context).textTheme.labelSmall
+                ?.copyWith(color: textColor, fontWeight: FontWeight.w600),
           ),
         ],
       ),

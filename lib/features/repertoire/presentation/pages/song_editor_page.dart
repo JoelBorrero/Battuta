@@ -141,9 +141,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     _tapTimestamps.add(now);
 
     // Keep taps from the last 3 seconds only
-    _tapTimestamps.removeWhere(
-      (t) => now.difference(t).inMilliseconds > 3000,
-    );
+    _tapTimestamps.removeWhere((t) => now.difference(t).inMilliseconds > 3000);
 
     if (_tapTimestamps.length >= 2) {
       var totalDeltaMs = 0;
@@ -209,8 +207,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     setState(() => _isSaving = true);
 
     try {
-      final songId = widget.songId ??
-          'song_${DateTime.now().millisecondsSinceEpoch}';
+      final songId =
+          widget.songId ?? 'song_${DateTime.now().millisecondsSinceEpoch}';
 
       final finalSections = <SongSection>[];
       for (var i = 0; i < _sections.length; i++) {
@@ -317,9 +315,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     if (confirmed == true && mounted) {
       await ref.read(repertoireProvider.notifier).deleteSong(widget.songId!);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Song deleted')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Song deleted')));
         try {
           context.go('/repertoire');
         } catch (_) {
@@ -339,9 +336,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     if (isEditing && !_initialized) {
       final songAsync = ref.watch(songByIdProvider(widget.songId!));
       return songAsync.when(
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        loading: () =>
+            const Scaffold(body: Center(child: CircularProgressIndicator())),
         error: (err, _) => Scaffold(
           appBar: AppBar(title: const Text('Edit Song')),
           body: Center(child: Text('Error loading song: $err')),
@@ -431,7 +427,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             // ── Musical Attributes (Key, Tempo, Meter) ──
             Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
@@ -451,8 +449,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                           flex: 3,
                           child: DropdownButtonFormField<String>(
                             key: const Key('song_key_dropdown'),
-                            initialValue: MusicalKey.allKeys
-                                    .any((k) => k.name == _selectedKey)
+                            initialValue:
+                                MusicalKey.allKeys.any(
+                                  (k) => k.name == _selectedKey,
+                                )
                                 ? _selectedKey
                                 : MusicalKey.cMajor.name,
                             decoration: const InputDecoration(
@@ -468,7 +468,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                                 value: k.name,
                                 child: Text(
                                   k.name,
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -693,7 +695,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     totalSections: _sections.length,
                     section: section,
                     onDelete: () => _removeSection(index),
-                    onMoveUp: index > 0 ? () => _moveSection(index, index - 1) : null,
+                    onMoveUp: index > 0
+                        ? () => _moveSection(index, index - 1)
+                        : null,
                     onMoveDown: index < _sections.length - 1
                         ? () => _moveSection(index, index + 1)
                         : null,
@@ -718,12 +722,12 @@ class _EditableSection {
     required String lyrics,
     String rehearsalNotes = '',
     this.repeatCount = 1,
-  })  : nameController = TextEditingController(text: name),
-        lyricsController = TextEditingController(text: lyrics),
-        notesController = TextEditingController(text: rehearsalNotes),
-        quickChordsController = TextEditingController(
-          text: chords.map((c) => c.displayLabel).join(' '),
-        );
+  }) : nameController = TextEditingController(text: name),
+       lyricsController = TextEditingController(text: lyrics),
+       notesController = TextEditingController(text: rehearsalNotes),
+       quickChordsController = TextEditingController(
+         text: chords.map((c) => c.displayLabel).join(' '),
+       );
 
   final String id;
   final TextEditingController nameController;
@@ -795,10 +799,31 @@ class _SectionCardState extends State<_SectionCard> {
                     DropdownButtonFormField<String>(
                       initialValue: root,
                       decoration: const InputDecoration(labelText: 'Root Note'),
-                      items: const [
-                        'C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F',
-                        'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B',
-                      ].map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+                      items:
+                          const [
+                                'C',
+                                'C#',
+                                'Db',
+                                'D',
+                                'D#',
+                                'Eb',
+                                'E',
+                                'F',
+                                'F#',
+                                'Gb',
+                                'G',
+                                'G#',
+                                'Ab',
+                                'A',
+                                'A#',
+                                'Bb',
+                                'B',
+                              ]
+                              .map(
+                                (r) =>
+                                    DropdownMenuItem(value: r, child: Text(r)),
+                              )
+                              .toList(),
                       onChanged: (val) {
                         if (val != null) setDialogState(() => root = val);
                       },
@@ -808,10 +833,12 @@ class _SectionCardState extends State<_SectionCard> {
                       initialValue: quality,
                       decoration: const InputDecoration(labelText: 'Quality'),
                       items: ChordQuality.values
-                          .map((q) => DropdownMenuItem(
-                                value: q,
-                                child: Text('${q.displayName} (${q.symbol})'),
-                              ))
+                          .map(
+                            (q) => DropdownMenuItem(
+                              value: q,
+                              child: Text('${q.displayName} (${q.symbol})'),
+                            ),
+                          )
                           .toList(),
                       onChanged: (val) {
                         if (val != null) setDialogState(() => quality = val);
@@ -824,9 +851,26 @@ class _SectionCardState extends State<_SectionCard> {
                         labelText: 'Bass Note (Slash Chord)',
                       ),
                       items: [
-                        const DropdownMenuItem(value: null, child: Text('None')),
-                        ...['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
-                            .map((b) => DropdownMenuItem(value: b, child: Text(b))),
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('None'),
+                        ),
+                        ...[
+                          'C',
+                          'C#',
+                          'D',
+                          'Eb',
+                          'E',
+                          'F',
+                          'F#',
+                          'G',
+                          'Ab',
+                          'A',
+                          'Bb',
+                          'B',
+                        ].map(
+                          (b) => DropdownMenuItem(value: b, child: Text(b)),
+                        ),
                       ],
                       onChanged: (val) => setDialogState(() => bass = val),
                     ),
@@ -840,7 +884,8 @@ class _SectionCardState extends State<_SectionCard> {
                             child: ChoiceChip(
                               label: Text('$b'),
                               selected: beats == b,
-                              onSelected: (_) => setDialogState(() => beats = b),
+                              onSelected: (_) =>
+                                  setDialogState(() => beats = b),
                             ),
                           ),
                       ],
@@ -863,8 +908,11 @@ class _SectionCardState extends State<_SectionCard> {
                     );
                     setState(() {
                       widget.section.chords.add(chord);
-                      widget.section.quickChordsController.text =
-                          widget.section.chords.map((c) => c.displayLabel).join(' ');
+                      widget.section.quickChordsController.text = widget
+                          .section
+                          .chords
+                          .map((c) => c.displayLabel)
+                          .join(' ');
                     });
                     widget.onChordsUpdated();
                     Navigator.of(dialogCtx).pop();
@@ -952,7 +1000,11 @@ class _SectionCardState extends State<_SectionCard> {
 
                 // Delete Section
                 IconButton(
-                  icon: Icon(Icons.delete, color: theme.colorScheme.error, size: 20),
+                  icon: Icon(
+                    Icons.delete,
+                    color: theme.colorScheme.error,
+                    size: 20,
+                  ),
                   tooltip: 'Delete Section',
                   onPressed: widget.onDelete,
                 ),
@@ -968,7 +1020,8 @@ class _SectionCardState extends State<_SectionCard> {
                     controller: sec.quickChordsController,
                     decoration: InputDecoration(
                       labelText: 'Chords (e.g. C | G/B | Am | F)',
-                      hintText: 'Type chord symbols separated by spaces or bars',
+                      hintText:
+                          'Type chord symbols separated by spaces or bars',
                       isDense: true,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
@@ -1006,8 +1059,9 @@ class _SectionCardState extends State<_SectionCard> {
                       onDeleted: () {
                         setState(() {
                           sec.chords.removeAt(cIdx);
-                          sec.quickChordsController.text =
-                              sec.chords.map((c) => c.displayLabel).join(' ');
+                          sec.quickChordsController.text = sec.chords
+                              .map((c) => c.displayLabel)
+                              .join(' ');
                         });
                         widget.onChordsUpdated();
                       },

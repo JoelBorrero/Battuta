@@ -7,6 +7,7 @@
 library;
 
 import 'dart:typed_data';
+
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/domain/entities/chord_symbol.dart';
 import 'package:battuta/features/score/domain/entities/measure.dart';
@@ -81,9 +82,7 @@ void main() {
     final m2 = Measure(
       number: 2,
       timeSignature: timeSignature,
-      chords: const [
-        ChordSymbol(root: 'C#', quality: 'm7', tickOffset: 0),
-      ],
+      chords: const [ChordSymbol(root: 'C#', quality: 'm7', tickOffset: 0)],
       events: const [
         NoteEvent.note(
           id: 'n5',
@@ -103,9 +102,7 @@ void main() {
     final m3 = Measure(
       number: 3,
       timeSignature: timeSignature,
-      chords: const [
-        ChordSymbol(root: 'A', quality: '2', tickOffset: 0),
-      ],
+      chords: const [ChordSymbol(root: 'A', quality: '2', tickOffset: 0)],
       events: const [
         NoteEvent.note(
           id: 'n6',
@@ -221,9 +218,7 @@ void main() {
   }
 
   group('Printable PDF Lead Sheet Generator (ClickUp 86e3yy42h)', () {
-    test(
-        '(Checklist Requirement) Generates standard Letter PDF ready for AirPrint on iPadOS/macOS',
-        () async {
+    test('(Checklist Requirement) Generates standard Letter PDF ready for AirPrint on iPadOS/macOS', () async {
       final score = buildTestScore();
 
       final bytes = await generator.generatePdfBytes(
@@ -239,9 +234,7 @@ void main() {
       expect(header.startsWith('%PDF-1.'), isTrue);
     });
 
-    test(
-        '(Checklist Requirement) Generates standard A4 PDF ready for international printing and sharing',
-        () async {
+    test('(Checklist Requirement) Generates standard A4 PDF ready for international printing and sharing', () async {
       final score = buildTestScore();
 
       final bytes = await generator.generatePdfBytes(
@@ -255,9 +248,7 @@ void main() {
       expect(header.startsWith('%PDF-1.'), isTrue);
     });
 
-    test(
-        'Builds Document containing metadata, section navigation boxes, and repeat barlines',
-        () async {
+    test('Builds Document containing metadata, section navigation boxes, and repeat barlines', () async {
       final score = buildTestScore();
 
       final doc = generator.buildDocument(score);
@@ -267,29 +258,33 @@ void main() {
       expect(bytes.length, greaterThan(500));
     });
 
-    test('Renders lead sheet without staff melodies when melody toggle is false',
-        () async {
-      final score = buildTestScore();
+    test(
+      'Renders lead sheet without staff melodies when melody toggle is false',
+      () async {
+        final score = buildTestScore();
 
-      final bytes = await generator.generatePdfBytes(
-        score,
-        options: const PdfLeadSheetOptions(includeStaffMelodies: false),
-      );
+        final bytes = await generator.generatePdfBytes(
+          score,
+          options: const PdfLeadSheetOptions(includeStaffMelodies: false),
+        );
 
-      expect(bytes.length, greaterThan(500));
-    });
+        expect(bytes.length, greaterThan(500));
+      },
+    );
 
-    test('Renders custom measuresPerSystem layout (e.g. 2 bars per system)',
-        () async {
-      final score = buildTestScore();
+    test(
+      'Renders custom measuresPerSystem layout (e.g. 2 bars per system)',
+      () async {
+        final score = buildTestScore();
 
-      final bytes = await generator.generatePdfBytes(
-        score,
-        options: const PdfLeadSheetOptions(measuresPerSystem: 2),
-      );
+        final bytes = await generator.generatePdfBytes(
+          score,
+          options: const PdfLeadSheetOptions(measuresPerSystem: 2),
+        );
 
-      expect(bytes.length, greaterThan(500));
-    });
+        expect(bytes.length, greaterThan(500));
+      },
+    );
 
     test('Renders 3/4 time signature and compound meters cleanly', () async {
       const score = Score(
@@ -342,16 +337,15 @@ void main() {
       expect(bytes.length, greaterThan(500));
     });
 
-    test('Renders empty score gracefully without throwing exceptions',
-        () async {
-      const emptyScore = Score(
-        id: 'score-empty',
-        title: 'Empty Lead Sheet',
-      );
+    test(
+      'Renders empty score gracefully without throwing exceptions',
+      () async {
+        const emptyScore = Score(id: 'score-empty', title: 'Empty Lead Sheet');
 
-      final bytes = await generator.generatePdfBytes(emptyScore);
-      expect(bytes.length, greaterThan(200));
-    });
+        final bytes = await generator.generatePdfBytes(emptyScore);
+        expect(bytes.length, greaterThan(200));
+      },
+    );
 
     test('Handles long multi-section scores spanning multiple pages', () async {
       final manySections = List.generate(
@@ -364,7 +358,9 @@ void main() {
             8,
             (m) => Measure(
               number: (s * 8) + m + 1,
-              chords: [ChordSymbol(root: ['C', 'G', 'Am', 'F'][m % 4])],
+              chords: [
+                ChordSymbol(root: ['C', 'G', 'Am', 'F'][m % 4]),
+              ],
               events: [
                 NoteEvent.note(
                   id: 'n-$s-$m',

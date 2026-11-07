@@ -108,21 +108,13 @@ final class AppLogger {
   ///
   /// Always include [error] and [stackTrace] when available so that
   /// crash-reporting tools can pick them up.
-  static void error(
-    String message, {
-    Object? error,
-    StackTrace? stackTrace,
-  }) {
+  static void error(String message, {Object? error, StackTrace? stackTrace}) {
     _ensureInit();
     _logger.e(message, error: error, stackTrace: stackTrace);
   }
 
   /// Logs a **fatal**-level message (the app is about to crash).
-  static void fatal(
-    String message, {
-    Object? error,
-    StackTrace? stackTrace,
-  }) {
+  static void fatal(String message, {Object? error, StackTrace? stackTrace}) {
     _ensureInit();
     _logger.f(message, error: error, stackTrace: stackTrace);
   }

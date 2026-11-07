@@ -34,10 +34,8 @@ class PlayableScoreEvent {
 
 /// Controller managing real-time playback of a [Score] with tempo synchronization.
 class ScorePreviewPlayer extends ChangeNotifier {
-  ScorePreviewPlayer({
-    required this.score,
-    ToneSynthesizer? synthesizer,
-  })  : _synthesizer = synthesizer ?? ToneSynthesizer() {
+  ScorePreviewPlayer({required this.score, ToneSynthesizer? synthesizer})
+    : _synthesizer = synthesizer ?? ToneSynthesizer() {
     _buildPlaylist();
   }
 
@@ -68,20 +66,20 @@ class ScorePreviewPlayer extends ChangeNotifier {
   /// The active [RhythmCursor] corresponding to the currently playing note.
   RhythmCursor? get currentCursor =>
       (_currentIndex >= 0 && _currentIndex < _events.length)
-          ? _events[_currentIndex].cursor
-          : null;
+      ? _events[_currentIndex].cursor
+      : null;
 
   /// Display string for the currently playing note (e.g. `"C4"`, `"Rest"`).
   String? get currentPlayingLabel =>
       (_currentIndex >= 0 && _currentIndex < _events.length)
-          ? _events[_currentIndex].label
-          : null;
+      ? _events[_currentIndex].label
+      : null;
 
   /// Current measure number being auditioned.
   int? get currentMeasureNumber =>
       (_currentIndex >= 0 && _currentIndex < _events.length)
-          ? _events[_currentIndex].measureNumber
-          : null;
+      ? _events[_currentIndex].measureNumber
+      : null;
 
   /// Playback progress ratio from 0.0 to 1.0.
   double get progress =>
@@ -195,10 +193,7 @@ class ScorePreviewPlayer extends ChangeNotifier {
       final soundDuration = Duration(
         milliseconds: (currentEvent.duration.inMilliseconds * 0.88).round(),
       );
-      _synthesizer.playPitch(
-        currentEvent.pitch!,
-        duration: soundDuration,
-      );
+      _synthesizer.playPitch(currentEvent.pitch!, duration: soundDuration);
     }
 
     // Schedule next note advancement

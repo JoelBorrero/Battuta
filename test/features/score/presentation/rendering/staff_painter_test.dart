@@ -54,9 +54,7 @@ void main() {
           Measure(
             number: 2,
             timeSignature: TimeSignature.fourFour,
-            chords: [
-              ChordSymbol.parse('G', tickOffset: 0),
-            ],
+            chords: [ChordSymbol.parse('G', tickOffset: 0)],
             events: [
               NoteEvent.note(
                 id: 'm2-e1',
@@ -76,16 +74,12 @@ void main() {
           Measure(
             number: 3,
             timeSignature: TimeSignature.fourFour,
-            chords: [
-              ChordSymbol.parse('Am7', tickOffset: 0),
-            ],
+            chords: [ChordSymbol.parse('Am7', tickOffset: 0)],
           ),
           Measure(
             number: 4,
             timeSignature: TimeSignature.fourFour,
-            chords: [
-              ChordSymbol.parse('G', tickOffset: 0),
-            ],
+            chords: [ChordSymbol.parse('G', tickOffset: 0)],
           ),
         ],
       ),
@@ -119,9 +113,7 @@ void main() {
   });
 
   group('SectionLayoutIndex (Checklist Requirements)', () {
-    test(
-        'Registers vertical Y-offsets and retrieves via section ID, sync ID, and name',
-        () {
+    test('Registers vertical Y-offsets and retrieves via section ID, sync ID, and name', () {
       final index = SectionLayoutIndex();
 
       index.register(
@@ -130,11 +122,7 @@ void main() {
         externalSyncId: 'propresenter-intro-123',
         name: 'Intro',
       );
-      index.register(
-        sectionId: 'sec-chorus',
-        yOffset: 250.0,
-        name: 'Chorus',
-      );
+      index.register(sectionId: 'sec-chorus', yOffset: 250.0, name: 'Chorus');
 
       // Lookup by sectionId
       expect(index.getYOffset('sec-intro'), equals(24.0));
@@ -161,28 +149,30 @@ void main() {
   });
 
   group('StaffPainter Rendering', () {
-    test('paints staves, barlines, chords, and section headers without error',
-        () {
-      final layoutIndex = SectionLayoutIndex();
-      final painter = StaffPainter(
-        score: testScore,
-        layoutIndex: layoutIndex,
-      );
+    test(
+      'paints staves, barlines, chords, and section headers without error',
+      () {
+        final layoutIndex = SectionLayoutIndex();
+        final painter = StaffPainter(
+          score: testScore,
+          layoutIndex: layoutIndex,
+        );
 
-      final recorder = PictureRecorder();
-      final canvas = Canvas(recorder);
-      const size = Size(800, 600);
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+        const size = Size(800, 600);
 
-      painter.paint(canvas, size);
-      final picture = recorder.endRecording();
-      expect(picture, isNotNull);
-      picture.dispose();
+        painter.paint(canvas, size);
+        final picture = recorder.endRecording();
+        expect(picture, isNotNull);
+        picture.dispose();
 
-      // Check section headers registered in layoutIndex
-      expect(layoutIndex.getYOffset('sec-intro'), isNotNull);
-      expect(layoutIndex.getYOffset('sec-interludio'), isNotNull);
-      expect(layoutIndex.getYOffset('propresenter-uuid-intro'), isNotNull);
-    });
+        // Check section headers registered in layoutIndex
+        expect(layoutIndex.getYOffset('sec-intro'), isNotNull);
+        expect(layoutIndex.getYOffset('sec-interludio'), isNotNull);
+        expect(layoutIndex.getYOffset('propresenter-uuid-intro'), isNotNull);
+      },
+    );
 
     test('calculateTotalHeight calculates positive non-zero height', () {
       final height = StaffPainter.calculateTotalHeight(testScore, 800);
@@ -202,42 +192,46 @@ void main() {
 
   group('StaffCanvas Widget', () {
     testWidgets(
-        'StaffCanvas renders CustomPaint, registers layout, and supports scrollToSection',
-        (tester) async {
-      SectionLayoutIndex? capturedIndex;
+      'StaffCanvas renders CustomPaint, registers layout, and supports scrollToSection',
+      (tester) async {
+        SectionLayoutIndex? capturedIndex;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 800,
-              height: 600,
-              child: StaffCanvas(
-                score: testScore,
-                onLayoutReady: (index) {
-                  capturedIndex = index;
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 800,
+                height: 600,
+                child: StaffCanvas(
+                  score: testScore,
+                  onLayoutReady: (index) {
+                    capturedIndex = index;
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(find.byType(StaffCanvas), findsOneWidget);
-      expect(find.byType(CustomPaint), findsWidgets);
-      expect(capturedIndex, isNotNull);
-      expect(capturedIndex!.getYOffset('sec-intro'), isNotNull);
-      expect(capturedIndex!.getYOffset('sec-interludio'), isNotNull);
+        expect(find.byType(StaffCanvas), findsOneWidget);
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(capturedIndex, isNotNull);
+        expect(capturedIndex!.getYOffset('sec-intro'), isNotNull);
+        expect(capturedIndex!.getYOffset('sec-interludio'), isNotNull);
 
-      // Verify programmatic scrolling to section
-      final canvasState =
-          tester.state<StaffCanvasState>(find.byType(StaffCanvas));
-      await canvasState.scrollToSection('sec-interludio',
-          duration: Duration.zero);
-      await tester.pumpAndSettle();
-    });
+        // Verify programmatic scrolling to section
+        final canvasState = tester.state<StaffCanvasState>(
+          find.byType(StaffCanvas),
+        );
+        await canvasState.scrollToSection(
+          'sec-interludio',
+          duration: Duration.zero,
+        );
+        await tester.pumpAndSettle();
+      },
+    );
 
     test('StaffPainter shouldRepaint triggers on selection change', () {
       final painter1 = StaffPainter(

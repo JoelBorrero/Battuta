@@ -62,7 +62,8 @@ class PitchOnlyMapper {
         final chordItem = rawChords[chordIdx];
         if (chordItem is String && chordItem.trim().isNotEmpty) {
           final trimmed = chordItem.trim();
-          final tickOffset = chordIdx *
+          final tickOffset =
+              chordIdx *
               (timeSignature.maxTicks ~/
                   (rawChords.length > 1 ? rawChords.length : 1));
           try {
@@ -71,7 +72,8 @@ class PitchOnlyMapper {
             chords.add(ChordSymbol(root: trimmed, tickOffset: tickOffset));
           }
         } else if (chordItem is Map<String, dynamic>) {
-          final symbol = chordItem['cifrado'] as String? ??
+          final symbol =
+              chordItem['cifrado'] as String? ??
               chordItem['symbol'] as String? ??
               '';
           if (symbol.trim().isNotEmpty) {

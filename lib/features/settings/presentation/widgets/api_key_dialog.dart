@@ -45,7 +45,8 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
     final key = _controller.text.trim();
     if (!ApiKeyService.isValidKey(key)) {
       setState(() {
-        _errorMessage = 'API key must be at least 20 characters with no spaces.';
+        _errorMessage =
+            'API key must be at least 20 characters with no spaces.';
       });
       return;
     }
@@ -134,11 +135,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
 
     return AlertDialog(
       title: const Row(
-        children: [
-          Icon(Icons.key),
-          SizedBox(width: 8),
-          Text('Gemini API Key'),
-        ],
+        children: [Icon(Icons.key), SizedBox(width: 8), Text('Gemini API Key')],
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -159,7 +156,8 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
             apiKeyState.when(
               data: (state) {
                 final sourceLabel = switch (state.source) {
-                  ApiKeySource.userSecureStorage => 'Custom key (Secure Storage)',
+                  ApiKeySource.userSecureStorage =>
+                    'Custom key (Secure Storage)',
                   ApiKeySource.envFile => 'Development key (.env file)',
                   ApiKeySource.none => 'None configured',
                 };
@@ -180,7 +178,9 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   child: Row(
                     children: [
                       Icon(
-                        state.isConfigured ? Icons.check_circle : Icons.warning_amber,
+                        state.isConfigured
+                            ? Icons.check_circle
+                            : Icons.warning_amber,
                         size: 20,
                         color: state.isConfigured
                             ? colorScheme.primary
@@ -274,9 +274,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
         // Show clear button only if user custom key is currently set
         if (apiKeyState.value?.isUserCustom ?? false)
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: colorScheme.error,
-            ),
+            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
             onPressed: _isSaving ? null : _handleClear,
             child: const Text('Remove Key'),
           ),

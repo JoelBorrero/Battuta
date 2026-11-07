@@ -77,7 +77,8 @@ class StaffPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     var currentY = metrics.topPadding;
-    final contentWidth = size.width - metrics.leftPadding - metrics.rightPadding;
+    final contentWidth =
+        size.width - metrics.leftPadding - metrics.rightPadding;
     if (contentWidth <= 0) return;
 
     var isFirstSystemInScore = true;
@@ -237,7 +238,8 @@ class StaffPainter extends CustomPainter {
           // -------------------------------------------------------------------
           // 6. Notes, Stems, Ledger Lines & Warning Badges
           // -------------------------------------------------------------------
-          final isMeasureSelected = (section.id == selectedSectionId &&
+          final isMeasureSelected =
+              (section.id == selectedSectionId &&
               measure.number == selectedMeasureNumber);
 
           NoteheadPainter.paintMeasureNotes(
@@ -260,14 +262,10 @@ class StaffPainter extends CustomPainter {
     }
   }
 
-  void _paintSectionHeader(
-    Canvas canvas,
-    Section section,
-    double y,
-    double x,
-  ) {
-    final repeatSuffix =
-        section.repeatCount > 1 ? ' x ${section.repeatCount}' : '';
+  void _paintSectionHeader(Canvas canvas, Section section, double y, double x) {
+    final repeatSuffix = section.repeatCount > 1
+        ? ' x ${section.repeatCount}'
+        : '';
     final labelText = '[${section.name.toUpperCase()}]$repeatSuffix';
 
     final textSpan = TextSpan(
@@ -466,8 +464,9 @@ class StaffPainter extends CustomPainter {
     if (score.sections.isEmpty) return 100.0;
 
     var totalHeight = metrics.topPadding + metrics.bottomPadding;
-    final measuresPerSys =
-        metrics.measuresPerSystem > 0 ? metrics.measuresPerSystem : 4;
+    final measuresPerSys = metrics.measuresPerSystem > 0
+        ? metrics.measuresPerSystem
+        : 4;
 
     for (final section in score.sections) {
       totalHeight += metrics.headerSpacing;

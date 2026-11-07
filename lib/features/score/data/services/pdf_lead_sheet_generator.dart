@@ -58,13 +58,12 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
     String? fileName,
   }) async {
     final bytes = await generatePdfBytes(score, options: options);
-    final sanitizedTitle =
-        score.title.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
-    final actualFileName = fileName ?? '$sanitizedTitle.pdf';
-    return Printing.sharePdf(
-      bytes: bytes,
-      filename: actualFileName,
+    final sanitizedTitle = score.title.replaceAll(
+      RegExp(r'[^a-zA-Z0-9_\-]'),
+      '_',
     );
+    final actualFileName = fileName ?? '$sanitizedTitle.pdf';
+    return Printing.sharePdf(bytes: bytes, filename: actualFileName);
   }
 
   /// Builds a complete [pw.Document] tree for [score].
@@ -91,16 +90,8 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
       pw.MultiPage(
         pageFormat: options.pageFormat,
         margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 36),
-        header: (context) => _buildPageHeader(
-          context,
-          score,
-          italicFont,
-        ),
-        footer: (context) => _buildPageFooter(
-          context,
-          score,
-          font,
-        ),
+        header: (context) => _buildPageHeader(context, score, italicFont),
+        footer: (context) => _buildPageFooter(context, score, font),
         build: (context) => [
           // -------------------------------------------------------------------
           // 1. Song Title & Header Metadata (First Page)
@@ -169,11 +160,7 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
     );
   }
 
-  pw.Widget _buildPageFooter(
-    pw.Context context,
-    Score score,
-    pw.Font font,
-  ) {
+  pw.Widget _buildPageFooter(pw.Context context, Score score, pw.Font font) {
     final ccli = score.metadata['ccli']?.toString();
     final copyright = score.metadata['copyright']?.toString();
 
@@ -213,11 +200,7 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
     );
   }
 
-  pw.Widget _buildSongHeader(
-    Score score,
-    pw.Font font,
-    pw.Font boldFont,
-  ) {
+  pw.Widget _buildSongHeader(Score score, pw.Font font, pw.Font boldFont) {
     final artistOrComposer = [
       if (score.artist != null && score.artist!.isNotEmpty) score.artist!,
       if (score.composer != null &&
@@ -294,9 +277,7 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
       final section = score.sections[sIdx];
 
       // Section Navigation Box
-      widgets.add(
-        _buildSectionHeader(section, boldFont),
-      );
+      widgets.add(_buildSectionHeader(section, boldFont));
       widgets.add(pw.SizedBox(height: 6));
 
       // Systems for this section
@@ -343,8 +324,9 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
   }
 
   pw.Widget _buildSectionHeader(Section section, pw.Font boldFont) {
-    final repeatSuffix =
-        section.repeatCount > 1 ? ' x ${section.repeatCount}' : '';
+    final repeatSuffix = section.repeatCount > 1
+        ? ' x ${section.repeatCount}'
+        : '';
     final label = '[${section.name.toUpperCase()}]$repeatSuffix';
 
     return pw.Row(
@@ -585,7 +567,11 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
         } else {
           canvas.setLineWidth(0.8);
           canvas.drawLine(
-              systemPrefixWidth, staffBaseY, systemPrefixWidth, staffTopY);
+            systemPrefixWidth,
+            staffBaseY,
+            systemPrefixWidth,
+            staffTopY,
+          );
           canvas.strokePath();
         }
       }
@@ -781,15 +767,35 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
 
       // Repeat dots (in spaces 1 and 2: staffBaseY + 1.5*spacing and + 2.5*spacing)
       final dotX = thinX + barSpacing + 2.0;
-      canvas.drawEllipse(dotX, staffBaseY + (1.5 * lineSpacing), dotRadius, dotRadius);
-      canvas.drawEllipse(dotX, staffBaseY + (2.5 * lineSpacing), dotRadius, dotRadius);
+      canvas.drawEllipse(
+        dotX,
+        staffBaseY + (1.5 * lineSpacing),
+        dotRadius,
+        dotRadius,
+      );
+      canvas.drawEllipse(
+        dotX,
+        staffBaseY + (2.5 * lineSpacing),
+        dotRadius,
+        dotRadius,
+      );
       canvas.fillPath();
     } else {
       // Right Repeat (:|)
       // Repeat dots
       final dotX = x - thickWidth - barSpacing - 4.0;
-      canvas.drawEllipse(dotX, staffBaseY + (1.5 * lineSpacing), dotRadius, dotRadius);
-      canvas.drawEllipse(dotX, staffBaseY + (2.5 * lineSpacing), dotRadius, dotRadius);
+      canvas.drawEllipse(
+        dotX,
+        staffBaseY + (1.5 * lineSpacing),
+        dotRadius,
+        dotRadius,
+      );
+      canvas.drawEllipse(
+        dotX,
+        staffBaseY + (2.5 * lineSpacing),
+        dotRadius,
+        dotRadius,
+      );
       canvas.fillPath();
 
       // Thin bar
@@ -863,7 +869,8 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
         _paintLedgerLines(canvas, noteX, pitch, staffBaseY, lineSpacing);
 
         // 2. Notehead
-        final isHollow = event.rhythmicValue == RhythmicValue.whole ||
+        final isHollow =
+            event.rhythmicValue == RhythmicValue.whole ||
             event.rhythmicValue == RhythmicValue.half;
 
         canvas.saveContext();
@@ -899,10 +906,12 @@ class PdfLeadSheetGenerator implements LeadSheetPdfService {
         if (event.isTied) {
           final nextX = (eIdx < events.length - 1)
               ? measureLeft +
-                  leftMargin +
-                  ((events[eIdx + 1].tickOffset / totalTicks)
-                          .clamp(0.0, 0.95) *
-                      usableWidth)
+                    leftMargin +
+                    ((events[eIdx + 1].tickOffset / totalTicks).clamp(
+                          0.0,
+                          0.95,
+                        ) *
+                        usableWidth)
               : measureLeft + measureWidth;
           _paintTie(canvas, noteX, nextX, pitchY, step < 4);
         }

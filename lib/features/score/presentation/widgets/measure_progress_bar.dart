@@ -9,10 +9,7 @@ import 'package:flutter/material.dart';
 
 /// Real-time visual progress bar tracking active measure capacity.
 class MeasureProgressBar extends StatelessWidget {
-  const MeasureProgressBar({
-    required this.measure,
-    super.key,
-  });
+  const MeasureProgressBar({required this.measure, super.key});
 
   /// The active measure whose capacity is displayed.
   final Measure? measure;
@@ -67,7 +64,11 @@ class MeasureProgressBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isComplete)
-                    const Icon(Icons.check_circle, size: 14, color: Colors.green)
+                    const Icon(
+                      Icons.check_circle,
+                      size: 14,
+                      color: Colors.green,
+                    )
                   else if (hasOverflow)
                     const Icon(Icons.warning, size: 14, color: Colors.red),
                   if (isComplete || hasOverflow) const SizedBox(width: 4),
@@ -88,7 +89,9 @@ class MeasureProgressBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: fillRatio,
               minHeight: 6,
-              backgroundColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+              backgroundColor: theme.colorScheme.outlineVariant.withValues(
+                alpha: 0.3,
+              ),
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
           ),

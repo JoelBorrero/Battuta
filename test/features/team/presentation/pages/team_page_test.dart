@@ -6,16 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget buildSubject() {
-    return const ProviderScope(
-      child: MaterialApp(
-        home: TeamPage(),
-      ),
-    );
+    return const ProviderScope(child: MaterialApp(home: TeamPage()));
   }
 
   group('TeamPage', () {
-    testWidgets('renders team roster, statistics, and filter chips',
-        (tester) async {
+    testWidgets('renders team roster, statistics, and filter chips', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -115,87 +112,106 @@ void main() {
     });
 
     testWidgets(
-        'automatically discards vocal tessitura when only instrument roles are selected',
-        (tester) async {
-      tester.view.physicalSize = const Size(1024, 2048);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+      'automatically discards vocal tessitura when only instrument roles are selected',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      // Open Add dialog
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+        // Open Add dialog
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
 
-      // By default Keys (an instrument) is selected -> vocal range is discarded
-      expect(find.byKey(const ValueKey('vocal_range_discarded_info')),
-          findsOneWidget);
-      expect(
-          find.byKey(const ValueKey('vocal_tessitura_dropdown')), findsNothing);
+        // By default Keys (an instrument) is selected -> vocal range is discarded
+        expect(
+          find.byKey(const ValueKey('vocal_range_discarded_info')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('vocal_tessitura_dropdown')),
+          findsNothing,
+        );
 
-      // Select Lead Vocalist -> vocal tessitura becomes available
-      await tester
-          .tap(find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')));
-      await tester.pumpAndSettle();
+        // Select Lead Vocalist -> vocal tessitura becomes available
+        await tester.tap(
+          find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('vocal_tessitura_dropdown')),
-          findsOneWidget);
-      expect(find.byKey(const ValueKey('vocal_range_discarded_info')),
-          findsNothing);
+        expect(
+          find.byKey(const ValueKey('vocal_tessitura_dropdown')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('vocal_range_discarded_info')),
+          findsNothing,
+        );
 
-      // Deselect Lead Vocalist -> vocal tessitura is automatically discarded again
-      await tester
-          .tap(find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')));
-      await tester.pumpAndSettle();
+        // Deselect Lead Vocalist -> vocal tessitura is automatically discarded again
+        await tester.tap(
+          find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('vocal_range_discarded_info')),
-          findsOneWidget);
-      expect(
-          find.byKey(const ValueKey('vocal_tessitura_dropdown')), findsNothing);
-    });
+        expect(
+          find.byKey(const ValueKey('vocal_range_discarded_info')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('vocal_tessitura_dropdown')),
+          findsNothing,
+        );
+      },
+    );
 
     testWidgets(
-        'supports adding multiple roles (pianist who is also a singer and guitarist)',
-        (tester) async {
-      tester.view.physicalSize = const Size(1024, 2048);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+      'supports adding multiple roles (pianist who is also a singer and guitarist)',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      // Open Add dialog
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+        // Open Add dialog
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Full Name *'),
-        'Jordan Blake',
-      );
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Full Name *'),
+          'Jordan Blake',
+        );
 
-      // Keys is already selected, let's also select Lead Vocalist and Acoustic Guitar
-      await tester
-          .tap(find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')));
-      await tester.pumpAndSettle();
+        // Keys is already selected, let's also select Lead Vocalist and Acoustic Guitar
+        await tester.tap(
+          find.byKey(ValueKey('role_chip_${TeamRole.leadVocal.name}')),
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(
-          find.byKey(ValueKey('role_chip_${TeamRole.acousticGuitar.name}')));
-      await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(ValueKey('role_chip_${TeamRole.acousticGuitar.name}')),
+        );
+        await tester.pumpAndSettle();
 
-      // Save new member
-      await tester.tap(find.byKey(const ValueKey('add_member_btn')));
-      await tester.pumpAndSettle();
+        // Save new member
+        await tester.tap(find.byKey(const ValueKey('add_member_btn')));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Jordan Blake'), findsOneWidget);
-      // All three roles are displayed as badges for Jordan Blake
-      expect(find.text('Keys / Piano'), findsWidgets);
-      expect(find.text('Lead Vocalist'), findsWidgets);
-      expect(find.text('Acoustic Guitar'), findsWidgets);
-    });
+        expect(find.text('Jordan Blake'), findsOneWidget);
+        // All three roles are displayed as badges for Jordan Blake
+        expect(find.text('Keys / Piano'), findsWidgets);
+        expect(find.text('Lead Vocalist'), findsWidgets);
+        expect(find.text('Acoustic Guitar'), findsWidgets);
+      },
+    );
 
-    testWidgets('renders team cards without overflow on narrow width screens',
-        (tester) async {
+    testWidgets('renders team cards without overflow on narrow width screens', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -207,8 +223,9 @@ void main() {
       expect(find.text('Sarah Jenkins'), findsOneWidget);
     });
 
-    testWidgets('switches to Band Calendar tab and renders periodic services',
-        (tester) async {
+    testWidgets('switches to Band Calendar tab and renders periodic services', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -221,7 +238,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify calendar sections and periodic events
-      expect(find.textContaining('Periodic & Upcoming Services'), findsOneWidget);
+      expect(
+        find.textContaining('Periodic & Upcoming Services'),
+        findsOneWidget,
+      );
       expect(find.text('Sunday Morning Worship'), findsWidgets);
       expect(find.text('Midweek Band Rehearsal'), findsOneWidget);
       expect(find.text('NEXT SERVICE'), findsOneWidget);
@@ -242,7 +262,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap New Service FAB
-      await tester.tap(find.widgetWithText(FloatingActionButton, 'New Service'));
+      await tester.tap(
+        find.widgetWithText(FloatingActionButton, 'New Service'),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Add Service / Rehearsal'), findsOneWidget);
@@ -274,88 +296,105 @@ void main() {
       await tester.tap(find.text('Auto-Sundays'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Auto-generated next 4 Sunday services!'), findsOneWidget);
-    });
-
-    testWidgets('schedules recurring service series via Recurring Schedule modal',
-        (tester) async {
-      tester.view.physicalSize = const Size(1024, 2048);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      // Switch to Band Calendar tab
-      await tester.tap(find.textContaining('Band Calendar'));
-      await tester.pumpAndSettle();
-
-      // Tap Recurring Schedule button
-      await tester.tap(find.text('Recurring Schedule'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Schedule Recurring Series'), findsOneWidget);
-      expect(find.text('Communion Sunday Service'), findsOneWidget);
-      expect(find.textContaining('1st Sunday of every month'), findsOneWidget);
-
-      // Select Communion Sunday Service (1st Sunday of month) template
-      await tester.tap(find.text('Communion Sunday Service'));
-      await tester.pumpAndSettle();
-
-      // Tap Generate Series button
-      await tester.tap(find.byKey(const ValueKey('generate_series_btn')));
-      await tester.pumpAndSettle();
-
       expect(
-        find.textContaining('Generated 6 services for Communion Sunday Service!'),
+        find.text('Auto-generated next 4 Sunday services!'),
         findsOneWidget,
       );
     });
 
     testWidgets(
-        'schedules recurring series from Add Service dialog with occurrence selector',
-        (tester) async {
-      tester.view.physicalSize = const Size(1024, 2048);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+      'schedules recurring service series via Recurring Schedule modal',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      // Switch to Band Calendar tab
-      await tester.tap(find.textContaining('Band Calendar'));
-      await tester.pumpAndSettle();
+        // Switch to Band Calendar tab
+        await tester.tap(find.textContaining('Band Calendar'));
+        await tester.pumpAndSettle();
 
-      // Tap New Service FAB
-      await tester.tap(find.widgetWithText(FloatingActionButton, 'New Service'));
-      await tester.pumpAndSettle();
+        // Tap Recurring Schedule button
+        await tester.tap(find.text('Recurring Schedule'));
+        await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Sunday Morning Worship'),
-        'First Sunday Prayer & Praise',
-      );
+        expect(find.text('Schedule Recurring Series'), findsOneWidget);
+        expect(find.text('Communion Sunday Service'), findsOneWidget);
+        expect(
+          find.textContaining('1st Sunday of every month'),
+          findsOneWidget,
+        );
 
-      // Recurrence is already 'Every Sunday (Weekly)' by default -> series count dropdown should be visible
-      expect(find.byKey(const ValueKey('series_count_dropdown')), findsOneWidget);
-      expect(find.text('Create Service'), findsOneWidget);
+        // Select Communion Sunday Service (1st Sunday of month) template
+        await tester.tap(find.text('Communion Sunday Service'));
+        await tester.pumpAndSettle();
 
-      // Select 6 occurrences
-      await tester.tap(find.byKey(const ValueKey('series_count_dropdown')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('6 occurrences (~1.5 months)').last);
-      await tester.pumpAndSettle();
+        // Tap Generate Series button
+        await tester.tap(find.byKey(const ValueKey('generate_series_btn')));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Create Series (6)'), findsOneWidget);
+        expect(
+          find.textContaining(
+            'Generated 6 services for Communion Sunday Service!',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
 
-      // Tap Create Series
-      await tester.tap(find.text('Create Series (6)'));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'schedules recurring series from Add Service dialog with occurrence selector',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      expect(
-        find.textContaining(
-            'Scheduled 6 recurring services for First Sunday Prayer & Praise!'),
-        findsOneWidget,
-      );
-    });
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Switch to Band Calendar tab
+        await tester.tap(find.textContaining('Band Calendar'));
+        await tester.pumpAndSettle();
+
+        // Tap New Service FAB
+        await tester.tap(
+          find.widgetWithText(FloatingActionButton, 'New Service'),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Sunday Morning Worship'),
+          'First Sunday Prayer & Praise',
+        );
+
+        // Recurrence is already 'Every Sunday (Weekly)' by default -> series count dropdown should be visible
+        expect(
+          find.byKey(const ValueKey('series_count_dropdown')),
+          findsOneWidget,
+        );
+        expect(find.text('Create Service'), findsOneWidget);
+
+        // Select 6 occurrences
+        await tester.tap(find.byKey(const ValueKey('series_count_dropdown')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('6 occurrences (~1.5 months)').last);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Create Series (6)'), findsOneWidget);
+
+        // Tap Create Series
+        await tester.tap(find.text('Create Series (6)'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.textContaining(
+            'Scheduled 6 recurring services for First Sunday Prayer & Praise!',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

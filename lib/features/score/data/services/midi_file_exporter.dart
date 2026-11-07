@@ -40,14 +40,13 @@ class MidiFileExporter implements MidiExporterService {
     String? fileName,
   }) async {
     final bytes = exportScoreToMidi(score, options: options);
-    final sanitizedTitle =
-        score.title.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+    final sanitizedTitle = score.title.replaceAll(
+      RegExp(r'[^a-zA-Z0-9_\-]'),
+      '_',
+    );
     final actualFileName = fileName ?? '$sanitizedTitle.mid';
 
-    return Printing.sharePdf(
-      bytes: bytes,
-      filename: actualFileName,
-    );
+    return Printing.sharePdf(bytes: bytes, filename: actualFileName);
   }
 
   /// Writes the exported MIDI bytes directly to disk at [filePath],
@@ -65,8 +64,10 @@ class MidiFileExporter implements MidiExporterService {
     }
 
     final dir = await getApplicationDocumentsDirectory();
-    final sanitizedTitle =
-        score.title.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+    final sanitizedTitle = score.title.replaceAll(
+      RegExp(r'[^a-zA-Z0-9_\-]'),
+      '_',
+    );
     final target = File('${dir.path}/$sanitizedTitle.mid');
     return target.writeAsBytes(bytes);
   }
@@ -83,11 +84,13 @@ class MidiFileExporter implements MidiExporterService {
       events.add(_createTrackNameEvent(0, score.title));
     }
     if (options.includeTimeSignature) {
-      events.add(_createTimeSignatureEvent(
-        0,
-        score.timeSignature.numerator,
-        score.timeSignature.denominator,
-      ));
+      events.add(
+        _createTimeSignatureEvent(
+          0,
+          score.timeSignature.numerator,
+          score.timeSignature.denominator,
+        ),
+      );
     }
     if (options.includeTempo) {
       events.add(_createTempoEvent(0, score.tempo));
@@ -98,11 +101,9 @@ class MidiFileExporter implements MidiExporterService {
     }
 
     // Program Change (General MIDI Sound)
-    events.add(_createProgramChangeEvent(
-      0,
-      options.channel,
-      options.programNumber,
-    ));
+    events.add(
+      _createProgramChangeEvent(0, options.channel, options.programNumber),
+    );
 
     // 2. Note Events
     _collectScoreNoteEvents(score, options, events);
@@ -135,11 +136,13 @@ class MidiFileExporter implements MidiExporterService {
       tempoEvents.add(_createTrackNameEvent(0, '${score.title} (Tempo Map)'));
     }
     if (options.includeTimeSignature) {
-      tempoEvents.add(_createTimeSignatureEvent(
-        0,
-        score.timeSignature.numerator,
-        score.timeSignature.denominator,
-      ));
+      tempoEvents.add(
+        _createTimeSignatureEvent(
+          0,
+          score.timeSignature.numerator,
+          score.timeSignature.denominator,
+        ),
+      );
     }
     if (options.includeTempo) {
       tempoEvents.add(_createTempoEvent(0, score.tempo));
@@ -155,11 +158,9 @@ class MidiFileExporter implements MidiExporterService {
     if (options.includeTrackName) {
       noteTrackEvents.add(_createTrackNameEvent(0, 'Lead Melody'));
     }
-    noteTrackEvents.add(_createProgramChangeEvent(
-      0,
-      options.channel,
-      options.programNumber,
-    ));
+    noteTrackEvents.add(
+      _createProgramChangeEvent(0, options.channel, options.programNumber),
+    );
     _collectScoreNoteEvents(score, options, noteTrackEvents);
     final noteTrackBytes = _encodeTrackChunk(noteTrackEvents);
 
@@ -220,8 +221,9 @@ class MidiFileExporter implements MidiExporterService {
         final midiNote = pitch.midiNumber.clamp(0, 127);
         final startTick = current.absoluteStartTick;
         var totalTicks = event.rhythmicValue.ticks;
-        final velocity =
-            event.velocity > 0 ? event.velocity : options.defaultVelocity;
+        final velocity = event.velocity > 0
+            ? event.velocity
+            : options.defaultVelocity;
 
         // Merge consecutive tied notes of the same pitch
         var cursor = i;
@@ -242,26 +244,22 @@ class MidiFileExporter implements MidiExporterService {
         final endTick = startTick + totalTicks;
 
         // Note On event
-        outEvents.add(_MidiEvent(
-          absoluteTick: startTick,
-          priority: 3, // Note On after Note Off
-          data: [
-            0x90 | options.channel,
-            midiNote,
-            velocity.clamp(1, 127),
-          ],
-        ));
+        outEvents.add(
+          _MidiEvent(
+            absoluteTick: startTick,
+            priority: 3, // Note On after Note Off
+            data: [0x90 | options.channel, midiNote, velocity.clamp(1, 127)],
+          ),
+        );
 
         // Note Off event
-        outEvents.add(_MidiEvent(
-          absoluteTick: endTick,
-          priority: 2, // Note Off before Note On at same tick
-          data: [
-            0x80 | options.channel,
-            midiNote,
-            0x00,
-          ],
-        ));
+        outEvents.add(
+          _MidiEvent(
+            absoluteTick: endTick,
+            priority: 2, // Note Off before Note On at same tick
+            data: [0x80 | options.channel, midiNote, 0x00],
+          ),
+        );
       }
 
       i++;
@@ -334,12 +332,7 @@ class MidiFileExporter implements MidiExporterService {
 
   _MidiEvent _createTrackNameEvent(int tick, String name) {
     final bytes = utf8.encode(name);
-    final data = <int>[
-      0xFF,
-      0x03,
-      ...encodeVlq(bytes.length),
-      ...bytes,
-    ];
+    final data = <int>[0xFF, 0x03, ...encodeVlq(bytes.length), ...bytes];
     return _MidiEvent(absoluteTick: tick, priority: 0, data: data);
   }
 
@@ -407,13 +400,7 @@ class MidiFileExporter implements MidiExporterService {
     };
 
     final sfByte = sf < 0 ? (256 + sf) : sf;
-    final data = <int>[
-      0xFF,
-      0x59,
-      0x02,
-      sfByte & 0xFF,
-      mi,
-    ];
+    final data = <int>[0xFF, 0x59, 0x02, sfByte & 0xFF, mi];
     return _MidiEvent(absoluteTick: tick, priority: 0, data: data);
   }
 

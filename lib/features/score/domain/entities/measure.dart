@@ -35,26 +35,29 @@ class Measure {
 
   /// Converts this [Measure] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'number': number,
-        'timeSignature': timeSignature.toJson(),
-        'events': events.map((e) => e.toJson()).toList(),
-        'chords': chords.map((c) => c.toJson()).toList(),
-      };
+    'number': number,
+    'timeSignature': timeSignature.toJson(),
+    'events': events.map((e) => e.toJson()).toList(),
+    'chords': chords.map((c) => c.toJson()).toList(),
+  };
 
   /// Constructs a [Measure] from a JSON map.
   factory Measure.fromJson(Map<String, dynamic> json) => Measure(
-        number: json['number'] as int,
-        timeSignature:
-            TimeSignature.fromJson(json['timeSignature'] as Map<String, dynamic>),
-        events: (json['events'] as List<dynamic>?)
-                ?.map((e) => NoteEvent.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        chords: (json['chords'] as List<dynamic>?)
-                ?.map((c) => ChordSymbol.fromJson(c as Map<String, dynamic>))
-                .toList() ??
-            const [],
-      );
+    number: json['number'] as int,
+    timeSignature: TimeSignature.fromJson(
+      json['timeSignature'] as Map<String, dynamic>,
+    ),
+    events:
+        (json['events'] as List<dynamic>?)
+            ?.map((e) => NoteEvent.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    chords:
+        (json['chords'] as List<dynamic>?)
+            ?.map((c) => ChordSymbol.fromJson(c as Map<String, dynamic>))
+            .toList() ??
+        const [],
+  );
 
   // ---------------------------------------------------------------------------
   // Capacity & Duration Metrics
@@ -106,7 +109,8 @@ class Measure {
   void validateMeasureCapacity() {
     if (hasOverflow) {
       throw MeasureOverflowException(
-        message: 'Measure #$number exceeds time signature capacity: '
+        message:
+            'Measure #$number exceeds time signature capacity: '
             '$totalTicks ticks > $maxTicks ticks ($timeSignature).',
         maxTicks: maxTicks,
         attemptedTicks: totalTicks,
@@ -170,7 +174,8 @@ class Measure {
 
     if (projectedTotalTicks > maxTicks) {
       throw MeasureOverflowException(
-        message: 'Assigning rhythm exceeds measure capacity: '
+        message:
+            'Assigning rhythm exceeds measure capacity: '
             'attempted $projectedTotalTicks ticks, max is $maxTicks ticks for $timeSignature.',
         maxTicks: maxTicks,
         attemptedTicks: projectedTotalTicks,
@@ -185,10 +190,7 @@ class Measure {
       final duration = (i == eventIndex) ? rhythm : oldEvent.rhythmicValue;
 
       updatedEvents.add(
-        oldEvent.copyWith(
-          rhythmicValue: duration,
-          tickOffset: currentOffset,
-        ),
+        oldEvent.copyWith(rhythmicValue: duration, tickOffset: currentOffset),
       );
 
       currentOffset += duration.ticks;
@@ -239,9 +241,7 @@ class Measure {
     }
 
     final oldEvent = events[eventIndex];
-    final updatedEvent = oldEvent.copyWith(
-      pitch: newPitch,
-    );
+    final updatedEvent = oldEvent.copyWith(pitch: newPitch);
 
     final updatedEvents = List<NoteEvent>.from(events);
     updatedEvents[eventIndex] = updatedEvent;
@@ -254,10 +254,12 @@ class Measure {
   /// When [validateCapacity] is `true`, throws [MeasureOverflowException] if the event
   /// would cause the measure to exceed [maxTicks].
   Measure addEvent(NoteEvent event, {bool validateCapacity = false}) {
-    if (validateCapacity && (totalTicks + event.rhythmicValue.ticks > maxTicks)) {
+    if (validateCapacity &&
+        (totalTicks + event.rhythmicValue.ticks > maxTicks)) {
       final projectedTicks = totalTicks + event.rhythmicValue.ticks;
       throw MeasureOverflowException(
-        message: 'Adding event exceeds measure capacity: '
+        message:
+            'Adding event exceeds measure capacity: '
             'attempted $projectedTicks ticks, max is $maxTicks ticks.',
         maxTicks: maxTicks,
         attemptedTicks: projectedTicks,
@@ -272,16 +274,12 @@ class Measure {
         ? event
         : event.copyWith(tickOffset: newOffset);
 
-    return copyWith(
-      events: List.unmodifiable([...events, adjustedEvent]),
-    );
+    return copyWith(events: List.unmodifiable([...events, adjustedEvent]));
   }
 
   /// Appends a [chord] symbol to this measure.
   Measure addChord(ChordSymbol chord) {
-    return copyWith(
-      chords: List.unmodifiable([...chords, chord]),
-    );
+    return copyWith(chords: List.unmodifiable([...chords, chord]));
   }
 
   /// Creates a copy of this [Measure] with optional updated fields.
@@ -311,11 +309,11 @@ class Measure {
 
   @override
   int get hashCode => Object.hash(
-        number,
-        timeSignature,
-        Object.hashAll(events),
-        Object.hashAll(chords),
-      );
+    number,
+    timeSignature,
+    Object.hashAll(events),
+    Object.hashAll(chords),
+  );
 
   @override
   String toString() =>

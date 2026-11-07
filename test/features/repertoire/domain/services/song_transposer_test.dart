@@ -10,10 +10,22 @@ void main() {
     test('transposeNote correctly transposes sharps and flats', () {
       expect(SongTransposer.transposeNote('C', 2), equals('D'));
       expect(SongTransposer.transposeNote('C', 7), equals('G'));
-      expect(SongTransposer.transposeNote('C', -1, preferSharps: true), equals('B'));
-      expect(SongTransposer.transposeNote('G', 2, preferSharps: true), equals('A'));
-      expect(SongTransposer.transposeNote('F', 1, preferSharps: true), equals('F#'));
-      expect(SongTransposer.transposeNote('F', 1, preferSharps: false), equals('Gb'));
+      expect(
+        SongTransposer.transposeNote('C', -1, preferSharps: true),
+        equals('B'),
+      );
+      expect(
+        SongTransposer.transposeNote('G', 2, preferSharps: true),
+        equals('A'),
+      );
+      expect(
+        SongTransposer.transposeNote('F', 1, preferSharps: true),
+        equals('F#'),
+      );
+      expect(
+        SongTransposer.transposeNote('F', 1, preferSharps: false),
+        equals('Gb'),
+      );
     });
 
     test('transposeChord transposes root and bass while preserving quality and beats', () {
@@ -66,10 +78,16 @@ void main() {
       expect(transposed.key, equals('C'));
       expect(transposed.sections.first.chords[0].root, equals('C'));
       expect(transposed.sections.first.chords[1].root, equals('A'));
-      expect(transposed.sections.first.chords[1].quality, equals(ChordQuality.minor));
+      expect(
+        transposed.sections.first.chords[1].quality,
+        equals(ChordQuality.minor),
+      );
       expect(transposed.sections.first.chords[2].root, equals('F'));
       expect(transposed.sections.first.chords[3].root, equals('G'));
-      expect(transposed.sections.first.chords[3].quality, equals(ChordQuality.dominant7));
+      expect(
+        transposed.sections.first.chords[3].quality,
+        equals(ChordQuality.dominant7),
+      );
     });
   });
 
@@ -106,4 +124,3 @@ void main() {
     });
   });
 }
-

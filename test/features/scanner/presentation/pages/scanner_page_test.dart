@@ -12,18 +12,77 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockImageCaptureService extends Mock implements ImageCaptureService {}
+
 class MockOmrRepository extends Mock implements OmrRepository {}
 
 final kTransparent1x1Png = Uint8List.fromList([
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-  0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-  0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-  0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-  0x42, 0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ]);
 
 void main() {
@@ -33,8 +92,10 @@ void main() {
   setUp(() {
     mockCaptureService = MockImageCaptureService();
     mockOmrRepo = MockOmrRepository();
-    when(() => mockCaptureService.captureFromCamera()).thenAnswer((_) async => kTransparent1x1Png);
-    when(() => mockCaptureService.pickFromGallery()).thenAnswer((_) async => kTransparent1x1Png);
+    when(() => mockCaptureService.captureFromCamera())
+        .thenAnswer((_) async => kTransparent1x1Png);
+    when(() => mockCaptureService.pickFromGallery())
+        .thenAnswer((_) async => kTransparent1x1Png);
   });
 
   Widget buildSubject() {
@@ -43,14 +104,14 @@ void main() {
         imageCaptureServiceProvider.overrideWithValue(mockCaptureService),
         omrRepositoryProvider.overrideWithValue(mockOmrRepo),
       ],
-      child: const MaterialApp(
-        home: ScannerPage(),
-      ),
+      child: const MaterialApp(home: ScannerPage()),
     );
   }
 
   group('ScannerPage', () {
-    testWidgets('renders camera and gallery action buttons enabled', (tester) async {
+    testWidgets('renders camera and gallery action buttons enabled', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -58,8 +119,12 @@ void main() {
       expect(find.byKey(const Key('open_camera_button')), findsOneWidget);
       expect(find.byKey(const Key('choose_gallery_button')), findsOneWidget);
 
-      final cameraBtn = tester.widget<FilledButton>(find.byKey(const Key('open_camera_button')));
-      final galleryBtn = tester.widget<OutlinedButton>(find.byKey(const Key('choose_gallery_button')));
+      final cameraBtn = tester.widget<FilledButton>(
+        find.byKey(const Key('open_camera_button')),
+      );
+      final galleryBtn = tester.widget<OutlinedButton>(
+        find.byKey(const Key('choose_gallery_button')),
+      );
 
       expect(cameraBtn.onPressed, isNotNull);
       expect(galleryBtn.onPressed, isNotNull);
@@ -76,15 +141,18 @@ void main() {
       verify(() => mockCaptureService.captureFromCamera()).called(1);
     });
 
-    testWidgets('tapping Choose from Library launches scan flow modal with gallery picker', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'tapping Choose from Library launches scan flow modal with gallery picker',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('choose_gallery_button')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('choose_gallery_button')));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(ScanFlowModal), findsOneWidget);
-      verify(() => mockCaptureService.pickFromGallery()).called(1);
-    });
+        expect(find.byType(ScanFlowModal), findsOneWidget);
+        verify(() => mockCaptureService.pickFromGallery()).called(1);
+      },
+    );
   });
 }

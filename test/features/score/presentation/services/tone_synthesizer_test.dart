@@ -36,61 +36,67 @@ void main() {
   });
 
   group('ToneSynthesizer', () {
-    test('synthesizeWav generates valid 16-bit PCM RIFF/WAVE header and samples', () {
-      final wav = synthesizer.synthesizeWav(
-        frequencyHz: 440.0, // A4
-        duration: const Duration(milliseconds: 100),
-      );
+    test(
+      'synthesizeWav generates valid 16-bit PCM RIFF/WAVE header and samples',
+      () {
+        final wav = synthesizer.synthesizeWav(
+          frequencyHz: 440.0, // A4
+          duration: const Duration(milliseconds: 100),
+        );
 
-      expect(wav.length, greaterThan(44));
+        expect(wav.length, greaterThan(44));
 
-      // RIFF chunk descriptor
-      final riff = String.fromCharCodes(wav.sublist(0, 4));
-      expect(riff, equals('RIFF'));
+        // RIFF chunk descriptor
+        final riff = String.fromCharCodes(wav.sublist(0, 4));
+        expect(riff, equals('RIFF'));
 
-      final wave = String.fromCharCodes(wav.sublist(8, 12));
-      expect(wave, equals('WAVE'));
+        final wave = String.fromCharCodes(wav.sublist(8, 12));
+        expect(wave, equals('WAVE'));
 
-      // fmt subchunk
-      final fmt = String.fromCharCodes(wav.sublist(12, 16));
-      expect(fmt, equals('fmt '));
+        // fmt subchunk
+        final fmt = String.fromCharCodes(wav.sublist(12, 16));
+        expect(fmt, equals('fmt '));
 
-      final byteData = ByteData.sublistView(wav);
-      final subchunk1Size = byteData.getUint32(16, Endian.little);
-      expect(subchunk1Size, equals(16)); // 16 for PCM
+        final byteData = ByteData.sublistView(wav);
+        final subchunk1Size = byteData.getUint32(16, Endian.little);
+        expect(subchunk1Size, equals(16)); // 16 for PCM
 
-      final audioFormat = byteData.getUint16(20, Endian.little);
-      expect(audioFormat, equals(1)); // 1 = PCM
+        final audioFormat = byteData.getUint16(20, Endian.little);
+        expect(audioFormat, equals(1)); // 1 = PCM
 
-      final numChannels = byteData.getUint16(22, Endian.little);
-      expect(numChannels, equals(1)); // Mono
+        final numChannels = byteData.getUint16(22, Endian.little);
+        expect(numChannels, equals(1)); // Mono
 
-      final sampleRate = byteData.getUint32(24, Endian.little);
-      expect(sampleRate, equals(44100));
+        final sampleRate = byteData.getUint32(24, Endian.little);
+        expect(sampleRate, equals(44100));
 
-      final bitsPerSample = byteData.getUint16(34, Endian.little);
-      expect(bitsPerSample, equals(16));
+        final bitsPerSample = byteData.getUint16(34, Endian.little);
+        expect(bitsPerSample, equals(16));
 
-      // data subchunk
-      final dataHeader = String.fromCharCodes(wav.sublist(36, 40));
-      expect(dataHeader, equals('data'));
+        // data subchunk
+        final dataHeader = String.fromCharCodes(wav.sublist(36, 40));
+        expect(dataHeader, equals('data'));
 
-      final dataSize = byteData.getUint32(40, Endian.little);
-      expect(dataSize, equals(wav.length - 44));
-    });
+        final dataSize = byteData.getUint32(40, Endian.little);
+        expect(dataSize, equals(wav.length - 44));
+      },
+    );
 
-    test('playPitch sends synthesized audio to player and caches result', () async {
-      final a4 = Pitch.parse('A4');
-      await synthesizer.playPitch(a4);
+    test(
+      'playPitch sends synthesized audio to player and caches result',
+      () async {
+        final a4 = Pitch.parse('A4');
+        await synthesizer.playPitch(a4);
 
-      expect(fakePlayer.played.length, equals(1));
-      final firstBytes = fakePlayer.played.first;
+        expect(fakePlayer.played.length, equals(1));
+        final firstBytes = fakePlayer.played.first;
 
-      // Second play with same pitch uses cache
-      await synthesizer.playPitch(a4);
-      expect(fakePlayer.played.length, equals(2));
-      expect(fakePlayer.played[1], same(firstBytes));
-    });
+        // Second play with same pitch uses cache
+        await synthesizer.playPitch(a4);
+        expect(fakePlayer.played.length, equals(2));
+        expect(fakePlayer.played[1], same(firstBytes));
+      },
+    );
 
     test('toggleMute prevents audio playback when muted', () async {
       expect(synthesizer.isMuted, isFalse);
@@ -120,4 +126,3 @@ void main() {
     });
   });
 }
-

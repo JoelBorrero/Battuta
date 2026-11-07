@@ -27,8 +27,7 @@ extension StringX on String {
   /// ```dart
   /// 'amazing grace'.titleCase; // 'Amazing Grace'
   /// ```
-  String get titleCase =>
-      split(' ').map((w) => w.capitalize).join(' ');
+  String get titleCase => split(' ').map((w) => w.capitalize).join(' ');
 
   /// Whether this string is blank (empty or only whitespace).
   bool get isBlank => trimLeft().isEmpty;
@@ -76,10 +75,10 @@ extension DateTimeX on DateTime {
     return switch (diff) {
       Duration(inSeconds: < 60) => 'just now',
       Duration(inMinutes: < 60) => '${diff.inMinutes} min ago',
-      Duration(inHours: < 24)   => '${diff.inHours}h ago',
-      Duration(inDays: 1)       => 'yesterday',
-      Duration(inDays: < 7)     => '${diff.inDays}d ago',
-      _                         => formattedDate,
+      Duration(inHours: < 24) => '${diff.inHours}h ago',
+      Duration(inDays: 1) => 'yesterday',
+      Duration(inDays: < 7) => '${diff.inDays}d ago',
+      _ => formattedDate,
     };
   }
 

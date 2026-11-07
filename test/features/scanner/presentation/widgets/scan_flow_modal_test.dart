@@ -29,15 +29,73 @@ class FakeScanController extends ScanController {
 }
 
 final kTransparent1x1Png = Uint8List.fromList([
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-  0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-  0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-  0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-  0x42, 0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ]);
 
 void main() {
@@ -51,37 +109,29 @@ void main() {
     mockOmrRepo = MockOmrRepository();
   });
 
-  Widget buildTestWidget({
-    required Widget child,
-    ScanState? initialState,
-  }) {
+  Widget buildTestWidget({required Widget child, ScanState? initialState}) {
     return ProviderScope(
       overrides: [
         imageCaptureServiceProvider.overrideWithValue(mockCaptureService),
         omrRepositoryProvider.overrideWithValue(mockOmrRepo),
         if (initialState != null)
-          scanControllerProvider.overrideWith(() => FakeScanController(
-                initialState: initialState,
-                captureService: mockCaptureService,
-                omrRepository: mockOmrRepo,
-              )),
+          scanControllerProvider.overrideWith(
+            () => FakeScanController(
+              initialState: initialState,
+              captureService: mockCaptureService,
+              omrRepository: mockOmrRepo,
+            ),
+          ),
       ],
-      child: MaterialApp(
-        home: Scaffold(
-          body: child,
-        ),
-      ),
+      child: MaterialApp(home: Scaffold(body: child)),
     );
   }
 
   group('ScanFlowModal (iPadOS & macOS checklist requirements)', () {
-    testWidgets('renders mode segments and image selection buttons',
-        (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: const ScanFlowModal(),
-        ),
-      );
+    testWidgets('renders mode segments and image selection buttons', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildTestWidget(child: const ScanFlowModal()));
 
       expect(find.text('Scan Sheet Music'), findsOneWidget);
       expect(find.text('Full Sheet (Schema A)'), findsOneWidget);
@@ -90,8 +140,9 @@ void main() {
       expect(find.byKey(const Key('scan_gallery_btn')), findsOneWidget);
     });
 
-    testWidgets('renders loading overlay when analyzing with Gemini',
-        (tester) async {
+    testWidgets('renders loading overlay when analyzing with Gemini', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           initialState: ScanState(
@@ -106,8 +157,9 @@ void main() {
       expect(find.text('Analyzing sheet with Gemini AI...'), findsOneWidget);
     });
 
-    testWidgets('displays error card and offline alert cleanly',
-        (tester) async {
+    testWidgets('displays error card and offline alert cleanly', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           initialState: const ScanState(
@@ -125,12 +177,10 @@ void main() {
       );
     });
 
-    testWidgets('displays success banner and triggers callback',
-        (tester) async {
-      const score = Score(
-        id: '1',
-        title: 'Amazing Grace',
-      );
+    testWidgets('displays success banner and triggers callback', (
+      tester,
+    ) async {
+      const score = Score(id: '1', title: 'Amazing Grace');
 
       Score? receivedScore;
 
@@ -140,9 +190,7 @@ void main() {
             status: ScanStatus.success,
             extractedScore: score,
           ),
-          child: ScanFlowModal(
-            onScoreExtracted: (s) => receivedScore = s,
-          ),
+          child: ScanFlowModal(onScoreExtracted: (s) => receivedScore = s),
         ),
       );
 

@@ -206,3 +206,4 @@ All contributors and AI pairing sessions must operate within the documented stan
 - **Operating Standards**: [`AGENTS.md`](file:///Users/joelborrero/Projects/Battuta/AGENTS.md)
 - **Workflow Skill**: [`.agents/skills/dev-cycle/SKILL.md`](file:///Users/joelborrero/Projects/Battuta/.agents/skills/dev-cycle/SKILL.md) (invoke with `/dev-cycle`)
 - **Verification Rule**: No branch or ticket is complete without passing both `flutter analyze` (0 issues) and `flutter test` (100% pass rate).
+

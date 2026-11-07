@@ -18,10 +18,7 @@ final apiKeyServiceProvider = Provider<ApiKeyService>((ref) {
 
 /// Represents the UI state of the Gemini API key.
 class ApiKeyState {
-  const ApiKeyState({
-    required this.activeKey,
-    required this.source,
-  });
+  const ApiKeyState({required this.activeKey, required this.source});
 
   final String? activeKey;
   final ApiKeySource source;
@@ -69,6 +66,4 @@ class ApiKeyNotifier extends AsyncNotifier<ApiKeyState> {
 
 /// Provides the reactive [ApiKeyState].
 final apiKeyNotifierProvider =
-    AsyncNotifierProvider<ApiKeyNotifier, ApiKeyState>(
-  ApiKeyNotifier.new,
-);
+    AsyncNotifierProvider<ApiKeyNotifier, ApiKeyState>(ApiKeyNotifier.new);

@@ -50,21 +50,19 @@ void main() {
       );
 
       expect(result.isLeft(), isTrue);
-      result.fold(
-        (failure) {
-          expect(failure, isA<PermissionFailure>());
-          expect(failure.message, contains('API key is not configured'));
-        },
-        (_) => fail('Expected failure'),
-      );
+      result.fold((failure) {
+        expect(failure, isA<PermissionFailure>());
+        expect(failure.message, contains('API key is not configured'));
+      }, (_) => fail('Expected failure'));
     });
 
-    test('extracts full lead sheet and maps into valid Score on success',
-        () async {
-      when(() => mockStorage.read(geminiStorageKey))
-          .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
+    test(
+      'extracts full lead sheet and maps into valid Score on success',
+      () async {
+        when(() => mockStorage.read(geminiStorageKey))
+            .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
 
-      const jsonString = '''
+        const jsonString = '''
       {
         "metadatos": {
           "titulo": "10,000 Reasons (Bless the Lord)",
@@ -94,7 +92,8 @@ void main() {
       }
       ''';
 
-      when(() => mockClient.generateContent(
+        when(
+          () => mockClient.generateContent(
             modelName: any(named: 'modelName'),
             apiKey: any(named: 'apiKey'),
             imageBytes: any(named: 'imageBytes'),
@@ -102,17 +101,16 @@ void main() {
             responseSchema: any(named: 'responseSchema'),
             systemInstruction: any(named: 'systemInstruction'),
             prompt: any(named: 'prompt'),
-          )).thenAnswer((_) async => jsonString);
+          ),
+        ).thenAnswer((_) async => jsonString);
 
-      final result = await repository.extractFullLeadSheet(
-        imageBytes: sampleImageBytes,
-        mimeType: 'image/png',
-      );
+        final result = await repository.extractFullLeadSheet(
+          imageBytes: sampleImageBytes,
+          mimeType: 'image/png',
+        );
 
-      expect(result.isRight(), isTrue);
-      result.fold(
-        (failure) => fail('Expected success: $failure'),
-        (score) {
+        expect(result.isRight(), isTrue);
+        result.fold((failure) => fail('Expected success: $failure'), (score) {
           expect(score, isA<Score>());
           expect(score.title, equals('10,000 Reasons (Bless the Lord)'));
           expect(score.artist, equals('Matt Redman'));
@@ -121,25 +119,29 @@ void main() {
           expect(score.sections.length, equals(1));
           expect(score.sections.first.name, equals('Chorus'));
           expect(score.allMeasures.first.chords.length, equals(2));
-          expect(score.allMeasures.first.events.first.pitch?.scientificNotation,
-              equals('G4'));
+          expect(
+            score.allMeasures.first.events.first.pitch?.scientificNotation,
+            equals('G4'),
+          );
           expect(score.allMeasures.first.events.first.lyric, equals('Bless'));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('returns UnexpectedFailure when response text is empty', () async {
       when(() => mockStorage.read(geminiStorageKey))
           .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
-      when(() => mockClient.generateContent(
-            modelName: any(named: 'modelName'),
-            apiKey: any(named: 'apiKey'),
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-            responseSchema: any(named: 'responseSchema'),
-            systemInstruction: any(named: 'systemInstruction'),
-            prompt: any(named: 'prompt'),
-          )).thenAnswer((_) async => '');
+      when(
+        () => mockClient.generateContent(
+          modelName: any(named: 'modelName'),
+          apiKey: any(named: 'apiKey'),
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+          responseSchema: any(named: 'responseSchema'),
+          systemInstruction: any(named: 'systemInstruction'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenAnswer((_) async => '');
 
       final result = await repository.extractFullLeadSheet(
         imageBytes: sampleImageBytes,
@@ -156,15 +158,17 @@ void main() {
     test('returns UnexpectedFailure on malformed JSON response', () async {
       when(() => mockStorage.read(geminiStorageKey))
           .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
-      when(() => mockClient.generateContent(
-            modelName: any(named: 'modelName'),
-            apiKey: any(named: 'apiKey'),
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-            responseSchema: any(named: 'responseSchema'),
-            systemInstruction: any(named: 'systemInstruction'),
-            prompt: any(named: 'prompt'),
-          )).thenAnswer((_) async => '{ not valid json');
+      when(
+        () => mockClient.generateContent(
+          modelName: any(named: 'modelName'),
+          apiKey: any(named: 'apiKey'),
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+          responseSchema: any(named: 'responseSchema'),
+          systemInstruction: any(named: 'systemInstruction'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenAnswer((_) async => '{ not valid json');
 
       final result = await repository.extractFullLeadSheet(
         imageBytes: sampleImageBytes,
@@ -181,15 +185,17 @@ void main() {
     test('returns ServerFailure when model generation throws', () async {
       when(() => mockStorage.read(geminiStorageKey))
           .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
-      when(() => mockClient.generateContent(
-            modelName: any(named: 'modelName'),
-            apiKey: any(named: 'apiKey'),
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-            responseSchema: any(named: 'responseSchema'),
-            systemInstruction: any(named: 'systemInstruction'),
-            prompt: any(named: 'prompt'),
-          )).thenThrow(Exception('Rate limit exceeded (429)'));
+      when(
+        () => mockClient.generateContent(
+          modelName: any(named: 'modelName'),
+          apiKey: any(named: 'apiKey'),
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+          responseSchema: any(named: 'responseSchema'),
+          systemInstruction: any(named: 'systemInstruction'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenThrow(Exception('Rate limit exceeded (429)'));
 
       final result = await repository.extractFullLeadSheet(
         imageBytes: sampleImageBytes,
@@ -197,13 +203,10 @@ void main() {
       );
 
       expect(result.isLeft(), isTrue);
-      result.fold(
-        (failure) {
-          expect(failure, isA<ServerFailure>());
-          expect(failure.message, contains('Rate limit exceeded'));
-        },
-        (_) => fail('Expected failure'),
-      );
+      result.fold((failure) {
+        expect(failure, isA<ServerFailure>());
+        expect(failure.message, contains('Rate limit exceeded'));
+      }, (_) => fail('Expected failure'));
     });
   });
 
@@ -224,9 +227,7 @@ void main() {
       );
     });
 
-    test(
-        'successfully extracts Schema B pitch only section and populates measures',
-        () async {
+    test('successfully extracts Schema B pitch only section and populates measures', () async {
       when(() => mockStorage.read(geminiStorageKey))
           .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
 
@@ -245,15 +246,17 @@ void main() {
       }
       ''';
 
-      when(() => mockClient.generateContent(
-            modelName: any(named: 'modelName'),
-            apiKey: any(named: 'apiKey'),
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-            responseSchema: any(named: 'responseSchema'),
-            systemInstruction: any(named: 'systemInstruction'),
-            prompt: any(named: 'prompt'),
-          )).thenAnswer((_) async => jsonString);
+      when(
+        () => mockClient.generateContent(
+          modelName: any(named: 'modelName'),
+          apiKey: any(named: 'apiKey'),
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+          responseSchema: any(named: 'responseSchema'),
+          systemInstruction: any(named: 'systemInstruction'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenAnswer((_) async => jsonString);
 
       final result = await repository.extractPitchOnlySection(
         imageBytes: sampleImageBytes,
@@ -262,39 +265,42 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
-      result.fold(
-        (failure) => fail('Expected success: $failure'),
-        (pitchResult) {
-          expect(pitchResult, isA<PitchOnlyResult>());
-          expect(pitchResult.sectionName, equals('Bridge'));
-          expect(pitchResult.assumedClef, equals('G4'));
-          expect(pitchResult.warning,
-              equals('Dense ledger lines detected above staff'));
-          expect(pitchResult.measures.length, equals(1));
-          final m1 = pitchResult.measures.first;
-          expect(m1.number, equals(1));
-          expect(m1.chords.length, equals(2));
-          expect(m1.chords.first.text, equals('Em'));
-          expect(m1.events.length, equals(4));
-          expect(m1.events.first.pitch?.scientificNotation, equals('E4'));
-          expect(m1.events.last.pitch?.scientificNotation, equals('E5'));
-          expect(m1.hasUnassignedEvents, isTrue);
-        },
-      );
+      result.fold((failure) => fail('Expected success: $failure'), (
+        pitchResult,
+      ) {
+        expect(pitchResult, isA<PitchOnlyResult>());
+        expect(pitchResult.sectionName, equals('Bridge'));
+        expect(pitchResult.assumedClef, equals('G4'));
+        expect(
+          pitchResult.warning,
+          equals('Dense ledger lines detected above staff'),
+        );
+        expect(pitchResult.measures.length, equals(1));
+        final m1 = pitchResult.measures.first;
+        expect(m1.number, equals(1));
+        expect(m1.chords.length, equals(2));
+        expect(m1.chords.first.text, equals('Em'));
+        expect(m1.events.length, equals(4));
+        expect(m1.events.first.pitch?.scientificNotation, equals('E4'));
+        expect(m1.events.last.pitch?.scientificNotation, equals('E5'));
+        expect(m1.hasUnassignedEvents, isTrue);
+      });
     });
 
     test('returns UnexpectedFailure when response is empty', () async {
       when(() => mockStorage.read(geminiStorageKey))
           .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
-      when(() => mockClient.generateContent(
-            modelName: any(named: 'modelName'),
-            apiKey: any(named: 'apiKey'),
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-            responseSchema: any(named: 'responseSchema'),
-            systemInstruction: any(named: 'systemInstruction'),
-            prompt: any(named: 'prompt'),
-          )).thenAnswer((_) async => '   ');
+      when(
+        () => mockClient.generateContent(
+          modelName: any(named: 'modelName'),
+          apiKey: any(named: 'apiKey'),
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+          responseSchema: any(named: 'responseSchema'),
+          systemInstruction: any(named: 'systemInstruction'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenAnswer((_) async => '   ');
 
       final result = await repository.extractPitchOnlySection(
         imageBytes: sampleImageBytes,
@@ -311,15 +317,17 @@ void main() {
     test('returns ServerFailure when model generation throws', () async {
       when(() => mockStorage.read(geminiStorageKey))
           .thenAnswer((_) async => 'AIzaSyValidGeminiKey1234567890');
-      when(() => mockClient.generateContent(
-            modelName: any(named: 'modelName'),
-            apiKey: any(named: 'apiKey'),
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-            responseSchema: any(named: 'responseSchema'),
-            systemInstruction: any(named: 'systemInstruction'),
-            prompt: any(named: 'prompt'),
-          )).thenThrow(Exception('API error 503'));
+      when(
+        () => mockClient.generateContent(
+          modelName: any(named: 'modelName'),
+          apiKey: any(named: 'apiKey'),
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+          responseSchema: any(named: 'responseSchema'),
+          systemInstruction: any(named: 'systemInstruction'),
+          prompt: any(named: 'prompt'),
+        ),
+      ).thenThrow(Exception('API error 503'));
 
       final result = await repository.extractPitchOnlySection(
         imageBytes: sampleImageBytes,

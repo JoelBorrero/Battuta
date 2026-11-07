@@ -6,6 +6,7 @@
 library;
 
 import 'dart:typed_data';
+
 import 'package:battuta/features/score/domain/entities/score.dart';
 
 /// Supported Standard MIDI File (SMF) format types.
@@ -31,13 +32,22 @@ class MidiExportOptions {
     this.includeTempo = true,
     this.includeTimeSignature = true,
     this.includeTrackName = true,
-  })  : assert(ppq > 0, 'PPQ (ticks per quarter note) must be greater than zero'),
-        assert(channel >= 0 && channel <= 15,
-            'MIDI channel must be between 0 and 15'),
-        assert(programNumber >= 0 && programNumber <= 127,
-            'MIDI program number must be between 0 and 127'),
-        assert(defaultVelocity >= 1 && defaultVelocity <= 127,
-            'Default velocity must be between 1 and 127');
+  }) : assert(
+         ppq > 0,
+         'PPQ (ticks per quarter note) must be greater than zero',
+       ),
+       assert(
+         channel >= 0 && channel <= 15,
+         'MIDI channel must be between 0 and 15',
+       ),
+       assert(
+         programNumber >= 0 && programNumber <= 127,
+         'MIDI program number must be between 0 and 127',
+       ),
+       assert(
+         defaultVelocity >= 1 && defaultVelocity <= 127,
+         'Default velocity must be between 1 and 127',
+       );
 
   /// Pulses (Ticks) Per Quarter Note resolution. Default: 480 PPQ.
   final int ppq;

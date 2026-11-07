@@ -348,14 +348,34 @@ class MusicalKey {
 
   /// Sharp-preferring chromatic scale.
   static const _sharpNotes = [
-    'C', 'C#', 'D', 'D#', 'E', 'F',
-    'F#', 'G', 'G#', 'A', 'A#', 'B',
+    'C',
+    'C#',
+    'D',
+    'D#',
+    'E',
+    'F',
+    'F#',
+    'G',
+    'G#',
+    'A',
+    'A#',
+    'B',
   ];
 
   /// Flat-preferring chromatic scale.
   static const _flatNotes = [
-    'C', 'Db', 'D', 'Eb', 'E', 'F',
-    'Gb', 'G', 'Ab', 'A', 'Bb', 'B',
+    'C',
+    'Db',
+    'D',
+    'Eb',
+    'E',
+    'F',
+    'Gb',
+    'G',
+    'Ab',
+    'A',
+    'Bb',
+    'B',
   ];
 
   // ---------------------------------------------------------------------------
@@ -478,9 +498,7 @@ class MusicalKey {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MusicalKey &&
-          other.name == name &&
-          other.isMinor == isMinor;
+      other is MusicalKey && other.name == name && other.isMinor == isMinor;
 
   @override
   int get hashCode => Object.hash(name, isMinor);

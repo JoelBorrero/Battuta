@@ -21,10 +21,7 @@ class FullSheetMapper {
   static const _uuid = Uuid();
 
   /// Converts a JSON payload conforming to [FullSheetSchema] into a [Score].
-  static Score mapToScore(
-    Map<String, dynamic> json, {
-    String? scoreId,
-  }) {
+  static Score mapToScore(Map<String, dynamic> json, {String? scoreId}) {
     final meta = json['metadatos'] as Map<String, dynamic>? ?? {};
 
     final title = meta['titulo'] as String? ?? 'Untitled Lead Sheet';

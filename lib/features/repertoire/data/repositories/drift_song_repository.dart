@@ -25,32 +25,34 @@ class DriftSongRepository implements SongRepository {
   @override
   Future<Either<Failure, List<Song>>> getAllSongs() async {
     try {
-      final rows = await (db.select(db.songs)
-            ..orderBy([(t) => OrderingTerm.asc(t.title)]))
-          .get();
+      final rows = await (db.select(
+        db.songs,
+      )..orderBy([(t) => OrderingTerm.asc(t.title)])).get();
       return Right(rows.map(_rowToSong).toList());
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to retrieve songs: $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(message: 'Failed to retrieve songs: $e', stackTrace: st),
+      );
     }
   }
 
   @override
   Future<Either<Failure, Song>> getSongById(String id) async {
     try {
-      final row = await (db.select(db.songs)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+      final row = await (db.select(
+        db.songs,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
       if (row == null) {
         return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
       }
       return Right(_rowToSong(row));
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to retrieve song "$id": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to retrieve song "$id": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
@@ -78,27 +80,32 @@ class DriftSongRepository implements SongRepository {
       await db.into(db.songs).insertOnConflictUpdate(companion);
       return Right(song);
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to save song "${song.id}": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to save song "${song.id}": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
   @override
   Future<Either<Failure, void>> deleteSong(String id) async {
     try {
-      final rowsAffected =
-          await (db.delete(db.songs)..where((t) => t.id.equals(id))).go();
+      final rowsAffected = await (db.delete(
+        db.songs,
+      )..where((t) => t.id.equals(id))).go();
       if (rowsAffected == 0) {
         return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
       }
       return const Right(null);
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to delete song "$id": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to delete song "$id": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
@@ -110,19 +117,23 @@ class DriftSongRepository implements SongRepository {
         return await getAllSongs();
       }
 
-      final rows = await (db.select(db.songs)
-            ..where((t) =>
-                t.title.lower().contains(cleanQuery) |
-                t.artist.lower().contains(cleanQuery) |
-                t.tagsJson.lower().contains(cleanQuery)))
-          .get();
+      final rows =
+          await (db.select(db.songs)..where(
+                (t) =>
+                    t.title.lower().contains(cleanQuery) |
+                    t.artist.lower().contains(cleanQuery) |
+                    t.tagsJson.lower().contains(cleanQuery),
+              ))
+              .get();
 
       return Right(rows.map(_rowToSong).toList());
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Search failed for query "$query": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Search failed for query "$query": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 

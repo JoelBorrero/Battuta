@@ -20,11 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Full-screen interactive musical score & staff notation editor.
 class ScoreEditorPage extends ConsumerStatefulWidget {
-  const ScoreEditorPage({
-    required this.songId,
-    super.key,
-    this.synthesizer,
-  });
+  const ScoreEditorPage({required this.songId, super.key, this.synthesizer});
 
   final String songId;
   final ToneSynthesizer? synthesizer;
@@ -169,9 +165,8 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save score: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to save score: $e')));
       }
     } finally {
       if (mounted) {
@@ -195,8 +190,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
       infoText =
           'Selected: M${activeMeasure.number} • $pitchText • $rhythmText. Drag noteheads vertically to change pitch (C4–B5), or tap toolbar to assign rhythm.';
     } else {
-      infoText =
-          'Tap or drag any notehead to select. Drag noteheads vertically to change pitch (C4–B5). Use the toolbar below to assign rhythmic values.';
+      infoText = 'Tap or drag any notehead to select. Drag noteheads vertically to change pitch (C4–B5). Use the toolbar below to assign rhythmic values.';
     }
 
     return Container(
@@ -211,12 +205,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
             color: theme.colorScheme.primary,
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              infoText,
-              style: theme.textTheme.bodySmall,
-            ),
-          ),
+          Expanded(child: Text(infoText, style: theme.textTheme.bodySmall)),
         ],
       ),
     );
@@ -228,9 +217,8 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
     final songAsync = ref.watch(songByIdProvider(widget.songId));
 
     return songAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Score Editor')),
         body: Center(child: Text('Error loading song: $e')),

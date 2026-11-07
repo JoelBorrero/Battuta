@@ -131,10 +131,7 @@ extension SongScoreMapper on Song {
       tempo: tempo,
       timeSignature: meter,
       sections: scoreSections,
-      metadata: {
-        'notes': ?notes,
-        'tags': tags,
-      },
+      metadata: {'notes': ?notes, 'tags': tags},
     );
   }
 
@@ -162,8 +159,8 @@ extension ScoreSongMapper on Score {
       artist: (artist != null && artist!.isNotEmpty)
           ? artist!
           : ((composer != null && composer!.isNotEmpty)
-              ? composer!
-              : 'Unknown Artist'),
+                ? composer!
+                : 'Unknown Artist'),
       key: keySignature.isNotEmpty ? keySignature : 'C',
       tempo: tempo > 0 ? tempo : 120,
       timeSignature: (timeSignature.numerator, timeSignature.denominator),
@@ -173,8 +170,12 @@ extension ScoreSongMapper on Score {
         for (var sIdx = 0; sIdx < sections.length; sIdx++)
           SongSection(
             id: sections[sIdx].id.isNotEmpty ? sections[sIdx].id : 'sec-$sIdx',
-            name: sections[sIdx].name.isNotEmpty ? sections[sIdx].name : 'Section ${sIdx + 1}',
-            repeatCount: sections[sIdx].repeatCount > 0 ? sections[sIdx].repeatCount : 1,
+            name: sections[sIdx].name.isNotEmpty
+                ? sections[sIdx].name
+                : 'Section ${sIdx + 1}',
+            repeatCount: sections[sIdx].repeatCount > 0
+                ? sections[sIdx].repeatCount
+                : 1,
             orderIndex: sIdx,
             chords: [
               for (final m in sections[sIdx].measures)

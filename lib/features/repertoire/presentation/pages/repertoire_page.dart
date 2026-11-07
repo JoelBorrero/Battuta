@@ -163,11 +163,12 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     );
   }
 
-  Widget _buildSongsView(AsyncValue<List<dynamic>> repertoire, ThemeData theme) {
+  Widget _buildSongsView(
+    AsyncValue<List<dynamic>> repertoire,
+    ThemeData theme,
+  ) {
     return repertoire.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -280,10 +281,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'No Setlists Yet',
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  Text('No Setlists Yet', style: theme.textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(
                     'Create an ordered setlist for Sunday services or rehearsals.',
@@ -340,7 +338,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 ),
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Opening setlist: ${setlist.title}')),
+                    SnackBar(
+                      content: Text('Opening setlist: ${setlist.title}'),
+                    ),
                   );
                 },
               ),
@@ -353,10 +353,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
   /// Opens a search delegate to filter songs by query.
   void _showSearch(BuildContext context, WidgetRef ref) {
-    showSearch(
-      context: context,
-      delegate: _SongSearchDelegate(ref),
-    );
+    showSearch(context: context, delegate: _SongSearchDelegate(ref));
   }
 }
 
@@ -372,21 +369,21 @@ class _SongSearchDelegate extends SearchDelegate<String> {
 
   @override
   List<Widget>? buildActions(BuildContext context) => [
-        if (query.isNotEmpty)
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              query = '';
-              showSuggestions(context);
-            },
-          ),
-      ];
+    if (query.isNotEmpty)
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+          showSuggestions(context);
+        },
+      ),
+  ];
 
   @override
   Widget? buildLeading(BuildContext context) => IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => close(context, ''),
-      );
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () => close(context, ''),
+  );
 
   @override
   Widget buildResults(BuildContext context) => _buildSearchResults();
@@ -396,9 +393,7 @@ class _SongSearchDelegate extends SearchDelegate<String> {
 
   Widget _buildSearchResults() {
     if (query.trim().isEmpty) {
-      return const Center(
-        child: Text('Type to search songs…'),
-      );
+      return const Center(child: Text('Type to search songs…'));
     }
 
     final repertoire = _ref.watch(repertoireProvider);

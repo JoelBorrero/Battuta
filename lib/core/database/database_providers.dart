@@ -51,4 +51,3 @@ final scoreRepositoryProvider = Provider<ScoreRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
   return DriftScoreRepository(db);
 });
-

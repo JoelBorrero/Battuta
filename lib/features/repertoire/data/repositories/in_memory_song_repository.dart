@@ -151,4 +151,3 @@ class InMemorySongRepository implements SongRepository {
     yield* _controller.stream;
   }
 }
-

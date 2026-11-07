@@ -25,9 +25,5 @@ Future<void> main() async {
 
   AppLogger.info('Starting Battuta…');
 
-  runApp(
-    const ProviderScope(
-      child: BattutaApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: BattutaApp()));
 }

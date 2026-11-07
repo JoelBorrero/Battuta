@@ -33,22 +33,14 @@ void main() {
     id: 'test-score',
     title: 'Blessed Be Your Name',
     sections: [
-      Section(
-        id: 'sec-1',
-        name: 'Verse 1',
-        measures: [
-          Measure(number: 1),
-        ],
-      ),
+      Section(id: 'sec-1', name: 'Verse 1', measures: [Measure(number: 1)]),
     ],
   );
 
   const samplePitchResult = PitchOnlyResult(
     sectionName: 'Verse 1',
     assumedClef: 'G4',
-    measures: [
-      Measure(number: 1),
-    ],
+    measures: [Measure(number: 1)],
   );
 
   setUp(() {
@@ -80,12 +72,16 @@ void main() {
       final controller = container.read(scanControllerProvider.notifier);
 
       controller.setScanMode(ScanMode.pitchOnlySnippet);
-      expect(container.read(scanControllerProvider).scanMode,
-          equals(ScanMode.pitchOnlySnippet));
+      expect(
+        container.read(scanControllerProvider).scanMode,
+        equals(ScanMode.pitchOnlySnippet),
+      );
 
       controller.setScanMode(ScanMode.fullLeadSheet);
-      expect(container.read(scanControllerProvider).scanMode,
-          equals(ScanMode.fullLeadSheet));
+      expect(
+        container.read(scanControllerProvider).scanMode,
+        equals(ScanMode.fullLeadSheet),
+      );
     });
 
     test('captureFromCamera sets imageBytes on success', () async {
@@ -113,74 +109,94 @@ void main() {
       expect(state.imageBytes, equals(sampleBytes));
     });
 
-    test('routes to Schema A (full lead sheet) when mode is fullLeadSheet',
-        () async {
-      final controller = container.read(scanControllerProvider.notifier);
-      controller.setImageBytes(sampleBytes);
-      controller.setScanMode(ScanMode.fullLeadSheet);
+    test(
+      'routes to Schema A (full lead sheet) when mode is fullLeadSheet',
+      () async {
+        final controller = container.read(scanControllerProvider.notifier);
+        controller.setImageBytes(sampleBytes);
+        controller.setScanMode(ScanMode.fullLeadSheet);
 
-      when(() => mockOmrRepo.extractFullLeadSheet(
+        when(
+          () => mockOmrRepo.extractFullLeadSheet(
             imageBytes: any(named: 'imageBytes'),
             mimeType: any(named: 'mimeType'),
-          )).thenAnswer((_) async => const Right(sampleScore));
+          ),
+        ).thenAnswer((_) async => const Right(sampleScore));
 
-      await controller.analyze();
+        await controller.analyze();
 
-      final state = container.read(scanControllerProvider);
-      expect(state.status, equals(ScanStatus.success));
-      expect(state.extractedScore, equals(sampleScore));
-      verify(() => mockOmrRepo.extractFullLeadSheet(
+        final state = container.read(scanControllerProvider);
+        expect(state.status, equals(ScanStatus.success));
+        expect(state.extractedScore, equals(sampleScore));
+        verify(
+          () => mockOmrRepo.extractFullLeadSheet(
             imageBytes: sampleBytes,
             mimeType: 'image/jpeg',
-          )).called(1);
-      verifyNever(() => mockOmrRepo.extractPitchOnlySection(
+          ),
+        ).called(1);
+        verifyNever(
+          () => mockOmrRepo.extractPitchOnlySection(
             imageBytes: any(named: 'imageBytes'),
             mimeType: any(named: 'mimeType'),
-          ));
-    });
-
-    test('routes to Schema B (pitch-only) when mode is pitchOnlySnippet',
-        () async {
-      final controller = container.read(scanControllerProvider.notifier);
-      controller.setImageBytes(sampleBytes);
-      controller.setScanMode(ScanMode.pitchOnlySnippet);
-
-      when(() => mockOmrRepo.extractPitchOnlySection(
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-          )).thenAnswer((_) async => const Right(samplePitchResult));
-
-      await controller.analyze();
-
-      final state = container.read(scanControllerProvider);
-      expect(state.status, equals(ScanStatus.success));
-      expect(state.extractedPitchResult, equals(samplePitchResult));
-      verify(() => mockOmrRepo.extractPitchOnlySection(
-            imageBytes: sampleBytes,
-            mimeType: 'image/jpeg',
-          )).called(1);
-    });
+          ),
+        );
+      },
+    );
 
     test(
-        'handles offline / network error gracefully during analysis (Checklist Requirements)',
-        () async {
+      'routes to Schema B (pitch-only) when mode is pitchOnlySnippet',
+      () async {
+        final controller = container.read(scanControllerProvider.notifier);
+        controller.setImageBytes(sampleBytes);
+        controller.setScanMode(ScanMode.pitchOnlySnippet);
+
+        when(
+          () => mockOmrRepo.extractPitchOnlySection(
+            imageBytes: any(named: 'imageBytes'),
+            mimeType: any(named: 'mimeType'),
+          ),
+        ).thenAnswer((_) async => const Right(samplePitchResult));
+
+        await controller.analyze();
+
+        final state = container.read(scanControllerProvider);
+        expect(state.status, equals(ScanStatus.success));
+        expect(state.extractedPitchResult, equals(samplePitchResult));
+        verify(
+          () => mockOmrRepo.extractPitchOnlySection(
+            imageBytes: sampleBytes,
+            mimeType: 'image/jpeg',
+          ),
+        ).called(1);
+      },
+    );
+
+    test('handles offline / network error gracefully during analysis (Checklist Requirements)', () async {
       final controller = container.read(scanControllerProvider.notifier);
       controller.setImageBytes(sampleBytes);
       controller.setScanMode(ScanMode.fullLeadSheet);
 
-      when(() => mockOmrRepo.extractFullLeadSheet(
-            imageBytes: any(named: 'imageBytes'),
-            mimeType: any(named: 'mimeType'),
-          )).thenAnswer((_) async => const Left(ServerFailure(
+      when(
+        () => mockOmrRepo.extractFullLeadSheet(
+          imageBytes: any(named: 'imageBytes'),
+          mimeType: any(named: 'mimeType'),
+        ),
+      ).thenAnswer(
+        (_) async => const Left(
+          ServerFailure(
             message: 'Network offline. Check your internet connection.',
-          )));
+          ),
+        ),
+      );
 
       await controller.analyze();
 
       final state = container.read(scanControllerProvider);
       expect(state.status, equals(ScanStatus.error));
-      expect(state.errorMessage,
-          contains('Network offline. Check your internet connection.'));
+      expect(
+        state.errorMessage,
+        contains('Network offline. Check your internet connection.'),
+      );
     });
   });
 }

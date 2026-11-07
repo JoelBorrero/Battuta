@@ -75,7 +75,8 @@ class StaffCanvas extends StatefulWidget {
     int measureNumber,
     int eventIndex,
     Pitch newPitch,
-  )? onNotePitchChanged;
+  )?
+  onNotePitchChanged;
 
   /// Callback invoked when a notehead is tapped.
   final void Function(RenderedNoteBox note)? onNoteTapped;

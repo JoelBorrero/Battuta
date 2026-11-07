@@ -31,26 +31,27 @@ class ChordSymbol {
 
   /// Converts this [ChordSymbol] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'root': root,
-        'quality': quality,
-        'bass': bass,
-        'tickOffset': tickOffset,
-      };
+    'root': root,
+    'quality': quality,
+    'bass': bass,
+    'tickOffset': tickOffset,
+  };
 
   /// Constructs a [ChordSymbol] from a JSON map.
   factory ChordSymbol.fromJson(Map<String, dynamic> json) => ChordSymbol(
-        root: json['root'] as String,
-        quality: json['quality'] as String? ?? '',
-        bass: json['bass'] as String?,
-        tickOffset: json['tickOffset'] as int? ?? 0,
-      );
+    root: json['root'] as String,
+    quality: json['quality'] as String? ?? '',
+    bass: json['bass'] as String?,
+    tickOffset: json['tickOffset'] as int? ?? 0,
+  );
 
   // ---------------------------------------------------------------------------
   // Parsing
   // ---------------------------------------------------------------------------
 
-  static final RegExp _chordRegex =
-      RegExp(r'^([A-Ga-g][#b♯♭]?)([^/]*)(?:/([A-Ga-g][#b♯♭]?))?$');
+  static final RegExp _chordRegex = RegExp(
+    r'^([A-Ga-g][#b♯♭]?)([^/]*)(?:/([A-Ga-g][#b♯♭]?))?$',
+  );
 
   /// Parses a raw chord string such as `"G"`, `"Am"`, `"C#m7"`, or `"D/F#"`.
   ///
@@ -118,4 +119,3 @@ class ChordSymbol {
   @override
   String toString() => 'ChordSymbol($text, @${tickOffset}t)';
 }
-

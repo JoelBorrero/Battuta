@@ -155,8 +155,9 @@ abstract final class NoteheadPainter {
 
       // 3. Subtle outer pulse ring
       final outerRing = Paint()
-        ..color = metrics.selectedNoteColor
-            .withValues(alpha: isDragging ? 0.35 : 0.18)
+        ..color = metrics.selectedNoteColor.withValues(
+          alpha: isDragging ? 0.35 : 0.18,
+        )
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
       canvas.drawCircle(centerOffset, auraRadius + 3.0, outerRing);
@@ -221,7 +222,10 @@ abstract final class NoteheadPainter {
         // Accidental placed to the left of the notehead
         accPainter.paint(
           canvas,
-          Offset(x - accPainter.width - 4.0, noteY - (metrics.lineSpacing * 1.1)),
+          Offset(
+            x - accPainter.width - 4.0,
+            noteY - (metrics.lineSpacing * 1.1),
+          ),
         );
       }
     }
@@ -247,11 +251,7 @@ abstract final class NoteheadPainter {
       final haloPaint = Paint()
         ..color = unassignedHaloColor
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(
-        Offset(x, noteY),
-        metrics.lineSpacing * 0.9,
-        haloPaint,
-      );
+      canvas.drawCircle(Offset(x, noteY), metrics.lineSpacing * 0.9, haloPaint);
 
       final haloBorder = Paint()
         ..color = unassignedNoteColor.withValues(alpha: 0.6)
@@ -280,8 +280,9 @@ abstract final class NoteheadPainter {
         ..strokeWidth = metrics.lineThickness * (isSelected ? 1.3 : 1.0)
         ..style = PaintingStyle.stroke;
 
-      final stemX =
-          stemUp ? x + (noteheadPainter.width * 0.42) : x - (noteheadPainter.width * 0.42);
+      final stemX = stemUp
+          ? x + (noteheadPainter.width * 0.42)
+          : x - (noteheadPainter.width * 0.42);
       final stemStartY = noteY;
       final stemEndY = stemUp ? noteY - stemLength : noteY + stemLength;
 
@@ -294,8 +295,9 @@ abstract final class NoteheadPainter {
       // Flags for 8th and 16th notes
       if (event.rhythmicValue.ticks <= 240) {
         // Sixteenth note flag
-        final flagGlyph =
-            stemUp ? SmuflGlyphs.flag16thUp : SmuflGlyphs.flag16thDown;
+        final flagGlyph = stemUp
+            ? SmuflGlyphs.flag16thUp
+            : SmuflGlyphs.flag16thDown;
         final flagPainter = SmuflGlyphs.createPainter(
           glyph: flagGlyph,
           fontSize: metrics.lineSpacing * 2.8,
@@ -308,8 +310,9 @@ abstract final class NoteheadPainter {
       } else if (event.rhythmicValue.ticks <= 480 &&
           event.rhythmicValue.ticks < 960) {
         // Eighth note flag
-        final flagGlyph =
-            stemUp ? SmuflGlyphs.flag8thUp : SmuflGlyphs.flag8thDown;
+        final flagGlyph = stemUp
+            ? SmuflGlyphs.flag8thUp
+            : SmuflGlyphs.flag8thDown;
         final flagPainter = SmuflGlyphs.createPainter(
           glyph: flagGlyph,
           fontSize: metrics.lineSpacing * 2.8,
@@ -336,7 +339,10 @@ abstract final class NoteheadPainter {
           : noteY;
       dotPainter.paint(
         canvas,
-        Offset(x + (noteheadPainter.width / 2.0) + 4.0, dotY - (dotPainter.height / 2.0)),
+        Offset(
+          x + (noteheadPainter.width / 2.0) + 4.0,
+          dotY - (dotPainter.height / 2.0),
+        ),
       );
     }
 
@@ -404,8 +410,9 @@ abstract final class NoteheadPainter {
     bool isSelected = false,
   }) {
     final restGlyph = SmuflGlyphs.glyphForRest(event.rhythmicValue);
-    final restColor =
-        isSelected ? metrics.selectedNoteColor : metrics.staffColor;
+    final restColor = isSelected
+        ? metrics.selectedNoteColor
+        : metrics.staffColor;
     final restPainter = SmuflGlyphs.createPainter(
       glyph: restGlyph,
       fontSize: metrics.lineSpacing * 2.8,
@@ -480,8 +487,7 @@ abstract final class NoteheadPainter {
 
     final staffTopY = staffBottomY - metrics.staffHeight;
     final highestRefY = noteY < staffTopY ? noteY : staffTopY;
-    final badgeTopY =
-        highestRefY - metrics.lineSpacing - badgeHeight - 4.0;
+    final badgeTopY = highestRefY - metrics.lineSpacing - badgeHeight - 4.0;
     final badgeLeft = noteX - (badgeWidth / 2.0);
 
     final badgeRRect = RRect.fromRectAndRadius(
@@ -545,8 +551,9 @@ abstract final class NoteheadPainter {
     final endX = measureRight - 4.0;
 
     while (currentX < endX) {
-      final segEnd =
-          (currentX + dashWidth < endX) ? currentX + dashWidth : endX;
+      final segEnd = (currentX + dashWidth < endX)
+          ? currentX + dashWidth
+          : endX;
       canvas.drawLine(Offset(currentX, y), Offset(segEnd, y), guidePaint);
       currentX += dashWidth + dashSpace;
     }

@@ -126,8 +126,10 @@ void main() {
 
       test('transposes chromatically by semitones', () {
         final c4 = Pitch.parse('C4');
-        expect(c4.transposeChromatic(1, preferSharps: true).scientificNotation,
-            equals('C#4'));
+        expect(
+          c4.transposeChromatic(1, preferSharps: true).scientificNotation,
+          equals('C#4'),
+        );
         expect(c4.transposeChromatic(12).scientificNotation, equals('C5'));
       });
     });

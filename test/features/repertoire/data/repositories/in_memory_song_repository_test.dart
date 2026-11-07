@@ -55,13 +55,10 @@ void main() {
       final result = await repository.getSongById('non-existent-id');
 
       expect(result.isLeft(), isTrue);
-      result.fold(
-        (failure) {
-          expect(failure, isA<CacheFailure>());
-          expect(failure.message, contains('non-existent-id'));
-        },
-        (_) => fail('Expected left failure'),
-      );
+      result.fold((failure) {
+        expect(failure, isA<CacheFailure>());
+        expect(failure.message, contains('non-existent-id'));
+      }, (_) => fail('Expected left failure'));
     });
 
     test('saveSong creates new song and updates existing song', () async {
@@ -82,7 +79,10 @@ void main() {
 
       final getResult = await repository.getSongById('new-song');
       expect(getResult.isRight(), isTrue);
-      expect(getResult.getOrElse((_) => throw 'error').title, equals('Build My Life'));
+      expect(
+        getResult.getOrElse((_) => throw 'error').title,
+        equals('Build My Life'),
+      );
 
       // 2. Update
       final updatedSong = newSong.copyWith(title: 'Build My Life (Updated)');
@@ -90,7 +90,10 @@ void main() {
       expect(updateResult.isRight(), isTrue);
 
       final reGetResult = await repository.getSongById('new-song');
-      expect(reGetResult.getOrElse((_) => throw 'error').title, equals('Build My Life (Updated)'));
+      expect(
+        reGetResult.getOrElse((_) => throw 'error').title,
+        equals('Build My Life (Updated)'),
+      );
     });
 
     test('deleteSong removes song from repository', () async {
@@ -170,4 +173,3 @@ void main() {
     });
   });
 }
-

@@ -26,9 +26,7 @@ void main() {
   test('ApiKeyNotifier manages key state changes reactively', () async {
     final fakeStorage = FakeApiKeyStorage();
     final container = ProviderContainer(
-      overrides: [
-        apiKeyStorageProvider.overrideWithValue(fakeStorage),
-      ],
+      overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
     );
     addTearDown(container.dispose);
 

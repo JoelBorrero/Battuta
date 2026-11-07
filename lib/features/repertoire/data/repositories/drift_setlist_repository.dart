@@ -25,32 +25,37 @@ class DriftSetlistRepository implements SetlistRepository {
   @override
   Future<Either<Failure, List<Setlist>>> getAllSetlists() async {
     try {
-      final rows = await (db.select(db.setlists)
-            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .get();
+      final rows = await (db.select(
+        db.setlists,
+      )..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
       return Right(rows.map(_rowToSetlist).toList());
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to retrieve setlists: $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to retrieve setlists: $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
   @override
   Future<Either<Failure, Setlist>> getSetlistById(String id) async {
     try {
-      final row = await (db.select(db.setlists)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+      final row = await (db.select(
+        db.setlists,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
       if (row == null) {
         return Left(CacheFailure(message: 'Setlist with ID "$id" not found.'));
       }
       return Right(_rowToSetlist(row));
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to retrieve setlist "$id": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to retrieve setlist "$id": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
@@ -73,27 +78,32 @@ class DriftSetlistRepository implements SetlistRepository {
       await db.into(db.setlists).insertOnConflictUpdate(companion);
       return Right(setlist);
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to save setlist "${setlist.id}": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to save setlist "${setlist.id}": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 
   @override
   Future<Either<Failure, void>> deleteSetlist(String id) async {
     try {
-      final rowsAffected =
-          await (db.delete(db.setlists)..where((t) => t.id.equals(id))).go();
+      final rowsAffected = await (db.delete(
+        db.setlists,
+      )..where((t) => t.id.equals(id))).go();
       if (rowsAffected == 0) {
         return Left(CacheFailure(message: 'Setlist with ID "$id" not found.'));
       }
       return const Right(null);
     } catch (e, st) {
-      return Left(CacheFailure(
-        message: 'Failed to delete setlist "$id": $e',
-        stackTrace: st,
-      ));
+      return Left(
+        CacheFailure(
+          message: 'Failed to delete setlist "$id": $e',
+          stackTrace: st,
+        ),
+      );
     }
   }
 

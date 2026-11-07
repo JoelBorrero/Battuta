@@ -51,10 +51,10 @@ class RenderedNoteBox {
 
   /// Expanded touch target (at least 44x44 pt per Apple Human Interface Guidelines).
   Rect get touchTarget => Rect.fromCenter(
-        center: center,
-        width: bounds.width < 44.0 ? 44.0 : bounds.width + 12.0,
-        height: bounds.height < 44.0 ? 44.0 : bounds.height + 12.0,
-      );
+    center: center,
+    width: bounds.width < 44.0 ? 44.0 : bounds.width + 12.0,
+    height: bounds.height < 44.0 ? 44.0 : bounds.height + 12.0,
+  );
 }
 
 /// Spatial index of all noteheads rendered in the active score canvas.

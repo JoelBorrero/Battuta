@@ -40,4 +40,3 @@ class BattutaApp extends ConsumerWidget {
     );
   }
 }
-

@@ -63,7 +63,9 @@ class SettingsPage extends ConsumerWidget {
                 ],
                 selected: {themeMode},
                 onSelectionChanged: (modes) {
-                  ref.read(themeModeProvider.notifier).setThemeMode(modes.first);
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(modes.first);
                 },
               ),
             ),
@@ -160,9 +162,9 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

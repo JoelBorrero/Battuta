@@ -13,10 +13,7 @@ import 'package:flutter/material.dart';
 
 /// Rhythm input toolbar with SMuFL duration buttons and measure capacity validation.
 class RhythmToolbar extends StatelessWidget {
-  const RhythmToolbar({
-    required this.controller,
-    super.key,
-  });
+  const RhythmToolbar({required this.controller, super.key});
 
   /// The active [RhythmEditorController] orchestrating editing actions.
   final RhythmEditorController controller;
@@ -76,7 +73,9 @@ class RhythmToolbar extends StatelessWidget {
                         key: const Key('rhythm_prev_btn'),
                         icon: const Icon(Icons.chevron_left),
                         tooltip: 'Previous Note',
-                        onPressed: hasCursor ? () => controller.previousNote() : null,
+                        onPressed: hasCursor
+                            ? () => controller.previousNote()
+                            : null,
                       ),
                       const SizedBox(width: 4),
 
@@ -106,7 +105,9 @@ class RhythmToolbar extends StatelessWidget {
                         ),
                         tooltip: 'Toggle Rest',
                         isSelected: activeEvent?.isRest == true,
-                        onPressed: hasCursor ? () => controller.toggleRest() : null,
+                        onPressed: hasCursor
+                            ? () => controller.toggleRest()
+                            : null,
                       ),
                       const SizedBox(width: 4),
 
@@ -121,7 +122,9 @@ class RhythmToolbar extends StatelessWidget {
                         ),
                         tooltip: 'Toggle Tie',
                         isSelected: activeEvent?.isTied == true,
-                        onPressed: hasCursor ? () => controller.toggleTie() : null,
+                        onPressed: hasCursor
+                            ? () => controller.toggleTie()
+                            : null,
                       ),
                       const SizedBox(width: 4),
 
@@ -130,7 +133,9 @@ class RhythmToolbar extends StatelessWidget {
                         key: const Key('rhythm_next_btn'),
                         icon: const Icon(Icons.chevron_right),
                         tooltip: 'Next Note',
-                        onPressed: hasCursor ? () => controller.nextNote() : null,
+                        onPressed: hasCursor
+                            ? () => controller.nextNote()
+                            : null,
                       ),
                     ],
                   ),
@@ -180,9 +185,7 @@ class RhythmToolbar extends StatelessWidget {
                 : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
             width: isSelected ? 2 : 1,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: canFit ? () => controller.assignDuration(duration) : null,
         child: Column(
@@ -195,8 +198,8 @@ class RhythmToolbar extends StatelessWidget {
                 fontSize: 22,
                 color: canFit
                     ? (isSelected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurface)
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface)
                     : theme.disabledColor,
                 height: 1.0,
               ),
@@ -209,8 +212,8 @@ class RhythmToolbar extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: canFit
                     ? (isSelected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant)
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant)
                     : theme.disabledColor,
               ),
             ),

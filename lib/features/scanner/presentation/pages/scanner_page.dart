@@ -65,9 +65,7 @@ class ScannerPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Lead Sheet'),
-      ),
+      appBar: AppBar(title: const Text('Scan Lead Sheet')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -105,7 +103,8 @@ class ScannerPage extends ConsumerWidget {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 key: const Key('choose_gallery_button'),
-                onPressed: () => _openScanModal(context, ref, fromCamera: false),
+                onPressed: () =>
+                    _openScanModal(context, ref, fromCamera: false),
                 icon: const Icon(Icons.photo_library_outlined),
                 label: const Text('Choose from Library'),
               ),

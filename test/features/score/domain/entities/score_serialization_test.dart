@@ -70,15 +70,21 @@ void main() {
       final reloadedScore = Score.fromJson(json);
 
       expect(reloadedScore, equals(originalScore));
-      expect(reloadedScore.sections.first.externalSyncId,
-          equals('propresenter-uuid-999'));
-      expect(reloadedScore.allMeasures.first.events[0].pitch?.scientificNotation,
-          equals('C#4'));
+      expect(
+        reloadedScore.sections.first.externalSyncId,
+        equals('propresenter-uuid-999'),
+      );
+      expect(
+        reloadedScore.allMeasures.first.events[0].pitch?.scientificNotation,
+        equals('C#4'),
+      );
       expect(reloadedScore.allMeasures.first.events[0].isTied, isTrue);
       expect(reloadedScore.allMeasures.first.events[0].lyric, equals('Glo-'));
       expect(reloadedScore.allMeasures.first.events[1].isRest, isTrue);
-      expect(reloadedScore.allMeasures.first.events[2].pitch?.scientificNotation,
-          equals('Bb4'));
+      expect(
+        reloadedScore.allMeasures.first.events[2].pitch?.scientificNotation,
+        equals('Bb4'),
+      );
       expect(reloadedScore.allMeasures.first.chords[1].bass, equals('A#'));
     });
   });

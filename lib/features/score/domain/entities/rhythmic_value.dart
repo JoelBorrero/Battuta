@@ -31,11 +31,11 @@ class RhythmicValue implements Comparable<RhythmicValue> {
     bool isDotted = false,
     bool isTriplet = false,
   }) : this(
-          ticks: ticks,
-          name: name ?? 'Custom(${ticks}t)',
-          isDotted: isDotted,
-          isTriplet: isTriplet,
-        );
+         ticks: ticks,
+         name: name ?? 'Custom(${ticks}t)',
+         isDotted: isDotted,
+         isTriplet: isTriplet,
+       );
 
   /// Standard PPQ resolution: 480 ticks per quarter note.
   static const int ticksPerQuarterNote = 480;
@@ -54,19 +54,19 @@ class RhythmicValue implements Comparable<RhythmicValue> {
 
   /// Converts this [RhythmicValue] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'ticks': ticks,
-        'name': name,
-        'isDotted': isDotted,
-        'isTriplet': isTriplet,
-      };
+    'ticks': ticks,
+    'name': name,
+    'isDotted': isDotted,
+    'isTriplet': isTriplet,
+  };
 
   /// Constructs a [RhythmicValue] from a JSON map.
   factory RhythmicValue.fromJson(Map<String, dynamic> json) => RhythmicValue(
-        ticks: json['ticks'] as int,
-        name: json['name'] as String,
-        isDotted: json['isDotted'] as bool? ?? false,
-        isTriplet: json['isTriplet'] as bool? ?? false,
-      );
+    ticks: json['ticks'] as int,
+    name: json['name'] as String,
+    isDotted: json['isDotted'] as bool? ?? false,
+    isTriplet: json['isTriplet'] as bool? ?? false,
+  );
 
   // ---------------------------------------------------------------------------
   // Standard Note Durations
@@ -91,10 +91,7 @@ class RhythmicValue implements Comparable<RhythmicValue> {
   );
 
   /// Eighth note (1/8) — 240 ticks.
-  static const RhythmicValue eighth = RhythmicValue(
-    ticks: 240,
-    name: '8th',
-  );
+  static const RhythmicValue eighth = RhythmicValue(ticks: 240, name: '8th');
 
   /// Quarter note (1/4) — 480 ticks.
   static const RhythmicValue quarter = RhythmicValue(
@@ -244,4 +241,3 @@ class RhythmicValue implements Comparable<RhythmicValue> {
   @override
   String toString() => 'RhythmicValue($name, ${ticks}t)';
 }
-

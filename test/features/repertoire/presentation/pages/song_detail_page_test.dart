@@ -44,17 +44,15 @@ void main() {
 
   Widget buildSubject({required String songId}) {
     return ProviderScope(
-      overrides: [
-        songRepositoryProvider.overrideWithValue(repository),
-      ],
-      child: MaterialApp(
-        home: SongDetailPage(songId: songId),
-      ),
+      overrides: [songRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp(home: SongDetailPage(songId: songId)),
     );
   }
 
   group('SongDetailPage', () {
-    testWidgets('renders full metadata, badges, and chord chart', (tester) async {
+    testWidgets('renders full metadata, badges, and chord chart', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -70,10 +68,15 @@ void main() {
       expect(find.text('jazz'), findsOneWidget);
       expect(find.text('Acoustic bossa style'), findsOneWidget);
       expect(find.text('Intro'), findsOneWidget);
-      expect(find.text('Fly me to the moon and let me play among the stars...'), findsOneWidget);
+      expect(
+        find.text('Fly me to the moon and let me play among the stars...'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('shows transpose dialog and updates displayed key', (tester) async {
+    testWidgets('shows transpose dialog and updates displayed key', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -127,21 +130,24 @@ void main() {
       expect(found, isNull);
     });
 
-    testWidgets('switches to Musical Staff mode on narrow 360px screen without layout overflow', (tester) async {
-      tester.view.physicalSize = const Size(360, 800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'switches to Musical Staff mode on narrow 360px screen without layout overflow',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject(songId: 'song-detail-1'));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject(songId: 'song-detail-1'));
+        await tester.pumpAndSettle();
 
-      // Switch to Musical Staff
-      await tester.tap(find.text('Musical Staff'));
-      await tester.pumpAndSettle();
+        // Switch to Musical Staff
+        await tester.tap(find.text('Musical Staff'));
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.text('Interactive Notation View'), findsOneWidget);
-      expect(find.text('Edit in Notation Editor'), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.text('Interactive Notation View'), findsOneWidget);
+        expect(find.text('Edit in Notation Editor'), findsOneWidget);
+      },
+    );
   });
 }

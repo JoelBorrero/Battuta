@@ -36,23 +36,23 @@ class SetlistItem {
 
   /// Converts this [SetlistItem] to a JSON-compatible map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'songId': songId,
-        'orderIndex': orderIndex,
-        'keyOverride': keyOverride,
-        'tempoOverride': tempoOverride,
-        'notes': notes,
-      };
+    'id': id,
+    'songId': songId,
+    'orderIndex': orderIndex,
+    'keyOverride': keyOverride,
+    'tempoOverride': tempoOverride,
+    'notes': notes,
+  };
 
   /// Constructs a [SetlistItem] from a JSON map.
   factory SetlistItem.fromJson(Map<String, dynamic> json) => SetlistItem(
-        id: json['id'] as String,
-        songId: json['songId'] as String,
-        orderIndex: json['orderIndex'] as int,
-        keyOverride: json['keyOverride'] as String?,
-        tempoOverride: json['tempoOverride'] as int?,
-        notes: json['notes'] as String?,
-      );
+    id: json['id'] as String,
+    songId: json['songId'] as String,
+    orderIndex: json['orderIndex'] as int,
+    keyOverride: json['keyOverride'] as String?,
+    tempoOverride: json['tempoOverride'] as int?,
+    notes: json['notes'] as String?,
+  );
 
   /// Creates a copy of this [SetlistItem] with optional updated fields.
   SetlistItem copyWith({
@@ -70,10 +70,10 @@ class SetlistItem {
       id: id ?? this.id,
       songId: songId ?? this.songId,
       orderIndex: orderIndex ?? this.orderIndex,
-      keyOverride:
-          clearKeyOverride ? null : (keyOverride ?? this.keyOverride),
-      tempoOverride:
-          clearTempoOverride ? null : (tempoOverride ?? this.tempoOverride),
+      keyOverride: clearKeyOverride ? null : (keyOverride ?? this.keyOverride),
+      tempoOverride: clearTempoOverride
+          ? null
+          : (tempoOverride ?? this.tempoOverride),
       notes: clearNotes ? null : (notes ?? this.notes),
     );
   }
@@ -91,14 +91,8 @@ class SetlistItem {
           notes == other.notes;
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        songId,
-        orderIndex,
-        keyOverride,
-        tempoOverride,
-        notes,
-      );
+  int get hashCode =>
+      Object.hash(id, songId, orderIndex, keyOverride, tempoOverride, notes);
 
   @override
   String toString() =>

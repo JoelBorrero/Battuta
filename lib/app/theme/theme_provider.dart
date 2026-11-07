@@ -19,5 +19,6 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 }
 
 /// Provides the active [ThemeMode] for the application.
-final themeModeProvider =
-    NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);

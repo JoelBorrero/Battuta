@@ -41,9 +41,8 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: AppRoutes.repertoire,
             name: 'repertoire',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: RepertoirePage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: RepertoirePage()),
             routes: [
               // New song creation
               GoRoute(
@@ -87,27 +86,24 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: AppRoutes.scanner,
             name: 'scanner',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ScannerPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: ScannerPage()),
           ),
 
           // Tab 3 — Team
           GoRoute(
             path: AppRoutes.team,
             name: 'team',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: TeamPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: TeamPage()),
           ),
 
           // Tab 4 — Live session
           GoRoute(
             path: AppRoutes.live,
             name: 'live',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: LiveSessionPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: LiveSessionPage()),
             routes: [
               GoRoute(
                 path: ':sessionId',
@@ -121,9 +117,8 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: AppRoutes.settings,
             name: 'settings',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: SettingsPage(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SettingsPage()),
           ),
         ],
       ),

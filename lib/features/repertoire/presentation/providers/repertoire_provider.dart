@@ -21,8 +21,7 @@ final songRepositoryProvider = Provider<SongRepository>((ref) {
 });
 
 /// Provides all setlists managed through [SetlistsNotifier].
-final setlistsProvider =
-    AsyncNotifierProvider<SetlistsNotifier, List<Setlist>>(
+final setlistsProvider = AsyncNotifierProvider<SetlistsNotifier, List<Setlist>>(
   SetlistsNotifier.new,
 );
 
@@ -31,28 +30,19 @@ class SetlistsNotifier extends AsyncNotifier<List<Setlist>> {
   FutureOr<List<Setlist>> build() async {
     final repo = ref.watch(setlistRepositoryProvider);
     final result = await repo.getAllSetlists();
-    return result.fold(
-      (failure) => throw failure,
-      (setlists) => setlists,
-    );
+    return result.fold((failure) => throw failure, (setlists) => setlists);
   }
 
   Future<void> createSetlist(Setlist setlist) async {
     final repo = ref.read(setlistRepositoryProvider);
     final res = await repo.saveSetlist(setlist);
-    res.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
+    res.fold((failure) => throw failure, (_) => ref.invalidateSelf());
   }
 
   Future<void> deleteSetlist(String id) async {
     final repo = ref.read(setlistRepositoryProvider);
     final res = await repo.deleteSetlist(id);
-    res.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
+    res.fold((failure) => throw failure, (_) => ref.invalidateSelf());
   }
 }
 
@@ -65,10 +55,7 @@ final songByIdProvider = FutureProvider.family<Song?, String>((ref, id) async {
   }
   final repository = ref.watch(songRepositoryProvider);
   final result = await repository.getSongById(id);
-  return result.fold(
-    (failure) => throw failure,
-    (song) => song,
-  );
+  return result.fold((failure) => throw failure, (song) => song);
 });
 
 /// Provides the current repertoire list and exposes mutation methods.
@@ -89,10 +76,7 @@ class Repertoire extends _$Repertoire {
   Future<List<Song>> build() async {
     final repository = ref.watch(songRepositoryProvider);
     final result = await repository.getAllSongs();
-    return result.fold(
-      (failure) => throw failure,
-      (songs) => songs,
-    );
+    return result.fold((failure) => throw failure, (songs) => songs);
   }
 
   /// Adds a new [song] to the repertoire.
@@ -166,7 +150,9 @@ class Repertoire extends _$Repertoire {
         state = previousState; // rollback
         state = AsyncError(failure, StackTrace.current);
       },
-      (_) {/* already removed optimistically */},
+      (_) {
+        /* already removed optimistically */
+      },
     );
   }
 

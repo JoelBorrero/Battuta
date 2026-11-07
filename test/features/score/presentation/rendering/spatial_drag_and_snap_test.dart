@@ -32,20 +32,14 @@ void main() {
         tickOffset: 480,
       ),
     ],
-    chords: [
-      ChordSymbol.parse('C'),
-    ],
+    chords: [ChordSymbol.parse('C')],
   );
 
   final testScore = Score(
     id: 'score-1',
     title: 'Drag Test Score',
     sections: [
-      Section(
-        id: 'sec-1',
-        name: 'Verse',
-        measures: [testMeasure],
-      ),
+      Section(id: 'sec-1', name: 'Verse', measures: [testMeasure]),
     ],
   );
 
@@ -60,8 +54,10 @@ void main() {
     });
 
     test('Measure.dragPitchAt throws RangeError on invalid index', () {
-      expect(() => testMeasure.dragPitchAt(5, Pitch.parse('C4')),
-          throwsRangeError);
+      expect(
+        () => testMeasure.dragPitchAt(5, Pitch.parse('C4')),
+        throwsRangeError,
+      );
     });
 
     test('Score.updateNotePitch updates pitch immutably', () {
@@ -116,55 +112,59 @@ void main() {
 
   group('Vertical Drag-and-Snap GestureDetector (Checklist Verification)', () {
     testWidgets(
-        'Dragging a notehead vertically snaps mathematically to lines and spaces in real time',
-        (tester) async {
-      final spatialIndex = SpatialNoteIndex();
-      Pitch? lastDraggedPitch;
-      var pitchChangeCount = 0;
+      'Dragging a notehead vertically snaps mathematically to lines and spaces in real time',
+      (tester) async {
+        final spatialIndex = SpatialNoteIndex();
+        Pitch? lastDraggedPitch;
+        var pitchChangeCount = 0;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 800,
-              height: 600,
-              child: StaffCanvas(
-                score: testScore,
-                spatialIndex: spatialIndex,
-                onNotePitchChanged:
-                    (sectionId, measureNumber, eventIndex, newPitch) {
-                  lastDraggedPitch = newPitch;
-                  pitchChangeCount++;
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 800,
+                height: 600,
+                child: StaffCanvas(
+                  score: testScore,
+                  spatialIndex: spatialIndex,
+                  onNotePitchChanged:
+                      (sectionId, measureNumber, eventIndex, newPitch) {
+                        lastDraggedPitch = newPitch;
+                        pitchChangeCount++;
+                      },
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(spatialIndex.count, equals(2));
-      final firstNoteBox = spatialIndex.allNotes[0];
-      expect(firstNoteBox.pitch.scientificNotation, equals('E4'));
+        expect(spatialIndex.count, equals(2));
+        final firstNoteBox = spatialIndex.allNotes[0];
+        expect(firstNoteBox.pitch.scientificNotation, equals('E4'));
 
-      // Start drag on the first notehead center
-      final startPoint = firstNoteBox.center;
-      final gesture = await tester.startGesture(startPoint, kind: PointerDeviceKind.touch);
-      await tester.pump();
+        // Start drag on the first notehead center
+        final startPoint = firstNoteBox.center;
+        final gesture = await tester.startGesture(
+          startPoint,
+          kind: PointerDeviceKind.touch,
+        );
+        await tester.pump();
 
-      // Drag up by 10 logical pixels (2 half-staff-spaces: E4 -> F4 -> G4)
-      await gesture.moveBy(const Offset(0, -10));
-      await tester.pump();
+        // Drag up by 10 logical pixels (2 half-staff-spaces: E4 -> F4 -> G4)
+        await gesture.moveBy(const Offset(0, -10));
+        await tester.pump();
 
-      // Verify mathematical snap
-      expect(pitchChangeCount, greaterThan(0));
-      expect(lastDraggedPitch, isNotNull);
-      // Moving up 10px with lineSpacing 10 (stepHeight 5) moves 2 diatonic steps up from E4 -> G4!
-      expect(lastDraggedPitch?.scientificNotation, equals('G4'));
+        // Verify mathematical snap
+        expect(pitchChangeCount, greaterThan(0));
+        expect(lastDraggedPitch, isNotNull);
+        // Moving up 10px with lineSpacing 10 (stepHeight 5) moves 2 diatonic steps up from E4 -> G4!
+        expect(lastDraggedPitch?.scientificNotation, equals('G4'));
 
-      await gesture.up();
-      await tester.pumpAndSettle();
-    });
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
   });
 }

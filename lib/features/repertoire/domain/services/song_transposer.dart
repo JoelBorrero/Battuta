@@ -90,16 +90,16 @@ class SongTransposer {
   }) {
     if (semitones == 0) return chord;
 
-    final newRoot = transposeNote(chord.root, semitones, preferSharps: preferSharps);
+    final newRoot = transposeNote(
+      chord.root,
+      semitones,
+      preferSharps: preferSharps,
+    );
     final newBass = chord.bass != null
         ? transposeNote(chord.bass!, semitones, preferSharps: preferSharps)
         : null;
 
-    return chord.copyWith(
-      root: newRoot,
-      bass: newBass,
-      customLabel: null,
-    );
+    return chord.copyWith(root: newRoot, bass: newBass, customLabel: null);
   }
 
   /// Transposes an entire [Song] by [semitones].
@@ -118,7 +118,8 @@ class SongTransposer {
 
     final targetKey = currentKey?.transpose(semitones);
     final preferSharps = targetKey?.useSharps ?? !song.key.contains('b');
-    final newKeyName = targetKey?.name ??
+    final newKeyName =
+        targetKey?.name ??
         transposeNote(song.key, semitones, preferSharps: preferSharps);
 
     final updatedSections = song.sections.map((section) {
@@ -170,14 +171,15 @@ class ChordParser {
     if (match == null) return null;
 
     final rawRoot = match.group(1)!;
-    final root = rawRoot.substring(0, 1).toUpperCase() +
+    final root =
+        rawRoot.substring(0, 1).toUpperCase() +
         (rawRoot.length > 1 ? rawRoot.substring(1) : '');
 
     final rawQuality = (match.group(2) ?? '').trim();
     final rawBass = match.group(3)?.trim();
     final bass = (rawBass != null && rawBass.isNotEmpty)
         ? rawBass.substring(0, 1).toUpperCase() +
-            (rawBass.length > 1 ? rawBass.substring(1) : '')
+              (rawBass.length > 1 ? rawBass.substring(1) : '')
         : null;
 
     final (quality, extensions) = _matchQualityAndExtensions(rawQuality);
@@ -192,13 +194,21 @@ class ChordParser {
     );
   }
 
-  static (ChordQuality, List<String>) _matchQualityAndExtensions(String suffix) {
+  static (ChordQuality, List<String>) _matchQualityAndExtensions(
+    String suffix,
+  ) {
     final s = suffix.toLowerCase();
 
     if (s.isEmpty) return (ChordQuality.major, const []);
-    if (s == 'm' || s == 'min' || s == '-') return (ChordQuality.minor, const []);
-    if (s == 'm7' || s == 'min7' || s == '-7') return (ChordQuality.minor7, const []);
-    if (s == 'maj7' || s == 'm7+' || s == 'delta') return (ChordQuality.major7, const []);
+    if (s == 'm' || s == 'min' || s == '-') {
+      return (ChordQuality.minor, const []);
+    }
+    if (s == 'm7' || s == 'min7' || s == '-7') {
+      return (ChordQuality.minor7, const []);
+    }
+    if (s == 'maj7' || s == 'm7+' || s == 'delta') {
+      return (ChordQuality.major7, const []);
+    }
     if (s == '7' || s == 'dom7') return (ChordQuality.dominant7, const []);
     if (s == 'dim' || s == 'o') return (ChordQuality.diminished, const []);
     if (s == 'aug' || s == '+') return (ChordQuality.augmented, const []);
@@ -221,4 +231,3 @@ class ChordParser {
     return (ChordQuality.custom, const []);
   }
 }
-

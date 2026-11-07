@@ -73,7 +73,10 @@ void main() {
       expect(retrieved.artist, equals(song.artist));
       expect(retrieved.key, equals(song.key));
       expect(retrieved.sections.length, equals(1));
-      expect(retrieved.sections.first.lyrics, equals('You are here, moving in our midst'));
+      expect(
+        retrieved.sections.first.lyrics,
+        equals('You are here, moving in our midst'),
+      );
       expect(retrieved.tags, equals(['worship', 'miracles']));
     });
 
@@ -107,18 +110,22 @@ void main() {
     });
 
     test('searches songs by title, artist, and tags', () async {
-      await repository.saveSong(createSampleSong(
-        id: 's1',
-        title: 'Way Maker',
-        artist: 'Sinach',
-        tags: ['african', 'gospel'],
-      ));
-      await repository.saveSong(createSampleSong(
-        id: 's2',
-        title: 'Goodness of God',
-        artist: 'Bethel Music',
-        tags: ['faith', 'worship'],
-      ));
+      await repository.saveSong(
+        createSampleSong(
+          id: 's1',
+          title: 'Way Maker',
+          artist: 'Sinach',
+          tags: ['african', 'gospel'],
+        ),
+      );
+      await repository.saveSong(
+        createSampleSong(
+          id: 's2',
+          title: 'Goodness of God',
+          artist: 'Bethel Music',
+          tags: ['faith', 'worship'],
+        ),
+      );
 
       final titleSearch = await repository.searchSongs('maker');
       expect(titleSearch.getOrElse((_) => []).length, equals(1));

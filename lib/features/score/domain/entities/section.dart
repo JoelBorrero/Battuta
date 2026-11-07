@@ -19,8 +19,8 @@ class Section {
     this.measures = const [],
     this.repeatCount = 1,
     this.orderIndex = 0,
-  })  : assert(repeatCount >= 1, 'repeatCount must be at least 1'),
-        assert(orderIndex >= 0, 'orderIndex cannot be negative');
+  }) : assert(repeatCount >= 1, 'repeatCount must be at least 1'),
+       assert(orderIndex >= 0, 'orderIndex cannot be negative');
 
   /// Unique identifier for this section within the score.
   final String id;
@@ -45,26 +45,27 @@ class Section {
 
   /// Converts this [Section] to a JSON map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'externalSyncId': externalSyncId,
-        'measures': measures.map((m) => m.toJson()).toList(),
-        'repeatCount': repeatCount,
-        'orderIndex': orderIndex,
-      };
+    'id': id,
+    'name': name,
+    'externalSyncId': externalSyncId,
+    'measures': measures.map((m) => m.toJson()).toList(),
+    'repeatCount': repeatCount,
+    'orderIndex': orderIndex,
+  };
 
   /// Constructs a [Section] from a JSON map.
   factory Section.fromJson(Map<String, dynamic> json) => Section(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        externalSyncId: json['externalSyncId'] as String?,
-        measures: (json['measures'] as List<dynamic>?)
-                ?.map((m) => Measure.fromJson(m as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        repeatCount: json['repeatCount'] as int? ?? 1,
-        orderIndex: json['orderIndex'] as int? ?? 0,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    externalSyncId: json['externalSyncId'] as String?,
+    measures:
+        (json['measures'] as List<dynamic>?)
+            ?.map((m) => Measure.fromJson(m as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    repeatCount: json['repeatCount'] as int? ?? 1,
+    orderIndex: json['orderIndex'] as int? ?? 0,
+  );
 
   // ---------------------------------------------------------------------------
   // Metrics & Helpers
@@ -119,13 +120,13 @@ class Section {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        name,
-        externalSyncId,
-        repeatCount,
-        orderIndex,
-        Object.hashAll(measures),
-      );
+    id,
+    name,
+    externalSyncId,
+    repeatCount,
+    orderIndex,
+    Object.hashAll(measures),
+  );
 
   @override
   String toString() =>
@@ -140,4 +141,3 @@ class Section {
     return true;
   }
 }
-

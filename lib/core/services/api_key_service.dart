@@ -27,10 +27,7 @@ enum ApiKeySource {
 
 /// Service managing the lifecycle, resolution, and validation of API keys.
 class ApiKeyService {
-  ApiKeyService({
-    required this.storage,
-    this.envOverrides,
-  });
+  ApiKeyService({required this.storage, this.envOverrides});
 
   /// The underlying secure storage mechanism.
   final ApiKeyStorage storage;

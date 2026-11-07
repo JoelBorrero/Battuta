@@ -9,6 +9,7 @@
 library;
 
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AudioPracticeState {
@@ -50,8 +51,9 @@ class AudioPracticeState {
       speed: speed ?? this.speed,
       pitchSemitones: pitchSemitones ?? this.pitchSemitones,
       metronomeEnabled: metronomeEnabled ?? this.metronomeEnabled,
-      activeLoopSection:
-          clearLoop ? null : (activeLoopSection ?? this.activeLoopSection),
+      activeLoopSection: clearLoop
+          ? null
+          : (activeLoopSection ?? this.activeLoopSection),
       audioSourceTitle: audioSourceTitle ?? this.audioSourceTitle,
     );
   }
@@ -59,8 +61,8 @@ class AudioPracticeState {
 
 final audioPracticeControllerProvider =
     NotifierProvider<AudioPracticeNotifier, AudioPracticeState>(
-  AudioPracticeNotifier.new,
-);
+      AudioPracticeNotifier.new,
+    );
 
 class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
   Timer? _playbackTimer;
@@ -141,4 +143,3 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
     state = state.copyWith(audioSourceTitle: sourceName);
   }
 }
-

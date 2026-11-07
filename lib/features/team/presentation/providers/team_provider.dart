@@ -9,8 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final teamMembersProvider =
     NotifierProvider<TeamMembersNotifier, List<TeamMember>>(
-  TeamMembersNotifier.new,
-);
+      TeamMembersNotifier.new,
+    );
 
 class TeamMembersNotifier extends Notifier<List<TeamMember>> {
   @override

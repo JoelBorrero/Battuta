@@ -29,17 +29,15 @@ void main() {
 
   Widget buildSubject() {
     return ProviderScope(
-      overrides: [
-        songRepositoryProvider.overrideWithValue(repository),
-      ],
-      child: const MaterialApp(
-        home: RepertoirePage(),
-      ),
+      overrides: [songRepositoryProvider.overrideWithValue(repository)],
+      child: const MaterialApp(home: RepertoirePage()),
     );
   }
 
   group('RepertoirePage', () {
-    testWidgets('renders repertoire header, search icon, and song list', (tester) async {
+    testWidgets('renders repertoire header, search icon, and song list', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -50,17 +48,24 @@ void main() {
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
-    testWidgets('renders empty state when no songs are present', (tester) async {
+    testWidgets('renders empty state when no songs are present', (
+      tester,
+    ) async {
       repository = InMemorySongRepository(initialSongs: []);
 
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
       expect(find.text('Your repertoire is empty'), findsOneWidget);
-      expect(find.text('Tap the + button to add your first song'), findsOneWidget);
+      expect(
+        find.text('Tap the + button to add your first song'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('search button opens search, filters songs, and clears back', (tester) async {
+    testWidgets('search button opens search, filters songs, and clears back', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -89,4 +94,3 @@ void main() {
     });
   });
 }
-

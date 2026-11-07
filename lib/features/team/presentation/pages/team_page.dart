@@ -30,15 +30,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
   void _showMemberDialog({TeamMember? memberToEdit}) {
     final isEditing = memberToEdit != null;
-    final nameController =
-        TextEditingController(text: memberToEdit?.name ?? '');
-    final notesController =
-        TextEditingController(text: memberToEdit?.notes ?? '');
+    final nameController = TextEditingController(
+      text: memberToEdit?.name ?? '',
+    );
+    final notesController = TextEditingController(
+      text: memberToEdit?.notes ?? '',
+    );
 
     // Multi-role selection: defaults to Keys (an instrument) for new members
-    final selectedRoles = <TeamRole>{
-      ...?memberToEdit?.roles,
-    };
+    final selectedRoles = <TeamRole>{...?memberToEdit?.roles};
     if (selectedRoles.isEmpty) {
       selectedRoles.add(TeamRole.keys);
     }
@@ -167,11 +167,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         items: VocalTessitura.values
                             .where((v) => v != VocalTessitura.none)
                             .map((v) {
-                          return DropdownMenuItem(
-                            value: v,
-                            child: Text('${v.displayName} (${v.rangeLabel})'),
-                          );
-                        }).toList(),
+                              return DropdownMenuItem(
+                                value: v,
+                                child: Text(
+                                  '${v.displayName} (${v.rangeLabel})',
+                                ),
+                              );
+                            })
+                            .toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setDialogState(() => selectedRange = val);
@@ -190,8 +193,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               .withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: theme.colorScheme.outlineVariant
-                                .withValues(alpha: 0.5),
+                            color: theme.colorScheme.outlineVariant.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -219,8 +223,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                     'Automatically omitted because only instruments or production roles are selected.',
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color:
-                                          theme.colorScheme.onSurfaceVariant,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -285,8 +288,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
                     final vocalToSave = rolesToSave.any((r) => r.isVocal)
                         ? (selectedRange == VocalTessitura.none
-                            ? VocalTessitura.soprano
-                            : selectedRange)
+                              ? VocalTessitura.soprano
+                              : selectedRange)
                         : VocalTessitura.none;
 
                     if (isEditing) {
@@ -305,7 +308,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           .updateMember(updatedMember);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Updated ${updatedMember.name}')),
+                        SnackBar(
+                          content: Text('Updated ${updatedMember.name}'),
+                        ),
                       );
                     } else {
                       final newMember = TeamMember(
@@ -351,13 +356,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       text: eventToEdit?.location ?? 'Main Sanctuary',
     );
     final notesController = TextEditingController(
-      text: eventToEdit?.notes ?? 'Soundcheck 7:45 AM. Lead sheet package in Battuta.',
+      text:
+          eventToEdit?.notes ??
+          'Soundcheck 7:45 AM. Lead sheet package in Battuta.',
     );
 
     var selectedType = eventToEdit?.type ?? ServiceType.sundayService;
-    var selectedRecurrence =
-        eventToEdit?.recurrence ?? EventRecurrence.weekly;
-    var selectedDate = eventToEdit?.dateTime ??
+    var selectedRecurrence = eventToEdit?.recurrence ?? EventRecurrence.weekly;
+    var selectedDate =
+        eventToEdit?.dateTime ??
         DateTime.now().add(Duration(days: (7 - DateTime.now().weekday) % 7));
     var selectedTime = TimeOfDay(
       hour: eventToEdit?.dateTime.hour ?? 9,
@@ -371,7 +378,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
             return AlertDialog(
-              title: Text(isEditing ? 'Edit Service Event' : 'Add Service / Rehearsal'),
+              title: Text(
+                isEditing ? 'Edit Service Event' : 'Add Service / Rehearsal',
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -440,11 +449,26 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           prefixIcon: Icon(Icons.date_range_outlined),
                         ),
                         items: const [
-                          DropdownMenuItem(value: 1, child: Text('1 service (Single date only)')),
-                          DropdownMenuItem(value: 4, child: Text('4 occurrences (~1 month)')),
-                          DropdownMenuItem(value: 6, child: Text('6 occurrences (~1.5 months)')),
-                          DropdownMenuItem(value: 12, child: Text('12 occurrences (~3 months)')),
-                          DropdownMenuItem(value: 24, child: Text('24 occurrences (~6 months)')),
+                          DropdownMenuItem(
+                            value: 1,
+                            child: Text('1 service (Single date only)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 4,
+                            child: Text('4 occurrences (~1 month)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 6,
+                            child: Text('6 occurrences (~1.5 months)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 12,
+                            child: Text('12 occurrences (~3 months)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 24,
+                            child: Text('24 occurrences (~6 months)'),
+                          ),
                         ],
                         onChanged: (val) {
                           if (val != null) {
@@ -466,8 +490,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               final picked = await showDatePicker(
                                 context: dialogCtx,
                                 initialDate: selectedDate,
-                                firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                                lastDate: DateTime.now().add(const Duration(days: 365)),
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 30),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
                               );
                               if (picked != null) {
                                 setDialogState(() => selectedDate = picked);
@@ -520,7 +548,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
-                  key: ValueKey(isEditing ? 'save_service_btn' : 'add_service_btn'),
+                  key: ValueKey(
+                    isEditing ? 'save_service_btn' : 'add_service_btn',
+                  ),
                   onPressed: () {
                     final title = titleController.text.trim();
                     if (title.isEmpty) return;
@@ -544,12 +574,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             ? null
                             : notesController.text.trim(),
                       );
-                      ref.read(serviceCalendarProvider.notifier).updateEvent(updated);
+                      ref
+                          .read(serviceCalendarProvider.notifier)
+                          .updateEvent(updated);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Updated ${updated.title}')),
                       );
-                    } else if (selectedRecurrence.isRepeating && seriesCount > 1) {
+                    } else if (selectedRecurrence.isRepeating &&
+                        seriesCount > 1) {
                       final created = ref
                           .read(serviceCalendarProvider.notifier)
                           .scheduleRecurringSeries(
@@ -583,7 +616,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             ? null
                             : notesController.text.trim(),
                       );
-                      ref.read(serviceCalendarProvider.notifier).addEvent(newEvent);
+                      ref
+                          .read(serviceCalendarProvider.notifier)
+                          .addEvent(newEvent);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Scheduled ${newEvent.title}!')),
@@ -593,9 +628,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   child: Text(
                     isEditing
                         ? 'Save Changes'
-                        : (!isEditing && selectedRecurrence.isRepeating && seriesCount > 1
-                            ? 'Create Series ($seriesCount)'
-                            : 'Create Service'),
+                        : (!isEditing &&
+                                  selectedRecurrence.isRepeating &&
+                                  seriesCount > 1
+                              ? 'Create Series ($seriesCount)'
+                              : 'Create Service'),
                   ),
                 ),
               ],
@@ -702,7 +739,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 FilledButton(
                   key: const ValueKey('confirm_assign_member_btn'),
                   onPressed: () {
-                    ref.read(serviceCalendarProvider.notifier).assignMember(
+                    ref
+                        .read(serviceCalendarProvider.notifier)
+                        .assignMember(
                           eventId: event.id,
                           memberId: selectedMember.id,
                           role: selectedRole,
@@ -822,19 +861,28 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     // Templates List
                     for (var i = 0; i < templates.length; i++) ...[
                       InkWell(
-                        onTap: () => setModalState(() => selectedTemplateIndex = i),
+                        onTap: () =>
+                            setModalState(() => selectedTemplateIndex = i),
                         borderRadius: BorderRadius.circular(10),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: selectedTemplateIndex == i
-                                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-                                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                                ? theme.colorScheme.primaryContainer.withValues(
+                                    alpha: 0.3,
+                                  )
+                                : theme.colorScheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: selectedTemplateIndex == i
                                   ? const Color(0xFFE5A93C)
-                                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                                  : theme.colorScheme.outlineVariant.withValues(
+                                      alpha: 0.5,
+                                    ),
                               width: selectedTemplateIndex == i ? 1.5 : 1.0,
                             ),
                           ),
@@ -853,21 +901,28 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   children: [
                                     Text(
                                       templates[i].title,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       '${templates[i].description} • ${templates[i].time.format(ctx)}',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                               if (selectedTemplateIndex == i)
-                                const Icon(Icons.check_circle, color: Color(0xFFE5A93C), size: 20),
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Color(0xFFE5A93C),
+                                  size: 20,
+                                ),
                             ],
                           ),
                         ),
@@ -886,10 +941,22 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         prefixIcon: Icon(Icons.date_range),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 4, child: Text('4 occurrences (~1 month)')),
-                        DropdownMenuItem(value: 6, child: Text('6 occurrences (~1.5 months)')),
-                        DropdownMenuItem(value: 12, child: Text('12 occurrences (~3 months)')),
-                        DropdownMenuItem(value: 24, child: Text('24 occurrences (~6 months)')),
+                        DropdownMenuItem(
+                          value: 4,
+                          child: Text('4 occurrences (~1 month)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 6,
+                          child: Text('6 occurrences (~1.5 months)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 12,
+                          child: Text('12 occurrences (~3 months)'),
+                        ),
+                        DropdownMenuItem(
+                          value: 24,
+                          child: Text('24 occurrences (~6 months)'),
+                        ),
                       ],
                       onChanged: (val) {
                         if (val != null) {
@@ -976,8 +1043,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
     final scheduledCount = nextEvent != null
         ? nextEvent.assignments
-            .where((a) => a.status != AssignmentStatus.declined)
-            .length
+              .where((a) => a.status != AssignmentStatus.declined)
+              .length
         : 0;
 
     final availableCount = members.length - scheduledCount;
@@ -988,7 +1055,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         actions: [
           IconButton(
             icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
-            tooltip: _selectedTabIndex == 0 ? 'Add team member' : 'Add service event',
+            tooltip: _selectedTabIndex == 0
+                ? 'Add team member'
+                : 'Add service event',
             onPressed: _selectedTabIndex == 0
                 ? () => _showMemberDialog()
                 : () => _showServiceDialog(),
@@ -1043,7 +1112,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        tooltip: _selectedTabIndex == 0 ? 'Add team member' : 'Add service event',
+        tooltip: _selectedTabIndex == 0
+            ? 'Add team member'
+            : 'Add service event',
         onPressed: _selectedTabIndex == 0
             ? () => _showMemberDialog()
             : () => _showServiceDialog(),
@@ -1074,8 +1145,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         return m.hasInstrumentRole;
       }
       if (_selectedFilter == 'Scheduled') {
-        return events.any((e) => e.assignments.any(
-            (a) => a.memberId == m.id && a.status != AssignmentStatus.declined));
+        return events.any(
+          (e) => e.assignments.any(
+            (a) => a.memberId == m.id && a.status != AssignmentStatus.declined,
+          ),
+        );
       }
       return true;
     }).toList();
@@ -1190,9 +1264,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     }
 
     final isScheduled = nextAssignment != null;
-    final statusColor = isScheduled
-        ? nextAssignment.status.color
-        : Colors.blue;
+    final statusColor = isScheduled ? nextAssignment.status.color : Colors.blue;
     final statusText = isScheduled
         ? nextAssignment.status.displayName
         : 'Available';
@@ -1236,7 +1308,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               children: [
                 for (final role in member.roles)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(6),
@@ -1251,7 +1326,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ),
                 if (member.vocalRange != VocalTessitura.none)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE5A93C).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -1305,7 +1383,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               },
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
@@ -1331,7 +1412,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 } else if (val == 'schedule' && nextEvent != null) {
                   _showAssignMemberDialog(nextEvent);
                 } else if (val == 'delete') {
-                  ref.read(teamMembersProvider.notifier).removeMember(member.id);
+                  ref
+                      .read(teamMembersProvider.notifier)
+                      .removeMember(member.id);
                 }
               },
               itemBuilder: (_) => [
@@ -1362,7 +1445,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     children: [
                       Icon(Icons.delete_outline, size: 18, color: Colors.red),
                       SizedBox(width: 8),
-                      Text('Remove Member', style: TextStyle(color: Colors.red)),
+                      Text(
+                        'Remove Member',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ],
                   ),
                 ),
@@ -1391,7 +1477,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         // Quick Actions Bar
         Card(
           elevation: 0,
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.4,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
@@ -1422,7 +1510,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             .generatePeriodicSundays(count: 4);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Auto-generated next 4 Sunday services!'),
+                            content: Text(
+                              'Auto-generated next 4 Sunday services!',
+                            ),
                           ),
                         );
                       },
@@ -1479,8 +1569,18 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required Map<String, TeamMember> memberMap,
   }) {
     const months = [
-      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+      'JAN',
+      'FEB',
+      'MAR',
+      'APR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AUG',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DEC',
     ];
     const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
@@ -1626,7 +1726,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               Icon(
                                 event.type.icon,
                                 size: 14,
-                                color: isSunday ? const Color(0xFFE5A93C) : theme.colorScheme.primary,
+                                color: isSunday
+                                    ? const Color(0xFFE5A93C)
+                                    : theme.colorScheme.primary,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -1634,7 +1736,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: isSunday ? const Color(0xFFE5A93C) : theme.colorScheme.primary,
+                                  color: isSunday
+                                      ? const Color(0xFFE5A93C)
+                                      : theme.colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -1670,7 +1774,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     if (val == 'edit') {
                       _showServiceDialog(eventToEdit: event);
                     } else if (val == 'delete') {
-                      ref.read(serviceCalendarProvider.notifier).deleteEvent(event.id);
+                      ref
+                          .read(serviceCalendarProvider.notifier)
+                          .deleteEvent(event.id);
                     }
                   },
                   itemBuilder: (_) => [
@@ -1688,9 +1794,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                          Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: Colors.red,
+                          ),
                           SizedBox(width: 8),
-                          Text('Delete Service', style: TextStyle(color: Colors.red)),
+                          Text(
+                            'Delete Service',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -1703,9 +1816,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(

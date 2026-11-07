@@ -7,11 +7,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: BattutaApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: BattutaApp()));
 
     await tester.pumpAndSettle();
 

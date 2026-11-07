@@ -9,17 +9,19 @@ void main() {
     test('PitchOnlySchema defines structured JSON schema properties', () {
       expect(PitchOnlySchema.schema.properties, isNotNull);
       expect(PitchOnlySchema.schema.properties!.containsKey('seccion'), isTrue);
-      expect(PitchOnlySchema.schema.properties!.containsKey('clave_asumida'),
-          isTrue);
       expect(
-          PitchOnlySchema.schema.properties!.containsKey('compases'), isTrue);
+        PitchOnlySchema.schema.properties!.containsKey('clave_asumida'),
+        isTrue,
+      );
+      expect(
+        PitchOnlySchema.schema.properties!.containsKey('compases'),
+        isTrue,
+      );
       expect(PitchOnlySchema.systemInstruction, contains('Treble Clef'));
       expect(PitchOnlySchema.systemInstruction, contains('secuencia_notas'));
     });
 
-    test(
-        'Deterministically extracts seccion, clave_asumida, compases (numero, acordes, secuencia_notas, advertencia)',
-        () {
+    test('Deterministically extracts seccion, clave_asumida, compases (numero, acordes, secuencia_notas, advertencia)', () {
       final jsonPayload = {
         'seccion': 'Verse 1',
         'clave_asumida': 'G4 (Treble Clef)',
@@ -51,10 +53,14 @@ void main() {
       expect(result.assumedClef, equals('G4 (Treble Clef)'));
 
       // 3. Section and measure level advertencia (dense ledger lines)
-      expect(result.warning,
-          equals('Dense ledger lines detected above staff on beat 3'));
-      expect(result.measureWarnings[1],
-          equals('High G5 has double ledger line'));
+      expect(
+        result.warning,
+        equals('Dense ledger lines detected above staff on beat 3'),
+      );
+      expect(
+        result.measureWarnings[1],
+        equals('High G5 has double ledger line'),
+      );
       expect(result.measureWarnings[2], isNull);
 
       // 4. Compases list
@@ -109,7 +115,7 @@ void main() {
               {'cifrado': 'Cadd9', 'posicion_pulso': 3.0, 'tick_offset': 960},
             ],
             'secuencia_notas': ['E4', 'G4', 'B4'],
-          }
+          },
         ],
       };
 

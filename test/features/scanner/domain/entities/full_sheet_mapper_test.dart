@@ -8,12 +8,13 @@ void main() {
   group('FullSheetSchema & FullSheetMapper (Checklist Requirements)', () {
     test('FullSheetSchema defines structured JSON schema properties', () {
       expect(FullSheetSchema.schema, isNotNull);
-      expect(FullSheetSchema.systemInstruction, contains('Optical Music Recognition'));
+      expect(
+        FullSheetSchema.systemInstruction,
+        contains('Optical Music Recognition'),
+      );
     });
 
-    test(
-        'Deterministically extracts metadatos (titulo, artista, tonalidad_indicada, copyright) and secciones (Pentagrama, Cifrado de acordes with casilla/ritmo, Cajas de navegacion)',
-        () {
+    test('Deterministically extracts metadatos (titulo, artista, tonalidad_indicada, copyright) and secciones (Pentagrama, Cifrado de acordes with casilla/ritmo, Cajas de navegacion)', () {
       final geminiJson = {
         'metadatos': {
           'titulo': 'Build My Life',
@@ -33,23 +34,11 @@ void main() {
                 'numero': 1,
                 'compas': '4/4',
                 'acordes': [
-                  {
-                    'cifrado': 'G',
-                    'posicion_pulso': 1.0,
-                    'tick_offset': 0,
-                  },
-                  {
-                    'cifrado': 'C/G',
-                    'posicion_pulso': 3.0,
-                    'tick_offset': 960,
-                  }
+                  {'cifrado': 'G', 'posicion_pulso': 1.0, 'tick_offset': 0},
+                  {'cifrado': 'C/G', 'posicion_pulso': 3.0, 'tick_offset': 960},
                 ],
                 'notas': [
-                  {
-                    'tono': 'rest',
-                    'duracion': 'whole',
-                    'duracion_ticks': 1920,
-                  }
+                  {'tono': 'rest', 'duracion': 'whole', 'duracion_ticks': 1920},
                 ],
               },
             ],
@@ -63,10 +52,7 @@ void main() {
                 'numero': 2,
                 'casilla_ritmo': '1.',
                 'acordes': [
-                  {
-                    'cifrado': 'G',
-                    'tick_offset': 0,
-                  }
+                  {'cifrado': 'G', 'tick_offset': 0},
                 ],
                 'notas': [
                   {
@@ -82,16 +68,19 @@ void main() {
                     'duracion_ticks': 960,
                     'letra': 'thy',
                     'ligadura': true,
-                  }
+                  },
                 ],
-              }
+              },
             ],
-          }
+          },
         ],
       };
 
       // Map directly into a valid Dart Score instance
-      final score = FullSheetMapper.mapToScore(geminiJson, scoreId: 'score-omr-1');
+      final score = FullSheetMapper.mapToScore(
+        geminiJson,
+        scoreId: 'score-omr-1',
+      );
 
       // Verify Score entity
       expect(score, isA<Score>());
@@ -103,8 +92,10 @@ void main() {
       expect(score.keySignature, equals('G'));
       expect(score.tempo, equals(68));
       expect(score.timeSignature, equals(TimeSignature.fourFour));
-      expect(score.metadata['copyright'],
-          equals('© 2016 Barrett Daddy Music / Capitol CMG Genesis'));
+      expect(
+        score.metadata['copyright'],
+        equals('© 2016 Barrett Daddy Music / Capitol CMG Genesis'),
+      );
 
       // 2. Verify Sections & Navigation Boxes
       expect(score.sections.length, equals(2));

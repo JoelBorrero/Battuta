@@ -74,10 +74,7 @@ class LiveSessionPage extends ConsumerWidget {
                 runSpacing: 8,
                 alignment: WrapAlignment.center,
                 children: [
-                  _FeatureChip(
-                    icon: Icons.sync,
-                    label: 'Synced lead sheets',
-                  ),
+                  _FeatureChip(icon: Icons.sync, label: 'Synced lead sheets'),
                   _FeatureChip(
                     icon: Icons.people_outline,
                     label: 'Band connect',
@@ -86,10 +83,7 @@ class LiveSessionPage extends ConsumerWidget {
                     icon: Icons.timer_outlined,
                     label: 'Tempo control',
                   ),
-                  _FeatureChip(
-                    icon: Icons.queue_music,
-                    label: 'Section cues',
-                  ),
+                  _FeatureChip(icon: Icons.queue_music, label: 'Section cues'),
                 ],
               ),
             ],

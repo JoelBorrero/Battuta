@@ -43,17 +43,15 @@ void main() {
 
   Widget buildSubject({String? songId}) {
     return ProviderScope(
-      overrides: [
-        songRepositoryProvider.overrideWithValue(repository),
-      ],
-      child: MaterialApp(
-        home: SongEditorPage(songId: songId),
-      ),
+      overrides: [songRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp(home: SongEditorPage(songId: songId)),
     );
   }
 
   group('SongEditorPage', () {
-    testWidgets('renders creation form with empty/default fields', (tester) async {
+    testWidgets('renders creation form with empty/default fields', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -85,7 +83,9 @@ void main() {
       expect(find.text('Please enter an artist or composer'), findsOneWidget);
     });
 
-    testWidgets('creates a new song and persists it to repository', (tester) async {
+    testWidgets('creates a new song and persists it to repository', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);

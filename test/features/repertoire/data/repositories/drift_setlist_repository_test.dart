@@ -61,7 +61,10 @@ void main() {
       expect(retrieved.songCount, equals(2));
       expect(retrieved.items.first.keyOverride, equals('D'));
       expect(retrieved.items.first.tempoOverride, equals(75));
-      expect(retrieved.items.last.notes, equals('Segues directly without pause'));
+      expect(
+        retrieved.items.last.notes,
+        equals('Segues directly without pause'),
+      );
 
       // Update
       final updated = setlist.copyWith(title: 'Easter Sunday - 2nd Service');
@@ -88,12 +91,9 @@ void main() {
       expect(listEmissions.last, isEmpty);
 
       final now = DateTime.now();
-      await repository.saveSetlist(Setlist(
-        id: 'set-1',
-        title: 'Set 1',
-        createdAt: now,
-        updatedAt: now,
-      ));
+      await repository.saveSetlist(
+        Setlist(id: 'set-1', title: 'Set 1', createdAt: now, updatedAt: now),
+      );
 
       await pumpEventQueue();
       expect(listEmissions.last.length, equals(1));

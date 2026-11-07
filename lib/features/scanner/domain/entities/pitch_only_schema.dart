@@ -32,12 +32,10 @@ Guidelines:
 
   /// Structured output [Schema] for Schema B.
   static final Schema schema = Schema.object(
-    description:
-        'Pitch-only melodic and chord extraction for a musical snippet or section',
+    description: 'Pitch-only melodic and chord extraction for a musical snippet or section',
     properties: {
       'seccion': Schema.string(
-        description:
-            'Name or header of this section (e.g. "Intro", "Verse 1", "Snippet")',
+        description: 'Name or header of this section (e.g. "Intro", "Verse 1", "Snippet")',
         nullable: true,
       ),
       'clave_asumida': Schema.string(
@@ -45,8 +43,7 @@ Guidelines:
         nullable: true,
       ),
       'advertencia': Schema.string(
-        description:
-            'Section-level warning for dense ledger lines, low resolution, or ambiguous notation',
+        description: 'Section-level warning for dense ledger lines, low resolution, or ambiguous notation',
         nullable: true,
       ),
       'compases': Schema.array(
@@ -54,9 +51,7 @@ Guidelines:
         items: Schema.object(
           description: 'A single measure with pitches in left-to-right order',
           properties: {
-            'numero': Schema.integer(
-              description: '1-based measure index',
-            ),
+            'numero': Schema.integer(description: '1-based measure index'),
             'acordes': Schema.array(
               description: 'Chord symbols present in this measure',
               items: Schema.string(
@@ -65,16 +60,14 @@ Guidelines:
               nullable: true,
             ),
             'secuencia_notas': Schema.array(
-              description:
-                  'Scientific pitch strings in left-to-right order (e.g. ["C4", "E4", "G4"])',
+              description: 'Scientific pitch strings in left-to-right order (e.g. ["C4", "E4", "G4"])',
               items: Schema.string(
                 description:
                     'Scientific pitch notation, e.g. "C4", "D#4", "Bb4", "A5"',
               ),
             ),
             'advertencia': Schema.string(
-              description:
-                  'Measure-level warning (e.g. dense ledger lines, ambiguous pitch)',
+              description: 'Measure-level warning (e.g. dense ledger lines, ambiguous pitch)',
               nullable: true,
             ),
           },

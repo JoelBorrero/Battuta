@@ -72,9 +72,7 @@ void main() {
       expect(controller.state.cursor!.eventIndex, equals(0));
     });
 
-    test(
-        'assignDuration assigns RhythmicValue and advances cursor to next unassigned note',
-        () {
+    test('assignDuration assigns RhythmicValue and advances cursor to next unassigned note', () {
       final score = createTestScore();
       final controller = RhythmEditorController(initialScore: score);
 
@@ -93,61 +91,66 @@ void main() {
       final success2 = controller.assignDuration(RhythmicValue.half);
       expect(success2, isTrue);
 
-      expect(controller.state.activeMeasure!.events[1].rhythmicValue,
-          equals(RhythmicValue.half));
+      expect(
+        controller.state.activeMeasure!.events[1].rhythmicValue,
+        equals(RhythmicValue.half),
+      );
       expect(controller.state.activeMeasure!.events[1].tickOffset, equals(480));
 
       // Cursor automatically advances to note index 2 (E4)
       expect(controller.state.cursor!.eventIndex, equals(2));
     });
 
-    test('advances across measures when current measure has no unassigned notes',
-        () {
-      final score = createTestScore();
-      final controller = RhythmEditorController(initialScore: score);
+    test(
+      'advances across measures when current measure has no unassigned notes',
+      () {
+        final score = createTestScore();
+        final controller = RhythmEditorController(initialScore: score);
 
-      // Assign Note 0
-      controller.assignDuration(RhythmicValue.quarter);
-      // Assign Note 1
-      controller.assignDuration(RhythmicValue.quarter);
-      // Assign Note 2 (last note in Measure 1)
-      controller.assignDuration(RhythmicValue.half);
+        // Assign Note 0
+        controller.assignDuration(RhythmicValue.quarter);
+        // Assign Note 1
+        controller.assignDuration(RhythmicValue.quarter);
+        // Assign Note 2 (last note in Measure 1)
+        controller.assignDuration(RhythmicValue.half);
 
-      // Cursor should advance to Measure 2, Note 0 (F4)
-      expect(controller.state.cursor!.measureNumber, equals(2));
-      expect(controller.state.cursor!.eventIndex, equals(0));
-    });
+        // Cursor should advance to Measure 2, Note 0 (F4)
+        expect(controller.state.cursor!.measureNumber, equals(2));
+        expect(controller.state.cursor!.eventIndex, equals(0));
+      },
+    );
 
     test(
-        'disables assigning rhythm when it would exceed Measure.remainingTicks',
-        () {
-      final score = createTestScore();
-      final controller = RhythmEditorController(initialScore: score);
+      'disables assigning rhythm when it would exceed Measure.remainingTicks',
+      () {
+        final score = createTestScore();
+        final controller = RhythmEditorController(initialScore: score);
 
-      // Remaining ticks in Measure 1 = 1920
-      // Assign Dotted Half (1440 ticks) to note 0
-      controller.assignDuration(RhythmicValue.dottedHalf);
-      // Now remaining ticks = 1920 - 1440 = 480 ticks!
+        // Remaining ticks in Measure 1 = 1920
+        // Assign Dotted Half (1440 ticks) to note 0
+        controller.assignDuration(RhythmicValue.dottedHalf);
+        // Now remaining ticks = 1920 - 1440 = 480 ticks!
 
-      // Note 1 cursor:
-      expect(controller.state.cursor!.eventIndex, equals(1));
-      expect(controller.state.activeMeasureRemainingTicks, equals(480));
+        // Note 1 cursor:
+        expect(controller.state.cursor!.eventIndex, equals(1));
+        expect(controller.state.activeMeasureRemainingTicks, equals(480));
 
-      // Whole note (1920) cannot fit (1440 + 1920 > 1920)
-      expect(controller.state.canFitRhythm(RhythmicValue.whole), isFalse);
-      // Half note (960) cannot fit (1440 + 960 > 1920)
-      expect(controller.state.canFitRhythm(RhythmicValue.half), isFalse);
-      // Quarter note (480) fits exactly (1440 + 480 == 1920)
-      expect(controller.state.canFitRhythm(RhythmicValue.quarter), isTrue);
-      // Eighth note (240) fits (1440 + 240 < 1920)
-      expect(controller.state.canFitRhythm(RhythmicValue.eighth), isTrue);
+        // Whole note (1920) cannot fit (1440 + 1920 > 1920)
+        expect(controller.state.canFitRhythm(RhythmicValue.whole), isFalse);
+        // Half note (960) cannot fit (1440 + 960 > 1920)
+        expect(controller.state.canFitRhythm(RhythmicValue.half), isFalse);
+        // Quarter note (480) fits exactly (1440 + 480 == 1920)
+        expect(controller.state.canFitRhythm(RhythmicValue.quarter), isTrue);
+        // Eighth note (240) fits (1440 + 240 < 1920)
+        expect(controller.state.canFitRhythm(RhythmicValue.eighth), isTrue);
 
-      // Attempting to assign Half fails and returns false
-      final assigned = controller.assignDuration(RhythmicValue.half);
-      expect(assigned, isFalse);
-      // State and cursor unchanged
-      expect(controller.state.cursor!.eventIndex, equals(1));
-    });
+        // Attempting to assign Half fails and returns false
+        final assigned = controller.assignDuration(RhythmicValue.half);
+        expect(assigned, isFalse);
+        // State and cursor unchanged
+        expect(controller.state.cursor!.eventIndex, equals(1));
+      },
+    );
 
     test('toggleRest and toggleTie update note state at cursor', () {
       final score = createTestScore();
@@ -169,8 +172,7 @@ void main() {
   });
 
   group('MeasureProgressBar Widget', () {
-    testWidgets('renders ticks, ratio, and completion status',
-        (tester) async {
+    testWidgets('renders ticks, ratio, and completion status', (tester) async {
       const measure = Measure(
         number: 3,
         timeSignature: TimeSignature.fourFour,
@@ -192,9 +194,7 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: MeasureProgressBar(measure: measure),
-          ),
+          home: Scaffold(body: MeasureProgressBar(measure: measure)),
         ),
       );
 
@@ -207,73 +207,74 @@ void main() {
 
   group('RhythmToolbar Widget (Checklist Verification)', () {
     testWidgets(
-        'Tapping duration button assigns rhythm and advances cursor; buttons exceeding capacity are disabled',
-        (tester) async {
-      final score = createTestScore();
-      final controller = RhythmEditorController(initialScore: score);
+      'Tapping duration button assigns rhythm and advances cursor; buttons exceeding capacity are disabled',
+      (tester) async {
+        final score = createTestScore();
+        final controller = RhythmEditorController(initialScore: score);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RhythmToolbar(controller: controller),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: RhythmToolbar(controller: controller)),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // At start (0 ticks filled), all buttons should be enabled
-      final wholeBtnFinder = find.byKey(const Key('rhythm_btn_Whole'));
-      final quarterBtnFinder = find.byKey(const Key('rhythm_btn_Quarter'));
-      final halfBtnFinder = find.byKey(const Key('rhythm_btn_Half'));
+        // At start (0 ticks filled), all buttons should be enabled
+        final wholeBtnFinder = find.byKey(const Key('rhythm_btn_Whole'));
+        final quarterBtnFinder = find.byKey(const Key('rhythm_btn_Quarter'));
+        final halfBtnFinder = find.byKey(const Key('rhythm_btn_Half'));
 
-      expect(tester.widget<OutlinedButton>(wholeBtnFinder).onPressed, isNotNull);
-      expect(tester.widget<OutlinedButton>(quarterBtnFinder).onPressed, isNotNull);
+        expect(
+          tester.widget<OutlinedButton>(wholeBtnFinder).onPressed,
+          isNotNull,
+        );
+        expect(
+          tester.widget<OutlinedButton>(quarterBtnFinder).onPressed,
+          isNotNull,
+        );
 
-      // Tap Dotted Half button (1440 ticks)
-      final dottedHalfBtnFinder = find.byKey(const Key('rhythm_btn_Dotted Half'));
-      await tester.tap(dottedHalfBtnFinder);
-      await tester.pumpAndSettle();
+        // Tap Dotted Half button (1440 ticks)
+        final dottedHalfBtnFinder = find.byKey(
+          const Key('rhythm_btn_Dotted Half'),
+        );
+        await tester.tap(dottedHalfBtnFinder);
+        await tester.pumpAndSettle();
 
-      // Now Note 0 is assigned Dotted Half (1440t). Remaining in measure = 480t!
-      // Cursor has advanced to Note 1:
-      expect(controller.state.cursor!.eventIndex, equals(1));
+        // Now Note 0 is assigned Dotted Half (1440t). Remaining in measure = 480t!
+        // Cursor has advanced to Note 1:
+        expect(controller.state.cursor!.eventIndex, equals(1));
 
-      // Checklist: "Buttons exceeding Measure.remainingTicks are disabled."
-      // Whole (1920) must be disabled:
-      expect(
-        tester.widget<OutlinedButton>(wholeBtnFinder).onPressed,
-        isNull,
-      );
-      // Dotted Half (1440) must be disabled:
-      expect(
-        tester.widget<OutlinedButton>(dottedHalfBtnFinder).onPressed,
-        isNull,
-      );
-      // Half (960) must be disabled:
-      expect(
-        tester.widget<OutlinedButton>(halfBtnFinder).onPressed,
-        isNull,
-      );
-      // Quarter (480) fits remaining capacity: must be enabled!
-      expect(
-        tester.widget<OutlinedButton>(quarterBtnFinder).onPressed,
-        isNotNull,
-      );
+        // Checklist: "Buttons exceeding Measure.remainingTicks are disabled."
+        // Whole (1920) must be disabled:
+        expect(tester.widget<OutlinedButton>(wholeBtnFinder).onPressed, isNull);
+        // Dotted Half (1440) must be disabled:
+        expect(
+          tester.widget<OutlinedButton>(dottedHalfBtnFinder).onPressed,
+          isNull,
+        );
+        // Half (960) must be disabled:
+        expect(tester.widget<OutlinedButton>(halfBtnFinder).onPressed, isNull);
+        // Quarter (480) fits remaining capacity: must be enabled!
+        expect(
+          tester.widget<OutlinedButton>(quarterBtnFinder).onPressed,
+          isNotNull,
+        );
 
-      // Tap Quarter button to fill measure (1440 + 480 = 1920t)
-      await tester.tap(quarterBtnFinder);
-      await tester.pumpAndSettle();
+        // Tap Quarter button to fill measure (1440 + 480 = 1920t)
+        await tester.tap(quarterBtnFinder);
+        await tester.pumpAndSettle();
 
-      // Measure 1 is now completely full (1920t).
-      // Cursor advances to Note 2:
-      expect(controller.state.cursor!.eventIndex, equals(2));
-      // Remaining ticks in Measure 1 = 0!
-      // All duration buttons should now be disabled for Note 2 since measure is full!
-      expect(
-        tester.widget<OutlinedButton>(quarterBtnFinder).onPressed,
-        isNull,
-      );
-    });
+        // Measure 1 is now completely full (1920t).
+        // Cursor advances to Note 2:
+        expect(controller.state.cursor!.eventIndex, equals(2));
+        // Remaining ticks in Measure 1 = 0!
+        // All duration buttons should now be disabled for Note 2 since measure is full!
+        expect(
+          tester.widget<OutlinedButton>(quarterBtnFinder).onPressed,
+          isNull,
+        );
+      },
+    );
   });
 }

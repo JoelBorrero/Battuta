@@ -66,88 +66,104 @@ extension EventRecurrenceCalculator on EventRecurrence {
       case EventRecurrence.weekly:
         var cursor = _nextWeekday(fromDateTime, DateTime.sunday);
         for (var i = 0; i < count; i++) {
-          results.add(DateTime(
-            cursor.year,
-            cursor.month,
-            cursor.day,
-            baseTime.hour,
-            baseTime.minute,
-          ));
+          results.add(
+            DateTime(
+              cursor.year,
+              cursor.month,
+              cursor.day,
+              baseTime.hour,
+              baseTime.minute,
+            ),
+          );
           cursor = cursor.add(const Duration(days: 7));
         }
 
       case EventRecurrence.weeklyThursday:
         var cursor = _nextWeekday(fromDateTime, DateTime.thursday);
         for (var i = 0; i < count; i++) {
-          results.add(DateTime(
-            cursor.year,
-            cursor.month,
-            cursor.day,
-            baseTime.hour,
-            baseTime.minute,
-          ));
+          results.add(
+            DateTime(
+              cursor.year,
+              cursor.month,
+              cursor.day,
+              baseTime.hour,
+              baseTime.minute,
+            ),
+          );
           cursor = cursor.add(const Duration(days: 7));
         }
 
       case EventRecurrence.biweekly:
         var cursor = fromDateTime;
         for (var i = 0; i < count; i++) {
-          results.add(DateTime(
-            cursor.year,
-            cursor.month,
-            cursor.day,
-            baseTime.hour,
-            baseTime.minute,
-          ));
+          results.add(
+            DateTime(
+              cursor.year,
+              cursor.month,
+              cursor.day,
+              baseTime.hour,
+              baseTime.minute,
+            ),
+          );
           cursor = cursor.add(const Duration(days: 14));
         }
 
       case EventRecurrence.firstSundayOfMonth:
-        results.addAll(_generateNthWeekdayOfMonths(
-          fromDateTime: fromDateTime,
-          weekday: DateTime.sunday,
-          ordinal: 1,
-          count: count,
-          baseTime: baseTime,
-        ));
+        results.addAll(
+          _generateNthWeekdayOfMonths(
+            fromDateTime: fromDateTime,
+            weekday: DateTime.sunday,
+            ordinal: 1,
+            count: count,
+            baseTime: baseTime,
+          ),
+        );
 
       case EventRecurrence.secondSundayOfMonth:
-        results.addAll(_generateNthWeekdayOfMonths(
-          fromDateTime: fromDateTime,
-          weekday: DateTime.sunday,
-          ordinal: 2,
-          count: count,
-          baseTime: baseTime,
-        ));
+        results.addAll(
+          _generateNthWeekdayOfMonths(
+            fromDateTime: fromDateTime,
+            weekday: DateTime.sunday,
+            ordinal: 2,
+            count: count,
+            baseTime: baseTime,
+          ),
+        );
 
       case EventRecurrence.thirdSundayOfMonth:
-        results.addAll(_generateNthWeekdayOfMonths(
-          fromDateTime: fromDateTime,
-          weekday: DateTime.sunday,
-          ordinal: 3,
-          count: count,
-          baseTime: baseTime,
-        ));
+        results.addAll(
+          _generateNthWeekdayOfMonths(
+            fromDateTime: fromDateTime,
+            weekday: DateTime.sunday,
+            ordinal: 3,
+            count: count,
+            baseTime: baseTime,
+          ),
+        );
 
       case EventRecurrence.lastSundayOfMonth:
-        results.addAll(_generateNthWeekdayOfMonths(
-          fromDateTime: fromDateTime,
-          weekday: DateTime.sunday,
-          ordinal: -1,
-          count: count,
-          baseTime: baseTime,
-        ));
+        results.addAll(
+          _generateNthWeekdayOfMonths(
+            fromDateTime: fromDateTime,
+            weekday: DateTime.sunday,
+            ordinal: -1,
+            count: count,
+            baseTime: baseTime,
+          ),
+        );
 
       case EventRecurrence.monthly:
         var cursor = fromDateTime;
         for (var i = 0; i < count; i++) {
-          results.add(DateTime(
-            cursor.year,
-            cursor.month,
-            cursor.day,
-            baseTime.hour,
-            baseTime.minute,
-          ));
+          results.add(
+            DateTime(
+              cursor.year,
+              cursor.month,
+              cursor.day,
+              baseTime.hour,
+              baseTime.minute,
+            ),
+          );
           final nextYear = cursor.year + (cursor.month == 12 ? 1 : 0);
           final nextMonth = cursor.month == 12 ? 1 : cursor.month + 1;
           final maxDays = DateTime(nextYear, nextMonth + 1, 0).day;
@@ -315,7 +331,8 @@ class ServiceEvent {
   bool get isUpcoming {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-    return dateTime.isAfter(todayStart) || dateTime.isAtSameMomentAs(todayStart);
+    return dateTime.isAfter(todayStart) ||
+        dateTime.isAtSameMomentAs(todayStart);
   }
 
   /// Formatted date string (e.g. "Sun, Nov 8").
@@ -332,7 +349,7 @@ class ServiceEvent {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final weekday = weekdays[dateTime.weekday - 1];

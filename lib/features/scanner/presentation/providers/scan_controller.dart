@@ -19,14 +19,7 @@ final imageCaptureServiceProvider = Provider<ImageCaptureService>((ref) {
 });
 
 /// Current lifecycle status of an OMR scanning session.
-enum ScanStatus {
-  idle,
-  picking,
-  cropping,
-  analyzing,
-  success,
-  error,
-}
+enum ScanStatus { idle, picking, cropping, analyzing, success, error }
 
 /// State representation for an active OMR scanning workflow.
 class ScanState {
@@ -79,8 +72,8 @@ class ScanController extends Notifier<ScanState> {
   ScanController({
     ImageCaptureService? captureService,
     OmrRepository? omrRepository,
-  })  : _injectedCaptureService = captureService,
-        _injectedOmrRepository = omrRepository;
+  }) : _injectedCaptureService = captureService,
+       _injectedOmrRepository = omrRepository;
 
   final ImageCaptureService? _injectedCaptureService;
   final OmrRepository? _injectedOmrRepository;
@@ -117,10 +110,7 @@ class ScanController extends Notifier<ScanState> {
     try {
       final bytes = await captureService.captureFromCamera();
       if (bytes != null) {
-        state = state.copyWith(
-          imageBytes: bytes,
-          status: ScanStatus.idle,
-        );
+        state = state.copyWith(imageBytes: bytes, status: ScanStatus.idle);
         if (state.scanMode == ScanMode.pitchOnlySnippet) {
           await cropStaffSnippet();
         }
@@ -141,10 +131,7 @@ class ScanController extends Notifier<ScanState> {
     try {
       final bytes = await captureService.pickFromGallery();
       if (bytes != null) {
-        state = state.copyWith(
-          imageBytes: bytes,
-          status: ScanStatus.idle,
-        );
+        state = state.copyWith(imageBytes: bytes, status: ScanStatus.idle);
         if (state.scanMode == ScanMode.pitchOnlySnippet) {
           await cropStaffSnippet();
         }
@@ -166,10 +153,7 @@ class ScanController extends Notifier<ScanState> {
     try {
       final cropped = await captureService.cropStaffSnippet(state.imageBytes!);
       if (cropped != null) {
-        state = state.copyWith(
-          imageBytes: cropped,
-          status: ScanStatus.idle,
-        );
+        state = state.copyWith(imageBytes: cropped, status: ScanStatus.idle);
       } else {
         state = state.copyWith(status: ScanStatus.idle);
       }
@@ -242,5 +226,6 @@ class ScanController extends Notifier<ScanState> {
 }
 
 /// Provider for [ScanController].
-final scanControllerProvider =
-    NotifierProvider<ScanController, ScanState>(ScanController.new);
+final scanControllerProvider = NotifierProvider<ScanController, ScanState>(
+  ScanController.new,
+);

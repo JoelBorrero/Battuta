@@ -46,38 +46,37 @@ void main() {
 
   Widget buildSubject({required String songId}) {
     return ProviderScope(
-      overrides: [
-        songRepositoryProvider.overrideWithValue(repository),
-      ],
-      child: MaterialApp(
-        home: ScoreEditorPage(songId: songId),
-      ),
+      overrides: [songRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp(home: ScoreEditorPage(songId: songId)),
     );
   }
 
   group('ScoreEditorPage', () {
-    testWidgets('renders score title, hint banner, StaffCanvas, and RhythmToolbar',
-        (tester) async {
-      tester.view.physicalSize = const Size(1024, 2048);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'renders score title, hint banner, StaffCanvas, and RhythmToolbar',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject(songId: 'score-song-1'));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject(songId: 'score-song-1'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Holy, Holy, Holy (Notation)'), findsOneWidget);
-      expect(find.text('Save'), findsOneWidget);
-      expect(
-        find.textContaining('Drag noteheads vertically to change pitch'),
-        findsOneWidget,
-      );
-      expect(find.byType(StaffCanvas), findsOneWidget);
-      expect(find.byType(ScorePlaybackBar), findsOneWidget);
-      expect(find.byType(RhythmToolbar), findsOneWidget);
-    });
+        expect(find.text('Holy, Holy, Holy (Notation)'), findsOneWidget);
+        expect(find.text('Save'), findsOneWidget);
+        expect(
+          find.textContaining('Drag noteheads vertically to change pitch'),
+          findsOneWidget,
+        );
+        expect(find.byType(StaffCanvas), findsOneWidget);
+        expect(find.byType(ScorePlaybackBar), findsOneWidget);
+        expect(find.byType(RhythmToolbar), findsOneWidget);
+      },
+    );
 
-    testWidgets('ScorePlaybackBar play and mute buttons toggle state',
-        (tester) async {
+    testWidgets('ScorePlaybackBar play and mute buttons toggle state', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -116,8 +115,9 @@ void main() {
       expect(find.textContaining('not found'), findsOneWidget);
     });
 
-    testWidgets('tapping Save button saves updated notation to repository',
-        (tester) async {
+    testWidgets('tapping Save button saves updated notation to repository', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -132,22 +132,24 @@ void main() {
       expect(find.text('Notation changes saved to Song!'), findsOneWidget);
     });
 
-    testWidgets('displays selected note details in header banner and passes cursor to StaffCanvas',
-        (tester) async {
-      tester.view.physicalSize = const Size(1024, 2048);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'displays selected note details in header banner and passes cursor to StaffCanvas',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject(songId: 'score-song-1'));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject(songId: 'score-song-1'));
+        await tester.pumpAndSettle();
 
-      // Controller auto-selects first unassigned note or first note (D4 for chord D)
-      expect(find.textContaining('Selected: M1'), findsOneWidget);
-      expect(find.textContaining('Pitch: D4'), findsOneWidget);
+        // Controller auto-selects first unassigned note or first note (D4 for chord D)
+        expect(find.textContaining('Selected: M1'), findsOneWidget);
+        expect(find.textContaining('Pitch: D4'), findsOneWidget);
 
-      final canvas = tester.widget<StaffCanvas>(find.byType(StaffCanvas));
-      expect(canvas.selectedCursor, isNotNull);
-      expect(canvas.selectedCursor?.measureNumber, equals(1));
-    });
+        final canvas = tester.widget<StaffCanvas>(find.byType(StaffCanvas));
+        expect(canvas.selectedCursor, isNotNull);
+        expect(canvas.selectedCursor?.measureNumber, equals(1));
+      },
+    );
   });
 }

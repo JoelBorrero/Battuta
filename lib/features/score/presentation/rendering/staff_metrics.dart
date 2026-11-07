@@ -43,21 +43,25 @@ class StaffMetrics {
     final isDark = theme.brightness == Brightness.dark;
     return StaffMetrics(
       staffColor: isDark ? const Color(0xFFCAC4D0) : const Color(0xFF24272C),
-      headerBadgeColor:
-          isDark ? const Color(0xFF2D3138) : const Color(0xFFF1F3F5),
-      headerBadgeBorderColor:
-          isDark ? const Color(0xFF3A3D44) : const Color(0xFFE1E4E8),
-      headerTextColor:
-          isDark ? const Color(0xFFF2F2F2) : const Color(0xFF1A1C20),
-      chordColor:
-          isDark ? const Color(0xFFFFB800) : const Color(0xFF0F766E),
+      headerBadgeColor: isDark
+          ? const Color(0xFF2D3138)
+          : const Color(0xFFF1F3F5),
+      headerBadgeBorderColor: isDark
+          ? const Color(0xFF3A3D44)
+          : const Color(0xFFE1E4E8),
+      headerTextColor: isDark
+          ? const Color(0xFFF2F2F2)
+          : const Color(0xFF1A1C20),
+      chordColor: isDark ? const Color(0xFFFFB800) : const Color(0xFF0F766E),
       selectedNoteColor: const Color(0xFFE5A93C),
       selectedHaloColor: const Color(0x38E5A93C),
       selectedBorderColor: const Color(0xFFE5A93C),
-      selectedBadgeBgColor:
-          isDark ? const Color(0xFF24272C) : const Color(0xFFFFFFFF),
-      selectedBadgeTextColor:
-          isDark ? const Color(0xFFE5A93C) : const Color(0xFFC7831C),
+      selectedBadgeBgColor: isDark
+          ? const Color(0xFF24272C)
+          : const Color(0xFFFFFFFF),
+      selectedBadgeTextColor: isDark
+          ? const Color(0xFFE5A93C)
+          : const Color(0xFFC7831C),
     );
   }
 
@@ -245,31 +249,31 @@ class StaffMetrics {
 
   @override
   int get hashCode => Object.hashAll([
-        lineSpacing,
-        lineThickness,
-        staffColor,
-        barlineThickness,
-        heavyBarlineThickness,
-        systemSpacing,
-        headerSpacing,
-        measuresPerSystem,
-        leftPadding,
-        rightPadding,
-        topPadding,
-        bottomPadding,
-        clefFontSize,
-        timeSigFontSize,
-        chordFontSize,
-        sectionHeaderFontSize,
-        voltaHeight,
-        headerBadgeColor,
-        headerBadgeBorderColor,
-        headerTextColor,
-        chordColor,
-        selectedNoteColor,
-        selectedHaloColor,
-        selectedBorderColor,
-        selectedBadgeBgColor,
-        selectedBadgeTextColor,
-      ]);
+    lineSpacing,
+    lineThickness,
+    staffColor,
+    barlineThickness,
+    heavyBarlineThickness,
+    systemSpacing,
+    headerSpacing,
+    measuresPerSystem,
+    leftPadding,
+    rightPadding,
+    topPadding,
+    bottomPadding,
+    clefFontSize,
+    timeSigFontSize,
+    chordFontSize,
+    sectionHeaderFontSize,
+    voltaHeight,
+    headerBadgeColor,
+    headerBadgeBorderColor,
+    headerTextColor,
+    chordColor,
+    selectedNoteColor,
+    selectedHaloColor,
+    selectedBorderColor,
+    selectedBadgeBgColor,
+    selectedBadgeTextColor,
+  ]);
 }

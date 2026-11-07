@@ -5,6 +5,7 @@
 library;
 
 import 'dart:typed_data';
+
 import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:pdf/pdf.dart';
 
@@ -20,8 +21,10 @@ class PdfLeadSheetOptions {
     this.systemSpacing = 16.0,
     this.sectionSpacing = 14.0,
     this.highContrast = true,
-  }) : assert(measuresPerSystem >= 1 && measuresPerSystem <= 8,
-            'measuresPerSystem must be between 1 and 8');
+  }) : assert(
+         measuresPerSystem >= 1 && measuresPerSystem <= 8,
+         'measuresPerSystem must be between 1 and 8',
+       );
 
   /// Target paper size (e.g. [PdfPageFormat.letter] or [PdfPageFormat.a4]).
   final PdfPageFormat pageFormat;

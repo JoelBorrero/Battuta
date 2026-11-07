@@ -9,6 +9,7 @@ library;
 
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/domain/entities/chord_symbol.dart';
 import 'package:battuta/features/score/domain/entities/measure.dart';
@@ -114,9 +115,7 @@ void main() {
   }
 
   group('Basic MIDI Reference File Exporter (ClickUp 86e3yy42k)', () {
-    test(
-        '(Checklist Verification) Exports valid Standard MIDI File Type 0 binary at 480 PPQ',
-        () {
+    test('(Checklist Verification) Exports valid Standard MIDI File Type 0 binary at 480 PPQ', () {
       final score = buildTestScore();
       final bytes = exporter.exportScoreToMidi(score);
 
@@ -149,15 +148,10 @@ void main() {
       // 3. Verify Track ends with End of Track meta event (0xFF, 0x2F, 0x00)
       final trackData = bytes.sublist(22);
       expect(trackData.length, trackLength);
-      expect(
-        trackData.sublist(trackData.length - 4),
-        [0x00, 0xFF, 0x2F, 0x00],
-      );
+      expect(trackData.sublist(trackData.length - 4), [0x00, 0xFF, 0x2F, 0x00]);
     });
 
-    test(
-        'Encodes exact pitches (Middle C=60, E4=64, G#4=68, B4=71) and tapped rhythm durations',
-        () {
+    test('Encodes exact pitches (Middle C=60, E4=64, G#4=68, B4=71) and tapped rhythm durations', () {
       final score = buildTestScore();
       final bytes = exporter.exportScoreToMidi(score);
 
@@ -179,22 +173,24 @@ void main() {
       expect(noteOns, containsAllInOrder([60, 64, 68, 71, 72]));
     });
 
-    test('Merges consecutive tied notes of the same pitch into a sustained note',
-        () {
-      final score = buildTestScore();
-      final bytes = exporter.exportScoreToMidi(score);
+    test(
+      'Merges consecutive tied notes of the same pitch into a sustained note',
+      () {
+        final score = buildTestScore();
+        final bytes = exporter.exportScoreToMidi(score);
 
-      // Count Note On events for pitch 71 (B4). It should appear exactly once
-      // because m1 note 4 is tied to m2 note 1.
-      var noteOnCount71 = 0;
-      for (var i = 22; i < bytes.length - 2; i++) {
-        if (bytes[i] == 0x90 && bytes[i + 1] == 71 && bytes[i + 2] > 0) {
-          noteOnCount71++;
+        // Count Note On events for pitch 71 (B4). It should appear exactly once
+        // because m1 note 4 is tied to m2 note 1.
+        var noteOnCount71 = 0;
+        for (var i = 22; i < bytes.length - 2; i++) {
+          if (bytes[i] == 0x90 && bytes[i + 1] == 71 && bytes[i + 2] > 0) {
+            noteOnCount71++;
+          }
         }
-      }
 
-      expect(noteOnCount71, 1);
-    });
+        expect(noteOnCount71, 1);
+      },
+    );
 
     test('Embeds accurate Tempo meta event (0xFF 0x51 0x03) for 120 BPM', () {
       final score = buildTestScore(tempo: 120);
@@ -234,18 +230,20 @@ void main() {
       expect(foundTimeSig, isTrue);
     });
 
-    test('Respects section repeat counts by duplicating measures in performance',
-        () {
-      // 1 repeat vs 2 repeats
-      final scoreSingle = buildTestScore(repeatCount: 1);
-      final scoreDouble = buildTestScore(repeatCount: 2);
+    test(
+      'Respects section repeat counts by duplicating measures in performance',
+      () {
+        // 1 repeat vs 2 repeats
+        final scoreSingle = buildTestScore(repeatCount: 1);
+        final scoreDouble = buildTestScore(repeatCount: 2);
 
-      final bytesSingle = exporter.exportScoreToMidi(scoreSingle);
-      final bytesDouble = exporter.exportScoreToMidi(scoreDouble);
+        final bytesSingle = exporter.exportScoreToMidi(scoreSingle);
+        final bytesDouble = exporter.exportScoreToMidi(scoreDouble);
 
-      // Repeated performance should have approximately double the note events and longer track length
-      expect(bytesDouble.length, greaterThan(bytesSingle.length));
-    });
+        // Repeated performance should have approximately double the note events and longer track length
+        expect(bytesDouble.length, greaterThan(bytesSingle.length));
+      },
+    );
 
     test('Supports Format 1 (Multi-Track) export', () {
       final score = buildTestScore();
@@ -279,8 +277,7 @@ void main() {
 
       for (final (value, expectedBytes) in testCases) {
         final encoded = MidiFileExporter.encodeVlq(value);
-        expect(encoded, expectedBytes,
-            reason: 'VLQ mismatch for value $value');
+        expect(encoded, expectedBytes, reason: 'VLQ mismatch for value $value');
 
         final (decoded, bytesRead) = MidiFileExporter.decodeVlq(
           Uint8List.fromList(encoded),
@@ -307,10 +304,7 @@ void main() {
     });
 
     test('Handles empty score gracefully', () {
-      const emptyScore = Score(
-        id: 'score-empty',
-        title: 'Empty Piece',
-      );
+      const emptyScore = Score(id: 'score-empty', title: 'Empty Piece');
 
       final bytes = exporter.exportScoreToMidi(emptyScore);
       expect(bytes.length, greaterThan(20));

@@ -23,15 +23,15 @@ void main() {
   Widget buildSubject() {
     return ProviderScope(
       child: MaterialApp(
-        home: Scaffold(
-          body: PracticePlayerBar(song: sampleSong),
-        ),
+        home: Scaffold(body: PracticePlayerBar(song: sampleSong)),
       ),
     );
   }
 
   group('PracticePlayerBar', () {
-    testWidgets('renders playback title, scrub slider, and tempo metronome', (tester) async {
+    testWidgets('renders playback title, scrub slider, and tempo metronome', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -58,7 +58,9 @@ void main() {
       expect(find.byIcon(Icons.play_arrow), findsOneWidget);
     });
 
-    testWidgets('opens attach audio dialog and attaches track name', (tester) async {
+    testWidgets('opens attach audio dialog and attaches track name', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -73,25 +75,27 @@ void main() {
       expect(find.textContaining('Acoustic_Guide_Track.mp3'), findsOneWidget);
     });
 
-    testWidgets('renders without overflow on narrow 320px screen and loop selected', (tester) async {
-      tester.view.physicalSize = const Size(320, 640);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    testWidgets(
+      'renders without overflow on narrow 320px screen and loop selected',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+        expect(tester.takeException(), isNull);
 
-      // Select a section loop to ensure activeLoopSection chip doesn't overflow
-      await tester.tap(find.byTooltip('Loop Section'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Loop: Chorus').last);
-      await tester.pumpAndSettle();
+        // Select a section loop to ensure activeLoopSection chip doesn't overflow
+        await tester.tap(find.byTooltip('Loop Section'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Loop: Chorus').last);
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.text('Chorus'), findsWidgets);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.text('Chorus'), findsWidgets);
+      },
+    );
   });
 }
-

@@ -49,35 +49,35 @@ class Setlist {
 
   /// Converts this [Setlist] to a JSON-compatible map.
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'description': description,
-        'eventDate': eventDate?.toIso8601String(),
-        'items': items.map((i) => i.toJson()).toList(),
-        'tags': tags,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'id': id,
+    'title': title,
+    'description': description,
+    'eventDate': eventDate?.toIso8601String(),
+    'items': items.map((i) => i.toJson()).toList(),
+    'tags': tags,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   /// Constructs a [Setlist] from a JSON map.
   factory Setlist.fromJson(Map<String, dynamic> json) => Setlist(
-        id: json['id'] as String,
-        title: json['title'] as String,
-        description: json['description'] as String?,
-        eventDate: json['eventDate'] != null
-            ? DateTime.parse(json['eventDate'] as String)
-            : null,
-        items: (json['items'] as List<dynamic>?)
-                ?.map((i) => SetlistItem.fromJson(i as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        tags: (json['tags'] as List<dynamic>?)
-                ?.map((t) => t as String)
-                .toList() ??
-            const [],
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        updatedAt: DateTime.parse(json['updatedAt'] as String),
-      );
+    id: json['id'] as String,
+    title: json['title'] as String,
+    description: json['description'] as String?,
+    eventDate: json['eventDate'] != null
+        ? DateTime.parse(json['eventDate'] as String)
+        : null,
+    items:
+        (json['items'] as List<dynamic>?)
+            ?.map((i) => SetlistItem.fromJson(i as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    tags:
+        (json['tags'] as List<dynamic>?)?.map((t) => t as String).toList() ??
+        const [],
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    updatedAt: DateTime.parse(json['updatedAt'] as String),
+  );
 
   /// Creates a copy of this [Setlist] with optional updated fields.
   Setlist copyWith({
@@ -95,8 +95,7 @@ class Setlist {
     return Setlist(
       id: id ?? this.id,
       title: title ?? this.title,
-      description:
-          clearDescription ? null : (description ?? this.description),
+      description: clearDescription ? null : (description ?? this.description),
       eventDate: clearEventDate ? null : (eventDate ?? this.eventDate),
       items: items ?? this.items,
       tags: tags ?? this.tags,
@@ -121,15 +120,15 @@ class Setlist {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        title,
-        description,
-        eventDate,
-        createdAt,
-        updatedAt,
-        Object.hashAll(items),
-        Object.hashAll(tags),
-      );
+    id,
+    title,
+    description,
+    eventDate,
+    createdAt,
+    updatedAt,
+    Object.hashAll(items),
+    Object.hashAll(tags),
+  );
 
   @override
   String toString() =>
