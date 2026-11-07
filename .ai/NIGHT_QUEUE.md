@@ -19,7 +19,7 @@
 
 ---
 
-## [ ] TASK-102: v1.1 Live Stage Sync Banner & Director Control Bar UI
+## [x] TASK-102: v1.1 Live Stage Sync Banner & Director Control Bar UI
 - **Epic**: Epic 1 — Live Stage Synchronization (v1.1)
 - **Scope**:
   1. Create `lib/features/sync/presentation/widgets/stage_cue_banner.dart`:

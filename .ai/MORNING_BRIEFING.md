@@ -14,3 +14,13 @@
   - `lib/features/sync/data/lan_websocket_sync_service.dart`: Pure `dart:io` WebSocket/HttpServer LiveSync implementation with `LeaderLock` conflict resolution and automatic 2-measure lookahead calculation.
   - `test/features/sync/lan_websocket_sync_service_test.dart`: Ephemeral port server startup, 2 followers broadcast, LeaderLock rejection of follower direct overrides, and lookahead measure math.
 - **Architectural Notes**: Uses zero external packages (pure `dart:io`), ensuring offline-first deterministic execution. Follower overrides are queued as requests to avoid stage collisions.
+
+### ✅ TASK-102: v1.1 Live Stage Sync Banner & Director Control Bar UI
+- **Status**: Complete & Verified
+- **Tests**: 287 / 287 passing (+5 new tests)
+- **Static Analysis**: 0 issues
+- **Files Created/Modified**:
+  - `lib/features/sync/presentation/providers/live_sync_provider.dart`: Riverpod state notifier integrating `LiveSyncService` streams to UI state with automatic cleanup.
+  - `lib/features/sync/presentation/widgets/stage_cue_banner.dart`: Stage-ready Anti-Material cue banner and Director Control Bar with 1.5px `#E5A93C` amber borders, zero elevation, `>=44x44pt` touch targets, and flexible rows preventing `RenderFlex` overflow down to 320pt widths.
+  - `test/features/sync/presentation/stage_cue_banner_test.dart`: Widget tests verifying Dark (`#121316`) and Light (`#F8F9FA`) themes, 320x600 responsive constraints, touch target dimensions, and callback interactions.
+- **Architectural Notes**: Complies fully with Apple/stage Anti-Material invariants, responsive constraint wrapping, and Riverpod 2 notifier pattern.
