@@ -4,6 +4,7 @@
 /// strict structured JSON output and schema validation.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -62,7 +63,12 @@ class DefaultGeminiOmrClient implements GeminiOmrClient {
     final response = await model.generateContent([
       Content.data(mimeType, imageBytes),
       Content.text(prompt),
-    ]);
+    ]).timeout(
+      const Duration(seconds: 45),
+      onTimeout: () => throw TimeoutException(
+        'Gemini analysis timed out after 45 seconds. Please check your network connection or try again.',
+      ),
+    );
 
     return response.text;
   }
@@ -89,8 +95,8 @@ class GeminiOmrRepository implements OmrRepository {
   /// Optional telemetry hook called with total tokens consumed upon successful extraction.
   final void Function(int tokens)? onUsageRecorded;
 
-  /// Default multimodal Gemini model for lead sheet recognition.
-  static const String defaultModel = 'gemini-3.8-flash';
+  /// Default fast multimodal Gemini model for lead sheet recognition.
+  static const String defaultModel = 'gemini-3.5-flash-lite';
 
   @override
   Future<Either<Failure, Score>> extractFullLeadSheet({

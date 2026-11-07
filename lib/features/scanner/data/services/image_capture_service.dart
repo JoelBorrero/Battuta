@@ -48,9 +48,9 @@ class DefaultImageCaptureService implements ImageCaptureService {
   Future<Uint8List?> captureFromCamera() async {
     final file = await _picker.pickImage(
       source: ImageSource.camera,
-      maxWidth: 2400,
-      maxHeight: 3200,
-      imageQuality: 90,
+      maxWidth: 1800,
+      maxHeight: 2400,
+      imageQuality: 85,
     );
     if (file == null) return null;
     return file.readAsBytes();
@@ -60,9 +60,9 @@ class DefaultImageCaptureService implements ImageCaptureService {
   Future<Uint8List?> pickFromGallery() async {
     final file = await _picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 2400,
-      maxHeight: 3200,
-      imageQuality: 90,
+      maxWidth: 1800,
+      maxHeight: 2400,
+      imageQuality: 85,
     );
     if (file == null) return null;
     return file.readAsBytes();
