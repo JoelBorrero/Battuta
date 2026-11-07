@@ -22,7 +22,7 @@ You are an expert musicologist and Optical Music Recognition (OMR) system specia
 Analyze the provided sheet music image and extract the complete musical structure in structured JSON format according to the schema.
 Guidelines:
 1. Extract metadata: title (titulo), artist/composer (artista), indicated key (tonalidad_indicada, e.g. "C", "G#m", "Eb"), tempo (tempo_bpm), time signature (compas, e.g. "4/4"), and copyright/licensing info.
-2. Group bars into sections: Intro, Verse 1, Verse 2, Chorus, Bridge, Outro, etc. Note any rehearsal letters or navigation boxes (caja_navegacion, e.g. "[A]", "[B]", "D.S. al Coda", "Fine").
+2. Group bars into sections: Intro, Verse 1, Verse 2, Chorus, Bridge, Outro, etc. Note any rehearsal letters or navigation boxes (caja_navegacion, e.g. "[A]", "[B]", "D.S. al Coda", "Fine"). Section repeats (repeticiones) must be an integer between 1 and 4 (default 1). Never output large numbers.
 3. For each measure (compas):
    - Record the 1-based measure number.
    - Record any volta brackets or endings (casilla_ritmo, e.g. "1.", "2.").
@@ -77,7 +77,8 @@ Guidelines:
               nullable: true,
             ),
             'repeticiones': Schema.integer(
-              description: 'Repeat count for this section, default 1',
+              description:
+                  'Repeat count for this section (1 to 4), default 1',
               nullable: true,
             ),
             'compases': Schema.array(

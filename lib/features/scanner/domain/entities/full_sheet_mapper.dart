@@ -50,7 +50,8 @@ class FullSheetMapper {
       final secMap = sectionsJson[sIdx] as Map<String, dynamic>;
       final sectionName = secMap['nombre'] as String? ?? 'Section ${sIdx + 1}';
       final navBox = secMap['caja_navegacion'] as String?;
-      final repeatCount = secMap['repeticiones'] as int? ?? 1;
+      final rawRepeat = (secMap['repeticiones'] as num?)?.toInt() ?? 1;
+      final repeatCount = (rawRepeat > 0 && rawRepeat <= 16) ? rawRepeat : 1;
 
       final measuresJson = secMap['compases'] as List<dynamic>? ?? [];
       final measures = <Measure>[];

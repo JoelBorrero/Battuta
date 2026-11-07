@@ -56,6 +56,7 @@ class DefaultGeminiOmrClient implements GeminiOmrClient {
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
         responseSchema: responseSchema,
+        temperature: 0.1,
       ),
       systemInstruction: Content.system(systemInstruction),
     );
