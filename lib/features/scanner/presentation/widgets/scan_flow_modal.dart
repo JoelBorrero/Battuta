@@ -8,6 +8,7 @@ library;
 import 'package:battuta/features/scanner/data/services/image_capture_service.dart';
 import 'package:battuta/features/scanner/domain/entities/pitch_only_result.dart';
 import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
+import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,6 +83,12 @@ class ScanFlowModal extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          IconButton(
+            key: const ValueKey('open_omr_debug_logs_btn'),
+            icon: const Icon(Icons.receipt_long_outlined),
+            tooltip: 'OMR Debug Logs',
+            onPressed: () => OmrLogViewerModal.show(context),
+          ),
           if (state.hasImage && !state.isLoading)
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -271,6 +278,20 @@ class ScanFlowModal extends ConsumerWidget {
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onErrorContainer,
                                 ),
+                              ),
+                              const SizedBox(height: 8),
+                              OutlinedButton.icon(
+                                key: const ValueKey('scan_view_debug_logs_btn'),
+                                icon: const Icon(Icons.bug_report_outlined, size: 16),
+                                label: const Text('View Debug Logs'),
+                                style: OutlinedButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                  foregroundColor: theme.colorScheme.error,
+                                  side: BorderSide(
+                                    color: theme.colorScheme.error.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                onPressed: () => OmrLogViewerModal.show(context),
                               ),
                             ],
                           ),

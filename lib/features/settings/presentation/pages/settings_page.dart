@@ -8,6 +8,7 @@ import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
+import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
 import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
@@ -369,6 +370,14 @@ class SettingsPage extends ConsumerWidget {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => ApiKeyDialog.show(context),
+          ),
+          ListTile(
+            key: const ValueKey('omr_debug_logs_tile'),
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: const Text('OMR Diagnostic Logs'),
+            subtitle: const Text('Inspect Gemini requests, latencies & responses'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => OmrLogViewerModal.show(context),
           ),
 
           const Divider(),
