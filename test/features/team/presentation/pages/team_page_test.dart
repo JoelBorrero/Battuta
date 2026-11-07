@@ -1,3 +1,4 @@
+import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
 import 'package:flutter/material.dart';
@@ -394,6 +395,52 @@ void main() {
           ),
           findsOneWidget,
         );
+      },
+    );
+
+    testWidgets(
+      'opens Assign Musician dialog on narrow 320px screen without RenderFlex overflow',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Switch to Band Calendar tab
+        await tester.tap(find.textContaining('Band Calendar'));
+        await tester.pumpAndSettle();
+
+        // Find the "Assign Musician" button and scroll to it
+        final assignBtn = find
+            .widgetWithText(TextButton, 'Assign Musician')
+            .first;
+        await tester.scrollUntilVisible(
+          assignBtn,
+          200,
+          scrollable: find.byType(Scrollable).last,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(assignBtn);
+        await tester.pumpAndSettle();
+
+        // Verify the dialog is visible and zero layout exceptions occurred
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('Assign Musician to'), findsOneWidget);
+        expect(
+          find.byType(DropdownButtonFormField<TeamMember>),
+          findsOneWidget,
+        );
+        expect(find.byType(DropdownButtonFormField<TeamRole>), findsOneWidget);
+        expect(
+          find.byType(DropdownButtonFormField<AssignmentStatus>),
+          findsOneWidget,
+        );
+
+        // Tap cancel to close dialog cleanly
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
       },
     );
   });

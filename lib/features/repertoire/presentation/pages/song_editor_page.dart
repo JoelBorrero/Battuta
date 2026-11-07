@@ -449,6 +449,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                           flex: 3,
                           child: DropdownButtonFormField<String>(
                             key: const Key('song_key_dropdown'),
+                            isExpanded: true,
                             initialValue:
                                 MusicalKey.allKeys.any(
                                   (k) => k.name == _selectedKey,
@@ -468,6 +469,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                                 value: k.name,
                                 child: Text(
                                   k.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -488,6 +491,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                           flex: 3,
                           child: DropdownButtonFormField<(int, int)>(
                             key: const Key('song_meter_dropdown'),
+                            isExpanded: true,
                             initialValue: _timeSignature,
                             decoration: const InputDecoration(
                               labelText: 'Meter',
@@ -501,7 +505,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                               final (num, den) = sig;
                               return DropdownMenuItem(
                                 value: sig,
-                                child: Text('$num/$den'),
+                                child: Text(
+                                  '$num/$den',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                               );
                             }).toList(),
                             onChanged: (val) {
@@ -797,6 +805,7 @@ class _SectionCardState extends State<_SectionCard> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: root,
                       decoration: const InputDecoration(labelText: 'Root Note'),
                       items:
@@ -820,8 +829,14 @@ class _SectionCardState extends State<_SectionCard> {
                                 'B',
                               ]
                               .map(
-                                (r) =>
-                                    DropdownMenuItem(value: r, child: Text(r)),
+                                (r) => DropdownMenuItem(
+                                  value: r,
+                                  child: Text(
+                                    r,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
                               )
                               .toList(),
                       onChanged: (val) {
@@ -830,13 +845,18 @@ class _SectionCardState extends State<_SectionCard> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<ChordQuality>(
+                      isExpanded: true,
                       initialValue: quality,
                       decoration: const InputDecoration(labelText: 'Quality'),
                       items: ChordQuality.values
                           .map(
                             (q) => DropdownMenuItem(
                               value: q,
-                              child: Text('${q.displayName} (${q.symbol})'),
+                              child: Text(
+                                '${q.displayName} (${q.symbol})',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             ),
                           )
                           .toList(),
@@ -846,6 +866,7 @@ class _SectionCardState extends State<_SectionCard> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
+                      isExpanded: true,
                       initialValue: bass,
                       decoration: const InputDecoration(
                         labelText: 'Bass Note (Slash Chord)',
@@ -853,7 +874,11 @@ class _SectionCardState extends State<_SectionCard> {
                       items: [
                         const DropdownMenuItem(
                           value: null,
-                          child: Text('None'),
+                          child: Text(
+                            'None',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                         ...[
                           'C',
@@ -869,7 +894,14 @@ class _SectionCardState extends State<_SectionCard> {
                           'Bb',
                           'B',
                         ].map(
-                          (b) => DropdownMenuItem(value: b, child: Text(b)),
+                          (b) => DropdownMenuItem(
+                            value: b,
+                            child: Text(
+                              b,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
                         ),
                       ],
                       onChanged: (val) => setDialogState(() => bass = val),

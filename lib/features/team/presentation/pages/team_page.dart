@@ -156,6 +156,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     if (hasVocalRole) ...[
                       DropdownButtonFormField<VocalTessitura>(
                         key: const ValueKey('vocal_tessitura_dropdown'),
+                        isExpanded: true,
                         initialValue: selectedRange == VocalTessitura.none
                             ? VocalTessitura.soprano
                             : selectedRange,
@@ -171,6 +172,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 value: v,
                                 child: Text(
                                   '${v.displayName} (${v.rangeLabel})',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               );
                             })
@@ -237,6 +240,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
                     // Availability Status
                     DropdownButtonFormField<AvailabilityStatus>(
+                      isExpanded: true,
                       initialValue: selectedAvailability,
                       decoration: const InputDecoration(
                         labelText: 'General Availability',
@@ -246,7 +250,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       items: AvailabilityStatus.values.map((a) {
                         return DropdownMenuItem(
                           value: a,
-                          child: Text(a.displayName),
+                          child: Text(
+                            a.displayName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -395,6 +403,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<ServiceType>(
+                      isExpanded: true,
                       initialValue: selectedType,
                       decoration: const InputDecoration(
                         labelText: 'Service Type',
@@ -407,7 +416,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             children: [
                               Icon(t.icon, size: 18),
                               const SizedBox(width: 8),
-                              Text(t.displayName),
+                              Expanded(
+                                child: Text(
+                                  t.displayName,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -420,6 +435,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<EventRecurrence>(
+                      isExpanded: true,
                       initialValue: selectedRecurrence,
                       decoration: const InputDecoration(
                         labelText: 'Recurrence Schedule',
@@ -429,7 +445,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       items: EventRecurrence.values.map((r) {
                         return DropdownMenuItem(
                           value: r,
-                          child: Text(r.displayName),
+                          child: Text(
+                            r.displayName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -442,6 +462,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<int>(
                         key: const ValueKey('series_count_dropdown'),
+                        isExpanded: true,
                         initialValue: seriesCount,
                         decoration: const InputDecoration(
                           labelText: 'Occurrences to Generate',
@@ -451,23 +472,43 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         items: const [
                           DropdownMenuItem(
                             value: 1,
-                            child: Text('1 service (Single date only)'),
+                            child: Text(
+                              '1 service (Single date only)',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 4,
-                            child: Text('4 occurrences (~1 month)'),
+                            child: Text(
+                              '4 occurrences (~1 month)',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 6,
-                            child: Text('6 occurrences (~1.5 months)'),
+                            child: Text(
+                              '6 occurrences (~1.5 months)',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 12,
-                            child: Text('12 occurrences (~3 months)'),
+                            child: Text(
+                              '12 occurrences (~3 months)',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 24,
-                            child: Text('24 occurrences (~6 months)'),
+                            child: Text(
+                              '24 occurrences (~6 months)',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ],
                         onChanged: (val) {
@@ -667,6 +708,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<TeamMember>(
+                      isExpanded: true,
                       initialValue: selectedMember,
                       decoration: const InputDecoration(
                         labelText: 'Band Member',
@@ -676,7 +718,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       items: members.map((m) {
                         return DropdownMenuItem(
                           value: m,
-                          child: Text('${m.name} (${m.role.shortName})'),
+                          child: Text(
+                            '${m.name} (${m.role.shortName})',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                       onChanged: (m) {
@@ -690,6 +736,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<TeamRole>(
+                      isExpanded: true,
                       initialValue: selectedRole,
                       decoration: const InputDecoration(
                         labelText: 'Assigned Role for Service',
@@ -699,7 +746,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       items: TeamRole.values.map((r) {
                         return DropdownMenuItem(
                           value: r,
-                          child: Text(r.displayName),
+                          child: Text(
+                            r.displayName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                       onChanged: (r) {
@@ -710,6 +761,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<AssignmentStatus>(
+                      isExpanded: true,
                       initialValue: selectedStatus,
                       decoration: const InputDecoration(
                         labelText: 'Attendance Status',
@@ -719,7 +771,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       items: AssignmentStatus.values.map((s) {
                         return DropdownMenuItem(
                           value: s,
-                          child: Text(s.displayName),
+                          child: Text(
+                            s.displayName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         );
                       }).toList(),
                       onChanged: (s) {
@@ -934,6 +990,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     // Occurrences Selector
                     DropdownButtonFormField<int>(
                       key: const ValueKey('recurring_modal_count_dropdown'),
+                      isExpanded: true,
                       initialValue: seriesCount,
                       decoration: const InputDecoration(
                         labelText: 'Occurrences to Generate',
@@ -943,19 +1000,35 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       items: const [
                         DropdownMenuItem(
                           value: 4,
-                          child: Text('4 occurrences (~1 month)'),
+                          child: Text(
+                            '4 occurrences (~1 month)',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 6,
-                          child: Text('6 occurrences (~1.5 months)'),
+                          child: Text(
+                            '6 occurrences (~1.5 months)',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 12,
-                          child: Text('12 occurrences (~3 months)'),
+                          child: Text(
+                            '12 occurrences (~3 months)',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 24,
-                          child: Text('24 occurrences (~6 months)'),
+                          child: Text(
+                            '24 occurrences (~6 months)',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                       ],
                       onChanged: (val) {
@@ -1482,14 +1555,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Expanded(
-                  child: Text(
-                    'Periodic & Upcoming Services (${events.length})',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  'Periodic & Upcoming Services (${events.length})',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Wrap(
@@ -1711,11 +1786,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                event.formattedTime,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.colorScheme.onSurfaceVariant,
+                              Flexible(
+                                child: Text(
+                                  event.formattedTime,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1731,14 +1809,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                     : theme.colorScheme.primary,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                '${event.type.shortName} • ${event.recurrence.shortName}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSunday
-                                      ? const Color(0xFFE5A93C)
-                                      : theme.colorScheme.primary,
+                              Flexible(
+                                child: Text(
+                                  '${event.type.shortName} • ${event.recurrence.shortName}',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSunday
+                                        ? const Color(0xFFE5A93C)
+                                        : theme.colorScheme.primary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1752,11 +1833,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                event.location,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.colorScheme.onSurfaceVariant,
+                              Flexible(
+                                child: Text(
+                                  event.location,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1842,8 +1926,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             const SizedBox(height: 8),
 
             // Band Lineup Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Text(
                   'Band Lineup (${event.assignments.length})',
