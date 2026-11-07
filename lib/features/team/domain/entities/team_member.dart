@@ -69,6 +69,7 @@ class TeamMember {
     this.availability = AvailabilityStatus.available,
     this.notes,
     this.email,
+    this.isAdmin = false,
   });
 
   final String id;
@@ -82,6 +83,10 @@ class TeamMember {
   final AvailabilityStatus availability;
   final String? notes;
   final String? email;
+
+  /// Whether this member holds administrative permissions (creating songs,
+  /// managing master schedules, and assigning replacements).
+  final bool isAdmin;
 
   /// Whether the member has at least one vocal assignment (Lead Vocal or Backing Vocal).
   bool get hasVocalRole => roles.any((r) => r.isVocal);
@@ -98,6 +103,7 @@ class TeamMember {
     AvailabilityStatus? availability,
     String? notes,
     String? email,
+    bool? isAdmin,
   }) {
     return TeamMember(
       id: id ?? this.id,
@@ -107,6 +113,7 @@ class TeamMember {
       availability: availability ?? this.availability,
       notes: notes ?? this.notes,
       email: email ?? this.email,
+      isAdmin: isAdmin ?? this.isAdmin,
     );
   }
 
@@ -121,7 +128,8 @@ class TeamMember {
           vocalRange == other.vocalRange &&
           availability == other.availability &&
           notes == other.notes &&
-          email == other.email;
+          email == other.email &&
+          isAdmin == other.isAdmin;
 
   @override
   int get hashCode =>
@@ -131,5 +139,6 @@ class TeamMember {
       vocalRange.hashCode ^
       availability.hashCode ^
       notes.hashCode ^
-      email.hashCode;
+      email.hashCode ^
+      isAdmin.hashCode;
 }

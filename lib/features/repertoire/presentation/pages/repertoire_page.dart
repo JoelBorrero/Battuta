@@ -10,6 +10,7 @@ import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
+import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -135,6 +136,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     final theme = Theme.of(context);
     final repertoire = ref.watch(repertoireProvider);
     final setlistsAsync = ref.watch(setlistsProvider);
+    final isAdmin = ref.watch(isCurrentUserAdminProvider);
 
     final songCount = repertoire.value?.length ?? 0;
     final setlistCount = setlistsAsync.value?.length ?? 0;
@@ -183,26 +185,29 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           // ── Content Area ──
           Expanded(
             child: _selectedTabIndex == 0
-                ? _buildSongsView(repertoire, theme)
-                : _buildSetlistsView(setlistsAsync, theme),
+                ? _buildSongsView(repertoire, theme, isAdmin: isAdmin)
+                : _buildSetlistsView(setlistsAsync, theme, isAdmin: isAdmin),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: _selectedTabIndex == 0 ? 'Add song' : 'Create setlist',
-        onPressed: _selectedTabIndex == 0
-            ? () => context.push('/repertoire/new')
-            : _showCreateSetlistDialog,
-        icon: const Icon(Icons.add),
-        label: Text(_selectedTabIndex == 0 ? 'New Song' : 'New Setlist'),
-      ),
+      floatingActionButton: isAdmin
+          ? FloatingActionButton.extended(
+              tooltip: _selectedTabIndex == 0 ? 'Add song' : 'Create setlist',
+              onPressed: _selectedTabIndex == 0
+                  ? () => context.push('/repertoire/new')
+                  : _showCreateSetlistDialog,
+              icon: const Icon(Icons.add),
+              label: Text(_selectedTabIndex == 0 ? 'New Song' : 'New Setlist'),
+            )
+          : null,
     );
   }
 
   Widget _buildSongsView(
     AsyncValue<List<dynamic>> repertoire,
-    ThemeData theme,
-  ) {
+    ThemeData theme, {
+    required bool isAdmin,
+  }) {
     return repertoire.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
@@ -257,7 +262,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tap the + button to add your first song',
+                    isAdmin
+                        ? 'Tap the + button to add your first song'
+                        : 'No songs available yet. Contact an administrator to add songs.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -269,24 +276,26 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                     spacing: 12,
                     runSpacing: 10,
                     children: [
-                      FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppTheme.amberAccent,
-                          foregroundColor: AppTheme.obsidianText,
+                      if (isAdmin) ...[
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.amberAccent,
+                            foregroundColor: AppTheme.obsidianText,
+                          ),
+                          icon: const Icon(Icons.auto_awesome),
+                          label: const Text('Load Sample Songs'),
+                          onPressed: () async {
+                            await ref
+                                .read(repertoireProvider.notifier)
+                                .seedSampleData();
+                          },
                         ),
-                        icon: const Icon(Icons.auto_awesome),
-                        label: const Text('Load Sample Songs'),
-                        onPressed: () async {
-                          await ref
-                              .read(repertoireProvider.notifier)
-                              .seedSampleData();
-                        },
-                      ),
-                      FilledButton.icon(
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add Song'),
-                        onPressed: () => context.push('/repertoire/new'),
-                      ),
+                        FilledButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add Song'),
+                          onPressed: () => context.push('/repertoire/new'),
+                        ),
+                      ],
                       OutlinedButton.icon(
                         icon: const Icon(Icons.document_scanner_outlined),
                         label: const Text('Scan Score'),
@@ -312,8 +321,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
   Widget _buildSetlistsView(
     AsyncValue<List<Setlist>> setlistsAsync,
-    ThemeData theme,
-  ) {
+    ThemeData theme, {
+    required bool isAdmin,
+  }) {
     return setlistsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Error loading setlists: $e')),
@@ -334,38 +344,41 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   Text('No Setlists Yet', style: theme.textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(
-                    'Create an ordered setlist for Sunday services or rehearsals.',
+                    isAdmin
+                        ? 'Create an ordered setlist for Sunday services or rehearsals.'
+                        : 'No setlists created yet. Setlists will appear here once published by your director.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 12,
-                    runSpacing: 10,
-                    children: [
-                      FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppTheme.amberAccent,
-                          foregroundColor: AppTheme.obsidianText,
+                  if (isAdmin)
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 12,
+                      runSpacing: 10,
+                      children: [
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.amberAccent,
+                            foregroundColor: AppTheme.obsidianText,
+                          ),
+                          icon: const Icon(Icons.auto_awesome),
+                          label: const Text('Load Sample Setlist'),
+                          onPressed: () async {
+                            await ref
+                                .read(repertoireProvider.notifier)
+                                .seedSampleData();
+                          },
                         ),
-                        icon: const Icon(Icons.auto_awesome),
-                        label: const Text('Load Sample Setlist'),
-                        onPressed: () async {
-                          await ref
-                              .read(repertoireProvider.notifier)
-                              .seedSampleData();
-                        },
-                      ),
-                      FilledButton.icon(
-                        icon: const Icon(Icons.add),
-                        label: const Text('Create Setlist'),
-                        onPressed: _showCreateSetlistDialog,
-                      ),
-                    ],
-                  ),
+                        FilledButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: const Text('Create Setlist'),
+                          onPressed: _showCreateSetlistDialog,
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -403,15 +416,17 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: AppTheme.stageRed,
-                  ),
-                  tooltip: 'Delete setlist',
-                  onPressed: () => _confirmDeleteSetlist(context, setlist),
-                ),
+                trailing: isAdmin
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: AppTheme.stageRed,
+                        ),
+                        tooltip: 'Delete setlist',
+                        onPressed: () => _confirmDeleteSetlist(context, setlist),
+                      )
+                    : null,
                 onTap: () => context.push(AppRoutes.setlistDetail(setlist.id)),
               ),
             );

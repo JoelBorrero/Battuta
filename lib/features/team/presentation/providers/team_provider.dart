@@ -12,6 +12,44 @@ final teamMembersProvider =
       TeamMembersNotifier.new,
     );
 
+/// Manages the currently active team member ID acting within the app session.
+/// Defaults to 'member-1' (Sarah Jenkins - Admin).
+class CurrentMemberIdNotifier extends Notifier<String?> {
+  CurrentMemberIdNotifier([this._initialId = 'member-1']);
+  final String? _initialId;
+
+  @override
+  String? build() => _initialId;
+
+  void setMemberId(String? id) => state = id;
+}
+
+final currentMemberIdProvider =
+    NotifierProvider<CurrentMemberIdNotifier, String?>(
+      CurrentMemberIdNotifier.new,
+    );
+
+/// Resolves the currently active [TeamMember] entity.
+final currentMemberProvider = Provider<TeamMember?>((ref) {
+  final memberId = ref.watch(currentMemberIdProvider);
+  if (memberId == null) return null;
+  final members = ref.watch(teamMembersProvider);
+  return members.cast<TeamMember?>().firstWhere(
+    (m) => m?.id == memberId,
+    orElse: () => null,
+  );
+});
+
+/// Whether the currently active user has administrator permissions.
+/// Returns true if the member has `isAdmin == true`, or if no members are configured (fail-safe).
+final isCurrentUserAdminProvider = Provider<bool>((ref) {
+  final members = ref.watch(teamMembersProvider);
+  if (members.isEmpty) return true; // Fail-safe: empty roster allows configuration
+  final current = ref.watch(currentMemberProvider);
+  if (current == null) return true; // Fail-safe: fallback to admin
+  return current.isAdmin;
+});
+
 class TeamMembersNotifier extends Notifier<List<TeamMember>> {
   @override
   List<TeamMember> build() {
@@ -59,6 +97,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.scheduled,
         notes: 'Available for 1st service',
         email: 'sarah.j@worship.org',
+        isAdmin: true,
       ),
       TeamMember(
         id: 'member-2',

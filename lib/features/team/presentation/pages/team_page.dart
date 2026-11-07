@@ -5,6 +5,7 @@
 /// service scheduling system with recurring periodic Sunday services.
 library;
 
+import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/features/team/presentation/providers/service_calendar_provider.dart';
@@ -54,6 +55,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
     AvailabilityStatus selectedAvailability =
         memberToEdit?.availability ?? AvailabilityStatus.available;
+    var isAdmin = memberToEdit?.isAdmin ?? false;
 
     showDialog<void>(
       context: context,
@@ -274,6 +276,28 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         prefixIcon: Icon(Icons.note_alt_outlined),
                       ),
                     ),
+                    const SizedBox(height: 14),
+
+                    // Administrator permissions toggle
+                    SwitchListTile.adaptive(
+                      key: const ValueKey('member_admin_switch'),
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        'Administrator Role',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Grants authority to create songs, schedule services, and assign musician replacements.',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      value: isAdmin,
+                      onChanged: (val) {
+                        setDialogState(() => isAdmin = val);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -306,6 +330,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         roles: rolesToSave,
                         vocalRange: vocalToSave,
                         availability: selectedAvailability,
+                        isAdmin: isAdmin,
                         notes: notesController.text.trim().isEmpty
                             ? null
                             : notesController.text.trim(),
@@ -327,6 +352,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         roles: rolesToSave,
                         vocalRange: vocalToSave,
                         availability: selectedAvailability,
+                        isAdmin: isAdmin,
                         notes: notesController.text.trim().isEmpty
                             ? null
                             : notesController.text.trim(),
@@ -823,6 +849,462 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // REPLACE MUSICIAN / SUBSTITUTE DIALOG
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  void _showReplaceMemberDialog({
+    required ServiceEvent event,
+    required ServiceAssignment assignment,
+  }) {
+    final members = ref.read(teamMembersProvider);
+    final currentAssignedMember = members.cast<TeamMember?>().firstWhere(
+      (m) => m?.id == assignment.memberId,
+      orElse: () => null,
+    );
+
+    final alreadyAssignedIds = event.assignments.map((a) => a.memberId).toSet();
+    final availableCandidates =
+        members.where((m) => m.id != assignment.memberId).toList();
+
+    if (availableCandidates.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No other team members available to substitute.'),
+        ),
+      );
+      return;
+    }
+
+    // Pre-select candidate who plays this role and isn't in lineup yet, if possible
+    TeamMember selectedSubstitute = availableCandidates.firstWhere(
+      (m) =>
+          m.roles.contains(assignment.role) &&
+          !alreadyAssignedIds.contains(m.id),
+      orElse: () => availableCandidates.firstWhere(
+        (m) => !alreadyAssignedIds.contains(m.id),
+        orElse: () => availableCandidates.first,
+      ),
+    );
+
+    TeamRole selectedRole = assignment.role;
+    AssignmentStatus selectedStatus = AssignmentStatus.confirmed;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              title: const Text('Assign Musician Replacement'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.stageRed.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppTheme.stageRed.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.person_off_outlined,
+                            color: AppTheme.stageRed,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Cannot Attend: ${currentAssignedMember?.name ?? "Musician"}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                Text(
+                                  'Role: ${assignment.role.displayName} • ${event.formattedDate}',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Select Substitute Musician:',
+                      style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<TeamMember>(
+                      key: const ValueKey('replacement_member_dropdown'),
+                      isExpanded: true,
+                      initialValue: selectedSubstitute,
+                      decoration: const InputDecoration(
+                        labelText: 'Substitute Musician',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person_add),
+                      ),
+                      items: availableCandidates.map((m) {
+                        final playsRole = m.roles.contains(assignment.role);
+                        final isInLineup = alreadyAssignedIds.contains(m.id);
+                        final roleNote = playsRole
+                            ? '★ Plays ${assignment.role.shortName}'
+                            : (isInLineup ? '(In Lineup)' : m.role.shortName);
+
+                        return DropdownMenuItem(
+                          value: m,
+                          child: Text(
+                            '${m.name} — $roleNote',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (m) {
+                        if (m != null) {
+                          setDialogState(() {
+                            selectedSubstitute = m;
+                            if (m.roles.contains(assignment.role)) {
+                              selectedRole = assignment.role;
+                            } else {
+                              selectedRole = m.role;
+                            }
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<TeamRole>(
+                      key: const ValueKey('replacement_role_dropdown'),
+                      isExpanded: true,
+                      initialValue: selectedRole,
+                      decoration: const InputDecoration(
+                        labelText: 'Assigned Role',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.music_note),
+                      ),
+                      items: TeamRole.values.map((r) {
+                        return DropdownMenuItem(
+                          value: r,
+                          child: Text(
+                            r.displayName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (r) {
+                        if (r != null) {
+                          setDialogState(() => selectedRole = r);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<AssignmentStatus>(
+                      key: const ValueKey('replacement_status_dropdown'),
+                      isExpanded: true,
+                      initialValue: selectedStatus,
+                      decoration: const InputDecoration(
+                        labelText: 'Attendance Status',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.check_circle_outline),
+                      ),
+                      items: AssignmentStatus.values.map((s) {
+                        return DropdownMenuItem(
+                          value: s,
+                          child: Text(
+                            s.displayName,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (s) {
+                        if (s != null) {
+                          setDialogState(() => selectedStatus = s);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogCtx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  key: const ValueKey('confirm_replacement_btn'),
+                  onPressed: () {
+                    ref.read(serviceCalendarProvider.notifier).replaceMember(
+                          eventId: event.id,
+                          oldMemberId: assignment.memberId,
+                          newMemberId: selectedSubstitute.id,
+                          role: selectedRole,
+                          status: selectedStatus,
+                        );
+                    Navigator.of(dialogCtx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Replaced ${currentAssignedMember?.name ?? "musician"} with ${selectedSubstitute.name} for ${event.formattedDate}!',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Confirm Replacement'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAssignmentActionsModal({
+    required ServiceEvent event,
+    required ServiceAssignment assignment,
+    required TeamMember? member,
+    required bool isAdmin,
+  }) {
+    final memberName = member?.name ?? 'Musician';
+    final currentMemberId = ref.read(currentMemberIdProvider);
+    final isCurrentMember = currentMemberId == assignment.memberId;
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$memberName • ${assignment.role.displayName}',
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Text(
+                  '${event.title} (${event.formattedDate})',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (isAdmin || isCurrentMember) ...[
+                  ListTile(
+                    leading:
+                        const Icon(Icons.check_circle, color: Colors.green),
+                    title: const Text('Confirm Attendance'),
+                    onTap: () {
+                      ref.read(serviceCalendarProvider.notifier).assignMember(
+                            eventId: event.id,
+                            memberId: assignment.memberId,
+                            role: assignment.role,
+                            status: AssignmentStatus.confirmed,
+                          );
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.cancel_outlined,
+                      color: AppTheme.stageRed,
+                    ),
+                    title: const Text('Mark Unavailable / Cannot Attend'),
+                    subtitle:
+                        const Text('Flags date so admin can set a replacement'),
+                    onTap: () {
+                      ref.read(serviceCalendarProvider.notifier).assignMember(
+                            eventId: event.id,
+                            memberId: assignment.memberId,
+                            role: assignment.role,
+                            status: AssignmentStatus.declined,
+                          );
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+                ],
+                if (isAdmin) ...[
+                  ListTile(
+                    key: const ValueKey('action_find_replacement'),
+                    leading: const Icon(
+                      Icons.swap_horiz,
+                      color: AppTheme.amberAccent,
+                    ),
+                    title: const Text('Find Replacement / Substitute'),
+                    subtitle: const Text(
+                      'Assign another team member to take this spot',
+                    ),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _showReplaceMemberDialog(
+                        event: event,
+                        assignment: assignment,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete_outline,
+                      color: AppTheme.stageRed,
+                    ),
+                    title: const Text('Remove from Lineup'),
+                    onTap: () {
+                      ref
+                          .read(serviceCalendarProvider.notifier)
+                          .removeMemberAssignment(
+                            eventId: event.id,
+                            memberId: assignment.memberId,
+                          );
+                      Navigator.of(ctx).pop();
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showActiveUserSwitcherModal(List<TeamMember> members) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final currentMemberId = ref.watch(currentMemberIdProvider);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Select Active User Profile',
+                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Switch active user to preview musician permissions vs administrator capabilities.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final member in members) ...[
+                  ListTile(
+                    key: ValueKey('switch_user_${member.id}'),
+                    leading: CircleAvatar(
+                      backgroundColor: member.isAdmin
+                          ? AppTheme.amberAccent.withValues(alpha: 0.2)
+                          : Theme.of(ctx).colorScheme.primaryContainer,
+                      child: Icon(
+                        member.isAdmin ? Icons.shield : Icons.person,
+                        size: 18,
+                        color: member.isAdmin
+                            ? AppTheme.amberAccent
+                            : Theme.of(ctx).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Text(
+                          member.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        if (member.isAdmin) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppTheme.amberAccent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color:
+                                    AppTheme.amberAccent.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: const Text(
+                              'Admin',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.amberAccent,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    subtitle: Text(
+                      '${member.roles.map((r) => r.displayName).join(", ")} • ${member.availability.displayName}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    trailing: currentMemberId == member.id
+                        ? const Icon(Icons.check_circle, color: Colors.green)
+                        : null,
+                    onTap: () {
+                      ref
+                          .read(currentMemberIdProvider.notifier)
+                          .setMemberId(member.id);
+                      Navigator.of(ctx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Active user: ${member.name} (${member.isAdmin ? 'Administrator' : 'Musician'})',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // RECURRING EVENT SERIES TEMPLATES MODAL
   // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1108,6 +1590,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     final theme = Theme.of(context);
     final members = ref.watch(teamMembersProvider);
     final events = ref.watch(serviceCalendarProvider);
+    final currentMember = ref.watch(currentMemberProvider);
+    final isAdmin = ref.watch(isCurrentUserAdminProvider);
 
     final upcomingEvents = events.where((e) => e.isUpcoming).toList()
       ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
@@ -1124,17 +1608,32 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Worship Team & Band'),
+        title: const Text(
+          'Worship Team & Band',
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
           IconButton(
-            icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
-            tooltip: _selectedTabIndex == 0
-                ? 'Add team member'
-                : 'Add service event',
-            onPressed: _selectedTabIndex == 0
-                ? () => _showMemberDialog()
-                : () => _showServiceDialog(),
+            key: const ValueKey('active_user_switcher_btn'),
+            icon: Icon(
+              isAdmin ? Icons.shield_outlined : Icons.person_outline,
+              color: isAdmin ? AppTheme.amberAccent : theme.colorScheme.primary,
+            ),
+            tooltip: currentMember != null
+                ? 'Active Profile: ${currentMember.name} (${isAdmin ? 'Admin' : 'Musician'})'
+                : 'Switch active user profile',
+            onPressed: () => _showActiveUserSwitcherModal(members),
           ),
+          if (isAdmin)
+            IconButton(
+              icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
+              tooltip: _selectedTabIndex == 0
+                  ? 'Add team member'
+                  : 'Add service event',
+              onPressed: _selectedTabIndex == 0
+                  ? () => _showMemberDialog()
+                  : () => _showServiceDialog(),
+            ),
         ],
       ),
       body: Column(
@@ -1180,20 +1679,23 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     theme: theme,
                     members: members,
                     events: upcomingEvents,
+                    isAdmin: isAdmin,
                   ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: _selectedTabIndex == 0
-            ? 'Add team member'
-            : 'Add service event',
-        onPressed: _selectedTabIndex == 0
-            ? () => _showMemberDialog()
-            : () => _showServiceDialog(),
-        icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
-        label: Text(_selectedTabIndex == 0 ? 'Add Member' : 'New Service'),
-      ),
+      floatingActionButton: isAdmin
+          ? FloatingActionButton.extended(
+              tooltip: _selectedTabIndex == 0
+                  ? 'Add team member'
+                  : 'Add service event',
+              onPressed: _selectedTabIndex == 0
+                  ? () => _showMemberDialog()
+                  : () => _showServiceDialog(),
+              icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
+              label: Text(_selectedTabIndex == 0 ? 'Add Member' : 'New Service'),
+            )
+          : null,
     );
   }
 
@@ -1368,6 +1870,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         title: Text(
           member.name,
           style: const TextStyle(fontWeight: FontWeight.bold),
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1379,6 +1882,40 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               runSpacing: 4,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                if (member.isAdmin)
+                  Container(
+                    key: ValueKey('admin_badge_${member.id}'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.amberAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: AppTheme.amberAccent.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.shield_outlined,
+                          size: 11,
+                          color: AppTheme.amberAccent,
+                        ),
+                        SizedBox(width: 3),
+                        Text(
+                          'Admin',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.amberAccent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 for (final role in member.roles)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -1541,6 +2078,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required ThemeData theme,
     required List<TeamMember> members,
     required List<ServiceEvent> events,
+    required bool isAdmin,
   }) {
     final memberMap = {for (final m in members) m.id: m};
 
@@ -1567,33 +2105,63 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: [
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.repeat, size: 16),
-                      label: const Text('Recurring Schedule'),
-                      onPressed: _showRecurringSeriesModal,
-                    ),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.auto_awesome, size: 16),
-                      label: const Text('Auto-Sundays'),
-                      onPressed: () {
-                        ref
-                            .read(serviceCalendarProvider.notifier)
-                            .generatePeriodicSundays(count: 4);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Auto-generated next 4 Sunday services!',
+                if (isAdmin)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.repeat, size: 16),
+                        label: const Text('Recurring Schedule'),
+                        onPressed: _showRecurringSeriesModal,
+                      ),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.auto_awesome, size: 16),
+                        label: const Text('Auto-Sundays'),
+                        onPressed: () {
+                          ref
+                              .read(serviceCalendarProvider.notifier)
+                              .generatePeriodicSundays(count: 4);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Auto-generated next 4 Sunday services!',
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                  ],
-                ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.visibility_outlined,
+                          size: 14,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Musician View',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -1614,11 +2182,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   const SizedBox(height: 12),
                   const Text('No upcoming services scheduled.'),
                   const SizedBox(height: 8),
-                  FilledButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Schedule First Service'),
-                    onPressed: () => _showServiceDialog(),
-                  ),
+                  if (isAdmin)
+                    FilledButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: const Text('Schedule First Service'),
+                      onPressed: () => _showServiceDialog(),
+                    ),
                 ],
               ),
             ),
@@ -1630,6 +2199,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               event: events[i],
               isNextService: i == 0,
               memberMap: memberMap,
+              isAdmin: isAdmin,
             ),
 
         const SizedBox(height: 64),
@@ -1642,6 +2212,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required ServiceEvent event,
     required bool isNextService,
     required Map<String, TeamMember> memberMap,
+    required bool isAdmin,
   }) {
     const months = [
       'JAN',
@@ -1851,48 +2422,49 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ),
                 ),
 
-                // Event Menu
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, size: 20),
-                  onSelected: (val) {
-                    if (val == 'edit') {
-                      _showServiceDialog(eventToEdit: event);
-                    } else if (val == 'delete') {
-                      ref
-                          .read(serviceCalendarProvider.notifier)
-                          .deleteEvent(event.id);
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit_outlined, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit Service'),
-                        ],
+                // Event Menu (Admins only)
+                if (isAdmin)
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, size: 20),
+                    onSelected: (val) {
+                      if (val == 'edit') {
+                        _showServiceDialog(eventToEdit: event);
+                      } else if (val == 'delete') {
+                        ref
+                            .read(serviceCalendarProvider.notifier)
+                            .deleteEvent(event.id);
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit Service'),
+                          ],
+                        ),
                       ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline,
-                            size: 18,
-                            color: Colors.red,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Delete Service',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ],
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Delete Service',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
 
@@ -1938,15 +2510,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                if (isAdmin)
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    icon: const Icon(Icons.person_add_alt_1, size: 16),
+                    label: const Text('Assign Musician'),
+                    onPressed: () => _showAssignMemberDialog(event),
                   ),
-                  icon: const Icon(Icons.person_add_alt_1, size: 16),
-                  label: const Text('Assign Musician'),
-                  onPressed: () => _showAssignMemberDialog(event),
-                ),
               ],
             ),
             const SizedBox(height: 4),
@@ -1967,32 +2540,93 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               Wrap(
                 spacing: 8,
                 runSpacing: 6,
-                children: event.assignments.map((assignment) {
-                  final member = memberMap[assignment.memberId];
-                  final memberName = member?.name ?? 'Musician';
-                  final roleName = assignment.role.shortName;
+                children: [
+                  for (final assignment in event.assignments) ...[
+                    () {
+                      final member = memberMap[assignment.memberId];
+                      final memberName = member?.name ?? 'Musician';
+                      final roleName = assignment.role.shortName;
+                      final isDeclined =
+                          assignment.status == AssignmentStatus.declined;
 
-                  return InputChip(
-                    avatar: Icon(
-                      _getRoleIcon(assignment.role),
-                      size: 14,
-                      color: assignment.status.color,
-                    ),
-                    label: Text(
-                      '$memberName ($roleName)',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    deleteIcon: const Icon(Icons.close, size: 14),
-                    onDeleted: () {
-                      ref
-                          .read(serviceCalendarProvider.notifier)
-                          .removeMemberAssignment(
-                            eventId: event.id,
-                            memberId: assignment.memberId,
-                          );
-                    },
-                  );
-                }).toList(),
+                      return InputChip(
+                        key: ValueKey(
+                          'lineup_chip_${event.id}_${assignment.memberId}',
+                        ),
+                        backgroundColor: isDeclined
+                            ? AppTheme.stageRed.withValues(alpha: 0.12)
+                            : null,
+                        side: isDeclined
+                            ? const BorderSide(
+                                color: AppTheme.stageRed,
+                                width: 1,
+                              )
+                            : null,
+                        avatar: Icon(
+                          isDeclined
+                              ? Icons.person_off_outlined
+                              : _getRoleIcon(assignment.role),
+                          size: 14,
+                          color: isDeclined
+                              ? AppTheme.stageRed
+                              : assignment.status.color,
+                        ),
+                        label: Text(
+                          '$memberName ($roleName)${isDeclined ? " • Can't attend" : ""}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDeclined ? AppTheme.stageRed : null,
+                            fontWeight: isDeclined
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        deleteIcon:
+                            isAdmin ? const Icon(Icons.close, size: 14) : null,
+                        onDeleted: isAdmin
+                            ? () {
+                                ref
+                                    .read(serviceCalendarProvider.notifier)
+                                    .removeMemberAssignment(
+                                      eventId: event.id,
+                                      memberId: assignment.memberId,
+                                    );
+                              }
+                            : null,
+                        onPressed: () => _showAssignmentActionsModal(
+                          event: event,
+                          assignment: assignment,
+                          member: member,
+                          isAdmin: isAdmin,
+                        ),
+                      );
+                    }(),
+                    if (assignment.status == AssignmentStatus.declined &&
+                        isAdmin)
+                      ActionChip(
+                        key: ValueKey(
+                          'replace_btn_${event.id}_${assignment.memberId}',
+                        ),
+                        avatar: const Icon(
+                          Icons.swap_horiz,
+                          size: 14,
+                          color: AppTheme.amberAccent,
+                        ),
+                        label: Text(
+                          'Replace ${(memberMap[assignment.memberId]?.name ?? "Musician").split(" ").first}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.amberAccent,
+                          ),
+                        ),
+                        onPressed: () => _showReplaceMemberDialog(
+                          event: event,
+                          assignment: assignment,
+                        ),
+                      ),
+                  ],
+                ],
               ),
           ],
         ),

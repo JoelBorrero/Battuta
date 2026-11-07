@@ -2,6 +2,7 @@ import 'package:battuta/features/repertoire/data/repositories/in_memory_song_rep
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -92,5 +93,40 @@ void main() {
       expect(find.text('Repertoire'), findsOneWidget);
       expect(find.text('Amazing Grace'), findsOneWidget);
     });
+
+    testWidgets('renders song creation FAB for admin user', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.text('New Song'), findsOneWidget);
+    });
+
+    testWidgets(
+      'hides song creation FAB and shows guidance for non-admin user',
+      (tester) async {
+        repository = InMemorySongRepository(initialSongs: []);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              songRepositoryProvider.overrideWithValue(repository),
+              currentMemberIdProvider.overrideWith(
+                () => CurrentMemberIdNotifier('member-2'),
+              ),
+            ],
+            child: const MaterialApp(home: RepertoirePage()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // No FAB for non-admin user
+        expect(find.byType(FloatingActionButton), findsNothing);
+        expect(
+          find.textContaining('Contact an administrator to add songs'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

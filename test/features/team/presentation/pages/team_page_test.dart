@@ -443,5 +443,138 @@ void main() {
         await tester.pumpAndSettle();
       },
     );
+
+    testWidgets(
+      'shows admin badge on Sarah Jenkins and allows adding an Admin member',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Admin badge should be visible for Sarah Jenkins (member-1)
+        expect(
+          find.byKey(const ValueKey('admin_badge_member-1')),
+          findsOneWidget,
+        );
+
+        // Open Add Member dialog
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const ValueKey('member_admin_switch')),
+          findsOneWidget,
+        );
+
+        // Fill form and toggle admin switch on
+        await tester.enterText(
+          find.widgetWithText(TextField, 'Full Name *'),
+          'Pastor Michael',
+        );
+        await tester.tap(find.byKey(const ValueKey('member_admin_switch')));
+        await tester.pumpAndSettle();
+
+        // Tap Add Member
+        await tester.tap(find.widgetWithText(FilledButton, 'Add Member'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Pastor Michael'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'switches active user profile to non-admin and enforces musician view restrictions',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Active profile button should be visible in AppBar
+        expect(
+          find.byKey(const ValueKey('active_user_switcher_btn')),
+          findsOneWidget,
+        );
+
+        // Tap to open profile switcher modal
+        await tester.tap(find.byKey(const ValueKey('active_user_switcher_btn')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Select Active User Profile'), findsOneWidget);
+
+        // Switch to David Chen (member-2, non-admin)
+        await tester.tap(find.byKey(const ValueKey('switch_user_member-2')));
+        await tester.pumpAndSettle();
+
+        // Non-admin mode: FloatingActionButton should be gone
+        expect(find.byType(FloatingActionButton), findsNothing);
+
+        // Switch to Band Calendar tab
+        await tester.tap(find.textContaining('Band Calendar'));
+        await tester.pumpAndSettle();
+
+        // In non-admin mode: "Musician View" badge is shown, and "Auto-Sundays" / "Recurring Schedule" are not shown
+        expect(find.text('Musician View'), findsOneWidget);
+        expect(find.text('Auto-Sundays'), findsNothing);
+        expect(find.text('Recurring Schedule'), findsNothing);
+        expect(find.text('Assign Musician'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'replaces a musician who cannot attend using the replacement dialog',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Switch to Band Calendar tab
+        await tester.tap(find.textContaining('Band Calendar'));
+        await tester.pumpAndSettle();
+
+        // In the first event, tap David Chen's lineup chip to mark him unavailable
+        final davidChip = find.byKey(
+          const ValueKey('lineup_chip_event-next-sunday_member-2'),
+        );
+        expect(davidChip, findsOneWidget);
+        await tester.tap(davidChip);
+        await tester.pumpAndSettle();
+
+        // Tap "Cannot Attend / Mark Unavailable"
+        await tester.tap(find.text('Mark Unavailable / Cannot Attend'));
+        await tester.pumpAndSettle();
+
+        // Now the Replace button should appear for David Chen
+        final replaceBtn = find.byKey(
+          const ValueKey('replace_btn_event-next-sunday_member-2'),
+        );
+        expect(replaceBtn, findsOneWidget);
+
+        // Tap Replace
+        await tester.tap(replaceBtn);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Assign Musician Replacement'), findsOneWidget);
+        expect(find.textContaining('Cannot Attend: David Chen'), findsOneWidget);
+
+        // Confirm replacement
+        await tester.tap(find.byKey(const ValueKey('confirm_replacement_btn')));
+        await tester.pumpAndSettle();
+
+        // David Chen is replaced in lineup
+        expect(
+          find.byKey(const ValueKey('lineup_chip_event-next-sunday_member-2')),
+          findsNothing,
+        );
+      },
+    );
   });
 }

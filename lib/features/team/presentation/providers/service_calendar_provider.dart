@@ -76,6 +76,42 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     ];
   }
 
+  /// Replaces an existing musician assignment with a substitute team member.
+  void replaceMember({
+    required String eventId,
+    required String oldMemberId,
+    required String newMemberId,
+    TeamRole? role,
+    AssignmentStatus status = AssignmentStatus.confirmed,
+  }) {
+    state = [
+      for (final event in state)
+        if (event.id == eventId)
+          event.copyWith(
+            assignments: [
+              ...event.assignments
+                  .where((a) => a.memberId != oldMemberId && a.memberId != newMemberId),
+              ServiceAssignment(
+                memberId: newMemberId,
+                role: role ??
+                    event.assignments
+                        .firstWhere(
+                          (a) => a.memberId == oldMemberId,
+                          orElse: () => const ServiceAssignment(
+                            memberId: '',
+                            role: TeamRole.keys,
+                          ),
+                        )
+                        .role,
+                status: status,
+              ),
+            ],
+          )
+        else
+          event,
+    ];
+  }
+
   /// Cycles a member's attendance/availability status for the next upcoming service.
   void cycleMemberStatusForNextService(String memberId, TeamRole defaultRole) {
     final upcoming = state.where((e) => e.isUpcoming).toList()

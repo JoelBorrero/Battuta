@@ -12,6 +12,7 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -200,6 +201,18 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   }
 
   Future<void> _saveSong() async {
+    final isAdmin = ref.read(isCurrentUserAdminProvider);
+    if (!isAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Administrator permissions required to create or modify songs.',
+          ),
+        ),
+      );
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -359,18 +372,19 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   }
 
   Widget _buildScaffold(ThemeData theme, bool isEditing) {
+    final isAdmin = ref.watch(isCurrentUserAdminProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? 'Edit Song' : 'New Song'),
         actions: [
-          if (isEditing)
+          if (isEditing && isAdmin)
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: 'Delete Song',
               onPressed: _isSaving ? null : _confirmDelete,
             ),
           FilledButton.icon(
-            onPressed: _isSaving ? null : _saveSong,
+            onPressed: (_isSaving || !isAdmin) ? null : _saveSong,
             icon: _isSaving
                 ? const SizedBox(
                     width: 16,
@@ -378,7 +392,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save),
-            label: const Text('Save'),
+            label: Text(isAdmin ? 'Save' : 'View Only'),
           ),
           const SizedBox(width: 8),
         ],
@@ -388,6 +402,35 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
+            if (!isAdmin)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Read-only view: Administrator permissions are required to create or modify repertoire songs.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // ── Primary Metadata ──
             TextFormField(
               key: const Key('song_title_field'),
