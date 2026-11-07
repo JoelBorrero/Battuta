@@ -1,120 +1,588 @@
-/// Battuta — Live session page (placeholder).
+/// Battuta — Live Stage Session & Real-Time Sync Page.
 ///
-/// A coming-soon placeholder for the live-session feature that will
-/// allow band members to connect in real-time, share a synchronized
-/// lead sheet, and coordinate tempo and section cues.
+/// Provides stage synchronization controls for directors and band members:
+/// - Director Mode: Local LAN WebSocket host, LeaderLock section broadcasting, and cue lookahead.
+/// - Follower Mode: Real-time section following, upcoming cue banner, and request queuing.
+/// - Integrated [StageCueBanner] and [DirectorControlBar].
 library;
 
+import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/features/sync/domain/services/live_sync_service.dart';
+import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
+import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Placeholder page for the upcoming live-session feature.
-///
-/// Displays a centered illustration with a brief description of
-/// the feature. This will be replaced with the full implementation
-/// once the real-time collaboration backend is ready.
-class LiveSessionPage extends ConsumerWidget {
-  /// Creates a [LiveSessionPage].
+class LiveSessionPage extends ConsumerStatefulWidget {
   const LiveSessionPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Live Session')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ── Icon ──
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withValues(alpha: 0.4),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.music_note,
-                  size: 56,
-                  color: colorScheme.primary,
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // ── Title ──
-              Text(
-                'Live Session',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // ── Subtitle ──
-              Text(
-                'Coming soon — connect with your band in real-time',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // ── Feature preview chips ──
-              const Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  _FeatureChip(icon: Icons.sync, label: 'Synced lead sheets'),
-                  _FeatureChip(
-                    icon: Icons.people_outline,
-                    label: 'Band connect',
-                  ),
-                  _FeatureChip(
-                    icon: Icons.timer_outlined,
-                    label: 'Tempo control',
-                  ),
-                  _FeatureChip(icon: Icons.queue_music, label: 'Section cues'),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  ConsumerState<LiveSessionPage> createState() => _LiveSessionPageState();
 }
 
-// ---------------------------------------------------------------------------
-// Private helper widgets
-// ---------------------------------------------------------------------------
+class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
+  final _hostController = TextEditingController(text: '127.0.0.1');
+  final _portController = TextEditingController(text: '8080');
+  static const int _currentMeasure = 14;
 
-/// A small chip previewing an upcoming feature.
-class _FeatureChip extends StatelessWidget {
-  const _FeatureChip({required this.icon, required this.label});
+  @override
+  void dispose() {
+    _hostController.dispose();
+    _portController.dispose();
+    super.dispose();
+  }
 
-  final IconData icon;
-  final String label;
+  void _triggerSampleCue() {
+    final notifier = ref.read(liveSyncControllerProvider.notifier);
+    notifier.emitLookaheadCue(
+      songId: 'way-maker',
+      currentSectionId: 'verso-1',
+      nextSectionLabel: 'NEXT: CORO GLORIOSO',
+      currentMeasureIndex: _currentMeasure,
+      lookaheadMeasures: 2,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final syncState = ref.watch(liveSyncControllerProvider);
+    final syncNotifier = ref.read(liveSyncControllerProvider.notifier);
 
-    return Chip(
-      avatar: Icon(icon, size: 16, color: colorScheme.primary),
-      label: Text(label),
-      labelStyle: Theme.of(context).textTheme.labelMedium,
-      side: BorderSide(color: colorScheme.outlineVariant),
-      backgroundColor: colorScheme.surface,
+    const activeSections = [
+      'Intro',
+      'Verso 1',
+      'Coro',
+      'Verso 2',
+      'Puente',
+      'Final',
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Live Stage Sync'),
+        actions: [
+          // Connection Status Pill
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: syncState.isConnected
+                  ? AppTheme.stageGreen.withValues(alpha: 0.2)
+                  : (isDark
+                        ? AppTheme.slateSurfaceLight
+                        : AppTheme.pearlSurfaceLight),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: syncState.isConnected
+                    ? AppTheme.stageGreen
+                    : (isDark ? AppTheme.slateBorder : AppTheme.pearlBorder),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: syncState.isConnected
+                        ? AppTheme.stageGreen
+                        : Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  syncState.isConnected
+                      ? (syncState.isDirector ? 'HOSTING' : 'SYNCED')
+                      : 'STANDALONE',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: syncState.isConnected
+                        ? AppTheme.stageGreen
+                        : (isDark
+                              ? AppTheme.textMuted
+                              : AppTheme.charcoalMuted),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Mode Switcher (Director vs Follower) ──
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppTheme.slateSurface
+                          : AppTheme.pearlSurfaceLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark
+                            ? AppTheme.slateBorder
+                            : AppTheme.pearlBorder,
+                        width: 1,
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () =>
+                                syncNotifier.setSyncMode(LiveSyncMode.director),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: syncState.isDirector
+                                    ? AppTheme.amberAccent
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cell_tower,
+                                    size: 18,
+                                    color: syncState.isDirector
+                                        ? AppTheme.obsidianText
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Director (Host)',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: syncState.isDirector
+                                          ? AppTheme.obsidianText
+                                          : (isDark
+                                                ? AppTheme.textOffWhite
+                                                : AppTheme.charcoalText),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () =>
+                                syncNotifier.setSyncMode(LiveSyncMode.follower),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: !syncState.isDirector
+                                    ? AppTheme.amberAccent
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.group,
+                                    size: 18,
+                                    color: !syncState.isDirector
+                                        ? AppTheme.obsidianText
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Musician (Follower)',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: !syncState.isDirector
+                                          ? AppTheme.obsidianText
+                                          : (isDark
+                                                ? AppTheme.textOffWhite
+                                                : AppTheme.charcoalText),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ── Live Stage Cue Banner (If Active Cue Present) ──
+                  if (syncState.activeCue != null) ...[
+                    StageCueBanner(
+                      cue: syncState.activeCue!,
+                      currentMeasure: _currentMeasure,
+                      onDismiss: syncNotifier.dismissCue,
+                      onJumpNow: () {
+                        final label = syncState.activeCue!.nextSectionLabel;
+                        syncNotifier.jumpNowSection(label);
+                        syncNotifier.dismissCue();
+                      },
+                      isDirector: syncState.isDirector,
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+
+                  // ── Current Live Stage Section Prompter ──
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppTheme.slateSurface
+                          : AppTheme.pureWhiteSurface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark
+                            ? AppTheme.slateBorder
+                            : AppTheme.pearlBorder,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ON STAGE NOW',
+                          style: TextStyle(
+                            fontSize: 11,
+                            letterSpacing: 1.2,
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? AppTheme.textMuted
+                                : AppTheme.charcoalMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Container(
+                              width: 12,
+                              height: 12,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.amberAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                syncState.activeSectionId ?? 'INTRO / PRE-ROLL',
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                  color: AppTheme.amberAccent,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Text(
+                              'Queued Next:',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? AppTheme.textMuted
+                                    : AppTheme.charcoalMuted,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.amberMuted,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                syncState.queuedSectionLabel ??
+                                    'None (Waiting for cue)',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.amberAccent,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ── Network Setup & Connection Card ──
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppTheme.slateSurface
+                          : AppTheme.pureWhiteSurface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark
+                            ? AppTheme.slateBorder
+                            : AppTheme.pearlBorder,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          syncState.isDirector
+                              ? 'LOCAL LAN DIRECTOR SERVER'
+                              : 'CONNECT TO DIRECTOR DEVICE',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.8,
+                            color: isDark
+                                ? AppTheme.textMuted
+                                : AppTheme.charcoalMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (syncState.isDirector) ...[
+                          Text(
+                            syncState.isConnected
+                                ? 'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.'
+                                : 'Start a zero-configuration local WebSocket server so all band members follow your live cues.',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                          const SizedBox(height: 14),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: syncState.isConnected
+                                      ? AppTheme.stageRed
+                                      : AppTheme.amberAccent,
+                                  foregroundColor: syncState.isConnected
+                                      ? Colors.white
+                                      : AppTheme.obsidianText,
+                                  minimumSize: const Size(44, 44),
+                                ),
+                                icon: Icon(
+                                  syncState.isConnected
+                                      ? Icons.stop
+                                      : Icons.play_arrow,
+                                ),
+                                label: Text(
+                                  syncState.isConnected
+                                      ? 'Stop Host Server'
+                                      : 'Start LAN Host',
+                                ),
+                                onPressed: () async {
+                                  if (syncState.isConnected) {
+                                    await syncNotifier.disconnect();
+                                  } else {
+                                    await syncNotifier.startDirectorServer(
+                                      port: 0,
+                                    );
+                                  }
+                                },
+                              ),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(44, 44),
+                                ),
+                                icon: const Icon(
+                                  Icons.notifications_active_outlined,
+                                ),
+                                label: const Text('Trigger Test Cue'),
+                                onPressed: _triggerSampleCue,
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextField(
+                                  controller: _hostController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Director Host IP',
+                                    hintText: '192.168.1.X',
+                                    border: OutlineInputBorder(),
+                                    isDense: true,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextField(
+                                  controller: _portController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Port',
+                                    hintText: '8080',
+                                    border: OutlineInputBorder(),
+                                    isDense: true,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: syncState.isConnected
+                                  ? AppTheme.stageRed
+                                  : AppTheme.amberAccent,
+                              foregroundColor: syncState.isConnected
+                                  ? Colors.white
+                                  : AppTheme.obsidianText,
+                              minimumSize: const Size(44, 44),
+                            ),
+                            icon: Icon(
+                              syncState.isConnected
+                                  ? Icons.link_off
+                                  : Icons.link,
+                            ),
+                            label: Text(
+                              syncState.isConnected
+                                  ? 'Disconnect'
+                                  : 'Connect as Follower',
+                            ),
+                            onPressed: () async {
+                              if (syncState.isConnected) {
+                                await syncNotifier.disconnect();
+                              } else {
+                                final host = _hostController.text.trim();
+                                final port =
+                                    int.tryParse(_portController.text.trim()) ??
+                                    8080;
+                                try {
+                                  await syncNotifier.connect(host, port);
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Connection failed: $e'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  // ── Pending Follower Override Requests (LeaderLock) ──
+                  if (syncState.isDirector &&
+                      syncState.pendingRequests.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppTheme.slateSurface
+                            : AppTheme.pureWhiteSurface,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppTheme.amberAccent,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.shield,
+                                color: AppTheme.amberAccent,
+                                size: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'LeaderLock: Musician Transition Requests',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          for (final req in syncState.pendingRequests)
+                            ListTile(
+                              dense: true,
+                              title: Text('Request: ${req.currentSectionId}'),
+                              subtitle: const Text(
+                                'Follower requested section change',
+                              ),
+                              trailing: FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppTheme.amberAccent,
+                                  foregroundColor: AppTheme.obsidianText,
+                                ),
+                                onPressed: () {
+                                  syncNotifier.jumpNowSection(
+                                    req.currentSectionId,
+                                  );
+                                },
+                                child: const Text('Approve Jump'),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // ── Pinned Stage Director Control Bar ──
+          DirectorControlBar(
+            sections: activeSections,
+            activeSectionId: syncState.activeSectionId,
+            onQueueSection: (section) {
+              syncNotifier.queueNextSection(section);
+            },
+            onJumpSection: (section) {
+              syncNotifier.jumpNowSection(section);
+            },
+            onClearQueue: () {
+              syncNotifier.queueNextSection('');
+            },
+          ),
+        ],
+      ),
     );
   }
 }

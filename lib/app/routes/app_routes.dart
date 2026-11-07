@@ -55,6 +55,16 @@ final class AppRoutes {
   /// Returns the concrete path for editing a specific song.
   static String songEditor(String songId) => '/repertoire/$songId/edit';
 
+  // ── Setlist sub-routes ────────────────────────────────────────────────
+  /// Setlist detail & song sequencing view.
+  ///
+  /// Path parameter: `setlistId`.
+  static const String setlistDetailPath = '/repertoire/setlists/:setlistId';
+
+  /// Returns the concrete path for a specific setlist detail.
+  static String setlistDetail(String setlistId) =>
+      '/repertoire/setlists/$setlistId';
+
   // ── Scanner (OMR camera capture) ──────────────────────────────────────
 
   /// Camera-based Optical Music Recognition screen.

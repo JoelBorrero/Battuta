@@ -5,6 +5,8 @@
 /// and provides floating action buttons to create new songs or setlists.
 library;
 
+import 'package:battuta/app/routes/app_routes.dart';
+import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
@@ -88,6 +90,40 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               }
             },
             child: const Text('Create Setlist'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteSetlist(BuildContext context, Setlist setlist) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Setlist?'),
+        content: Text(
+          'Are you sure you want to delete "${setlist.title}"? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.stageRed),
+            onPressed: () async {
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              Navigator.of(ctx).pop();
+              await ref
+                  .read(setlistsProvider.notifier)
+                  .deleteSetlist(setlist.id);
+              if (mounted) {
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text('Deleted setlist "${setlist.title}"')),
+                );
+              }
+            },
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -228,15 +264,29 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    runSpacing: 10,
                     children: [
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.amberAccent,
+                          foregroundColor: AppTheme.obsidianText,
+                        ),
+                        icon: const Icon(Icons.auto_awesome),
+                        label: const Text('Load Sample Songs'),
+                        onPressed: () async {
+                          await ref
+                              .read(repertoireProvider.notifier)
+                              .seedSampleData();
+                        },
+                      ),
                       FilledButton.icon(
                         icon: const Icon(Icons.add),
                         label: const Text('Add Song'),
                         onPressed: () => context.push('/repertoire/new'),
                       ),
-                      const SizedBox(width: 12),
                       OutlinedButton.icon(
                         icon: const Icon(Icons.document_scanner_outlined),
                         label: const Text('Scan Score'),
@@ -291,10 +341,30 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  FilledButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Create Setlist'),
-                    onPressed: _showCreateSetlistDialog,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: [
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.amberAccent,
+                          foregroundColor: AppTheme.obsidianText,
+                        ),
+                        icon: const Icon(Icons.auto_awesome),
+                        label: const Text('Load Sample Setlist'),
+                        onPressed: () async {
+                          await ref
+                              .read(repertoireProvider.notifier)
+                              .seedSampleData();
+                        },
+                      ),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.add),
+                        label: const Text('Create Setlist'),
+                        onPressed: _showCreateSetlistDialog,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -308,15 +378,21 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           separatorBuilder: (_, _) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final setlist = setlists[index];
+            final isDark = theme.brightness == Brightness.dark;
+
             return Card(
-              elevation: 1,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isDark ? AppTheme.slateBorder : AppTheme.pearlBorder,
+                  width: 1,
+                ),
+              ),
               child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Icon(
-                    Icons.playlist_play,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
+                leading: const CircleAvatar(
+                  backgroundColor: AppTheme.amberMuted,
+                  child: Icon(Icons.playlist_play, color: AppTheme.amberAccent),
                 ),
                 title: Text(
                   setlist.title,
@@ -328,21 +404,15 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 20),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: AppTheme.stageRed,
+                  ),
                   tooltip: 'Delete setlist',
-                  onPressed: () async {
-                    await ref
-                        .read(setlistsProvider.notifier)
-                        .deleteSetlist(setlist.id);
-                  },
+                  onPressed: () => _confirmDeleteSetlist(context, setlist),
                 ),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Opening setlist: ${setlist.title}'),
-                    ),
-                  );
-                },
+                onTap: () => context.push(AppRoutes.setlistDetail(setlist.id)),
               ),
             );
           },

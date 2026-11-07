@@ -7,6 +7,7 @@
 library;
 
 import 'package:battuta/core/database/database_providers.dart';
+import 'package:battuta/features/repertoire/data/seed/repertoire_seeder.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
@@ -44,7 +45,28 @@ class SetlistsNotifier extends AsyncNotifier<List<Setlist>> {
     final res = await repo.deleteSetlist(id);
     res.fold((failure) => throw failure, (_) => ref.invalidateSelf());
   }
+
+  Future<void> updateSetlist(Setlist setlist) async {
+    final repo = ref.read(setlistRepositoryProvider);
+    final res = await repo.saveSetlist(setlist);
+    res.fold((failure) => throw failure, (_) => ref.invalidateSelf());
+  }
 }
+
+/// Provides a single [Setlist] by its [id].
+final setlistByIdProvider = FutureProvider.family<Setlist?, String>((
+  ref,
+  id,
+) async {
+  final setlists = ref.watch(setlistsProvider).value;
+  if (setlists != null) {
+    final cached = setlists.where((s) => s.id == id).firstOrNull;
+    if (cached != null) return cached;
+  }
+  final repository = ref.watch(setlistRepositoryProvider);
+  final result = await repository.getSetlistById(id);
+  return result.fold((failure) => throw failure, (setlist) => setlist);
+});
 
 /// Provides a single [Song] by its [id].
 final songByIdProvider = FutureProvider.family<Song?, String>((ref, id) async {
@@ -173,5 +195,17 @@ class Repertoire extends _$Repertoire {
       (failure) => AsyncError(failure, StackTrace.current),
       AsyncData.new,
     );
+  }
+
+  /// Seeds sample songs and default setlists into the SQLite database.
+  Future<void> seedSampleData() async {
+    final songRepo = ref.read(songRepositoryProvider);
+    final setlistRepo = ref.read(setlistRepositoryProvider);
+    await RepertoireSeeder.seedIfEmpty(
+      songRepo: songRepo,
+      setlistRepo: setlistRepo,
+    );
+    ref.invalidateSelf();
+    ref.invalidate(setlistsProvider);
   }
 }
