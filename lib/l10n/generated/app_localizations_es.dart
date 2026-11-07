@@ -147,4 +147,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get findCover => 'Buscar Reemplazo';
+
+  @override
+  String get workspaceResourcesSection => 'Recursos y Cuota del Espacio';
+
+  @override
+  String get activeWorkspacePool => 'RECURSOS DEL ESPACIO ACTIVO';
+
+  @override
+  String get geminiAiCredits => 'Créditos Gemini AI';
+
+  @override
+  String get cloudStorage => 'Almacenamiento en la Nube';
+
+  @override
+  String get developerOptions => 'Opciones de Desarrollador';
+
+  @override
+  String get developerOptionsSubtitle =>
+      'Configurar URL personalizada de Supabase y claves de IA';
 }

@@ -70,13 +70,19 @@ class DefaultGeminiOmrClient implements GeminiOmrClient {
 /// Concrete [OmrRepository] powered by Google Gemini multimodal models.
 class GeminiOmrRepository implements OmrRepository {
   /// Creates a [GeminiOmrRepository].
-  GeminiOmrRepository({required this.apiKeyService, GeminiOmrClient? client})
-    : _client = client ?? const DefaultGeminiOmrClient();
+  GeminiOmrRepository({
+    required this.apiKeyService,
+    GeminiOmrClient? client,
+    this.onUsageRecorded,
+  }) : _client = client ?? const DefaultGeminiOmrClient();
 
   /// Service managing active API keys.
   final ApiKeyService apiKeyService;
 
   final GeminiOmrClient _client;
+
+  /// Optional telemetry hook called with total tokens consumed upon successful extraction.
+  final void Function(int tokens)? onUsageRecorded;
 
   /// Default multimodal Gemini model for lead sheet recognition.
   static const String defaultModel = 'gemini-3.8-flash';
@@ -123,6 +129,7 @@ class GeminiOmrRepository implements OmrRepository {
       }
 
       final score = FullSheetMapper.mapToScore(decoded);
+      onUsageRecorded?.call(1500);
       return Right(score);
     } on FormatException catch (e, st) {
       return Left(
@@ -187,6 +194,7 @@ class GeminiOmrRepository implements OmrRepository {
         decoded,
         timeSignature: timeSignature,
       );
+      onUsageRecorded?.call(600);
       return Right(result);
     } on FormatException catch (e, st) {
       return Left(

@@ -189,5 +189,29 @@
   "findCover": "Find Cover",
   "@findCover": {
     "description": "Action button to find substitute musician"
+  },
+  "workspaceResourcesSection": "Workspace Resources & Quota",
+  "@workspaceResourcesSection": {
+    "description": "Section title for workspace resource consumption"
+  },
+  "activeWorkspacePool": "ACTIVE WORKSPACE POOL",
+  "@activeWorkspacePool": {
+    "description": "Label for active workspace pool"
+  },
+  "geminiAiCredits": "Gemini AI Credits",
+  "@geminiAiCredits": {
+    "description": "Title for Gemini AI credits gauge"
+  },
+  "cloudStorage": "Cloud Storage",
+  "@cloudStorage": {
+    "description": "Title for Cloud storage gauge"
+  },
+  "developerOptions": "Developer & Custom Endpoints",
+  "@developerOptions": {
+    "description": "Title for advanced developer options"
+  },
+  "developerOptionsSubtitle": "Configure custom Supabase URL and local AI keys",
+  "@developerOptionsSubtitle": {
+    "description": "Subtitle for developer options"
   }
 }

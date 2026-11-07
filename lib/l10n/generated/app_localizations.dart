@@ -373,6 +373,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Find Cover'**
   String get findCover;
+
+  /// Section title for workspace resource consumption
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace Resources & Quota'**
+  String get workspaceResourcesSection;
+
+  /// Label for active workspace pool
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVE WORKSPACE POOL'**
+  String get activeWorkspacePool;
+
+  /// Title for Gemini AI credits gauge
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini AI Credits'**
+  String get geminiAiCredits;
+
+  /// Title for Cloud storage gauge
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Storage'**
+  String get cloudStorage;
+
+  /// Title for advanced developer options
+  ///
+  /// In en, this message translates to:
+  /// **'Developer & Custom Endpoints'**
+  String get developerOptions;
+
+  /// Subtitle for developer options
+  ///
+  /// In en, this message translates to:
+  /// **'Configure custom Supabase URL and local AI keys'**
+  String get developerOptionsSubtitle;
 }
 
 class _AppLocalizationsDelegate

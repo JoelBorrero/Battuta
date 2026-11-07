@@ -51,5 +51,11 @@
   "recurringSchedules": "Horarios Recurrentes",
   "periodicServicesTitle": "Servicios Periódicos y Próximos",
   "nextService": "PRÓXIMO SERVICIO",
-  "findCover": "Buscar Reemplazo"
+  "findCover": "Buscar Reemplazo",
+  "workspaceResourcesSection": "Recursos y Cuota del Espacio",
+  "activeWorkspacePool": "RECURSOS DEL ESPACIO ACTIVO",
+  "geminiAiCredits": "Créditos Gemini AI",
+  "cloudStorage": "Almacenamiento en la Nube",
+  "developerOptions": "Opciones de Desarrollador",
+  "developerOptionsSubtitle": "Configurar URL personalizada de Supabase y claves de IA"
 }

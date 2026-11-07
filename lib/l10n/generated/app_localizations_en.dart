@@ -146,4 +146,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get findCover => 'Find Cover';
+
+  @override
+  String get workspaceResourcesSection => 'Workspace Resources & Quota';
+
+  @override
+  String get activeWorkspacePool => 'ACTIVE WORKSPACE POOL';
+
+  @override
+  String get geminiAiCredits => 'Gemini AI Credits';
+
+  @override
+  String get cloudStorage => 'Cloud Storage';
+
+  @override
+  String get developerOptions => 'Developer & Custom Endpoints';
+
+  @override
+  String get developerOptionsSubtitle =>
+      'Configure custom Supabase URL and local AI keys';
 }

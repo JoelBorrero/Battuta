@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/app/localization/locale_provider.dart';
+import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
@@ -12,6 +13,7 @@ import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.da
 import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
 import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
+import 'package:battuta/features/workspace/presentation/providers/workspace_usage_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -189,9 +191,171 @@ class SettingsPage extends ConsumerWidget {
 
           const Divider(),
 
+          // ── Workspace Resources & Quota ──
+          _SectionHeader(
+            title: l10n?.workspaceResourcesSection ?? 'Workspace Resources & Quota',
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Card(
+              key: const ValueKey('workspace_usage_card'),
+              elevation: 0,
+              color: const Color(0xFF1E2024),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFF2E323B)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ref.watch(workspaceUsageProvider).when(
+                  data: (usage) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l10n?.activeWorkspacePool ?? 'ACTIVE WORKSPACE POOL',
+                              style: const TextStyle(
+                                color: Color(0xFF8A8F98),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.1,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppTheme.stageAmber.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '${usage.workspaceName} • ${usage.tier}',
+                                style: const TextStyle(
+                                  color: AppTheme.stageAmber,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Gemini AI Credits
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                const Icon(Icons.auto_awesome, size: 16, color: AppTheme.stageAmber),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    l10n?.geminiAiCredits ?? 'Gemini AI Credits',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            usage.formattedCredits,
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: usage.creditsRatio,
+                          backgroundColor: const Color(0xFF2E323B),
+                          valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.stageAmber),
+                          minHeight: 6,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${usage.geminiScansCount} full lead-sheet scans this billing period',
+                        style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 11),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Cloud Storage
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                const Icon(Icons.cloud_outlined, size: 16, color: Colors.blueAccent),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    l10n?.cloudStorage ?? 'Cloud Storage',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            usage.formattedStorage,
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: usage.storageRatio,
+                          backgroundColor: const Color(0xFF2E323B),
+                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                          minHeight: 6,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${usage.filesUploadedCount} scores and audio tracks stored',
+                        style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 11),
+                      ),
+                    ],
+                  ),
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                  error: (error, stack) => const Text('Workspace metrics unavailable'),
+                ),
+              ),
+            ),
+          ),
+
+          const Divider(),
+
           // ── API Configuration ──
-          const _SectionHeader(title: 'API Configuration'),
+          const _SectionHeader(
+            title: 'API Configuration',
+          ),
           ListTile(
+            key: const ValueKey('gemini_api_key_tile'),
             leading: const Icon(Icons.key),
             title: const Text('Gemini API Key'),
             subtitle: Text(
