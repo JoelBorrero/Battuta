@@ -7,7 +7,7 @@
 
 ---
 
-## [ ] TASK-101: v1.1 Local LAN WebSocket LiveSync Implementation & Conflict Resolution
+## [x] TASK-101: v1.1 Local LAN WebSocket LiveSync Implementation & Conflict Resolution
 - **Epic**: Epic 1 — Live Stage Synchronization (v1.1)
 - **Architectural Decision Locked**: Implement Option B + Hybrid foundation using pure `dart:io` (`HttpServer` + `WebSocketTransformer` for Director host, `WebSocket.connect` for Band Member followers) on top of the existing `lib/features/sync/domain/services/live_sync_service.dart` contract.
 - **Scope**:
