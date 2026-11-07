@@ -24,3 +24,15 @@
   - `lib/features/sync/presentation/widgets/stage_cue_banner.dart`: Stage-ready Anti-Material cue banner and Director Control Bar with 1.5px `#E5A93C` amber borders, zero elevation, `>=44x44pt` touch targets, and flexible rows preventing `RenderFlex` overflow down to 320pt widths.
   - `test/features/sync/presentation/stage_cue_banner_test.dart`: Widget tests verifying Dark (`#121316`) and Light (`#F8F9FA`) themes, 320x600 responsive constraints, touch target dimensions, and callback interactions.
 - **Architectural Notes**: Complies fully with Apple/stage Anti-Material invariants, responsive constraint wrapping, and Riverpod 2 notifier pattern.
+
+### ✅ TASK-103: v1.2 A/B Practice Loop Engine & Local Stem Storage Manager
+- **Status**: Complete & Verified
+- **Tests**: 293 / 293 passing (+6 new tests)
+- **Static Analysis**: 0 issues
+- **Files Created/Modified**:
+  - `lib/features/audio/domain/models/ab_loop_region.dart`: Immutable model with sub-millisecond precision, minimum loop duration guard (>=100ms), and zero-crossing crossfade window calculations.
+  - `lib/features/audio/data/local_stem_storage_service.dart`: Offline multi-track backing stem storage (Click, Guide, Keys, Bass, Drums) with injectable directory resolver for deterministic testing.
+  - `lib/features/audio/presentation/providers/audio_practice_controller.dart`: State & Notifier extended with `loopPointA`, `loopPointB`, `isAbLoopActive`, `setLoopPointA()`, `setLoopPointB()`, `clearAbLoop()`, and boundary looping playback.
+  - `lib/features/audio/presentation/widgets/practice_player_bar.dart`: Responsive `Wrap` controls for Set A, Set B, and Clear Loop with `#E5A93C` amber active state and Anti-Material 0-elevation design.
+  - `test/features/audio/ab_loop_and_stems_test.dart`: Comprehensive unit and widget tests covering boundary guards, click-free fades, multi-track stem file management, and interactive A/B loop toggling.
+- **Architectural Notes**: Pure Dart implementation without external C++ FFI plugins, preserving test suite determinism.

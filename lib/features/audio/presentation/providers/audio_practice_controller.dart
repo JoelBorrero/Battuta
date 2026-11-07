@@ -22,6 +22,8 @@ class AudioPracticeState {
     this.metronomeEnabled = false,
     this.activeLoopSection,
     this.audioSourceTitle,
+    this.loopPointA,
+    this.loopPointB,
   });
 
   final bool isPlaying;
@@ -32,6 +34,10 @@ class AudioPracticeState {
   final bool metronomeEnabled;
   final String? activeLoopSection;
   final String? audioSourceTitle;
+  final Duration? loopPointA;
+  final Duration? loopPointB;
+
+  bool get isAbLoopActive => loopPointA != null && loopPointB != null;
 
   AudioPracticeState copyWith({
     bool? isPlaying,
@@ -42,7 +48,10 @@ class AudioPracticeState {
     bool? metronomeEnabled,
     String? activeLoopSection,
     String? audioSourceTitle,
+    Duration? loopPointA,
+    Duration? loopPointB,
     bool clearLoop = false,
+    bool clearAbLoop = false,
   }) {
     return AudioPracticeState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -55,6 +64,8 @@ class AudioPracticeState {
           ? null
           : (activeLoopSection ?? this.activeLoopSection),
       audioSourceTitle: audioSourceTitle ?? this.audioSourceTitle,
+      loopPointA: clearAbLoop ? null : (loopPointA ?? this.loopPointA),
+      loopPointB: clearAbLoop ? null : (loopPointB ?? this.loopPointB),
     );
   }
 }
@@ -88,6 +99,12 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
 
       final deltaMs = (250 * state.speed).round();
       var nextPos = state.position + Duration(milliseconds: deltaMs);
+
+      // A/B loop check
+      if (state.isAbLoopActive && nextPos >= state.loopPointB!) {
+        state = state.copyWith(position: state.loopPointA!);
+        return;
+      }
 
       if (nextPos >= state.duration) {
         nextPos = Duration.zero;
@@ -141,5 +158,33 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
 
   void attachAudioSource(String sourceName) {
     state = state.copyWith(audioSourceTitle: sourceName);
+  }
+
+  void setLoopPointA([Duration? position]) {
+    final pos = position ?? state.position;
+    if (state.loopPointB != null && pos >= state.loopPointB!) {
+      state = state.copyWith(loopPointA: pos, clearAbLoop: true);
+      state = state.copyWith(loopPointA: pos);
+    } else {
+      state = state.copyWith(loopPointA: pos);
+    }
+  }
+
+  void setLoopPointB([Duration? position]) {
+    final pos = position ?? state.position;
+    final pointA = state.loopPointA ?? Duration.zero;
+    if (pos > pointA) {
+      state = state.copyWith(loopPointA: pointA, loopPointB: pos);
+    } else {
+      // If position is before A, set B as A + 1 sec
+      state = state.copyWith(
+        loopPointA: pointA,
+        loopPointB: pointA + const Duration(seconds: 1),
+      );
+    }
+  }
+
+  void clearAbLoop() {
+    state = state.copyWith(clearAbLoop: true);
   }
 }

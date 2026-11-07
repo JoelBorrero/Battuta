@@ -5,6 +5,7 @@
 /// and tempo-synchronized visual metronome.
 library;
 
+import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:flutter/material.dart';
@@ -79,10 +80,18 @@ class PracticePlayerBar extends ConsumerWidget {
         ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Card(
-      elevation: 3,
+      elevation: 0,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? AppTheme.slateBorder : AppTheme.pearlBorder,
+          width: 1,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         child: Column(
@@ -358,6 +367,135 @@ class PracticePlayerBar extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // ── A/B Practice Loop Region Controls ──
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                // Loop Point A
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('ab_loop_point_a_button'),
+                    onPressed: () => notifier.setLoopPointA(),
+                    icon: const Icon(Icons.pin_drop, size: 14),
+                    label: Text(
+                      audioState.loopPointA != null
+                          ? 'A: ${_formatDuration(audioState.loopPointA!)}'
+                          : 'Set A',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: audioState.loopPointA != null
+                          ? AppTheme.amberAccent
+                          : Colors.transparent,
+                      foregroundColor: audioState.loopPointA != null
+                          ? AppTheme.obsidianText
+                          : theme.colorScheme.onSurface,
+                      side: BorderSide(
+                        color: audioState.loopPointA != null
+                            ? AppTheme.amberAccent
+                            : theme.colorScheme.outline.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      minimumSize: const Size(44, 44),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Loop Point B
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('ab_loop_point_b_button'),
+                    onPressed: () => notifier.setLoopPointB(),
+                    icon: const Icon(Icons.flag, size: 14),
+                    label: Text(
+                      audioState.loopPointB != null
+                          ? 'B: ${_formatDuration(audioState.loopPointB!)}'
+                          : 'Set B',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: audioState.loopPointB != null
+                          ? AppTheme.amberAccent
+                          : Colors.transparent,
+                      foregroundColor: audioState.loopPointB != null
+                          ? AppTheme.obsidianText
+                          : theme.colorScheme.onSurface,
+                      side: BorderSide(
+                        color: audioState.loopPointB != null
+                            ? AppTheme.amberAccent
+                            : theme.colorScheme.outline.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      minimumSize: const Size(44, 44),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Clear A/B Loop
+                if (audioState.loopPointA != null ||
+                    audioState.loopPointB != null)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
+                    child: TextButton.icon(
+                      key: const ValueKey('ab_loop_clear_button'),
+                      onPressed: notifier.clearAbLoop,
+                      icon: const Icon(Icons.clear, size: 14),
+                      label: const Text(
+                        'Clear Loop',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.stageRed,
+                        minimumSize: const Size(44, 44),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),

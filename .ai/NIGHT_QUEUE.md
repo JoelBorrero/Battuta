@@ -30,7 +30,7 @@
 
 ---
 
-## [ ] TASK-103: v1.2 A/B Practice Loop Engine & Local Stem Storage Manager
+## [x] TASK-103: v1.2 A/B Practice Loop Engine & Local Stem Storage Manager
 - **Epic**: Epic 2 — Audio Engine & Stem Playback (v1.2)
 - **Architectural Decision Locked**: Implement concrete domain/data controllers for `PitchShiftedAudioPlayer` (`lib/features/audio/`) and local file storage metadata without adding fragile C++ FFI dependencies overnight.
 - **Scope**:
