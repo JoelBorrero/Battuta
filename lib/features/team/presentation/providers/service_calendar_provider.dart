@@ -1,11 +1,15 @@
 /// Battuta — Service Calendar & Band Schedule Provider.
 ///
 /// Manages upcoming services, band rehearsals, periodic weekly events,
-/// and musician lineup assignments.
+/// and musician lineup assignments. Integrates single recurring schedule rules
+/// to dynamically project an X-count rolling window of upcoming events while
+/// respecting cutoff dates when recurring generation is disabled.
 library;
 
+import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
+import 'package:battuta/features/team/presentation/providers/recurring_schedules_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final serviceCalendarProvider =
@@ -14,27 +18,50 @@ final serviceCalendarProvider =
     );
 
 class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
+  List<ServiceEvent>? _customEvents;
+
   @override
   List<ServiceEvent> build() {
-    return _initialSampleEvents();
+    final schedules = ref.watch(recurringSchedulesProvider);
+    _customEvents ??= _initialSampleEvents();
+    return _computeProjectedEvents(_customEvents!, schedules);
+  }
+
+  void _syncState() {
+    final schedules = ref.read(recurringSchedulesProvider);
+    state = _computeProjectedEvents(_customEvents ?? [], schedules);
   }
 
   /// Adds a new calendar service or rehearsal event.
   void addEvent(ServiceEvent event) {
-    state = [...state, event]..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    _customEvents = [...?_customEvents, event];
+    _syncState();
   }
 
   /// Updates an existing service event.
   void updateEvent(ServiceEvent updated) {
-    state = [
-      for (final e in state)
+    _customEvents = [
+      for (final e in _customEvents ?? [])
         if (e.id == updated.id) updated else e,
-    ]..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    ];
+    _syncState();
   }
 
   /// Deletes a service event by id.
   void deleteEvent(String id) {
-    state = state.where((e) => e.id != id).toList();
+    _customEvents = (_customEvents ?? []).where((e) => e.id != id).toList();
+    _syncState();
+  }
+
+  /// Ensures an event exists in `_customEvents` before mutating its assignments.
+  void _materializeEventIfNeeded(String eventId) {
+    final exists = (_customEvents ?? []).any((e) => e.id == eventId);
+    if (!exists) {
+      final projected = state.where((e) => e.id == eventId).firstOrNull;
+      if (projected != null) {
+        _customEvents = [...?_customEvents, projected];
+      }
+    }
   }
 
   /// Assigns or updates a team member's role and status for a service.
@@ -44,11 +71,12 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     required TeamRole role,
     AssignmentStatus status = AssignmentStatus.confirmed,
   }) {
-    state = [
-      for (final event in state)
+    _materializeEventIfNeeded(eventId);
+    _customEvents = [
+      for (final event in _customEvents ?? [])
         if (event.id == eventId)
           event.copyWith(
-            assignments: [
+            assignments: <ServiceAssignment>[
               ...event.assignments.where((a) => a.memberId != memberId),
               ServiceAssignment(memberId: memberId, role: role, status: status),
             ],
@@ -56,6 +84,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         else
           event,
     ];
+    _syncState();
   }
 
   /// Removes a team member assignment from a service.
@@ -63,8 +92,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     required String eventId,
     required String memberId,
   }) {
-    state = [
-      for (final event in state)
+    _materializeEventIfNeeded(eventId);
+    _customEvents = [
+      for (final event in _customEvents ?? [])
         if (event.id == eventId)
           event.copyWith(
             assignments: event.assignments
@@ -74,6 +104,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         else
           event,
     ];
+    _syncState();
   }
 
   /// Replaces an existing musician assignment with a substitute team member.
@@ -84,11 +115,12 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     TeamRole? role,
     AssignmentStatus status = AssignmentStatus.confirmed,
   }) {
-    state = [
-      for (final event in state)
+    _materializeEventIfNeeded(eventId);
+    _customEvents = [
+      for (final event in _customEvents ?? [])
         if (event.id == eventId)
           event.copyWith(
-            assignments: [
+            assignments: <ServiceAssignment>[
               ...event.assignments
                   .where((a) => a.memberId != oldMemberId && a.memberId != newMemberId),
               ServiceAssignment(
@@ -110,6 +142,36 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         else
           event,
     ];
+    _syncState();
+  }
+
+  /// Assigns all members of a group to a service event, marking unavailable members as declined.
+  void assignGroup({
+    required String eventId,
+    required List<TeamMember> groupMembers,
+  }) {
+    _materializeEventIfNeeded(eventId);
+    _customEvents = [
+      for (final event in _customEvents ?? [])
+        if (event.id == eventId)
+          event.copyWith(
+            assignments: <ServiceAssignment>[
+              ...event.assignments,
+              for (final member in groupMembers)
+                if (!event.assignments.any((a) => a.memberId == member.id))
+                  ServiceAssignment(
+                    memberId: member.id,
+                    role: member.role,
+                    status: member.availability == AvailabilityStatus.unavailable
+                        ? AssignmentStatus.declined
+                        : AssignmentStatus.confirmed,
+                  ),
+            ],
+          )
+        else
+          event,
+    ];
+    _syncState();
   }
 
   /// Cycles a member's attendance/availability status for the next upcoming service.
@@ -120,12 +182,13 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     if (upcoming.isEmpty) return;
 
     final nextEvent = upcoming.first;
+    _materializeEventIfNeeded(nextEvent.id);
+
     final existingIndex = nextEvent.assignments.indexWhere(
       (a) => a.memberId == memberId,
     );
 
     if (existingIndex < 0) {
-      // Member not currently scheduled for next event -> schedule them!
       assignMember(
         eventId: nextEvent.id,
         memberId: memberId,
@@ -140,11 +203,11 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         AssignmentStatus.scheduled => AssignmentStatus.confirmed,
       };
 
-      state = [
-        for (final event in state)
+      _customEvents = [
+        for (final event in _customEvents ?? [])
           if (event.id == nextEvent.id)
             event.copyWith(
-              assignments: [
+              assignments: <ServiceAssignment>[
                 for (final a in event.assignments)
                   if (a.memberId == memberId)
                     a.copyWith(status: nextStatus)
@@ -155,99 +218,110 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
           else
             event,
       ];
+      _syncState();
     }
   }
 
-  /// Schedules a series of repetitive recurring events (e.g. Every Sunday, 1st Sunday of the Month).
-  List<ServiceEvent> scheduleRecurringSeries({
-    required String title,
-    required ServiceType type,
-    required EventRecurrence recurrence,
-    required DateTime startDateTime,
-    required String location,
-    String? notes,
-    int count = 6,
-    List<ServiceAssignment> defaultAssignments = const [],
-  }) {
-    final occurrences = recurrence.generateOccurrences(
-      fromDateTime: startDateTime,
-      count: count,
-    );
-
-    final newEvents = <ServiceEvent>[];
-    for (final dt in occurrences) {
-      newEvents.add(
-        ServiceEvent(
-          id: 'event_${dt.millisecondsSinceEpoch}_${newEvents.length}',
-          title: title,
-          dateTime: dt,
-          type: type,
-          recurrence: recurrence,
-          location: location,
-          notes: notes,
-          assignments: defaultAssignments,
-        ),
-      );
-    }
-
-    state = [...state, ...newEvents]
-      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
-
-    return newEvents;
-  }
-
-  /// Generates the next [count] periodic Sunday morning services automatically.
-  void generatePeriodicSundays({int count = 4}) {
+  /// Computes the combined calendar events by applying active recurring schedule rules,
+  /// rolling lookaheads (X events ahead), and cutoff dates where recurring generation is disabled.
+  static List<ServiceEvent> _computeProjectedEvents(
+    List<ServiceEvent> customEvents,
+    List<RecurringSchedule> schedules,
+  ) {
     final now = DateTime.now();
-    DateTime lastSunday = now;
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final scheduleMap = {for (final s in schedules) s.id: s};
 
-    // Find the latest Sunday in existing events
-    for (final event in state) {
-      if (event.type == ServiceType.sundayService &&
-          event.dateTime.isAfter(lastSunday)) {
-        lastSunday = event.dateTime;
+    final result = <ServiceEvent>[];
+
+    // 1. Filter customized events by active schedule rules & disabled cutoff dates:
+    for (final event in customEvents) {
+      if (event.seriesId != null) {
+        final schedule = scheduleMap[event.seriesId];
+        if (schedule != null) {
+          if (!schedule.isActive) continue;
+          if (schedule.disabledAfter != null) {
+            final cutoff = DateTime(
+              schedule.disabledAfter!.year,
+              schedule.disabledAfter!.month,
+              schedule.disabledAfter!.day,
+            );
+            final eventDay = DateTime(
+              event.dateTime.year,
+              event.dateTime.month,
+              event.dateTime.day,
+            );
+            if (!eventDay.isBefore(cutoff)) {
+              continue; // Exclude event because series generation is disabled from this date
+            }
+          }
+        }
+      }
+      result.add(event);
+    }
+
+    // 2. Project upcoming events for each active schedule up to lookaheadCount (X events ahead):
+    for (final schedule in schedules) {
+      if (!schedule.isActive || schedule.lookaheadCount <= 0) continue;
+
+      final projectedDates = schedule.generateOccurrences(fromDateTime: todayStart);
+
+      final existingForSeries = result.where((e) {
+        final isUpcoming = e.dateTime.isAfter(todayStart) ||
+            (e.dateTime.year == todayStart.year &&
+                e.dateTime.month == todayStart.month &&
+                e.dateTime.day == todayStart.day);
+        return isUpcoming &&
+            (e.seriesId == schedule.id || e.title == schedule.title);
+      }).toList();
+
+      for (final dt in projectedDates) {
+        if (existingForSeries.length >= schedule.lookaheadCount) break;
+
+        final alreadyCovered = result.any((e) {
+          final isSameDay = e.dateTime.year == dt.year &&
+              e.dateTime.month == dt.month &&
+              e.dateTime.day == dt.day;
+          return isSameDay &&
+              (e.seriesId == schedule.id || e.title == schedule.title);
+        });
+
+        if (!alreadyCovered) {
+          final newEvent = ServiceEvent(
+            id: 'projected_${schedule.id}_${dt.year}_${dt.month}_${dt.day}',
+            title: schedule.title,
+            dateTime: dt,
+            type: schedule.type,
+            recurrence: schedule.recurrence,
+            location: schedule.location,
+            notes: schedule.notes,
+            seriesId: schedule.id,
+            assignments: schedule.defaultAssignments,
+          );
+          result.add(newEvent);
+          existingForSeries.add(newEvent);
+        }
+      }
+
+      // Enforce lookaheadCount: if upcoming events for this series exceed X, trim the furthest dates
+      final upcomingSeriesEvents = result.where((e) {
+        final isUpcoming = e.dateTime.isAfter(todayStart) ||
+            (e.dateTime.year == todayStart.year &&
+                e.dateTime.month == todayStart.month &&
+                e.dateTime.day == todayStart.day);
+        return isUpcoming &&
+            (e.seriesId == schedule.id || e.title == schedule.title);
+      }).toList()..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+
+      if (upcomingSeriesEvents.length > schedule.lookaheadCount) {
+        final toRemove = upcomingSeriesEvents.sublist(schedule.lookaheadCount);
+        final removeIds = toRemove.map((e) => e.id).toSet();
+        result.removeWhere((e) => removeIds.contains(e.id));
       }
     }
 
-    // If no Sunday in future, calculate upcoming Sunday
-    if (lastSunday == now) {
-      final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
-      final nextSunday = now.add(
-        Duration(days: daysUntilSunday == 0 ? 7 : daysUntilSunday),
-      );
-      lastSunday = DateTime(
-        nextSunday.year,
-        nextSunday.month,
-        nextSunday.day,
-        9,
-        0,
-      );
-    }
-
-    final newEvents = <ServiceEvent>[];
-    for (var i = 1; i <= count; i++) {
-      final sundayDate = lastSunday.add(Duration(days: 7 * i));
-      newEvents.add(
-        ServiceEvent(
-          id: 'sunday_${sundayDate.millisecondsSinceEpoch}',
-          title: 'Sunday Worship Service',
-          dateTime: DateTime(
-            sundayDate.year,
-            sundayDate.month,
-            sundayDate.day,
-            9,
-            0,
-          ),
-          type: ServiceType.sundayService,
-          recurrence: EventRecurrence.weekly,
-          location: 'Main Sanctuary',
-          notes: '9:00 AM & 11:15 AM Services • Call time: 7:45 AM',
-        ),
-      );
-    }
-
-    state = [...state, ...newEvents]
-      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    result.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    return result;
   }
 
   static List<ServiceEvent> _initialSampleEvents() {
@@ -298,6 +372,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         recurrence: EventRecurrence.weekly,
         location: 'Main Sanctuary',
         notes: 'Soundcheck at 7:45 AM. Lead sheet package in Battuta.',
+        seriesId: 'series-sunday-morning',
         assignments: const [
           ServiceAssignment(
             memberId: 'member-1', // Sarah Jenkins
@@ -331,9 +406,10 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         title: 'Midweek Band Rehearsal',
         dateTime: nextThursday,
         type: ServiceType.rehearsal,
-        recurrence: EventRecurrence.weekly,
+        recurrence: EventRecurrence.weeklyThursday,
         location: 'Rehearsal Hall B',
         notes: 'Working through new arrangement and vocal harmonies.',
+        seriesId: 'series-thursday-rehearsal',
         assignments: const [
           ServiceAssignment(
             memberId: 'member-1',
@@ -360,6 +436,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         recurrence: EventRecurrence.weekly,
         location: 'Main Sanctuary',
         notes: 'Communion Sunday. Call time 8:00 AM.',
+        seriesId: 'series-sunday-morning',
         assignments: const [
           ServiceAssignment(
             memberId: 'member-1',
@@ -391,6 +468,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         recurrence: EventRecurrence.weekly,
         location: 'Main Sanctuary',
         notes: 'Regular 2-service schedule (9:00 AM & 11:15 AM).',
+        seriesId: 'series-sunday-morning',
         assignments: const [
           ServiceAssignment(
             memberId: 'member-2',

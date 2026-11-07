@@ -315,6 +315,7 @@ class ServiceEvent {
     this.assignments = const [],
     this.notes,
     this.setlistId,
+    this.seriesId,
   });
 
   final String id;
@@ -326,6 +327,9 @@ class ServiceEvent {
   final List<ServiceAssignment> assignments;
   final String? notes;
   final String? setlistId;
+
+  /// Identifier of the parent [RecurringSchedule], if generated or projected from a series.
+  final String? seriesId;
 
   /// Whether this service event is scheduled for today or a future date.
   bool get isUpcoming {
@@ -377,6 +381,7 @@ class ServiceEvent {
     List<ServiceAssignment>? assignments,
     String? notes,
     String? setlistId,
+    String? seriesId,
   }) {
     return ServiceEvent(
       id: id ?? this.id,
@@ -388,6 +393,7 @@ class ServiceEvent {
       assignments: assignments ?? this.assignments,
       notes: notes ?? this.notes,
       setlistId: setlistId ?? this.setlistId,
+      seriesId: seriesId ?? this.seriesId,
     );
   }
 
@@ -404,7 +410,8 @@ class ServiceEvent {
           location == other.location &&
           listEquals(assignments, other.assignments) &&
           notes == other.notes &&
-          setlistId == other.setlistId;
+          setlistId == other.setlistId &&
+          seriesId == other.seriesId;
 
   @override
   int get hashCode =>
@@ -416,5 +423,6 @@ class ServiceEvent {
       location.hashCode ^
       Object.hashAll(assignments) ^
       notes.hashCode ^
-      setlistId.hashCode;
+      setlistId.hashCode ^
+      seriesId.hashCode;
 }

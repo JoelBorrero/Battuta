@@ -85,6 +85,9 @@ abstract final class AppTheme {
   /// Primary warm amber / gold for active states, playback, and stage cues.
   static const Color amberAccent = Color(0xFFE5A93C);
 
+  /// Semantic alias for primary stage amber accent.
+  static const Color stageAmber = amberAccent;
+
   /// High-contrast amber/gold for light mode text and navigation items.
   static const Color amberAccentLightText = Color(0xFFC7831C);
 

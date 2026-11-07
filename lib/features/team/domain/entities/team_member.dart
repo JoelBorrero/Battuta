@@ -70,11 +70,15 @@ class TeamMember {
     this.notes,
     this.email,
     this.isAdmin = false,
+    this.groupIds = const [],
   });
 
   final String id;
   final String name;
   final List<TeamRole> roles;
+
+  /// Sub-teams and arrangement groups this member is part of.
+  final List<String> groupIds;
 
   /// Primary or first role assigned to the member.
   TeamRole get role => roles.isNotEmpty ? roles.first : TeamRole.keys;
@@ -104,6 +108,7 @@ class TeamMember {
     String? notes,
     String? email,
     bool? isAdmin,
+    List<String>? groupIds,
   }) {
     return TeamMember(
       id: id ?? this.id,
@@ -114,6 +119,7 @@ class TeamMember {
       notes: notes ?? this.notes,
       email: email ?? this.email,
       isAdmin: isAdmin ?? this.isAdmin,
+      groupIds: groupIds ?? this.groupIds,
     );
   }
 
@@ -125,6 +131,7 @@ class TeamMember {
           id == other.id &&
           name == other.name &&
           listEquals(roles, other.roles) &&
+          listEquals(groupIds, other.groupIds) &&
           vocalRange == other.vocalRange &&
           availability == other.availability &&
           notes == other.notes &&
@@ -136,6 +143,7 @@ class TeamMember {
       id.hashCode ^
       name.hashCode ^
       Object.hashAll(roles) ^
+      Object.hashAll(groupIds) ^
       vocalRange.hashCode ^
       availability.hashCode ^
       notes.hashCode ^

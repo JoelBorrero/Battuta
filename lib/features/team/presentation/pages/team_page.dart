@@ -6,10 +6,17 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
+import 'package:battuta/features/team/domain/entities/schedule_alert.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
+import 'package:battuta/features/team/domain/entities/team_group.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
+import 'package:battuta/features/team/presentation/providers/recurring_schedules_provider.dart';
+import 'package:battuta/features/team/presentation/providers/schedule_alerts_provider.dart';
 import 'package:battuta/features/team/presentation/providers/service_calendar_provider.dart';
+import 'package:battuta/features/team/presentation/providers/team_group_provider.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
+import 'package:battuta/features/team/presentation/widgets/admin_schedule_alerts_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,6 +50,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     if (selectedRoles.isEmpty) {
       selectedRoles.add(TeamRole.keys);
     }
+
+    // Arrangement groups multi-membership
+    final availableGroups = ref.read(teamGroupsProvider);
+    final selectedGroups = <String>{...?memberToEdit?.groupIds};
 
     // Vocal tessitura: if only instruments are selected, discard (none)
     VocalTessitura selectedRange;
@@ -278,6 +289,64 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 14),
 
+                    // Arrangement Groups / Sub-teams (N:M Membership)
+                    if (availableGroups.isNotEmpty) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Arrangement Groups / Sub-teams',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${selectedGroups.length} assigned',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Member can belong to multiple rotating teams:',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: availableGroups.map((g) {
+                          final isSelected = selectedGroups.contains(g.id);
+                          return FilterChip(
+                            key: ValueKey('member_dialog_group_chip_${g.id}'),
+                            avatar: CircleAvatar(
+                              radius: 5,
+                              backgroundColor: Color(g.colorValue),
+                            ),
+                            label: Text(g.name),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setDialogState(() {
+                                if (selected) {
+                                  selectedGroups.add(g.id);
+                                } else {
+                                  selectedGroups.remove(g.id);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+
                     // Administrator permissions toggle
                     SwitchListTile.adaptive(
                       key: const ValueKey('member_admin_switch'),
@@ -331,6 +400,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         vocalRange: vocalToSave,
                         availability: selectedAvailability,
                         isAdmin: isAdmin,
+                        groupIds: selectedGroups.toList(),
                         notes: notesController.text.trim().isEmpty
                             ? null
                             : notesController.text.trim(),
@@ -353,6 +423,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         vocalRange: vocalToSave,
                         availability: selectedAvailability,
                         isAdmin: isAdmin,
+                        groupIds: selectedGroups.toList(),
                         notes: notesController.text.trim().isEmpty
                             ? null
                             : notesController.text.trim(),
@@ -650,24 +721,26 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       );
                     } else if (selectedRecurrence.isRepeating &&
                         seriesCount > 1) {
-                      final created = ref
-                          .read(serviceCalendarProvider.notifier)
-                          .scheduleRecurringSeries(
-                            title: title,
-                            type: selectedType,
-                            recurrence: selectedRecurrence,
-                            startDateTime: eventDateTime,
-                            location: locationController.text.trim(),
-                            notes: notesController.text.trim().isEmpty
-                                ? null
-                                : notesController.text.trim(),
-                            count: seriesCount,
-                          );
+                      final newSchedule = RecurringSchedule(
+                        id: 'series_${DateTime.now().millisecondsSinceEpoch}',
+                        title: title,
+                        type: selectedType,
+                        recurrence: selectedRecurrence,
+                        time: selectedTime,
+                        location: locationController.text.trim(),
+                        notes: notesController.text.trim().isEmpty
+                            ? null
+                            : notesController.text.trim(),
+                        lookaheadCount: seriesCount,
+                      );
+                      ref
+                          .read(recurringSchedulesProvider.notifier)
+                          .addSchedule(newSchedule);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Scheduled ${created.length} recurring services for $title!',
+                            'Configured recurring schedule for $title (showing next $seriesCount events)!',
                           ),
                         ),
                       );
@@ -841,6 +914,271 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   child: const Text('Assign to Lineup'),
                 ),
               ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ASSIGN GROUP TO SERVICE DIALOG
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  void _showAssignGroupDialog(ServiceEvent event) {
+    final groups = ref.read(teamGroupsProvider);
+    final members = ref.read(teamMembersProvider);
+
+    if (groups.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No arrangement groups created yet.')),
+      );
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Assign Group to Service'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: groups.length,
+              separatorBuilder: (context, index) => const Divider(height: 1),
+              itemBuilder: (_, index) {
+                final group = groups[index];
+                final groupMembers = members
+                    .where((m) => m.groupIds.contains(group.id))
+                    .toList();
+                final unavailableCount = groupMembers
+                    .where((m) => m.availability == AvailabilityStatus.unavailable)
+                    .length;
+
+                return ListTile(
+                  key: ValueKey('assign_group_item_${group.id}'),
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        Color(group.colorValue).withValues(alpha: 0.2),
+                    child: Icon(Icons.groups, color: Color(group.colorValue)),
+                  ),
+                  title: Text(
+                    group.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    '${groupMembers.length} members'
+                    '${unavailableCount > 0 ? " • $unavailableCount unavailable" : ""}',
+                    style: TextStyle(
+                      color: unavailableCount > 0 ? AppTheme.stageRed : null,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    ref.read(serviceCalendarProvider.notifier).assignGroup(
+                          eventId: event.id,
+                          groupMembers: groupMembers,
+                        );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Assigned ${group.name} (${groupMembers.length} members) to ${event.formattedDate}!',
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ADMIN ALERTS & FIND COVER WORKFLOW
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  void _handleAlertFindCover(ScheduleAlert alert) {
+    final events = ref.read(serviceCalendarProvider);
+    final event = events.where((e) => e.id == alert.eventId).firstOrNull;
+    if (event == null) return;
+
+    final assignment = event.assignments
+            .where((a) => a.memberId == alert.memberId)
+            .firstOrNull ??
+        ServiceAssignment(
+          memberId: alert.memberId,
+          role: alert.role,
+          status: AssignmentStatus.declined,
+        );
+
+    _showReplaceMemberDialog(event: event, assignment: assignment);
+  }
+
+  void _showAdminAlertsModal() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (modalCtx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final alerts = ref.watch(adminScheduleAlertsProvider);
+            final theme = Theme.of(context);
+
+            return SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: AppTheme.stageAmber,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Coverage Alerts (${alerts.length})',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(modalCtx).pop(),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    if (alerts.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: Text(
+                            'No pending scheduling gaps. All services are covered!',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: alerts.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (_, index) {
+                            final alert = alerts[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Wrap(
+                                          spacing: 6,
+                                          runSpacing: 4,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
+                                          children: [
+                                            Text(
+                                              alert.memberName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 6,
+                                                vertical: 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.stageAmber
+                                                    .withValues(alpha: 0.15),
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                alert.role.shortName,
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: AppTheme.stageAmber,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${alert.eventTitle} • ${alert.reason}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: theme
+                                                .colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  FilledButton.tonal(
+                                    key: ValueKey(
+                                      'modal_find_cover_btn_${alert.id}',
+                                    ),
+                                    style: FilledButton.styleFrom(
+                                      visualDensity: VisualDensity.compact,
+                                      backgroundColor: AppTheme.stageAmber
+                                          .withValues(alpha: 0.2),
+                                      foregroundColor: AppTheme.stageAmber,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(modalCtx).pop();
+                                      _handleAlertFindCover(alert);
+                                    },
+                                    child: const Text(
+                                      'Find Cover',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             );
           },
         );
@@ -1305,63 +1643,19 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // RECURRING EVENT SERIES TEMPLATES MODAL
+  // RECURRING EVENT SERIES SINGLE-INSTANCE MANAGEMENT MODAL
   // ═══════════════════════════════════════════════════════════════════════════
 
   void _showRecurringSeriesModal() {
-    var selectedTemplateIndex = 0;
-    var seriesCount = 6;
-
-    final templates = [
-      (
-        title: 'Sunday Morning Worship',
-        type: ServiceType.sundayService,
-        recurrence: EventRecurrence.weekly,
-        time: const TimeOfDay(hour: 9, minute: 0),
-        location: 'Main Sanctuary',
-        notes: '9:00 AM & 11:15 AM Services • Call time: 7:45 AM',
-        icon: Icons.church_outlined,
-        description: 'Every Sunday (Weekly morning service)',
-      ),
-      (
-        title: 'Communion Sunday Service',
-        type: ServiceType.sundayService,
-        recurrence: EventRecurrence.firstSundayOfMonth,
-        time: const TimeOfDay(hour: 9, minute: 0),
-        location: 'Main Sanctuary',
-        notes: 'Communion table setup & extended worship set.',
-        icon: Icons.wine_bar_outlined,
-        description: '1st Sunday of every month',
-      ),
-      (
-        title: 'Midweek Band Rehearsal',
-        type: ServiceType.rehearsal,
-        recurrence: EventRecurrence.weeklyThursday,
-        time: const TimeOfDay(hour: 19, minute: 0),
-        location: 'Rehearsal Hall B',
-        notes: 'Full band rehearsal & vocal harmony check.',
-        icon: Icons.music_note_outlined,
-        description: 'Every Thursday evening rehearsal',
-      ),
-      (
-        title: 'Youth & Young Adults Night',
-        type: ServiceType.youthService,
-        recurrence: EventRecurrence.lastSundayOfMonth,
-        time: const TimeOfDay(hour: 18, minute: 0),
-        location: 'Youth Auditorium',
-        notes: 'High-energy contemporary praise set.',
-        icon: Icons.local_fire_department_outlined,
-        description: 'Last Sunday of every month',
-      ),
-    ];
-
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (bottomSheetCtx) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
+        return Consumer(
+          builder: (ctx, ref, _) {
+            final schedules = ref.watch(recurringSchedulesProvider);
             final theme = Theme.of(ctx);
+
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
@@ -1379,16 +1673,21 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         const Icon(Icons.repeat, color: Color(0xFFE5A93C)),
                         const SizedBox(width: 8),
                         Text(
-                          'Schedule Recurring Series',
+                          'Recurring Service Schedules',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(bottomSheetCtx).pop(),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
-                      'Choose a common repetitive template or schedule pattern:',
+                      'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.',
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -1396,168 +1695,307 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Templates List
-                    for (var i = 0; i < templates.length; i++) ...[
-                      InkWell(
-                        onTap: () =>
-                            setModalState(() => selectedTemplateIndex = i),
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
+                    if (schedules.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                            'No recurring schedules configured yet.',
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
-                          decoration: BoxDecoration(
-                            color: selectedTemplateIndex == i
-                                ? theme.colorScheme.primaryContainer.withValues(
-                                    alpha: 0.3,
-                                  )
-                                : theme.colorScheme.surfaceContainerHighest
-                                      .withValues(alpha: 0.2),
+                        ),
+                      )
+                    else
+                      for (final schedule in schedules) ...[
+                        Card(
+                          key: ValueKey('recurring_card_${schedule.id}'),
+                          elevation: 0,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          color: schedule.isActive
+                              ? theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.3)
+                              : theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.1),
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: selectedTemplateIndex == i
+                            side: BorderSide(
+                              color: schedule.isActive
                                   ? const Color(0xFFE5A93C)
-                                  : theme.colorScheme.outlineVariant.withValues(
-                                      alpha: 0.5,
-                                    ),
-                              width: selectedTemplateIndex == i ? 1.5 : 1.0,
+                                      .withValues(alpha: 0.4)
+                                  : theme.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.3),
+                              width: 1,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                templates[i].icon,
-                                color: selectedTemplateIndex == i
-                                    ? const Color(0xFFE5A93C)
-                                    : theme.colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
                                   children: [
-                                    Text(
-                                      templates[i].title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                    Icon(
+                                      schedule.type.icon,
+                                      size: 18,
+                                      color: schedule.isActive
+                                          ? const Color(0xFFE5A93C)
+                                          : theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        schedule.title,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          decoration: schedule.isActive
+                                              ? null
+                                              : TextDecoration.lineThrough,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${templates[i].description} • ${templates[i].time.format(ctx)}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color:
-                                            theme.colorScheme.onSurfaceVariant,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
                                       ),
+                                      decoration: BoxDecoration(
+                                        color: theme
+                                            .colorScheme.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        schedule.recurrence.shortName,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Switch.adaptive(
+                                      key: ValueKey(
+                                        'recurring_switch_${schedule.id}',
+                                      ),
+                                      value: schedule.isActive,
+                                      onChanged: (_) {
+                                        ref
+                                            .read(
+                                              recurringSchedulesProvider.notifier,
+                                            )
+                                            .toggleActive(schedule.id);
+                                      },
                                     ),
                                   ],
                                 ),
-                              ),
-                              if (selectedTemplateIndex == i)
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: Color(0xFFE5A93C),
-                                  size: 20,
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${schedule.location} • ${schedule.time.format(ctx)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+                                const SizedBox(height: 8),
+                                const Divider(height: 1),
+                                const SizedBox(height: 8),
 
-                    const SizedBox(height: 12),
-                    // Occurrences Selector
-                    DropdownButtonFormField<int>(
-                      key: const ValueKey('recurring_modal_count_dropdown'),
-                      isExpanded: true,
-                      initialValue: seriesCount,
-                      decoration: const InputDecoration(
-                        labelText: 'Occurrences to Generate',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.date_range),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 4,
-                          child: Text(
-                            '4 occurrences (~1 month)',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 6,
-                          child: Text(
-                            '6 occurrences (~1.5 months)',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 12,
-                          child: Text(
-                            '12 occurrences (~3 months)',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 24,
-                          child: Text(
-                            '24 occurrences (~6 months)',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                                if (!schedule.isActive)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.pause_circle_outline,
+                                          size: 14,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Schedule Paused — no occurrences generated',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else ...[
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 8,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children: [
+                                      // Lookahead count selector
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            'Show: ',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                          DropdownButton<int>(
+                                            key: ValueKey(
+                                              'lookahead_dropdown_${schedule.id}',
+                                            ),
+                                            value: schedule.lookaheadCount,
+                                            isDense: true,
+                                            items: const [
+                                              DropdownMenuItem(
+                                                value: 2,
+                                                child: Text('2 ahead'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 4,
+                                                child: Text('4 ahead'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 6,
+                                                child: Text('6 ahead'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 8,
+                                                child: Text('8 ahead'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 12,
+                                                child: Text('12 ahead'),
+                                              ),
+                                            ],
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                ref
+                                                    .read(
+                                                      recurringSchedulesProvider
+                                                          .notifier,
+                                                    )
+                                                    .setLookaheadCount(
+                                                      schedule.id,
+                                                      val,
+                                                    );
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+
+                                      // Cutoff disable date
+                                      if (schedule.disabledAfter == null)
+                                        OutlinedButton.icon(
+                                          key: ValueKey(
+                                            'set_cutoff_btn_${schedule.id}',
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.event_busy,
+                                            size: 14,
+                                          ),
+                                          label: const Text(
+                                            'Disable Since Date...',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                          onPressed: () async {
+                                            final now = DateTime.now();
+                                            final picked = await showDatePicker(
+                                              context: ctx,
+                                              initialDate: now.add(
+                                                const Duration(days: 14),
+                                              ),
+                                              firstDate: now,
+                                              lastDate: now.add(
+                                                const Duration(days: 730),
+                                              ),
+                                            );
+                                            if (picked != null) {
+                                              ref
+                                                  .read(
+                                                    recurringSchedulesProvider
+                                                        .notifier,
+                                                  )
+                                                  .setDisabledDate(
+                                                    schedule.id,
+                                                    picked,
+                                                  );
+                                            }
+                                          },
+                                        )
+                                      else
+                                        InputChip(
+                                          key: ValueKey(
+                                            'cutoff_chip_${schedule.id}',
+                                          ),
+                                          backgroundColor: AppTheme.stageRed
+                                              .withValues(alpha: 0.1),
+                                          side: BorderSide(
+                                            color: AppTheme.stageRed.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                          ),
+                                          avatar: const Icon(
+                                            Icons.event_busy,
+                                            size: 14,
+                                            color: AppTheme.stageRed,
+                                          ),
+                                          label: Text(
+                                            'Disabled from ${schedule.disabledAfter!.year}-${schedule.disabledAfter!.month.toString().padLeft(2, '0')}-${schedule.disabledAfter!.day.toString().padLeft(2, '0')}',
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: AppTheme.stageRed,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          onDeleted: () {
+                                            ref
+                                                .read(
+                                                  recurringSchedulesProvider
+                                                      .notifier,
+                                                )
+                                                .setDisabledDate(
+                                                  schedule.id,
+                                                  null,
+                                                );
+                                          },
+                                          deleteIcon: const Icon(
+                                            Icons.close,
+                                            size: 14,
+                                            color: AppTheme.stageRed,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setModalState(() => seriesCount = val);
-                        }
-                      },
-                    ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,
-                      child: FilledButton.icon(
-                        key: const ValueKey('generate_series_btn'),
-                        icon: const Icon(Icons.auto_awesome),
-                        label: Text('Generate $seriesCount Recurring Events'),
+                      child: OutlinedButton.icon(
+                        key: const ValueKey('add_recurring_pattern_btn'),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Repetitive Schedule Rule'),
                         onPressed: () {
-                          final template = templates[selectedTemplateIndex];
-                          final now = DateTime.now();
-                          final startDateTime = DateTime(
-                            now.year,
-                            now.month,
-                            now.day,
-                            template.time.hour,
-                            template.time.minute,
-                          );
-
-                          final created = ref
-                              .read(serviceCalendarProvider.notifier)
-                              .scheduleRecurringSeries(
-                                title: template.title,
-                                type: template.type,
-                                recurrence: template.recurrence,
-                                startDateTime: startDateTime,
-                                location: template.location,
-                                notes: template.notes,
-                                count: seriesCount,
-                              );
-
                           Navigator.of(bottomSheetCtx).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Generated ${created.length} services for ${template.title}!',
-                              ),
-                            ),
-                          );
+                          _showServiceDialog();
                         },
                       ),
                     ),
@@ -1624,7 +2062,31 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 : 'Switch active user profile',
             onPressed: () => _showActiveUserSwitcherModal(members),
           ),
-          if (isAdmin)
+          if (isAdmin) ...[
+            Consumer(
+              builder: (context, ref, _) {
+                final alertCount = ref.watch(pendingAlertCountProvider);
+                return Badge(
+                  isLabelVisible: alertCount > 0,
+                  label: Text('$alertCount'),
+                  backgroundColor: AppTheme.stageRed,
+                  offset: const Offset(-4, 4),
+                  child: IconButton(
+                    key: const ValueKey('admin_alerts_bell_btn'),
+                    icon: Icon(
+                      alertCount > 0
+                          ? Icons.notifications_active
+                          : Icons.notifications_none,
+                      color: alertCount > 0 ? AppTheme.stageAmber : null,
+                    ),
+                    tooltip: alertCount > 0
+                        ? '$alertCount cover alert${alertCount > 1 ? 's' : ''}'
+                        : 'Musician Coverage Alerts',
+                    onPressed: () => _showAdminAlertsModal(),
+                  ),
+                );
+              },
+            ),
             IconButton(
               icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
               tooltip: _selectedTabIndex == 0
@@ -1634,6 +2096,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ? () => _showMemberDialog()
                   : () => _showServiceDialog(),
             ),
+          ],
         ],
       ),
       body: Column(
@@ -1711,6 +2174,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required int scheduledCount,
     required int availableCount,
   }) {
+    final groups = ref.watch(teamGroupsProvider);
+    final groupMap = {for (final g in groups) g.id: g};
+
     final filteredMembers = members.where((m) {
       if (_selectedFilter == 'All') return true;
       if (_selectedFilter == 'Vocals') {
@@ -1725,6 +2191,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             (a) => a.memberId == m.id && a.status != AssignmentStatus.declined,
           ),
         );
+      }
+      if (_selectedFilter.startsWith('group:')) {
+        final targetGroupId = _selectedFilter.substring(6);
+        return m.groupIds.contains(targetGroupId);
       }
       return true;
     }).toList();
@@ -1769,7 +2239,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           ),
         ),
 
-        // Filter Chips
+        // Filter Chips (Role Categories & Rotating Arrangement Groups)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -1778,11 +2248,30 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
+                    key: ValueKey('filter_chip_${filter.toLowerCase()}'),
                     label: Text(filter),
                     selected: _selectedFilter == filter,
                     onSelected: (selected) {
                       if (selected) {
                         setState(() => _selectedFilter = filter);
+                      }
+                    },
+                  ),
+                ),
+              for (final group in groups)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    key: ValueKey('filter_chip_group_${group.id}'),
+                    avatar: CircleAvatar(
+                      radius: 5,
+                      backgroundColor: Color(group.colorValue),
+                    ),
+                    label: Text(group.name),
+                    selected: _selectedFilter == 'group:${group.id}',
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() => _selectedFilter = 'group:${group.id}');
                       }
                     },
                   ),
@@ -1812,6 +2301,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               member: member,
               events: events,
               nextEvent: nextEvent,
+              groupMap: groupMap,
             ),
 
         const SizedBox(height: 64),
@@ -1824,6 +2314,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required TeamMember member,
     required List<ServiceEvent> events,
     required ServiceEvent? nextEvent,
+    required Map<String, TeamGroup> groupMap,
   }) {
     // Find next assignment for this member
     ServiceAssignment? nextAssignment;
@@ -1956,6 +2447,32 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ),
                     ),
                   ),
+                for (final groupId in member.groupIds)
+                  if (groupMap.containsKey(groupId))
+                    Container(
+                      key: ValueKey('member_group_badge_${member.id}_$groupId'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Color(groupMap[groupId]!.colorValue)
+                            .withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Color(groupMap[groupId]!.colorValue)
+                              .withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        groupMap[groupId]!.name.split(' (').first,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(groupMap[groupId]!.colorValue),
+                        ),
+                      ),
+                    ),
               ],
             ),
             // Upcoming date info
@@ -2085,6 +2602,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
+        // Admin Coverage Alerts Banner (Attendance Gaps / Missing Musicians)
+        if (isAdmin)
+          AdminScheduleAlertsBanner(
+            onFindCover: _handleAlertFindCover,
+          ),
+
         // Quick Actions Bar
         Card(
           elevation: 0,
@@ -2106,32 +2629,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ),
                 ),
                 if (isAdmin)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: [
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.repeat, size: 16),
-                        label: const Text('Recurring Schedule'),
-                        onPressed: _showRecurringSeriesModal,
-                      ),
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.auto_awesome, size: 16),
-                        label: const Text('Auto-Sundays'),
-                        onPressed: () {
-                          ref
-                              .read(serviceCalendarProvider.notifier)
-                              .generatePeriodicSundays(count: 4);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Auto-generated next 4 Sunday services!',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                  OutlinedButton.icon(
+                    key: const ValueKey('recurring_schedules_btn'),
+                    icon: const Icon(Icons.repeat, size: 16),
+                    label: const Text('Recurring Schedules'),
+                    onPressed: _showRecurringSeriesModal,
                   )
                 else
                   Container(
@@ -2511,14 +3013,31 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ),
                 ),
                 if (isAdmin)
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    icon: const Icon(Icons.person_add_alt_1, size: 16),
-                    label: const Text('Assign Musician'),
-                    onPressed: () => _showAssignMemberDialog(event),
+                  Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      TextButton.icon(
+                        key: ValueKey('assign_group_btn_${event.id}'),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                        ),
+                        icon: const Icon(Icons.group_add_outlined, size: 16),
+                        label: const Text('Assign Group'),
+                        onPressed: () => _showAssignGroupDialog(event),
+                      ),
+                      TextButton.icon(
+                        key: ValueKey('assign_musician_btn_${event.id}'),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                        ),
+                        icon: const Icon(Icons.person_add_alt_1, size: 16),
+                        label: const Text('Assign Musician'),
+                        onPressed: () => _showAssignMemberDialog(event),
+                      ),
+                    ],
                   ),
               ],
             ),

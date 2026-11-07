@@ -1,0 +1,90 @@
+import 'package:battuta/features/team/presentation/providers/recurring_schedules_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('RecurringSchedulesProvider', () {
+    test('initializes with sample Sunday Morning and Midweek rules', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final schedules = container.read(recurringSchedulesProvider);
+      expect(schedules.length, equals(2));
+      expect(schedules.any((s) => s.id == 'series-sunday-morning'), isTrue);
+      expect(schedules.any((s) => s.id == 'series-thursday-rehearsal'), isTrue);
+    });
+
+    test('toggles active state of a recurring schedule', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(
+        container
+            .read(recurringSchedulesProvider)
+            .firstWhere((s) => s.id == 'series-sunday-morning')
+            .isActive,
+        isTrue,
+      );
+
+      container
+          .read(recurringSchedulesProvider.notifier)
+          .toggleActive('series-sunday-morning');
+
+      expect(
+        container
+            .read(recurringSchedulesProvider)
+            .firstWhere((s) => s.id == 'series-sunday-morning')
+            .isActive,
+        isFalse,
+      );
+    });
+
+    test('sets and clears cutoff disabled date', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final cutoff = DateTime(2026, 12, 1);
+      container
+          .read(recurringSchedulesProvider.notifier)
+          .setDisabledDate('series-sunday-morning', cutoff);
+
+      expect(
+        container
+            .read(recurringSchedulesProvider)
+            .firstWhere((s) => s.id == 'series-sunday-morning')
+            .disabledAfter,
+        equals(cutoff),
+      );
+
+      // Clear cutoff
+      container
+          .read(recurringSchedulesProvider.notifier)
+          .setDisabledDate('series-sunday-morning', null);
+
+      expect(
+        container
+            .read(recurringSchedulesProvider)
+            .firstWhere((s) => s.id == 'series-sunday-morning')
+            .disabledAfter,
+        isNull,
+      );
+    });
+
+    test('updates lookahead count (X number of events ahead)', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      container
+          .read(recurringSchedulesProvider.notifier)
+          .setLookaheadCount('series-sunday-morning', 8);
+
+      expect(
+        container
+            .read(recurringSchedulesProvider)
+            .firstWhere((s) => s.id == 'series-sunday-morning')
+            .lookaheadCount,
+        equals(8),
+      );
+    });
+  });
+}

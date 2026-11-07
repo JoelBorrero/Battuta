@@ -98,6 +98,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         notes: 'Available for 1st service',
         email: 'sarah.j@worship.org',
         isAdmin: true,
+        groupIds: ['group-alpha', 'group-beta'],
       ),
       TeamMember(
         id: 'member-2',
@@ -107,6 +108,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.scheduled,
         notes: 'Leading acoustic set & harmony vocals',
         email: 'david.c@worship.org',
+        groupIds: ['group-alpha', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-3',
@@ -116,6 +118,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Brought 5-string bass',
         email: 'marcus.m@worship.org',
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-4',
@@ -125,6 +128,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Main synth & alto vocals',
         email: 'elena.r@worship.org',
+        groupIds: ['group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-5',
@@ -134,6 +138,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'In-ear click track master',
         email: 'james.w@worship.org',
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-6',
@@ -143,6 +148,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.unavailable,
         notes: 'Traveling this Sunday',
         email: 'mateo.r@worship.org',
+        groupIds: ['group-alpha'],
       ),
     ];
   }

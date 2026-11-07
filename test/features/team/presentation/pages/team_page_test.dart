@@ -244,10 +244,11 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Sunday Morning Worship'), findsWidgets);
-      expect(find.text('Midweek Band Rehearsal'), findsOneWidget);
+      expect(find.text('Midweek Band Rehearsal'), findsWidgets);
       expect(find.text('NEXT SERVICE'), findsOneWidget);
       expect(find.textContaining('Sarah Jenkins'), findsWidgets);
-      expect(find.text('Auto-Sundays'), findsOneWidget);
+      expect(find.text('Recurring Schedules'), findsOneWidget);
+      expect(find.text('Auto-Sundays'), findsNothing);
     });
 
     testWidgets('adds a new service event in Band Calendar', (tester) async {
@@ -281,7 +282,7 @@ void main() {
       expect(find.text('Youth Worship Night'), findsOneWidget);
     });
 
-    testWidgets('auto-generates periodic upcoming Sundays', (tester) async {
+    testWidgets('manages single recurring instance: toggles active and changes lookahead count', (tester) async {
       tester.view.physicalSize = const Size(1024, 2048);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -293,18 +294,30 @@ void main() {
       await tester.tap(find.textContaining('Band Calendar'));
       await tester.pumpAndSettle();
 
-      // Tap Auto-Sundays button
-      await tester.tap(find.text('Auto-Sundays'));
+      // Tap Recurring Schedules button
+      await tester.tap(find.byKey(const ValueKey('recurring_schedules_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Recurring Service Schedules'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('recurring_card_series-sunday-morning')),
+        findsOneWidget,
+      );
+
+      // Toggle Sunday Morning Worship to Paused
+      await tester.tap(
+        find.byKey(const ValueKey('recurring_switch_series-sunday-morning')),
+      );
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Auto-generated next 4 Sunday services!'),
+        find.textContaining('Schedule Paused — no occurrences generated'),
         findsOneWidget,
       );
     });
 
     testWidgets(
-      'schedules recurring service series via Recurring Schedule modal',
+      'configures single recurring instance with cutoff date and lookahead',
       (tester) async {
         tester.view.physicalSize = const Size(1024, 2048);
         tester.view.devicePixelRatio = 1.0;
@@ -317,29 +330,17 @@ void main() {
         await tester.tap(find.textContaining('Band Calendar'));
         await tester.pumpAndSettle();
 
-        // Tap Recurring Schedule button
-        await tester.tap(find.text('Recurring Schedule'));
+        // Tap Recurring Schedules button
+        await tester.tap(find.byKey(const ValueKey('recurring_schedules_btn')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Schedule Recurring Series'), findsOneWidget);
-        expect(find.text('Communion Sunday Service'), findsOneWidget);
+        expect(find.text('Recurring Service Schedules'), findsOneWidget);
         expect(
-          find.textContaining('1st Sunday of every month'),
+          find.byKey(const ValueKey('lookahead_dropdown_series-sunday-morning')),
           findsOneWidget,
         );
-
-        // Select Communion Sunday Service (1st Sunday of month) template
-        await tester.tap(find.text('Communion Sunday Service'));
-        await tester.pumpAndSettle();
-
-        // Tap Generate Series button
-        await tester.tap(find.byKey(const ValueKey('generate_series_btn')));
-        await tester.pumpAndSettle();
-
         expect(
-          find.textContaining(
-            'Generated 6 services for Communion Sunday Service!',
-          ),
+          find.byKey(const ValueKey('set_cutoff_btn_series-sunday-morning')),
           findsOneWidget,
         );
       },
@@ -391,7 +392,7 @@ void main() {
 
         expect(
           find.textContaining(
-            'Scheduled 6 recurring services for First Sunday Prayer & Praise!',
+            'Configured recurring schedule for First Sunday Prayer & Praise (showing next 6 events)!',
           ),
           findsOneWidget,
         );
@@ -413,9 +414,9 @@ void main() {
         await tester.pumpAndSettle();
 
         // Find the "Assign Musician" button and scroll to it
-        final assignBtn = find
-            .widgetWithText(TextButton, 'Assign Musician')
-            .first;
+        final assignBtn = find.byKey(
+          const ValueKey('assign_musician_btn_event-next-sunday'),
+        );
         await tester.scrollUntilVisible(
           assignBtn,
           200,
@@ -518,10 +519,10 @@ void main() {
         await tester.tap(find.textContaining('Band Calendar'));
         await tester.pumpAndSettle();
 
-        // In non-admin mode: "Musician View" badge is shown, and "Auto-Sundays" / "Recurring Schedule" are not shown
+        // In non-admin mode: "Musician View" badge is shown, and "Auto-Sundays" / "Recurring Schedules" are not shown
         expect(find.text('Musician View'), findsOneWidget);
         expect(find.text('Auto-Sundays'), findsNothing);
-        expect(find.text('Recurring Schedule'), findsNothing);
+        expect(find.text('Recurring Schedules'), findsNothing);
         expect(find.text('Assign Musician'), findsNothing);
       },
     );
@@ -576,5 +577,179 @@ void main() {
         );
       },
     );
+
+    testWidgets('filters roster by arrangement group filter chip', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Find group filter chips
+      expect(
+        find.byKey(const ValueKey('filter_chip_group_group-alpha')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('filter_chip_group_group-beta')),
+        findsOneWidget,
+      );
+
+      // Scroll Group Beta filter into view and tap it
+      final betaChip = find.byKey(const ValueKey('filter_chip_group_group-beta'));
+      await tester.ensureVisible(betaChip);
+      await tester.pumpAndSettle();
+      await tester.tap(betaChip);
+      await tester.pumpAndSettle();
+
+      // Sarah Jenkins and Elena Rostova belong to Group Beta
+      expect(find.text('Sarah Jenkins'), findsOneWidget);
+      expect(find.text('Elena Rostova'), findsOneWidget);
+      // Marcus Miller does not belong to Group Beta
+      expect(find.text('Marcus Miller'), findsNothing);
+    });
+
+    testWidgets('member belongs to multiple groups and displays badges', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Sarah Jenkins belongs to Group Alpha and Group Beta
+      expect(
+        find.byKey(const ValueKey('member_group_badge_member-1_group-alpha')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('member_group_badge_member-1_group-beta')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('admin view displays alert banner and triggers find cover workflow', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // In the first event, mark David Chen unavailable to trigger an alert
+      final davidChip = find.byKey(
+        const ValueKey('lineup_chip_event-next-sunday_member-2'),
+      );
+      await tester.tap(davidChip);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mark Unavailable / Cannot Attend'));
+      await tester.pumpAndSettle();
+
+      // The AdminScheduleAlertsBanner should now be visible
+      expect(
+        find.textContaining('Scheduling Attention Needed'),
+        findsOneWidget,
+      );
+      expect(find.textContaining("Can't attend — missing cover"), findsOneWidget);
+
+      // Tap "Find Cover" button on the banner
+      final findCoverBtn = find.byKey(
+        const ValueKey('find_cover_btn_alert_event-next-sunday_member-2'),
+      );
+      expect(findCoverBtn, findsOneWidget);
+      await tester.tap(findCoverBtn);
+      await tester.pumpAndSettle();
+
+      // Replacement dialog opens
+      expect(find.text('Assign Musician Replacement'), findsOneWidget);
+      expect(find.textContaining('Cannot Attend: David Chen'), findsOneWidget);
+
+      // Confirm replacement
+      await tester.tap(find.byKey(const ValueKey('confirm_replacement_btn')));
+      await tester.pumpAndSettle();
+
+      // David Chen was replaced and alert banner clears
+      expect(
+        find.byKey(const ValueKey('lineup_chip_event-next-sunday_member-2')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('admin notification bell opens coverage alerts modal', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Mark David Chen as unavailable
+      final davidChip = find.byKey(
+        const ValueKey('lineup_chip_event-next-sunday_member-2'),
+      );
+      await tester.tap(davidChip);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Mark Unavailable / Cannot Attend'));
+      await tester.pumpAndSettle();
+
+      // Admin notification bell icon should be present
+      final bellBtn = find.byKey(const ValueKey('admin_alerts_bell_btn'));
+      expect(bellBtn, findsOneWidget);
+
+      // Tap the bell icon to open alerts modal
+      await tester.tap(bellBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Coverage Alerts'), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey('modal_find_cover_btn_alert_event-next-sunday_member-2'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('assigns group to upcoming service lineup', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Switch to Band Calendar tab
+      await tester.tap(find.textContaining('Band Calendar'));
+      await tester.pumpAndSettle();
+
+      // Tap Assign Group on the first event
+      final assignGroupBtn = find.byKey(
+        const ValueKey('assign_group_btn_event-next-sunday'),
+      );
+      expect(assignGroupBtn, findsOneWidget);
+      await tester.tap(assignGroupBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Assign Group to Service'), findsOneWidget);
+      expect(find.text('Youth Band'), findsOneWidget);
+
+      // Select Youth Band
+      await tester.tap(
+        find.byKey(const ValueKey('assign_group_item_group-gamma')),
+      );
+      await tester.pumpAndSettle();
+
+      // Members of Youth Band (David Chen, Elena Rostova, James Wilson) assigned
+      expect(find.textContaining('Assigned Youth Band'), findsOneWidget);
+    });
   });
 }
