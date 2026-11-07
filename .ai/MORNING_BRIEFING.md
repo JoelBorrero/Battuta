@@ -47,3 +47,13 @@
   - `lib/features/score/domain/services/chord_stem_layout_calculator.dart`: Pure Dart geometry calculator implementing standard engraving rules (extreme distance from middle line B4 for stem direction, collision offsets for unisons and adjacent seconds, zero offset for thirds/triads).
   - `test/features/score/chord_stem_layout_calculator_test.dart`: Exhaustive unit tests for stem directions, single notes, high/low chords, equidistant ties, unisons, second collisions (up/down displacements), alternating clusters, and triads.
 - **Architectural Notes**: 100% backward-compatible with all score entities and serialization formats. Pure Dart geometry with zero external dependencies.
+
+### ✅ TASK-105: v1.3 Syllable-to-Note Lyric Alignment Engine
+- **Status**: Complete & Verified
+- **Tests**: 309 / 309 passing (+6 new tests)
+- **Static Analysis**: 0 issues
+- **Files Created/Modified**:
+  - `lib/features/score/domain/services/lyric_syllable_tokenizer.dart`: Vocal prosody tokenizer handling hyphenated word decomposition, Spanish/Italian synalepha (sinalefa) adjacent vowel merger across words (`"Glo-ria al Se-ñor"` -> `["Glo-", "ria al", "Se-", "ñor"]`), explicit elision markers (`~`, `_`), and 1:1 non-rest note alignment.
+  - `lib/features/score/presentation/rendering/notehead_painter.dart`: Updated lyric positioning below the lowest notehead/ledger line boundary to ensure lyrics never collide with low ledger lines (C4 and below).
+  - `test/features/score/lyric_syllable_alignment_test.dart`: Exhaustive unit and custom painter tests for prosody hyphenation, synalepha elisions, measure alignment skipping rests, and canvas rendering below bottom ledger boundary.
+- **Architectural Notes**: Offline-first pure Dart tokenizer respecting standard musical and linguistic prosody standards without external dependencies.

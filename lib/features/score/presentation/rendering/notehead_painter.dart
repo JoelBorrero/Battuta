@@ -5,6 +5,8 @@
 /// plus Gemini advertencia warning badges on affected measures.
 library;
 
+import 'dart:math' as math;
+
 import 'package:battuta/features/score/domain/entities/measure.dart';
 import 'package:battuta/features/score/domain/entities/note_event.dart';
 import 'package:battuta/features/score/domain/entities/pitch.dart';
@@ -38,6 +40,7 @@ abstract final class NoteheadPainter {
     String? measureWarning,
     int? selectedEventIndex,
     bool isDragging = false,
+    bool showLyrics = true,
   }) {
     // -------------------------------------------------------------------------
     // 1. Draw Gemini Advertencia Warning Badge (if present)
@@ -53,6 +56,27 @@ abstract final class NoteheadPainter {
 
     final events = measure.events;
     if (events.isEmpty) return;
+
+    // Calculate lowest ledger boundary across all notes in the measure
+    // so lyrics sit comfortably below the lowest notehead or ledger line.
+    var lowestNoteY = staffBottomY;
+    for (final ev in events) {
+      if (ev.pitch != null) {
+        final ny = StaffPitchMapper.yCoordinateForPitch(
+          ev.pitch!,
+          staffBottomY: staffBottomY,
+          lineSpacing: metrics.lineSpacing,
+        );
+        final noteBottomY = ny + (metrics.lineSpacing * 0.5);
+        if (noteBottomY > lowestNoteY) {
+          lowestNoteY = noteBottomY;
+        }
+      }
+    }
+    final lyricBaselineY = math.max(
+      staffBottomY + 14.0,
+      lowestNoteY + metrics.lineSpacing + 2.0,
+    );
 
     final measureWidth = measureRight - measureLeft;
     final noteSpacing = measureWidth / (events.length + 1);
@@ -95,6 +119,8 @@ abstract final class NoteheadPainter {
           measureRight: measureRight,
           isSelected: isSelected,
           isDragging: isSelected && isDragging,
+          showLyrics: showLyrics,
+          lyricY: lyricBaselineY,
         );
         if (noteBox != null) {
           spatialIndex?.register(noteBox);
@@ -116,6 +142,8 @@ abstract final class NoteheadPainter {
     double? measureRight,
     bool isSelected = false,
     bool isDragging = false,
+    bool showLyrics = true,
+    double? lyricY,
   }) {
     final pitch = event.pitch!;
     final isUnassigned = event.rhythmicValue.isUnassigned;
@@ -349,7 +377,7 @@ abstract final class NoteheadPainter {
     // -------------------------------------------------------------------------
     // Lyrics
     // -------------------------------------------------------------------------
-    if (event.lyric != null && event.lyric!.isNotEmpty) {
+    if (showLyrics && event.lyric != null && event.lyric!.isNotEmpty) {
       final lyricPainter = TextPainter(
         text: TextSpan(
           text: event.lyric,
@@ -362,9 +390,10 @@ abstract final class NoteheadPainter {
         textDirection: TextDirection.ltr,
       )..layout();
 
+      final targetY = lyricY ?? (staffBottomY + 14.0);
       lyricPainter.paint(
         canvas,
-        Offset(x - (lyricPainter.width / 2.0), staffBottomY + 14.0),
+        Offset(x - (lyricPainter.width / 2.0), targetY),
       );
     }
 

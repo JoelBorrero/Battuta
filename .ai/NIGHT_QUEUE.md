@@ -51,7 +51,7 @@
 
 ---
 
-## [ ] TASK-105: v1.3 Syllable-to-Note Lyric Alignment Engine
+## [x] TASK-105: v1.3 Syllable-to-Note Lyric Alignment Engine
 - **Epic**: Epic 3 — Notation Engine Polyphony & Multi-Page View (v1.3)
 - **Scope**:
   1. Create `lib/features/score/domain/services/lyric_syllable_tokenizer.dart` that splits raw section lyrics into hyphenated syllables (`"Glo-ria al Se-ñor"` -> `["Glo-", "ria al", "Se-", "ñor"]`) and maps them 1:1 against non-rest note events in a `Measure`.
