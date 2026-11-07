@@ -85,7 +85,14 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
       );
       if (mounted) {
         if (success) {
-          Navigator.of(context).pop();
+          final currentUser = ref.read(currentUserProvider);
+          if (currentUser == null) {
+            setState(() {
+              _statusMessage = 'Account created! Please check your email to confirm your account.';
+            });
+          } else {
+            Navigator.of(context).pop();
+          }
         } else {
           final err = ref.read(authControllerProvider).error;
           setState(() => _errorMessage = err?.toString() ?? 'Sign up failed.');

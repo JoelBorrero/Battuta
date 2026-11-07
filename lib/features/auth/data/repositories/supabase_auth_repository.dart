@@ -16,6 +16,9 @@ class SupabaseAuthRepository implements AuthRepository {
     required this.clientManager,
   });
 
+  /// The custom URI scheme callback recognized by Android, iOS, and Supabase.
+  static const String authRedirectUrl = 'battuta://login-callback';
+
   final SupabaseClientManager clientManager;
 
   supa.SupabaseClient? get _client => clientManager.client;
@@ -75,6 +78,7 @@ class SupabaseAuthRepository implements AuthRepository {
       final response = await client.auth.signUp(
         email: email.trim(),
         password: password,
+        emailRedirectTo: authRedirectUrl,
         data: displayName != null ? {'display_name': displayName.trim()} : null,
       );
       final user = response.user;
@@ -96,13 +100,29 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       await client.auth.signInWithOtp(
         email: email.trim(),
-        emailRedirectTo: 'org.battuta.battuta://login-callback',
+        emailRedirectTo: authRedirectUrl,
       );
     } on supa.AuthException catch (e, st) {
       throw ServerFailure(message: e.message, statusCode: int.tryParse(e.statusCode ?? ''), stackTrace: st);
     } catch (e, st) {
       if (e is Failure) rethrow;
       throw ServerFailure(message: 'Magic link failed: $e', stackTrace: st);
+    }
+  }
+
+  @override
+  Future<void> resetPassword({required String email}) async {
+    final client = _requireClient();
+    try {
+      await client.auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: authRedirectUrl,
+      );
+    } on supa.AuthException catch (e, st) {
+      throw ServerFailure(message: e.message, statusCode: int.tryParse(e.statusCode ?? ''), stackTrace: st);
+    } catch (e, st) {
+      if (e is Failure) rethrow;
+      throw ServerFailure(message: 'Password reset request failed: $e', stackTrace: st);
     }
   }
 

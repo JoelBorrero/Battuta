@@ -29,6 +29,9 @@ abstract class AuthRepository {
   /// Sends a passwordless Magic Link (OTP) to the specified email.
   Future<void> sendMagicLink({required String email});
 
+  /// Sends a password reset email to the specified address.
+  Future<void> resetPassword({required String email});
+
   /// Signs the active user out and clears session tokens.
   Future<void> signOut();
 }

@@ -95,6 +95,19 @@ class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
     }
   }
 
+  Future<bool> sendPasswordReset({required String email}) async {
+    state = const AsyncLoading();
+    final repo = ref.read(authRepositoryProvider);
+    try {
+      await repo.resetPassword(email: email);
+      state = const AsyncData(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+
   Future<void> signOut() async {
     state = const AsyncLoading();
     final repo = ref.read(authRepositoryProvider);

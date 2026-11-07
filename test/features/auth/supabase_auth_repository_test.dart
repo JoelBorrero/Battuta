@@ -74,6 +74,20 @@ void main() {
         throwsA(isA<ValidationFailure>()),
       );
     });
+
+    test('throws ValidationFailure when attempting resetPassword without configured client', () async {
+      final manager = SupabaseClientManager();
+      final repo = SupabaseAuthRepository(clientManager: manager);
+
+      expect(
+        () => repo.resetPassword(email: 'test@battuta.app'),
+        throwsA(isA<ValidationFailure>()),
+      );
+    });
+
+    test('defines correct auth redirect URL scheme for mobile deep linking', () {
+      expect(SupabaseAuthRepository.authRedirectUrl, equals('battuta://login-callback'));
+    });
   });
 
   group('AuthControllerNotifier Provider Tests', () {
@@ -92,6 +106,18 @@ void main() {
       final success = await container.read(authControllerProvider.notifier).signInWithEmailPassword(
         email: 'admin@battuta.app',
         password: 'password123',
+      );
+
+      expect(success, isFalse);
+      expect(container.read(authControllerProvider), isA<AsyncError>());
+    });
+
+    test('sendPasswordReset fails gracefully when unconfigured', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final success = await container.read(authControllerProvider.notifier).sendPasswordReset(
+        email: 'admin@battuta.app',
       );
 
       expect(success, isFalse);
