@@ -50,20 +50,20 @@ class TeamGroupsNotifier extends Notifier<List<TeamGroup>> {
     return const [
       TeamGroup(
         id: 'group-alpha',
-        name: 'Band Alpha (Contemporary)',
-        description: 'Primary Sunday morning full rhythm section & vocal team',
+        name: 'Ensamble 1',
+        description: 'Primer ensamble de alabanza y adoración',
         colorValue: 0xFFE5A93C, // Stage amber
       ),
       TeamGroup(
         id: 'group-beta',
-        name: 'Band Beta (Acoustic)',
-        description: 'Acoustic-driven arrangement with piano & vocal harmonies',
+        name: 'Ensamble 2',
+        description: 'Segundo ensamble de alabanza y adoración',
         colorValue: 0xFF4A90E2, // Stage blue
       ),
       TeamGroup(
         id: 'group-gamma',
-        name: 'Youth Band',
-        description: 'Youth night and midweek praise team',
+        name: 'Ensamble 3',
+        description: 'Tercer ensamble de alabanza y adoración',
         colorValue: 0xFF50E3C2, // Stage teal
       ),
     ];

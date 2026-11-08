@@ -115,7 +115,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         notes: 'Piano, Synthesizer & Worship Director',
         email: 'joel@battuta.music',
         isAdmin: true,
-        groupIds: ['group-alpha', 'group-beta'],
+        groupIds: ['group-gamma'],
       ),
       TeamMember(
         id: 'member-2',
@@ -125,7 +125,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.scheduled,
         notes: 'Acoustic guitar rhythm & fingerpicking',
         email: 'raul@battuta.music',
-        groupIds: ['group-alpha', 'group-gamma'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-3',
@@ -135,7 +135,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Electric bass groove & fundamentals',
         email: 'pipe@battuta.music',
-        groupIds: ['group-alpha'],
+        groupIds: ['group-gamma'],
       ),
       TeamMember(
         id: 'member-4',
@@ -145,7 +145,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Drums & rhythm section lock',
         email: 'jose@battuta.music',
-        groupIds: ['group-alpha', 'group-beta'],
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-5',
@@ -155,7 +155,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.scheduled,
         notes: 'Lead voice & vocal harmony direction',
         email: 'amparito@battuta.music',
-        groupIds: ['group-alpha', 'group-beta'],
+        groupIds: ['group-beta'],
       ),
       TeamMember(
         id: 'member-6',
@@ -186,7 +186,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         notes: 'Multi-instrumentalist: Bass, Drums & Front of House Sound',
         email: 'daniel@battuta.music',
         isAdmin: true,
-        groupIds: ['group-alpha', 'group-gamma'],
+        groupIds: ['group-gamma'],
       ),
       TeamMember(
         id: 'member-9',
@@ -206,7 +206,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Drums, Synth pads & auxiliary keys',
         email: 'diego@battuta.music',
-        groupIds: ['group-beta', 'group-gamma'],
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-11',
@@ -214,9 +214,9 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         roles: [TeamRole.leadVocal, TeamRole.backingVocal],
         vocalRange: VocalTessitura.alto,
         availability: AvailabilityStatus.available,
-        notes: 'Lead vocal & alto harmonies',
+        notes: 'Lead voice & vocal harmonies',
         email: 'epsa@battuta.music',
-        groupIds: ['group-beta'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-12',
@@ -224,9 +224,9 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         roles: [TeamRole.keys, TeamRole.backingVocal],
         vocalRange: VocalTessitura.baritone,
         availability: AvailabilityStatus.available,
-        notes: 'Piano & baritone harmonies',
+        notes: 'Piano, keyboards & vocal support',
         email: 'humberto@battuta.music',
-        groupIds: ['group-alpha'],
+        groupIds: ['group-beta'],
       ),
       TeamMember(
         id: 'member-13',
@@ -234,7 +234,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         roles: [TeamRole.backingVocal],
         vocalRange: VocalTessitura.alto,
         availability: AvailabilityStatus.available,
-        notes: 'Alto chorus vocals',
+        notes: 'Chorus vocals',
         email: 'jeimy@battuta.music',
         groupIds: ['group-gamma'],
       ),
@@ -244,19 +244,19 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         roles: [TeamRole.leadVocal, TeamRole.backingVocal],
         vocalRange: VocalTessitura.tenor,
         availability: AvailabilityStatus.available,
-        notes: 'Tenor lead vocal & chorus',
+        notes: 'Tenor lead & vocal direction',
         email: 'juanse@battuta.music',
-        groupIds: ['group-gamma'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-15',
         name: 'July',
         roles: [TeamRole.leadVocal, TeamRole.backingVocal],
-        vocalRange: VocalTessitura.alto,
+        vocalRange: VocalTessitura.soprano,
         availability: AvailabilityStatus.available,
-        notes: 'Lead voice & alto support',
+        notes: 'Soprano lead & chorus harmonies',
         email: 'july@battuta.music',
-        groupIds: ['group-beta'],
+        groupIds: ['group-gamma'],
       ),
       TeamMember(
         id: 'member-16',
@@ -264,7 +264,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         roles: [TeamRole.leadVocal, TeamRole.backingVocal],
         vocalRange: VocalTessitura.soprano,
         availability: AvailabilityStatus.available,
-        notes: 'Soprano lead & chorus',
+        notes: 'Lead voice & vocal harmonies',
         email: 'laura@battuta.music',
         groupIds: ['group-beta'],
       ),
@@ -287,7 +287,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         notes: 'Vocal lead & chorus',
         email: 'mona@battuta.music',
         isAdmin: true,
-        groupIds: ['group-beta'],
+        groupIds: ['group-gamma'],
       ),
       TeamMember(
         id: 'member-19',
@@ -297,7 +297,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Chorus vocals',
         email: 'monica@battuta.music',
-        groupIds: ['group-gamma'],
+        groupIds: ['group-beta'],
       ),
       TeamMember(
         id: 'member-20',
@@ -307,7 +307,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Lead electric guitar & ambient textures',
         email: 'nico@battuta.music',
-        groupIds: ['group-alpha', 'group-gamma'],
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-21',
@@ -317,7 +317,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Lead vocals & pastoral guidance',
         email: 'henry@battuta.music',
-        groupIds: ['group-alpha', 'group-beta'],
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-22',
@@ -328,7 +328,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         notes: 'Acoustic guitar, Lead voice, Piano',
         email: 'ricardo@battuta.music',
         isAdmin: true,
-        groupIds: ['group-alpha', 'group-beta'],
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
       TeamMember(
         id: 'member-23',
@@ -338,7 +338,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Piano & keyboard arrangements',
         email: 'samu.garcia@battuta.music',
-        groupIds: ['group-beta'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-24',
@@ -348,7 +348,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Drums & percussion',
         email: 'samu.saldana@battuta.music',
-        groupIds: ['group-gamma'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-25',
@@ -358,7 +358,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Alto lead & chorus',
         email: 'sandra@battuta.music',
-        groupIds: ['group-beta'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-26',
@@ -368,7 +368,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Soprano lead & chorus',
         email: 'sara@battuta.music',
-        groupIds: ['group-gamma'],
+        groupIds: ['group-beta'],
       ),
       TeamMember(
         id: 'member-27',
@@ -388,7 +388,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Alto chorus',
         email: 'vicky@battuta.music',
-        groupIds: ['group-gamma'],
+        groupIds: ['group-alpha'],
       ),
       TeamMember(
         id: 'member-29',
@@ -398,7 +398,17 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
         availability: AvailabilityStatus.available,
         notes: 'Alto chorus harmonies',
         email: 'zulma@battuta.music',
-        groupIds: ['group-alpha'],
+        groupIds: ['group-beta'],
+      ),
+      TeamMember(
+        id: 'member-30',
+        name: 'Margarita',
+        roles: [TeamRole.sound],
+        vocalRange: VocalTessitura.none,
+        availability: AvailabilityStatus.available,
+        notes: 'Ingeniera de Sonido / Front of House Audio',
+        email: 'margarita@battuta.music',
+        groupIds: ['group-alpha', 'group-beta', 'group-gamma'],
       ),
     ];
   }

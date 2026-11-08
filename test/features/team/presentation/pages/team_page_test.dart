@@ -632,11 +632,12 @@ void main() {
       await tester.tap(betaChip);
       await tester.pumpAndSettle();
 
-      // Joel and Amparito belong to Group Beta
-      expect(find.text('Joel'), findsOneWidget);
+      // Amparito and Anita García belong to Group Beta (Ensamble 2)
       expect(find.text('Amparito'), findsOneWidget);
-      // Pipe does not belong to Group Beta
+      expect(find.text('Anita García'), findsOneWidget);
+      // Pipe and Joel do not belong to Group Beta
       expect(find.text('Pipe'), findsNothing);
+      expect(find.text('Joel'), findsNothing);
     });
 
     testWidgets('member belongs to multiple groups and displays badges', (tester) async {
@@ -647,13 +648,13 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      // Sarah Jenkins belongs to Group Alpha and Group Beta
+      // Diego (member-10) belongs to Group Alpha, Beta and Gamma
       expect(
-        find.byKey(const ValueKey('member_group_badge_member-1_group-alpha')),
+        find.byKey(const ValueKey('member_group_badge_member-10_group-alpha')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey('member_group_badge_member-1_group-beta')),
+        find.byKey(const ValueKey('member_group_badge_member-10_group-beta')),
         findsOneWidget,
       );
     });
