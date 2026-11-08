@@ -111,9 +111,7 @@ void main() {
           ProviderScope(
             overrides: [
               songRepositoryProvider.overrideWithValue(repository),
-              currentMemberIdProvider.overrideWith(
-                () => CurrentMemberIdNotifier('member-2'),
-              ),
+              isCurrentUserAdminProvider.overrideWithValue(false),
             ],
             child: const MaterialApp(home: RepertoirePage()),
           ),

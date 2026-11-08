@@ -6,6 +6,7 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -60,7 +61,7 @@ class PracticePlayerBar extends ConsumerWidget {
               if (controller.text.trim().isNotEmpty) {
                 ref
                     .read(audioPracticeControllerProvider.notifier)
-                    .attachAudioSource(controller.text.trim());
+                    .attachAudioSource(controller.text.trim(), songId: song.id);
               }
               Navigator.of(ctx).pop();
             },
@@ -77,14 +78,203 @@ class PracticePlayerBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final audioState = ref.watch(audioPracticeControllerProvider);
     final notifier = ref.read(audioPracticeControllerProvider.notifier);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final isDemo = ref.watch(demoModeProvider);
+    final hasAudio = notifier.hasAudioForSong(song.id, isDemo: isDemo);
+    final audioTitle = notifier.getAudioSourceTitle(
+      song.id,
+      isDemo: isDemo,
+      defaultDemoTitle:
+          '${song.title} (${l10n?.practiceReference ?? "Practice Reference"})',
+    );
+
+    // ── When No Audio is Attached (Non-Demo Mode) ──
+    if (!hasAudio) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 420;
+          return Card(
+            elevation: 0,
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: isDark ? AppTheme.slateBorder : AppTheme.pearlBorder,
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: isNarrow
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppTheme.slateSurfaceLight
+                                    : AppTheme.pearlSurfaceLight,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.headphones_outlined,
+                                size: 20,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    l10n?.noAudioAttachedTitle ??
+                                        'No Reference Audio Attached',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    l10n?.noAudioAttachedSubtitle ??
+                                        'Attach an MP3 or guide track for rehearsal scrubbing & loops',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                      fontSize: 12,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton.filledTonal(
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                audioState.metronomeEnabled
+                                    ? Icons.timer
+                                    : Icons.timer_outlined,
+                                color: audioState.metronomeEnabled
+                                    ? theme.colorScheme.primary
+                                    : null,
+                              ),
+                              tooltip: l10n?.metronomeClickTooltip(song.tempo) ??
+                                  'Metronome Click (${song.tempo} BPM)',
+                              onPressed: notifier.toggleMetronome,
+                            ),
+                            const SizedBox(width: 8),
+                            FilledButton.tonalIcon(
+                              style: FilledButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
+                                ),
+                              ),
+                              icon: const Icon(Icons.add_link, size: 16),
+                              label: Text(l10n?.attachAudioAction ?? 'Attach Audio'),
+                              onPressed: () => _showAttachAudioDialog(context, ref),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppTheme.slateSurfaceLight
+                                : AppTheme.pearlSurfaceLight,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.headphones_outlined,
+                            size: 20,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                l10n?.noAudioAttachedTitle ??
+                                    'No Reference Audio Attached',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                l10n?.noAudioAttachedSubtitle ??
+                                    'Attach an MP3 or guide track for rehearsal scrubbing & loops',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontSize: 12,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          visualDensity: VisualDensity.compact,
+                          icon: Icon(
+                            audioState.metronomeEnabled
+                                ? Icons.timer
+                                : Icons.timer_outlined,
+                            color: audioState.metronomeEnabled
+                                ? theme.colorScheme.primary
+                                : null,
+                          ),
+                          tooltip: l10n?.metronomeClickTooltip(song.tempo) ??
+                              'Metronome Click (${song.tempo} BPM)',
+                          onPressed: notifier.toggleMetronome,
+                        ),
+                        const SizedBox(width: 4),
+                        FilledButton.tonalIcon(
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                          ),
+                          icon: const Icon(Icons.add_link, size: 16),
+                          label: Text(l10n?.attachAudioAction ?? 'Attach Audio'),
+                          onPressed: () => _showAttachAudioDialog(context, ref),
+                        ),
+                      ],
+                    ),
+            ),
+          );
+        },
+      );
+    }
 
     final position = audioState.position;
     final duration = audioState.duration;
     final progress = duration.inMilliseconds > 0
         ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
-
-    final isDark = theme.brightness == Brightness.dark;
 
     return Card(
       elevation: 0,
@@ -115,7 +305,8 @@ class PracticePlayerBar extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        audioState.audioSourceTitle ??
+                        audioTitle ??
+                            audioState.audioSourceTitle ??
                             '${song.title} (${l10n?.practiceReference ?? "Practice Reference"})',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                         maxLines: 1,
@@ -154,6 +345,15 @@ class PracticePlayerBar extends ConsumerWidget {
                   tooltip: l10n?.attachAudioTrackTooltip ?? 'Attach Audio Track',
                   onPressed: () => _showAttachAudioDialog(context, ref),
                 ),
+
+                // Detach audio button (if not demo mode)
+                if (!isDemo)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.link_off, size: 18),
+                    tooltip: l10n?.detachAudioAction ?? 'Detach Audio',
+                    onPressed: () => notifier.detachAudioSource(song.id),
+                  ),
               ],
             ),
 

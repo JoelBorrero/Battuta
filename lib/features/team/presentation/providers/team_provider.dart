@@ -4,6 +4,7 @@
 /// and vocal/instrument assignments.
 library;
 
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,16 +52,31 @@ final isCurrentUserAdminProvider = Provider<bool>((ref) {
 });
 
 class TeamMembersNotifier extends Notifier<List<TeamMember>> {
+  final List<TeamMember> _userMembers = [];
+
   @override
   List<TeamMember> build() {
-    return _initialSampleMembers();
+    final isDemo = ref.watch(demoModeProvider);
+    if (isDemo) {
+      final userIds = _userMembers.map((m) => m.id).toSet();
+      return [
+        ..._userMembers,
+        ..._initialSampleMembers().where((s) => !userIds.contains(s.id)),
+      ];
+    }
+    return List.unmodifiable(_userMembers);
   }
 
   void addMember(TeamMember member) {
-    state = [...state, member];
+    _userMembers.add(member);
+    ref.invalidateSelf();
   }
 
   void updateMember(TeamMember updated) {
+    final idx = _userMembers.indexWhere((m) => m.id == updated.id);
+    if (idx != -1) {
+      _userMembers[idx] = updated;
+    }
     state = [
       for (final m in state)
         if (m.id == updated.id) updated else m,
@@ -68,6 +84,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
   }
 
   void removeMember(String id) {
+    _userMembers.removeWhere((m) => m.id != id);
     state = state.where((m) => m.id != id).toList();
   }
 

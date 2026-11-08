@@ -4,8 +4,8 @@
 /// (e.g. Band Alpha, Band Beta, Youth Team) where members rotate together.
 library;
 
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/team_group.dart';
-import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final teamGroupsProvider =
@@ -14,16 +14,27 @@ final teamGroupsProvider =
     );
 
 class TeamGroupsNotifier extends Notifier<List<TeamGroup>> {
+  final List<TeamGroup> _userGroups = [];
+
   @override
   List<TeamGroup> build() {
-    return _initialSampleGroups();
+    final isDemo = ref.watch(demoModeProvider);
+    if (isDemo) {
+      return [..._userGroups, ..._initialSampleGroups()];
+    }
+    return List.unmodifiable(_userGroups);
   }
 
   void addGroup(TeamGroup group) {
-    state = [...state, group];
+    _userGroups.add(group);
+    ref.invalidateSelf();
   }
 
   void updateGroup(TeamGroup updated) {
+    final idx = _userGroups.indexWhere((g) => g.id == updated.id);
+    if (idx != -1) {
+      _userGroups[idx] = updated;
+    }
     state = [
       for (final g in state)
         if (g.id == updated.id) updated else g,
@@ -31,6 +42,7 @@ class TeamGroupsNotifier extends Notifier<List<TeamGroup>> {
   }
 
   void removeGroup(String id) {
+    _userGroups.removeWhere((g) => g.id != id);
     state = state.where((g) => g.id != id).toList();
   }
 
@@ -57,11 +69,3 @@ class TeamGroupsNotifier extends Notifier<List<TeamGroup>> {
     ];
   }
 }
-
-/// Helper provider to get members belonging to a specific group ID.
-final membersInGroupFamily =
-    Provider.family<List<TeamMember>, ({String groupId, List<TeamMember> members})>(
-  (ref, arg) {
-    return arg.members.where((m) => m.groupIds.contains(arg.groupId)).toList();
-  },
-);

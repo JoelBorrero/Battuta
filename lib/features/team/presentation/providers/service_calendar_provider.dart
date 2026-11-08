@@ -6,6 +6,7 @@
 /// respecting cutoff dates when recurring generation is disabled.
 library;
 
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
@@ -18,54 +19,77 @@ final serviceCalendarProvider =
     );
 
 class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
-  List<ServiceEvent>? _customEvents;
+  final List<ServiceEvent> _userEvents = [];
 
   @override
   List<ServiceEvent> build() {
     final schedules = ref.watch(recurringSchedulesProvider);
-    _customEvents ??= _initialSampleEvents();
-    return _computeProjectedEvents(_customEvents!, schedules);
+    final isDemo = ref.watch(demoModeProvider);
+    final userEventIds = _userEvents.map((e) => e.id).toSet();
+    final baseEvents = isDemo
+        ? [
+            ..._userEvents,
+            ..._initialSampleEvents().where((s) => !userEventIds.contains(s.id)),
+          ]
+        : _userEvents;
+    return _computeProjectedEvents(baseEvents, schedules);
   }
 
   void _syncState() {
     final schedules = ref.read(recurringSchedulesProvider);
-    state = _computeProjectedEvents(_customEvents ?? [], schedules);
+    final isDemo = ref.read(demoModeProvider);
+    final userEventIds = _userEvents.map((e) => e.id).toSet();
+    final baseEvents = isDemo
+        ? [
+            ..._userEvents,
+            ..._initialSampleEvents().where((s) => !userEventIds.contains(s.id)),
+          ]
+        : _userEvents;
+    state = _computeProjectedEvents(baseEvents, schedules);
   }
 
   /// Adds a new calendar service or rehearsal event.
   void addEvent(ServiceEvent event) {
-    _customEvents ??= List.of(state);
-    _customEvents = [..._customEvents!, event];
+    _userEvents.add(event);
     _syncState();
   }
 
   /// Updates an existing service event.
   void updateEvent(ServiceEvent updated) {
-    _customEvents ??= List.of(state);
-    _customEvents = [
-      for (final e in _customEvents!)
-        if (e.id == updated.id) updated else e,
-    ];
+    final idx = _userEvents.indexWhere((e) => e.id == updated.id);
+    if (idx != -1) {
+      _userEvents[idx] = updated;
+    }
     _syncState();
   }
 
   /// Deletes a service event by id.
   void deleteEvent(String id) {
-    _customEvents ??= List.of(state);
-    _customEvents = _customEvents!.where((e) => e.id != id).toList();
+    _userEvents.removeWhere((e) => e.id == id);
     _syncState();
   }
 
-  /// Ensures an event exists in `_customEvents` before mutating its assignments.
+  /// Ensures an event exists in `_userEvents` before mutating its assignments.
   void _materializeEventIfNeeded(String eventId) {
-    _customEvents ??= List.of(state);
-    final exists = _customEvents!.any((e) => e.id == eventId);
+    final exists = _userEvents.any((e) => e.id == eventId);
     if (!exists) {
       final projected = state.where((e) => e.id == eventId).firstOrNull;
       if (projected != null) {
-        _customEvents!.add(projected);
+        _userEvents.add(projected);
       }
     }
+  }
+
+  void _updateUserEvent(
+    String eventId,
+    ServiceEvent Function(ServiceEvent) updater,
+  ) {
+    _materializeEventIfNeeded(eventId);
+    final idx = _userEvents.indexWhere((e) => e.id == eventId);
+    if (idx != -1) {
+      _userEvents[idx] = updater(_userEvents[idx]);
+    }
+    _syncState();
   }
 
   /// Assigns or updates a team member's role and status for a service.
@@ -75,20 +99,15 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     required TeamRole role,
     AssignmentStatus status = AssignmentStatus.confirmed,
   }) {
-    _materializeEventIfNeeded(eventId);
-    _customEvents = [
-      for (final event in _customEvents ?? [])
-        if (event.id == eventId)
-          event.copyWith(
-            assignments: <ServiceAssignment>[
-              ...event.assignments.where((a) => a.memberId != memberId),
-              ServiceAssignment(memberId: memberId, role: role, status: status),
-            ],
-          )
-        else
-          event,
-    ];
-    _syncState();
+    _updateUserEvent(
+      eventId,
+      (event) => event.copyWith(
+        assignments: <ServiceAssignment>[
+          ...event.assignments.where((a) => a.memberId != memberId),
+          ServiceAssignment(memberId: memberId, role: role, status: status),
+        ],
+      ),
+    );
   }
 
   /// Removes a team member assignment from a service.
@@ -96,19 +115,14 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     required String eventId,
     required String memberId,
   }) {
-    _materializeEventIfNeeded(eventId);
-    _customEvents = [
-      for (final event in _customEvents ?? [])
-        if (event.id == eventId)
-          event.copyWith(
-            assignments: event.assignments
-                .where((a) => a.memberId != memberId)
-                .toList(),
-          )
-        else
-          event,
-    ];
-    _syncState();
+    _updateUserEvent(
+      eventId,
+      (event) => event.copyWith(
+        assignments: event.assignments
+            .where((a) => a.memberId != memberId)
+            .toList(),
+      ),
+    );
   }
 
   /// Replaces an existing musician assignment with a substitute team member.
@@ -119,34 +133,30 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     TeamRole? role,
     AssignmentStatus status = AssignmentStatus.confirmed,
   }) {
-    _materializeEventIfNeeded(eventId);
-    _customEvents = [
-      for (final event in _customEvents ?? [])
-        if (event.id == eventId)
-          event.copyWith(
-            assignments: <ServiceAssignment>[
-              ...event.assignments
-                  .where((a) => a.memberId != oldMemberId && a.memberId != newMemberId),
-              ServiceAssignment(
-                memberId: newMemberId,
-                role: role ??
-                    event.assignments
-                        .firstWhere(
-                          (a) => a.memberId == oldMemberId,
-                          orElse: () => const ServiceAssignment(
-                            memberId: '',
-                            role: TeamRole.keys,
-                          ),
-                        )
-                        .role,
-                status: status,
-              ),
-            ],
-          )
-        else
-          event,
-    ];
-    _syncState();
+    _updateUserEvent(
+      eventId,
+      (event) => event.copyWith(
+        assignments: <ServiceAssignment>[
+          ...event.assignments.where(
+            (a) => a.memberId != oldMemberId && a.memberId != newMemberId,
+          ),
+          ServiceAssignment(
+            memberId: newMemberId,
+            role: role ??
+                event.assignments
+                    .firstWhere(
+                      (a) => a.memberId == oldMemberId,
+                      orElse: () => const ServiceAssignment(
+                        memberId: '',
+                        role: TeamRole.keys,
+                      ),
+                    )
+                    .role,
+            status: status,
+          ),
+        ],
+      ),
+    );
   }
 
   /// Assigns all members of a group to a service event, marking unavailable members as declined.
@@ -154,28 +164,23 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     required String eventId,
     required List<TeamMember> groupMembers,
   }) {
-    _materializeEventIfNeeded(eventId);
-    _customEvents = [
-      for (final event in _customEvents ?? [])
-        if (event.id == eventId)
-          event.copyWith(
-            assignments: <ServiceAssignment>[
-              ...event.assignments,
-              for (final member in groupMembers)
-                if (!event.assignments.any((a) => a.memberId == member.id))
-                  ServiceAssignment(
-                    memberId: member.id,
-                    role: member.role,
-                    status: member.availability == AvailabilityStatus.unavailable
-                        ? AssignmentStatus.declined
-                        : AssignmentStatus.confirmed,
-                  ),
-            ],
-          )
-        else
-          event,
-    ];
-    _syncState();
+    _updateUserEvent(
+      eventId,
+      (event) => event.copyWith(
+        assignments: <ServiceAssignment>[
+          ...event.assignments,
+          for (final member in groupMembers)
+            if (!event.assignments.any((a) => a.memberId == member.id))
+              ServiceAssignment(
+                memberId: member.id,
+                role: member.role,
+                status: member.availability == AvailabilityStatus.unavailable
+                    ? AssignmentStatus.declined
+                    : AssignmentStatus.confirmed,
+              ),
+        ],
+      ),
+    );
   }
 
   /// Cycles a member's attendance/availability status for the next upcoming service.
@@ -185,13 +190,10 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
     if (upcoming.isEmpty) return;
 
-    // Target the earliest upcoming event where the member is already scheduled,
-    // or fall back to the first upcoming event to assign them.
     final targetEvent = upcoming.firstWhere(
       (e) => e.assignments.any((a) => a.memberId == memberId),
       orElse: () => upcoming.first,
     );
-    _materializeEventIfNeeded(targetEvent.id);
 
     final existingIndex = targetEvent.assignments.indexWhere(
       (a) => a.memberId == memberId,
@@ -212,22 +214,18 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         AssignmentStatus.scheduled => AssignmentStatus.confirmed,
       };
 
-      _customEvents = [
-        for (final event in _customEvents ?? [])
-          if (event.id == targetEvent.id)
-            event.copyWith(
-              assignments: <ServiceAssignment>[
-                for (final a in event.assignments)
-                  if (a.memberId == memberId)
-                    a.copyWith(status: nextStatus)
-                  else
-                    a,
-              ],
-            )
-          else
-            event,
-      ];
-      _syncState();
+      _updateUserEvent(
+        targetEvent.id,
+        (event) => event.copyWith(
+          assignments: <ServiceAssignment>[
+            for (final a in event.assignments)
+              if (a.memberId == memberId)
+                a.copyWith(status: nextStatus)
+              else
+                a,
+          ],
+        ),
+      );
     }
   }
 

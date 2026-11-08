@@ -1,16 +1,45 @@
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _FakeDemoModeNotifier extends DemoModeNotifier {
+  _FakeDemoModeNotifier([this._initial = true]);
+  final bool _initial;
+  @override
+  bool build() => _initial;
+}
+
 void main() {
-  Widget buildSubject() {
-    return const ProviderScope(child: MaterialApp(home: TeamPage()));
+  Widget buildSubject({bool demoMode = true}) {
+    return ProviderScope(
+      overrides: [
+        demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(demoMode)),
+      ],
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: TeamPage(),
+      ),
+    );
   }
 
   group('TeamPage', () {
+    testWidgets('renders empty state card when demo mode is off and roster is empty', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject(demoMode: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No Team Members Yet'), findsOneWidget);
+      expect(find.text('Add Member'), findsWidgets);
+      expect(find.text('Enable Demo Mode'), findsOneWidget);
+    });
+
     testWidgets('renders team roster, statistics, and filter chips', (
       tester,
     ) async {
@@ -381,7 +410,7 @@ void main() {
         // Select 6 occurrences
         await tester.tap(find.byKey(const ValueKey('series_count_dropdown')));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('6 occurrences (~1.5 months)').last);
+        await tester.tap(find.text('6 services (6 weeks ahead)').last);
         await tester.pumpAndSettle();
 
         expect(find.text('Create Series (6)'), findsOneWidget);

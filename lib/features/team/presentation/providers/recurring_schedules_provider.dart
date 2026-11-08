@@ -5,6 +5,7 @@
 /// projection lookaheads, active toggling, and disabling on/after a specific cutoff date.
 library;
 
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:flutter/material.dart';
@@ -16,14 +17,21 @@ final recurringSchedulesProvider =
     );
 
 class RecurringSchedulesNotifier extends Notifier<List<RecurringSchedule>> {
+  final List<RecurringSchedule> _userSchedules = [];
+
   @override
   List<RecurringSchedule> build() {
-    return _initialSampleSchedules();
+    final isDemo = ref.watch(demoModeProvider);
+    if (isDemo) {
+      return [..._userSchedules, ..._initialSampleSchedules()];
+    }
+    return List.unmodifiable(_userSchedules);
   }
 
   /// Adds a new repetitive schedule pattern.
   void addSchedule(RecurringSchedule schedule) {
-    state = [...state, schedule];
+    _userSchedules.add(schedule);
+    ref.invalidateSelf();
   }
 
   /// Updates an existing recurring schedule definition.

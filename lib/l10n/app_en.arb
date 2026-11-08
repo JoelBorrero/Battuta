@@ -247,6 +247,62 @@
   "@noChordsForSection": {
     "description": "Notice when a section has no chords"
   },
+  "demoModeTitle": "Demo Mode",
+  "@demoModeTitle": {
+    "description": "Title for Demo / Showcase Mode toggle switch"
+  },
+  "demoModeSubtitle": "Show mock musicians, sample schedules, AI credits, and demo practice audio",
+  "@demoModeSubtitle": {
+    "description": "Subtitle describing Demo / Showcase Mode"
+  },
+  "demoModeSection": "Showcase & Demo Mode",
+  "@demoModeSection": {
+    "description": "Section header for demo mode settings"
+  },
+  "noAudioAttachedTitle": "No Reference Audio Attached",
+  "@noAudioAttachedTitle": {
+    "description": "Title when a song has no audio file attached"
+  },
+  "noAudioAttachedSubtitle": "Attach an MP3, WAV, or rehearsal guide track for audio scrubbing",
+  "@noAudioAttachedSubtitle": {
+    "description": "Subtitle when a song has no audio file attached"
+  },
+  "attachAudioAction": "Attach Audio",
+  "@attachAudioAction": {
+    "description": "Button to attach an audio track to a song"
+  },
+  "detachAudioAction": "Detach Audio",
+  "@detachAudioAction": {
+    "description": "Button to remove attached audio track from song"
+  },
+  "noMembersInRoster": "No Team Members Yet",
+  "@noMembersInRoster": {
+    "description": "Title when team roster is empty"
+  },
+  "noMembersInRosterSubtitle": "Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.",
+  "@noMembersInRosterSubtitle": {
+    "description": "Subtitle when team roster is empty"
+  },
+  "noEventsInCalendar": "No Services or Rehearsals Scheduled",
+  "@noEventsInCalendar": {
+    "description": "Title when band calendar has no events"
+  },
+  "noEventsInCalendarSubtitle": "Tap + to schedule an event, or enable Demo Mode in Settings to view sample schedules.",
+  "@noEventsInCalendarSubtitle": {
+    "description": "Subtitle when band calendar has no events"
+  },
+  "enableDemoModeAction": "Enable Demo Mode",
+  "@enableDemoModeAction": {
+    "description": "Button to turn on Demo Mode"
+  },
+  "localWorkspace": "Local Workspace",
+  "@localWorkspace": {
+    "description": "Name for offline local workspace pool"
+  },
+  "localOfflineTier": "Offline",
+  "@localOfflineTier": {
+    "description": "Badge tier for offline local workspace pool"
+  },
   "newSong": "New Song",
   "@newSong": {
     "description": "Button and title for creating a new song"

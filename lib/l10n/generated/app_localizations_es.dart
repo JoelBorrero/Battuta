@@ -193,6 +193,52 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay acordes ingresados para esta sección.';
 
   @override
+  String get demoModeTitle => 'Modo Demo';
+
+  @override
+  String get demoModeSubtitle =>
+      'Mostrar músicos de prueba, horarios de muestra, créditos de IA y audio de práctica de demostración';
+
+  @override
+  String get demoModeSection => 'Modo de Demostración y Prueba';
+
+  @override
+  String get noAudioAttachedTitle => 'Sin Audio de Referencia Adjunto';
+
+  @override
+  String get noAudioAttachedSubtitle =>
+      'Adjunta un MP3, WAV o pista guía de ensayo para reproducción y cambio de tono';
+
+  @override
+  String get attachAudioAction => 'Adjuntar Audio';
+
+  @override
+  String get detachAudioAction => 'Desvincular Audio';
+
+  @override
+  String get noMembersInRoster => 'Sin Miembros en la Plantilla';
+
+  @override
+  String get noMembersInRosterSubtitle =>
+      'Toca + para añadir músicos, o activa el Modo Demo en Ajustes para ver datos de prueba.';
+
+  @override
+  String get noEventsInCalendar => 'Sin Servicios ni Ensayos Programados';
+
+  @override
+  String get noEventsInCalendarSubtitle =>
+      'Toca + para programar un evento, o activa el Modo Demo en Ajustes para ver horarios de prueba.';
+
+  @override
+  String get enableDemoModeAction => 'Activar Modo Demo';
+
+  @override
+  String get localWorkspace => 'Espacio de Trabajo Local';
+
+  @override
+  String get localOfflineTier => 'Desconectado';
+
+  @override
   String get newSong => 'Nueva Canción';
 
   @override

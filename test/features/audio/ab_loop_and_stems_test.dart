@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/audio/data/local_stem_storage_service.dart';
 import 'package:battuta/features/audio/domain/models/ab_loop_region.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
@@ -8,6 +9,13 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _FakeDemoModeNotifier extends DemoModeNotifier {
+  _FakeDemoModeNotifier([this._initial = true]);
+  final bool _initial;
+  @override
+  bool build() => _initial;
+}
 
 void main() {
   group('AbLoopRegion Domain Tests', () {
@@ -183,6 +191,9 @@ void main() {
 
     Widget buildSubject() {
       return ProviderScope(
+        overrides: [
+          demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(true)),
+        ],
         child: MaterialApp(
           home: Scaffold(body: PracticePlayerBar(song: sampleSong)),
         ),

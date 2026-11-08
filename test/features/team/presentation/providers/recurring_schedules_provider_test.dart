@@ -1,21 +1,55 @@
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/presentation/providers/recurring_schedules_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _FakeDemoModeNotifier extends DemoModeNotifier {
+  _FakeDemoModeNotifier([this._initial = true]);
+  final bool _initial;
+  @override
+  bool build() => _initial;
+}
+
 void main() {
   group('RecurringSchedulesProvider', () {
-    test('initializes with sample Sunday Morning and Midweek rules', () {
-      final container = ProviderContainer();
+    test('is empty when demo mode is disabled', () {
+      final container = ProviderContainer(
+        overrides: [
+          demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(false)),
+        ],
+      );
       addTearDown(container.dispose);
 
       final schedules = container.read(recurringSchedulesProvider);
-      expect(schedules.length, equals(2));
-      expect(schedules.any((s) => s.id == 'series-sunday-morning'), isTrue);
-      expect(schedules.any((s) => s.id == 'series-thursday-rehearsal'), isTrue);
+      expect(schedules, isEmpty);
     });
 
+    test(
+      'initializes with sample Sunday Morning and Midweek rules in demo mode',
+      () {
+        final container = ProviderContainer(
+          overrides: [
+            demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(true)),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final schedules = container.read(recurringSchedulesProvider);
+        expect(schedules.length, equals(2));
+        expect(schedules.any((s) => s.id == 'series-sunday-morning'), isTrue);
+        expect(
+          schedules.any((s) => s.id == 'series-thursday-rehearsal'),
+          isTrue,
+        );
+      },
+    );
+
     test('toggles active state of a recurring schedule', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(true)),
+        ],
+      );
       addTearDown(container.dispose);
 
       expect(
@@ -40,7 +74,11 @@ void main() {
     });
 
     test('sets and clears cutoff disabled date', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(true)),
+        ],
+      );
       addTearDown(container.dispose);
 
       final cutoff = DateTime(2026, 12, 1);
@@ -71,7 +109,11 @@ void main() {
     });
 
     test('updates lookahead count (X number of events ahead)', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(true)),
+        ],
+      );
       addTearDown(container.dispose);
 
       container

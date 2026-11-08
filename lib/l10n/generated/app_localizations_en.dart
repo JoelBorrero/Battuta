@@ -191,6 +191,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noChordsForSection => 'No chords entered for this section.';
 
   @override
+  String get demoModeTitle => 'Demo Mode';
+
+  @override
+  String get demoModeSubtitle =>
+      'Show mock musicians, sample schedules, AI credits, and demo practice audio';
+
+  @override
+  String get demoModeSection => 'Showcase & Demo Mode';
+
+  @override
+  String get noAudioAttachedTitle => 'No Reference Audio Attached';
+
+  @override
+  String get noAudioAttachedSubtitle =>
+      'Attach an MP3, WAV, or rehearsal guide track for audio scrubbing';
+
+  @override
+  String get attachAudioAction => 'Attach Audio';
+
+  @override
+  String get detachAudioAction => 'Detach Audio';
+
+  @override
+  String get noMembersInRoster => 'No Team Members Yet';
+
+  @override
+  String get noMembersInRosterSubtitle =>
+      'Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.';
+
+  @override
+  String get noEventsInCalendar => 'No Services or Rehearsals Scheduled';
+
+  @override
+  String get noEventsInCalendarSubtitle =>
+      'Tap + to schedule an event, or enable Demo Mode in Settings to view sample schedules.';
+
+  @override
+  String get enableDemoModeAction => 'Enable Demo Mode';
+
+  @override
+  String get localWorkspace => 'Local Workspace';
+
+  @override
+  String get localOfflineTier => 'Offline';
+
+  @override
   String get newSong => 'New Song';
 
   @override

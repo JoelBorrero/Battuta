@@ -458,6 +458,90 @@ abstract class AppLocalizations {
   /// **'No chords entered for this section.'**
   String get noChordsForSection;
 
+  /// Title for Demo / Showcase Mode toggle switch
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Mode'**
+  String get demoModeTitle;
+
+  /// Subtitle describing Demo / Showcase Mode
+  ///
+  /// In en, this message translates to:
+  /// **'Show mock musicians, sample schedules, AI credits, and demo practice audio'**
+  String get demoModeSubtitle;
+
+  /// Section header for demo mode settings
+  ///
+  /// In en, this message translates to:
+  /// **'Showcase & Demo Mode'**
+  String get demoModeSection;
+
+  /// Title when a song has no audio file attached
+  ///
+  /// In en, this message translates to:
+  /// **'No Reference Audio Attached'**
+  String get noAudioAttachedTitle;
+
+  /// Subtitle when a song has no audio file attached
+  ///
+  /// In en, this message translates to:
+  /// **'Attach an MP3, WAV, or rehearsal guide track for audio scrubbing'**
+  String get noAudioAttachedSubtitle;
+
+  /// Button to attach an audio track to a song
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Audio'**
+  String get attachAudioAction;
+
+  /// Button to remove attached audio track from song
+  ///
+  /// In en, this message translates to:
+  /// **'Detach Audio'**
+  String get detachAudioAction;
+
+  /// Title when team roster is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No Team Members Yet'**
+  String get noMembersInRoster;
+
+  /// Subtitle when team roster is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.'**
+  String get noMembersInRosterSubtitle;
+
+  /// Title when band calendar has no events
+  ///
+  /// In en, this message translates to:
+  /// **'No Services or Rehearsals Scheduled'**
+  String get noEventsInCalendar;
+
+  /// Subtitle when band calendar has no events
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to schedule an event, or enable Demo Mode in Settings to view sample schedules.'**
+  String get noEventsInCalendarSubtitle;
+
+  /// Button to turn on Demo Mode
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Demo Mode'**
+  String get enableDemoModeAction;
+
+  /// Name for offline local workspace pool
+  ///
+  /// In en, this message translates to:
+  /// **'Local Workspace'**
+  String get localWorkspace;
+
+  /// Badge tier for offline local workspace pool
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get localOfflineTier;
+
   /// Button and title for creating a new song
   ///
   /// In en, this message translates to:

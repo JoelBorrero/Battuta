@@ -4,6 +4,7 @@
 /// storage at the active workspace level.
 library;
 
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/utils/logger.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
@@ -23,27 +24,44 @@ class WorkspaceUsageNotifier extends AsyncNotifier<WorkspaceUsage> {
   @override
   Future<WorkspaceUsage> build() async {
     final clientManager = ref.watch(supabaseClientManagerProvider);
-    return _fetchUsage(clientManager);
+    final isDemo = ref.watch(demoModeProvider);
+    return _fetchUsage(clientManager, isDemo: isDemo);
   }
 
-  Future<WorkspaceUsage> _fetchUsage(SupabaseClientManager clientManager) async {
+  Future<WorkspaceUsage> _fetchUsage(
+    SupabaseClientManager clientManager, {
+    required bool isDemo,
+  }) async {
     final client = clientManager.client;
     final now = DateTime.now();
     final period = "${now.year}-${now.month.toString().padLeft(2, '0')}";
 
-    // Offline-first base metrics
-    final base = WorkspaceUsage(
-      workspaceId: _defaultWorkspaceId,
-      workspaceName: _defaultWorkspaceName,
-      tier: 'Pro',
-      billingPeriod: period,
-      geminiCreditsUsed: 1450,
-      geminiCreditsLimit: 5000,
-      geminiScansCount: 14,
-      storageUsedBytes: 42 * 1024 * 1024, // 42 MB
-      storageLimitBytes: 1024 * 1024 * 1024, // 1 GB
-      filesUploadedCount: 28,
-    );
+    // Base metrics: if demo, return sample credits/storage. If real, return authentic 0 used.
+    final base = isDemo
+        ? WorkspaceUsage(
+            workspaceId: _defaultWorkspaceId,
+            workspaceName: _defaultWorkspaceName,
+            tier: 'Pro',
+            billingPeriod: period,
+            geminiCreditsUsed: 1450,
+            geminiCreditsLimit: 5000,
+            geminiScansCount: 14,
+            storageUsedBytes: 42 * 1024 * 1024, // 42 MB
+            storageLimitBytes: 1024 * 1024 * 1024, // 1 GB
+            filesUploadedCount: 28,
+          )
+        : WorkspaceUsage(
+            workspaceId: 'ws-local-offline',
+            workspaceName: 'Local Workspace',
+            tier: 'Offline',
+            billingPeriod: period,
+            geminiCreditsUsed: 0,
+            geminiCreditsLimit: 5000,
+            geminiScansCount: 0,
+            storageUsedBytes: 0,
+            storageLimitBytes: 1024 * 1024 * 1024,
+            filesUploadedCount: 0,
+          );
 
     if (client == null || client.auth.currentUser == null) {
       return base;

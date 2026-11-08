@@ -7,6 +7,7 @@ library;
 import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
@@ -380,6 +381,30 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(l10n?.omrDiagnosticLogsSubtitle ?? 'Inspect Gemini requests, latencies & responses'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => OmrLogViewerModal.show(context),
+          ),
+
+          const Divider(),
+
+          // ── Showcase & Demo Mode ──
+          _SectionHeader(title: l10n?.demoModeSection ?? 'Showcase & Demo Mode'),
+          SwitchListTile(
+            key: const ValueKey('demo_mode_switch'),
+            secondary: const Icon(
+              Icons.science_outlined,
+              color: AppTheme.amberAccent,
+            ),
+            title: Text(
+              l10n?.demoModeTitle ?? 'Demo Mode',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              l10n?.demoModeSubtitle ??
+                  'Show mock musicians, sample schedules, AI credits, and demo practice audio',
+            ),
+            value: ref.watch(demoModeProvider),
+            onChanged: (enabled) {
+              ref.read(demoModeProvider.notifier).setDemoMode(enabled);
+            },
           ),
 
           const Divider(),

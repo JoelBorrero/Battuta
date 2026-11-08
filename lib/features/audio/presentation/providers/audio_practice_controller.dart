@@ -6,6 +6,7 @@
 /// - Variable speed control (0.5x to 1.5x)
 /// - Metronome pulse synchronization with song tempo
 /// - Section practice looping (Intro, Verse, Chorus, etc.)
+/// - Song-specific audio attachment management (real vs demo)
 library;
 
 import 'dart:async';
@@ -52,6 +53,7 @@ class AudioPracticeState {
     Duration? loopPointB,
     bool clearLoop = false,
     bool clearAbLoop = false,
+    bool clearAudioSource = false,
   }) {
     return AudioPracticeState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -63,7 +65,9 @@ class AudioPracticeState {
       activeLoopSection: clearLoop
           ? null
           : (activeLoopSection ?? this.activeLoopSection),
-      audioSourceTitle: audioSourceTitle ?? this.audioSourceTitle,
+      audioSourceTitle: clearAudioSource
+          ? null
+          : (audioSourceTitle ?? this.audioSourceTitle),
       loopPointA: clearAbLoop ? null : (loopPointA ?? this.loopPointA),
       loopPointB: clearAbLoop ? null : (loopPointB ?? this.loopPointB),
     );
@@ -77,6 +81,7 @@ final audioPracticeControllerProvider =
 
 class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
   Timer? _playbackTimer;
+  final Map<String, String> _attachedAudioBySong = {};
 
   @override
   AudioPracticeState build() {
@@ -84,6 +89,27 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
       _playbackTimer?.cancel();
     });
     return const AudioPracticeState();
+  }
+
+  /// Whether the specified song has an attached audio track (or is populated via demo mode).
+  bool hasAudioForSong(String songId, {required bool isDemo}) {
+    if (isDemo) return true;
+    return _attachedAudioBySong.containsKey(songId);
+  }
+
+  /// Resolves the audio source title for a song.
+  String? getAudioSourceTitle(
+    String songId, {
+    required bool isDemo,
+    String? defaultDemoTitle,
+  }) {
+    if (_attachedAudioBySong.containsKey(songId)) {
+      return _attachedAudioBySong[songId];
+    }
+    if (isDemo) {
+      return defaultDemoTitle ?? 'Acoustic_Guide_Track.mp3';
+    }
+    return null;
   }
 
   void play() {
@@ -98,27 +124,33 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
       }
 
       final deltaMs = (250 * state.speed).round();
-      var nextPos = state.position + Duration(milliseconds: deltaMs);
+      final newPosMs = state.position.inMilliseconds + deltaMs;
 
-      // A/B loop check
-      if (state.isAbLoopActive && nextPos >= state.loopPointB!) {
-        state = state.copyWith(position: state.loopPointA!);
+      // Check A-B loop boundary
+      if (state.isAbLoopActive &&
+          state.loopPointB != null &&
+          newPosMs >= state.loopPointB!.inMilliseconds) {
+        seek(state.loopPointA ?? Duration.zero);
         return;
       }
 
-      if (nextPos >= state.duration) {
-        nextPos = Duration.zero;
-        state = state.copyWith(position: nextPos, isPlaying: false);
+      // Check track duration end
+      if (newPosMs >= state.duration.inMilliseconds) {
+        state = state.copyWith(
+          isPlaying: false,
+          position: state.duration,
+        );
         timer.cancel();
-      } else {
-        state = state.copyWith(position: nextPos);
+        return;
       }
+
+      state = state.copyWith(position: Duration(milliseconds: newPosMs));
     });
   }
 
   void pause() {
-    _playbackTimer?.cancel();
     state = state.copyWith(isPlaying: false);
+    _playbackTimer?.cancel();
   }
 
   void togglePlay() {
@@ -130,18 +162,19 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
   }
 
   void seek(Duration newPosition) {
-    final clamped = newPosition < Duration.zero
-        ? Duration.zero
-        : (newPosition > state.duration ? state.duration : newPosition);
-    state = state.copyWith(position: clamped);
+    final clampedMs = newPosition.inMilliseconds.clamp(
+      0,
+      state.duration.inMilliseconds,
+    );
+    state = state.copyWith(position: Duration(milliseconds: clampedMs));
   }
 
   void setSpeed(double newSpeed) {
-    state = state.copyWith(speed: newSpeed);
+    state = state.copyWith(speed: newSpeed.clamp(0.5, 1.5));
   }
 
-  void setPitch(int semitones) {
-    state = state.copyWith(pitchSemitones: semitones);
+  void setPitchSemitones(int semitones) {
+    state = state.copyWith(pitchSemitones: semitones.clamp(-6, 6));
   }
 
   void toggleMetronome() {
@@ -156,8 +189,23 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
     }
   }
 
-  void attachAudioSource(String sourceName) {
+  void attachAudioSource(String sourceName, {String? songId}) {
+    if (songId != null) {
+      _attachedAudioBySong[songId] = sourceName;
+    }
     state = state.copyWith(audioSourceTitle: sourceName);
+  }
+
+  void detachAudioSource(String songId) {
+    _attachedAudioBySong.remove(songId);
+    _playbackTimer?.cancel();
+    state = state.copyWith(
+      isPlaying: false,
+      clearAudioSource: true,
+      position: Duration.zero,
+      clearLoop: true,
+      clearAbLoop: true,
+    );
   }
 
   void setLoopPointA([Duration? position]) {

@@ -6,6 +6,7 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/schedule_alert.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
@@ -2436,7 +2437,72 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         const SizedBox(height: 12),
 
         // Member Cards
-        if (filteredMembers.isEmpty)
+        if (members.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.amberAccent.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.groups_outlined,
+                      size: 40,
+                      color: AppTheme.amberAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context)?.noMembersInRoster ??
+                        'No Team Members Yet',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(context)?.noMembersInRosterSubtitle ??
+                        'Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      FilledButton.icon(
+                        icon: const Icon(Icons.person_add, size: 18),
+                        label: Text(
+                          AppLocalizations.of(context)?.addMusician ?? 'Add Member',
+                        ),
+                        onPressed: () => _showMemberDialog(),
+                      ),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.science_outlined, size: 18),
+                        label: Text(
+                          AppLocalizations.of(context)?.enableDemoModeAction ??
+                              'Enable Demo Mode',
+                        ),
+                        onPressed: () {
+                          ref.read(demoModeProvider.notifier).setDemoMode(true);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )
+        else if (filteredMembers.isEmpty)
           Padding(
             padding: const EdgeInsets.all(32),
             child: Center(
