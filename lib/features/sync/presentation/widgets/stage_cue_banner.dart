@@ -9,6 +9,7 @@
 /// - >= 44x44 pt interactive touch targets
 library;
 
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_theme.dart';
@@ -41,6 +42,7 @@ class StageCueBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final backgroundColor = isDark
@@ -127,9 +129,9 @@ class StageCueBanner extends StatelessWidget {
                   ),
                   minimumSize: const Size(44, 44),
                 ),
-                child: const Text(
-                  'JUMP',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                child: Text(
+                  l10n?.jumpAction ?? 'JUMP',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                 ),
               ),
             ),
@@ -177,6 +179,7 @@ class DirectorControlBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final backgroundColor = isDark
@@ -215,7 +218,7 @@ class DirectorControlBar extends StatelessWidget {
                         : AppTheme.charcoalMuted,
                     minimumSize: const Size(44, 44),
                   ),
-                  child: const Text('CLEAR QUEUE'),
+                  child: Text(l10n?.clearQueueAction ?? 'CLEAR QUEUE'),
                 ),
               ),
           ],

@@ -1038,4 +1038,123 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteService => 'Eliminar Servicio';
+
+  @override
+  String get supabaseNotConfigured =>
+      'El cliente de Supabase no está configurado. Los cambios se guardan localmente en SQLite.';
+
+  @override
+  String get onStageNow => 'EN ESCENARIO AHORA';
+
+  @override
+  String get introPreRoll => 'INTRODUCCIÓN / PRE-ROLL';
+
+  @override
+  String get queuedNext => 'Siguiente en cola:';
+
+  @override
+  String get waitingForCue => 'Ninguna (Esperando señal)';
+
+  @override
+  String get localLanDirectorServer => 'SERVIDOR DIRECTOR LAN LOCAL';
+
+  @override
+  String get connectToDirectorDevice => 'CONECTAR A DISPOSITIVO DIRECTOR';
+
+  @override
+  String get startZeroConfigServer =>
+      'Inicia un servidor WebSocket local sin configuración para que todos los músicos sigan tus señales en vivo.';
+
+  @override
+  String serverRunningOnPort(int port) {
+    return 'Servidor activo en el puerto efímero $port. Las tablets de los miembros pueden conectarse en esta red Wi-Fi local.';
+  }
+
+  @override
+  String get stopHostServer => 'Detener Servidor';
+
+  @override
+  String get startLanHost => 'Iniciar Servidor LAN';
+
+  @override
+  String get directorHostIp => 'IP del Director';
+
+  @override
+  String get portLabel => 'Puerto';
+
+  @override
+  String get disconnect => 'Desconectar';
+
+  @override
+  String get connectAsFollower => 'Conectar como Seguidor';
+
+  @override
+  String connectionFailed(String error) {
+    return 'Fallo al conectar: $error';
+  }
+
+  @override
+  String get leaderLockRequestsTitle =>
+      'LeaderLock: Solicitudes de Transición de Músicos';
+
+  @override
+  String get followerRequestedChange =>
+      'El músico solicitó un cambio de sección';
+
+  @override
+  String requestPrefix(String section) {
+    return 'Solicitud: $section';
+  }
+
+  @override
+  String get jumpAction => 'SALTAR';
+
+  @override
+  String get clearQueueAction => 'LIMPIAR COLA';
+
+  @override
+  String get supabaseConfigExplanation =>
+      'Ingresa el endpoint de tu proyecto Supabase y la clave pública anónima para habilitar la sincronización en la nube.';
+
+  @override
+  String get projectUrlLabel => 'URL del Proyecto';
+
+  @override
+  String get anonPublicKeyLabel => 'Clave Pública Anónima (Anon Key)';
+
+  @override
+  String get magicLinkSignInTitle => 'Iniciar Sesión con Magic Link';
+
+  @override
+  String get createAccountTitle => 'Crear Cuenta de Supabase';
+
+  @override
+  String get signInTitle => 'Iniciar Sesión en Supabase';
+
+  @override
+  String get fullNameLabel => 'Nombre Completo';
+
+  @override
+  String get emailAddressLabel => 'Correo Electrónico';
+
+  @override
+  String get passwordLabel => 'Contraseña';
+
+  @override
+  String get usePasswordAction => 'Usar Contraseña';
+
+  @override
+  String get sendMagicLinkAction => 'Enviar Magic Link';
+
+  @override
+  String get haveAccountSignInAction => '¿Ya tienes cuenta? Iniciar Sesión';
+
+  @override
+  String get newRegisterAction => '¿Nuevo? Regístrate';
+
+  @override
+  String get sendLinkAction => 'Enviar Enlace';
+
+  @override
+  String get registerAction => 'Registrarse';
 }

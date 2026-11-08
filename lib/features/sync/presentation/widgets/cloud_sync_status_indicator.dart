@@ -257,12 +257,25 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
                     ),
                   ),
                   child: Text(
-                    result.errorMessage ??
-                        (result.isOffline
-                            ? (l10n?.cloudOfflineMode ??
-                                'Offline mode active. All changes are saved safely to local SQLite.')
-                            : (l10n?.cloudSignInRequired ??
-                                'Please sign in to Supabase to enable cloud sync.')),
+                    () {
+                      final err = result.errorMessage;
+                      if (err != null) {
+                        if (err.contains('not configured')) {
+                          return l10n?.supabaseNotConfigured ??
+                              'Supabase client is not configured. Local changes cached.';
+                        }
+                        if (err.toLowerCase().contains('sign in')) {
+                          return l10n?.cloudSignInRequired ??
+                              'Please sign in to Supabase to enable cloud sync.';
+                        }
+                        return err;
+                      }
+                      return result.isOffline
+                          ? (l10n?.cloudOfflineMode ??
+                              'Offline mode active. All changes are saved safely to local SQLite.')
+                          : (l10n?.cloudSignInRequired ??
+                              'Please sign in to Supabase to enable cloud sync.');
+                    }(),
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.4,

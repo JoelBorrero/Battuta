@@ -265,7 +265,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'ON STAGE NOW',
+                          l10n?.onStageNow ?? 'ON STAGE NOW',
                           style: TextStyle(
                             fontSize: 11,
                             letterSpacing: 1.2,
@@ -289,7 +289,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                syncState.activeSectionId ?? 'INTRO / PRE-ROLL',
+                                syncState.activeSectionId ??
+                                    (l10n?.introPreRoll ?? 'INTRO / PRE-ROLL'),
                                 style: const TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.w900,
@@ -304,7 +305,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                         Row(
                           children: [
                             Text(
-                              'Queued Next:',
+                              l10n?.queuedNext ?? 'Queued Next:',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
@@ -324,7 +325,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                               ),
                               child: Text(
                                 syncState.queuedSectionLabel ??
-                                    'None (Waiting for cue)',
+                                    (l10n?.waitingForCue ??
+                                        'None (Waiting for cue)'),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -360,8 +362,10 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                       children: [
                         Text(
                           syncState.isDirector
-                              ? 'LOCAL LAN DIRECTOR SERVER'
-                              : 'CONNECT TO DIRECTOR DEVICE',
+                              ? (l10n?.localLanDirectorServer ??
+                                  'LOCAL LAN DIRECTOR SERVER')
+                              : (l10n?.connectToDirectorDevice ??
+                                  'CONNECT TO DIRECTOR DEVICE'),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -375,8 +379,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                         if (syncState.isDirector) ...[
                           Text(
                             syncState.isConnected
-                                ? 'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.'
-                                : 'Start a zero-configuration local WebSocket server so all band members follow your live cues.',
+                                ? (l10n?.serverRunningOnPort(
+                                        syncState.serverPort ?? 0) ??
+                                    'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.')
+                                : (l10n?.startZeroConfigServer ??
+                                    'Start a zero-configuration local WebSocket server so all band members follow your live cues.'),
                             style: const TextStyle(fontSize: 13),
                           ),
                           const SizedBox(height: 14),
@@ -401,8 +408,10 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 ),
                                 label: Text(
                                   syncState.isConnected
-                                      ? 'Stop Host Server'
-                                      : 'Start LAN Host',
+                                      ? (l10n?.stopHostServer ??
+                                          'Stop Host Server')
+                                      : (l10n?.startLanHost ??
+                                          'Start LAN Host'),
                                 ),
                                 onPressed: () async {
                                   if (syncState.isConnected) {
@@ -433,10 +442,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 flex: 3,
                                 child: TextField(
                                   controller: _hostController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Director Host IP',
+                                  decoration: InputDecoration(
+                                    labelText: l10n?.directorHostIp ??
+                                        'Director Host IP',
                                     hintText: '192.168.1.X',
-                                    border: OutlineInputBorder(),
+                                    border: const OutlineInputBorder(),
                                     isDense: true,
                                   ),
                                 ),
@@ -447,10 +457,10 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 child: TextField(
                                   controller: _portController,
                                   keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Port',
+                                  decoration: InputDecoration(
+                                    labelText: l10n?.portLabel ?? 'Port',
                                     hintText: '8080',
-                                    border: OutlineInputBorder(),
+                                    border: const OutlineInputBorder(),
                                     isDense: true,
                                   ),
                                 ),
@@ -475,8 +485,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                             ),
                             label: Text(
                               syncState.isConnected
-                                  ? 'Disconnect'
-                                  : 'Connect as Follower',
+                                  ? (l10n?.disconnect ?? 'Disconnect')
+                                  : (l10n?.connectAsFollower ??
+                                      'Connect as Follower'),
                             ),
                             onPressed: () async {
                               if (syncState.isConnected) {
@@ -492,7 +503,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Connection failed: $e'),
+                                        content: Text(
+                                          l10n?.connectionFailed(
+                                                  e.toString()) ??
+                                              'Connection failed: $e',
+                                        ),
                                       ),
                                     );
                                   }
@@ -524,17 +539,18 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.shield,
                                 color: AppTheme.amberAccent,
                                 size: 18,
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
-                                'LeaderLock: Musician Transition Requests',
-                                style: TextStyle(
+                                l10n?.leaderLockRequestsTitle ??
+                                    'LeaderLock: Musician Transition Requests',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                 ),
@@ -545,9 +561,13 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                           for (final req in syncState.pendingRequests)
                             ListTile(
                               dense: true,
-                              title: Text('Request: ${req.currentSectionId}'),
-                              subtitle: const Text(
-                                'Follower requested section change',
+                              title: Text(
+                                l10n?.requestPrefix(req.currentSectionId) ??
+                                    'Request: ${req.currentSectionId}',
+                              ),
+                              subtitle: Text(
+                                l10n?.followerRequestedChange ??
+                                    'Follower requested section change',
                               ),
                               trailing: FilledButton(
                                 style: FilledButton.styleFrom(

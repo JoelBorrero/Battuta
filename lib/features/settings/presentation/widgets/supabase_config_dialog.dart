@@ -140,9 +140,10 @@ class _SupabaseConfigDialogState extends ConsumerState<SupabaseConfigDialog> {
                   padding: EdgeInsets.only(bottom: 12),
                   child: LinearProgressIndicator(),
                 ),
-              const Text(
-                'Enter your Supabase project endpoint and anon public key to enable cloud sync.',
-                style: TextStyle(fontSize: 13),
+              Text(
+                l10n?.supabaseConfigExplanation ??
+                    'Enter your Supabase project endpoint and anon public key to enable cloud sync.',
+                style: const TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 16),
               if (_errorMessage != null)
@@ -160,10 +161,10 @@ class _SupabaseConfigDialogState extends ConsumerState<SupabaseConfigDialog> {
               TextField(
                 key: const ValueKey('supabase_config_url_field'),
                 controller: _urlController,
-                decoration: const InputDecoration(
-                  labelText: 'Project URL',
+                decoration: InputDecoration(
+                  labelText: l10n?.projectUrlLabel ?? 'Project URL',
                   hintText: 'https://xyzcompany.supabase.co',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.url,
                 textInputAction: TextInputAction.next,
@@ -172,10 +173,10 @@ class _SupabaseConfigDialogState extends ConsumerState<SupabaseConfigDialog> {
               TextField(
                 key: const ValueKey('supabase_config_key_field'),
                 controller: _keyController,
-                decoration: const InputDecoration(
-                  labelText: 'Anon Public Key',
+                decoration: InputDecoration(
+                  labelText: l10n?.anonPublicKeyLabel ?? 'Anon Public Key',
                   hintText: 'eyJhbGciOiJIUzI1NiIsIn...',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
                 textInputAction: TextInputAction.done,

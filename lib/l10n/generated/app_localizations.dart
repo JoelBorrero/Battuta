@@ -1969,6 +1969,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete Service'**
   String get deleteService;
+
+  /// Message when Supabase client is not configured
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase client is not configured. Local changes cached.'**
+  String get supabaseNotConfigured;
+
+  /// Label for currently active stage section
+  ///
+  /// In en, this message translates to:
+  /// **'ON STAGE NOW'**
+  String get onStageNow;
+
+  /// Default active section when none is cued
+  ///
+  /// In en, this message translates to:
+  /// **'INTRO / PRE-ROLL'**
+  String get introPreRoll;
+
+  /// Label for upcoming queued section
+  ///
+  /// In en, this message translates to:
+  /// **'Queued Next:'**
+  String get queuedNext;
+
+  /// Placeholder when no section is queued
+  ///
+  /// In en, this message translates to:
+  /// **'None (Waiting for cue)'**
+  String get waitingForCue;
+
+  /// Header for director server card
+  ///
+  /// In en, this message translates to:
+  /// **'LOCAL LAN DIRECTOR SERVER'**
+  String get localLanDirectorServer;
+
+  /// Header for follower connection card
+  ///
+  /// In en, this message translates to:
+  /// **'CONNECT TO DIRECTOR DEVICE'**
+  String get connectToDirectorDevice;
+
+  /// Instruction for starting director server
+  ///
+  /// In en, this message translates to:
+  /// **'Start a zero-configuration local WebSocket server so all band members follow your live cues.'**
+  String get startZeroConfigServer;
+
+  /// Status message when director server is active
+  ///
+  /// In en, this message translates to:
+  /// **'Server running on ephemeral port {port}. Band member tablets can connect on this local Wi-Fi.'**
+  String serverRunningOnPort(int port);
+
+  /// Button to stop director server
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Host Server'**
+  String get stopHostServer;
+
+  /// Button to start director server
+  ///
+  /// In en, this message translates to:
+  /// **'Start LAN Host'**
+  String get startLanHost;
+
+  /// Input label for director IP address
+  ///
+  /// In en, this message translates to:
+  /// **'Director Host IP'**
+  String get directorHostIp;
+
+  /// Input label for port number
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get portLabel;
+
+  /// Button to disconnect from live session
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get disconnect;
+
+  /// Button to connect as live session follower
+  ///
+  /// In en, this message translates to:
+  /// **'Connect as Follower'**
+  String get connectAsFollower;
+
+  /// Snackbar message when live connection fails
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {error}'**
+  String connectionFailed(String error);
+
+  /// Header for incoming follower override requests
+  ///
+  /// In en, this message translates to:
+  /// **'LeaderLock: Musician Transition Requests'**
+  String get leaderLockRequestsTitle;
+
+  /// Subtitle for follower transition request
+  ///
+  /// In en, this message translates to:
+  /// **'Follower requested section change'**
+  String get followerRequestedChange;
+
+  /// Title for follower request item
+  ///
+  /// In en, this message translates to:
+  /// **'Request: {section}'**
+  String requestPrefix(String section);
+
+  /// Button to immediately jump to section
+  ///
+  /// In en, this message translates to:
+  /// **'JUMP'**
+  String get jumpAction;
+
+  /// Button to clear queued live section
+  ///
+  /// In en, this message translates to:
+  /// **'CLEAR QUEUE'**
+  String get clearQueueAction;
+
+  /// Explanation text in Supabase config dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your Supabase project endpoint and anon public key to enable cloud sync.'**
+  String get supabaseConfigExplanation;
+
+  /// Field label for Supabase URL
+  ///
+  /// In en, this message translates to:
+  /// **'Project URL'**
+  String get projectUrlLabel;
+
+  /// Field label for Supabase anon key
+  ///
+  /// In en, this message translates to:
+  /// **'Anon Public Key'**
+  String get anonPublicKeyLabel;
+
+  /// Title for magic link sign in dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Magic Link Sign In'**
+  String get magicLinkSignInTitle;
+
+  /// Title for account creation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Create Supabase Account'**
+  String get createAccountTitle;
+
+  /// Title for sign in dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In to Supabase'**
+  String get signInTitle;
+
+  /// Field label for full name
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullNameLabel;
+
+  /// Field label for email
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddressLabel;
+
+  /// Field label for password
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// Toggle to use password authentication
+  ///
+  /// In en, this message translates to:
+  /// **'Use Password'**
+  String get usePasswordAction;
+
+  /// Toggle to send magic link
+  ///
+  /// In en, this message translates to:
+  /// **'Send Magic Link'**
+  String get sendMagicLinkAction;
+
+  /// Toggle for existing users to sign in
+  ///
+  /// In en, this message translates to:
+  /// **'Have an account? Sign In'**
+  String get haveAccountSignInAction;
+
+  /// Toggle for new users to register
+  ///
+  /// In en, this message translates to:
+  /// **'New? Register'**
+  String get newRegisterAction;
+
+  /// Button to send login link
+  ///
+  /// In en, this message translates to:
+  /// **'Send Link'**
+  String get sendLinkAction;
+
+  /// Button to submit registration
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get registerAction;
 }
 
 class _AppLocalizationsDelegate

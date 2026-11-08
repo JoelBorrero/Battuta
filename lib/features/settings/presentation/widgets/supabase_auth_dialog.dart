@@ -120,13 +120,14 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
     final authState = ref.watch(authControllerProvider);
     final isLoading = authState.isLoading;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       title: Text(_useMagicLink
-          ? 'Magic Link Sign In'
+          ? (l10n?.magicLinkSignInTitle ?? 'Magic Link Sign In')
           : _isSignUp
-              ? 'Create Supabase Account'
-              : 'Sign In to Supabase'),
+              ? (l10n?.createAccountTitle ?? 'Create Supabase Account')
+              : (l10n?.signInTitle ?? 'Sign In to Supabase')),
       content: SingleChildScrollView(
         child: SizedBox(
           width: 380,
@@ -162,10 +163,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                 TextField(
                   key: const ValueKey('supabase_auth_name_field'),
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n?.fullNameLabel ?? 'Full Name',
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: const OutlineInputBorder(),
                   ),
                   textInputAction: TextInputAction.next,
                 ),
@@ -174,10 +175,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
               TextField(
                 key: const ValueKey('supabase_auth_email_field'),
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n?.emailAddressLabel ?? 'Email Address',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: _useMagicLink
@@ -189,10 +190,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                 TextField(
                   key: const ValueKey('supabase_auth_password_field'),
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n?.passwordLabel ?? 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    border: const OutlineInputBorder(),
                   ),
                   obscureText: true,
                   textInputAction: TextInputAction.done,
@@ -212,7 +213,9 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                       });
                     },
                     child: Text(
-                      _useMagicLink ? 'Use Password' : 'Send Magic Link',
+                      _useMagicLink
+                          ? (l10n?.usePasswordAction ?? 'Use Password')
+                          : (l10n?.sendMagicLinkAction ?? 'Send Magic Link'),
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -225,7 +228,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                         });
                       },
                       child: Text(
-                        _isSignUp ? 'Have an account? Sign In' : 'New? Register',
+                        _isSignUp
+                            ? (l10n?.haveAccountSignInAction ??
+                                'Have an account? Sign In')
+                            : (l10n?.newRegisterAction ?? 'New? Register'),
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
@@ -238,7 +244,7 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const ValueKey('supabase_auth_submit_btn'),
@@ -250,10 +256,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Text(_useMagicLink
-                  ? 'Send Link'
+                  ? (l10n?.sendLinkAction ?? 'Send Link')
                   : _isSignUp
-                      ? 'Register'
-                      : 'Sign In'),
+                      ? (l10n?.registerAction ?? 'Register')
+                      : (l10n?.signInAction ?? 'Sign In')),
         ),
       ],
     );

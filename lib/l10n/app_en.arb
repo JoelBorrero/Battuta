@@ -1492,5 +1492,167 @@
   "deleteService": "Delete Service",
   "@deleteService": {
     "description": "Action to delete a service"
+  },
+  "supabaseNotConfigured": "Supabase client is not configured. Local changes cached.",
+  "@supabaseNotConfigured": {
+    "description": "Message when Supabase client is not configured"
+  },
+  "onStageNow": "ON STAGE NOW",
+  "@onStageNow": {
+    "description": "Label for currently active stage section"
+  },
+  "introPreRoll": "INTRO / PRE-ROLL",
+  "@introPreRoll": {
+    "description": "Default active section when none is cued"
+  },
+  "queuedNext": "Queued Next:",
+  "@queuedNext": {
+    "description": "Label for upcoming queued section"
+  },
+  "waitingForCue": "None (Waiting for cue)",
+  "@waitingForCue": {
+    "description": "Placeholder when no section is queued"
+  },
+  "localLanDirectorServer": "LOCAL LAN DIRECTOR SERVER",
+  "@localLanDirectorServer": {
+    "description": "Header for director server card"
+  },
+  "connectToDirectorDevice": "CONNECT TO DIRECTOR DEVICE",
+  "@connectToDirectorDevice": {
+    "description": "Header for follower connection card"
+  },
+  "startZeroConfigServer": "Start a zero-configuration local WebSocket server so all band members follow your live cues.",
+  "@startZeroConfigServer": {
+    "description": "Instruction for starting director server"
+  },
+  "serverRunningOnPort": "Server running on ephemeral port {port}. Band member tablets can connect on this local Wi-Fi.",
+  "@serverRunningOnPort": {
+    "description": "Status message when director server is active",
+    "placeholders": {
+      "port": {
+        "type": "int",
+        "example": "8080"
+      }
+    }
+  },
+  "stopHostServer": "Stop Host Server",
+  "@stopHostServer": {
+    "description": "Button to stop director server"
+  },
+  "startLanHost": "Start LAN Host",
+  "@startLanHost": {
+    "description": "Button to start director server"
+  },
+  "directorHostIp": "Director Host IP",
+  "@directorHostIp": {
+    "description": "Input label for director IP address"
+  },
+  "portLabel": "Port",
+  "@portLabel": {
+    "description": "Input label for port number"
+  },
+  "disconnect": "Disconnect",
+  "@disconnect": {
+    "description": "Button to disconnect from live session"
+  },
+  "connectAsFollower": "Connect as Follower",
+  "@connectAsFollower": {
+    "description": "Button to connect as live session follower"
+  },
+  "connectionFailed": "Connection failed: {error}",
+  "@connectionFailed": {
+    "description": "Snackbar message when live connection fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "SocketException"
+      }
+    }
+  },
+  "leaderLockRequestsTitle": "LeaderLock: Musician Transition Requests",
+  "@leaderLockRequestsTitle": {
+    "description": "Header for incoming follower override requests"
+  },
+  "followerRequestedChange": "Follower requested section change",
+  "@followerRequestedChange": {
+    "description": "Subtitle for follower transition request"
+  },
+  "requestPrefix": "Request: {section}",
+  "@requestPrefix": {
+    "description": "Title for follower request item",
+    "placeholders": {
+      "section": {
+        "type": "String",
+        "example": "Chorus"
+      }
+    }
+  },
+  "jumpAction": "JUMP",
+  "@jumpAction": {
+    "description": "Button to immediately jump to section"
+  },
+  "clearQueueAction": "CLEAR QUEUE",
+  "@clearQueueAction": {
+    "description": "Button to clear queued live section"
+  },
+  "supabaseConfigExplanation": "Enter your Supabase project endpoint and anon public key to enable cloud sync.",
+  "@supabaseConfigExplanation": {
+    "description": "Explanation text in Supabase config dialog"
+  },
+  "projectUrlLabel": "Project URL",
+  "@projectUrlLabel": {
+    "description": "Field label for Supabase URL"
+  },
+  "anonPublicKeyLabel": "Anon Public Key",
+  "@anonPublicKeyLabel": {
+    "description": "Field label for Supabase anon key"
+  },
+  "magicLinkSignInTitle": "Magic Link Sign In",
+  "@magicLinkSignInTitle": {
+    "description": "Title for magic link sign in dialog"
+  },
+  "createAccountTitle": "Create Supabase Account",
+  "@createAccountTitle": {
+    "description": "Title for account creation dialog"
+  },
+  "signInTitle": "Sign In to Supabase",
+  "@signInTitle": {
+    "description": "Title for sign in dialog"
+  },
+  "fullNameLabel": "Full Name",
+  "@fullNameLabel": {
+    "description": "Field label for full name"
+  },
+  "emailAddressLabel": "Email Address",
+  "@emailAddressLabel": {
+    "description": "Field label for email"
+  },
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Field label for password"
+  },
+  "usePasswordAction": "Use Password",
+  "@usePasswordAction": {
+    "description": "Toggle to use password authentication"
+  },
+  "sendMagicLinkAction": "Send Magic Link",
+  "@sendMagicLinkAction": {
+    "description": "Toggle to send magic link"
+  },
+  "haveAccountSignInAction": "Have an account? Sign In",
+  "@haveAccountSignInAction": {
+    "description": "Toggle for existing users to sign in"
+  },
+  "newRegisterAction": "New? Register",
+  "@newRegisterAction": {
+    "description": "Toggle for new users to register"
+  },
+  "sendLinkAction": "Send Link",
+  "@sendLinkAction": {
+    "description": "Button to send login link"
+  },
+  "registerAction": "Register",
+  "@registerAction": {
+    "description": "Button to submit registration"
   }
 }
