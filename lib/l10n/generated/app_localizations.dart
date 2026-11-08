@@ -2185,6 +2185,658 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Register'**
   String get registerAction;
+
+  /// Title for admin scheduling gaps banner
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduling Attention Needed ({count})'**
+  String schedulingAttentionNeeded(int count);
+
+  /// Button to dismiss alert
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismissAction;
+
+  /// Title for coverage alerts modal
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Alerts ({count})'**
+  String coverageAlertsCount(int count);
+
+  /// Empty state for coverage alerts
+  ///
+  /// In en, this message translates to:
+  /// **'No pending scheduling gaps. All services are covered!'**
+  String get noPendingGaps;
+
+  /// Dialog title for replacing musician
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Musician Replacement'**
+  String get assignMusicianReplacement;
+
+  /// Label indicating which member cannot attend
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Attend: {name}'**
+  String cannotAttendPrefix(String name);
+
+  /// Role and date information line
+  ///
+  /// In en, this message translates to:
+  /// **'Role: {role} • {date}'**
+  String roleDatePrefix(String role, String date);
+
+  /// Dropdown label for substitute musician
+  ///
+  /// In en, this message translates to:
+  /// **'Select Substitute Musician:'**
+  String get selectSubstituteMusician;
+
+  /// Field label for substitute musician
+  ///
+  /// In en, this message translates to:
+  /// **'Substitute Musician'**
+  String get substituteMusicianLabel;
+
+  /// Tag indicating substitute plays the requested role
+  ///
+  /// In en, this message translates to:
+  /// **'★ Plays {role}'**
+  String playsRoleTag(String role);
+
+  /// Tag indicating member is already scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'(In Lineup)'**
+  String get inLineupTag;
+
+  /// Field label for assigned role
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Role'**
+  String get assignedRoleLabel;
+
+  /// Field label for attendance status
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Status'**
+  String get attendanceStatusLabel;
+
+  /// Button to confirm replacement
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Replacement'**
+  String get confirmReplacement;
+
+  /// Snackbar confirming musician replacement
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced {oldMember} with {newMember} for {date}!'**
+  String replacedMusicianSuccess(
+    String oldMember,
+    String newMember,
+    String date,
+  );
+
+  /// Snackbar when no substitute is available
+  ///
+  /// In en, this message translates to:
+  /// **'No other team members available to substitute.'**
+  String get noOtherMembersToSubstitute;
+
+  /// Action to confirm attendance
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Attendance'**
+  String get confirmAttendance;
+
+  /// Action to mark unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Unavailable / Cannot Attend'**
+  String get markUnavailableCannotAttend;
+
+  /// Subtitle explaining decline action
+  ///
+  /// In en, this message translates to:
+  /// **'Flags date so admin can set a replacement'**
+  String get flagsDateReplacement;
+
+  /// Action to find replacement
+  ///
+  /// In en, this message translates to:
+  /// **'Find Replacement / Substitute'**
+  String get findReplacementSubstitute;
+
+  /// Subtitle explaining find replacement
+  ///
+  /// In en, this message translates to:
+  /// **'Assign another team member to take this spot'**
+  String get assignAnotherMember;
+
+  /// Action to remove member from lineup
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Lineup'**
+  String get removeFromLineup;
+
+  /// Dialog title for assigning musician
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Musician to {date}'**
+  String assignMusicianToDate(String date);
+
+  /// Field label for band member
+  ///
+  /// In en, this message translates to:
+  /// **'Band Member'**
+  String get bandMemberLabel;
+
+  /// Field label for role in service
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Role for Service'**
+  String get assignedRoleForService;
+
+  /// Button to assign musician to lineup
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to Lineup'**
+  String get assignToLineupAction;
+
+  /// Empty state for arrangement groups
+  ///
+  /// In en, this message translates to:
+  /// **'No arrangement groups created yet.'**
+  String get noArrangementGroupsYet;
+
+  /// Dialog title for assigning group
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Group to Service'**
+  String get assignGroupToService;
+
+  /// Button to add recurring schedule rule
+  ///
+  /// In en, this message translates to:
+  /// **'Add Repetitive Schedule Rule'**
+  String get addRepetitiveScheduleRule;
+
+  /// Label for lookahead count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ahead'**
+  String aheadCount(int count);
+
+  /// Field label for full name required
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name *'**
+  String get fullNameRequired;
+
+  /// Label for roles and instruments section
+  ///
+  /// In en, this message translates to:
+  /// **'Roles & Instruments *'**
+  String get rolesInstrumentsRequired;
+
+  /// Badge showing how many roles are selected
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String rolesSelectedCount(int count);
+
+  /// Hint text for role selection
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one role (musicians can hold multiple roles)'**
+  String get selectAtLeastOneRole;
+
+  /// Field label for vocal tessitura
+  ///
+  /// In en, this message translates to:
+  /// **'Vocal Tessitura (Range)'**
+  String get vocalTessituraRange;
+
+  /// Field label for general availability
+  ///
+  /// In en, this message translates to:
+  /// **'General Availability'**
+  String get generalAvailabilityLabel;
+
+  /// Field label for notes or assignment details
+  ///
+  /// In en, this message translates to:
+  /// **'Notes / Assignment'**
+  String get notesAssignmentLabel;
+
+  /// Field label for service title required
+  ///
+  /// In en, this message translates to:
+  /// **'Service Title *'**
+  String get serviceTitleRequired;
+
+  /// Field label for service type
+  ///
+  /// In en, this message translates to:
+  /// **'Service Type'**
+  String get serviceTypeLabel;
+
+  /// Field label for recurrence schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence Schedule'**
+  String get recurrenceScheduleLabel;
+
+  /// Field label for number of occurrences to generate
+  ///
+  /// In en, this message translates to:
+  /// **'Occurrences to Generate'**
+  String get occurrencesToGenerate;
+
+  /// Field label for location or venue
+  ///
+  /// In en, this message translates to:
+  /// **'Location / Venue'**
+  String get locationVenueLabel;
+
+  /// Field label for call time and instructions
+  ///
+  /// In en, this message translates to:
+  /// **'Call Time & Instructions'**
+  String get callTimeInstructionsLabel;
+
+  /// Option for single service date
+  ///
+  /// In en, this message translates to:
+  /// **'1 service (Single date only)'**
+  String get singleDateOnly;
+
+  /// Option for recurring series generation
+  ///
+  /// In en, this message translates to:
+  /// **'{count} services ({weeks} weeks ahead)'**
+  String seriesCountServices(int count, int weeks);
+
+  /// Alert reason when member declined
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'\'t attend — missing cover for {role}'**
+  String cantAttendCoverNeeded(String role);
+
+  /// Alert reason when member is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'General status is Unavailable — may need substitute'**
+  String get statusUnavailableNeedsSub;
+
+  /// User friendly message when Gemini network connection fails
+  ///
+  /// In en, this message translates to:
+  /// **'Network error: Unable to connect to Gemini AI. Please check your internet connection.'**
+  String get networkErrorNoInternet;
+
+  /// User friendly message when Gemini analysis times out
+  ///
+  /// In en, this message translates to:
+  /// **'The AI analysis request timed out. Please check your internet connection or try again.'**
+  String get omrTimeoutError;
+
+  /// User friendly message when Gemini API key is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API key is not configured. Please configure your key in Settings.'**
+  String get geminiApiKeyNotConfigured;
+
+  /// User friendly message when Gemini response cannot be parsed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not transcribe the sheet music. Please ensure the image is clear and try again.'**
+  String get omrParseError;
+
+  /// Extracted score title prefix
+  ///
+  /// In en, this message translates to:
+  /// **'Title: {title}'**
+  String scanTitlePrefix(String title);
+
+  /// Extracted score sections count
+  ///
+  /// In en, this message translates to:
+  /// **'Sections: {count}'**
+  String scanSectionsCount(int count);
+
+  /// Extracted pitch section name
+  ///
+  /// In en, this message translates to:
+  /// **'Section: {name}'**
+  String scanSectionName(String name);
+
+  /// Extracted pitch measures count
+  ///
+  /// In en, this message translates to:
+  /// **'Measures: {count}'**
+  String scanMeasuresCount(int count);
+
+  /// Action to remove member from roster
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Member'**
+  String get removeMember;
+
+  /// Tooltip for member options popup
+  ///
+  /// In en, this message translates to:
+  /// **'Member options'**
+  String get memberOptionsTooltip;
+
+  /// Badge showing non-admin musician view
+  ///
+  /// In en, this message translates to:
+  /// **'Musician View'**
+  String get musicianViewLabel;
+
+  /// Button to replace a member in lineup
+  ///
+  /// In en, this message translates to:
+  /// **'Replace {name}'**
+  String replaceMemberAction(String name);
+
+  /// Label for lookahead dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Show: '**
+  String get showLabel;
+
+  /// Title for recurring series management modal
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring Service Schedules'**
+  String get recurringServiceSchedules;
+
+  /// Subtitle explaining recurring schedules
+  ///
+  /// In en, this message translates to:
+  /// **'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.'**
+  String get recurringSchedulesSubtitle;
+
+  /// Empty state for recurring schedules
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring schedules configured yet.'**
+  String get noRecurringSchedulesYet;
+
+  /// Notice banner when schedule is paused
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Paused — no occurrences generated'**
+  String get schedulePausedNotice;
+
+  /// Button to set a cutoff date for a recurring schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Since Date...'**
+  String get disableSinceDate;
+
+  /// Chip label showing disabled date
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled from {date}'**
+  String disabledFromDate(String date);
+
+  /// Snackbar confirming member updated
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {name}'**
+  String updatedMemberSuccess(String name);
+
+  /// Snackbar confirming member added
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name} to the team!'**
+  String addedMemberSuccess(String name);
+
+  /// Snackbar confirming service updated
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {title}'**
+  String updatedServiceSuccess(String title);
+
+  /// Snackbar confirming service scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled {title}!'**
+  String scheduledServiceSuccess(String title);
+
+  /// Snackbar confirming recurring schedule configured
+  ///
+  /// In en, this message translates to:
+  /// **'Configured recurring schedule for {title} (showing next {count} events)!'**
+  String recurringScheduleSuccess(String title, int count);
+
+  /// Snackbar confirming musician assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned {name} to {title}!'**
+  String assignedMusicianSuccess(String name, String title);
+
+  /// Snackbar confirming group assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned {group} ({count} members) to {date}!'**
+  String assignedGroupSuccess(String group, int count, String date);
+
+  /// Dialog title for editing a team member
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Team Member'**
+  String get editTeamMember;
+
+  /// Dialog title for adding a team member
+  ///
+  /// In en, this message translates to:
+  /// **'Add Team Member'**
+  String get addTeamMember;
+
+  /// Helper text for selecting roles
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to toggle roles (e.g. Pianist + Singer + Guitarist):'**
+  String get tapToToggleRoles;
+
+  /// Title when vocal range is discarded
+  ///
+  /// In en, this message translates to:
+  /// **'Vocal Tessitura: Discarded (Instrumental)'**
+  String get vocalTessituraDiscardedTitle;
+
+  /// Subtitle when vocal range is discarded
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically omitted because only instruments or production roles are selected.'**
+  String get vocalTessituraDiscardedSubtitle;
+
+  /// Section title for arrangement groups
+  ///
+  /// In en, this message translates to:
+  /// **'Arrangement Groups / Sub-teams'**
+  String get arrangementGroupsSubteams;
+
+  /// Badge showing number of groups assigned
+  ///
+  /// In en, this message translates to:
+  /// **'{count} assigned'**
+  String groupsAssignedCount(int count);
+
+  /// Helper text for groups
+  ///
+  /// In en, this message translates to:
+  /// **'Member can belong to multiple rotating teams:'**
+  String get memberRotatingTeamsSubtitle;
+
+  /// Switch title for administrator role
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator Role'**
+  String get administratorRole;
+
+  /// Subtitle explaining administrator role
+  ///
+  /// In en, this message translates to:
+  /// **'Grants authority to create songs, schedule services, and assign musician replacements.'**
+  String get administratorRoleSubtitle;
+
+  /// Button to save form changes
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// Button to add a member
+  ///
+  /// In en, this message translates to:
+  /// **'Add Member'**
+  String get addMemberAction;
+
+  /// Dialog title for editing a service
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Service Event'**
+  String get editServiceEvent;
+
+  /// Dialog title for adding a service
+  ///
+  /// In en, this message translates to:
+  /// **'Add Service / Rehearsal'**
+  String get addServiceRehearsal;
+
+  /// Badge showing member count of group
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String groupMembersCount(int count);
+
+  /// Subtitle showing unavailable count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unavailable'**
+  String unavailableCountSubtitle(int count);
+
+  /// Dialog title to attach reference audio
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Reference Audio'**
+  String get attachReferenceAudio;
+
+  /// Instructions for attaching reference audio
+  ///
+  /// In en, this message translates to:
+  /// **'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):'**
+  String get attachAudioInstructions;
+
+  /// Input label for audio track source
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Track Source'**
+  String get audioTrackSource;
+
+  /// Button to attach audio track
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Track'**
+  String get attachTrackAction;
+
+  /// Practice reference default title suffix
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Reference'**
+  String get practiceReference;
+
+  /// Tooltip for metronome button
+  ///
+  /// In en, this message translates to:
+  /// **'Metronome Click ({tempo} BPM)'**
+  String metronomeClickTooltip(int tempo);
+
+  /// Tooltip for attaching audio track
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Audio Track'**
+  String get attachAudioTrackTooltip;
+
+  /// Badge text when looping a section
+  ///
+  /// In en, this message translates to:
+  /// **'Looping: {section}'**
+  String loopingPrefix(String section);
+
+  /// Tooltip for playback speed menu
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Speed'**
+  String get playbackSpeedTooltip;
+
+  /// Label for playback speed menu items
+  ///
+  /// In en, this message translates to:
+  /// **'{speed}× Speed'**
+  String speedLabel(double speed);
+
+  /// Tooltip for rewind button
+  ///
+  /// In en, this message translates to:
+  /// **'Rewind {seconds} seconds'**
+  String rewindSecondsTooltip(int seconds);
+
+  /// Tooltip for forward button
+  ///
+  /// In en, this message translates to:
+  /// **'Forward {seconds} seconds'**
+  String forwardSecondsTooltip(int seconds);
+
+  /// Tooltip for pause button
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseAction;
+
+  /// Tooltip for play button
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get playAction;
+
+  /// Tooltip for looping section button
+  ///
+  /// In en, this message translates to:
+  /// **'Loop Section'**
+  String get loopSectionTooltip;
+
+  /// Option for no looping
+  ///
+  /// In en, this message translates to:
+  /// **'No Loop (Full Song)'**
+  String get noLoopFullSong;
+
+  /// Menu item to loop a specific section
+  ///
+  /// In en, this message translates to:
+  /// **'Loop: {section}'**
+  String loopSectionItem(String section);
+
+  /// Button to create a single service
+  ///
+  /// In en, this message translates to:
+  /// **'Create Service'**
+  String get createService;
+
+  /// Button to create a series of services
+  ///
+  /// In en, this message translates to:
+  /// **'Create Series ({count})'**
+  String createSeriesCount(int count);
 }
 
 class _AppLocalizationsDelegate

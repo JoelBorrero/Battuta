@@ -278,7 +278,7 @@ class ScanFlowModal extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                state.errorMessage!,
+                                _localizeErrorMessage(state.errorMessage!, l10n),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onErrorContainer,
                                 ),
@@ -335,9 +335,13 @@ class ScanFlowModal extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         if (state.extractedScore != null) ...[
-                          Text('Title: ${state.extractedScore!.title}'),
                           Text(
-                            'Sections: ${state.extractedScore!.sections.length}',
+                            l10n?.scanTitlePrefix(state.extractedScore!.title) ??
+                                'Title: ${state.extractedScore!.title}',
+                          ),
+                          Text(
+                            l10n?.scanSectionsCount(state.extractedScore!.sections.length) ??
+                                'Sections: ${state.extractedScore!.sections.length}',
                           ),
                           const SizedBox(height: 12),
                           FilledButton.tonal(
@@ -349,10 +353,12 @@ class ScanFlowModal extends ConsumerWidget {
                           ),
                         ] else if (state.extractedPitchResult != null) ...[
                           Text(
-                            'Section: ${state.extractedPitchResult!.sectionName}',
+                            l10n?.scanSectionName(state.extractedPitchResult!.sectionName) ??
+                                'Section: ${state.extractedPitchResult!.sectionName}',
                           ),
                           Text(
-                            'Measures: ${state.extractedPitchResult!.totalMeasures}',
+                            l10n?.scanMeasuresCount(state.extractedPitchResult!.totalMeasures) ??
+                                'Measures: ${state.extractedPitchResult!.totalMeasures}',
                           ),
                           const SizedBox(height: 12),
                           FilledButton.tonal(
@@ -415,5 +421,32 @@ class ScanFlowModal extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _localizeErrorMessage(String raw, AppLocalizations? l10n) {
+    if (raw.contains('NETWORK_ERROR') ||
+        raw.contains('SocketException') ||
+        raw.contains('Failed host lookup') ||
+        raw.contains('Network is unreachable') ||
+        raw.contains('ClientException')) {
+      return l10n?.networkErrorNoInternet ??
+          'Network error: Unable to connect to Gemini AI. Please check your internet connection.';
+    }
+    if (raw.contains('TIMEOUT_ERROR') ||
+        raw.contains('TimeoutException') ||
+        raw.contains('timed out')) {
+      return l10n?.omrTimeoutError ??
+          'The AI analysis request timed out. Please check your internet connection or try again.';
+    }
+    if (raw.contains('Gemini API key is not configured')) {
+      return l10n?.geminiApiKeyNotConfigured ??
+          'Gemini API key is not configured. Please configure your key in Settings.';
+    }
+    if (raw.contains('FormatException') ||
+        raw.contains('Failed to parse Gemini JSON output')) {
+      return l10n?.omrParseError ??
+          'Could not transcribe the sheet music. Please ensure the image is clear and try again.';
+    }
+    return raw;
   }
 }

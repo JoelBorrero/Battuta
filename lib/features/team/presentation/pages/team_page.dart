@@ -76,6 +76,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
             final theme = Theme.of(dialogCtx);
+            final l10n = AppLocalizations.of(dialogCtx);
             final hasVocalRole = selectedRoles.any((r) => r.isVocal);
 
             void toggleRole(TeamRole role) {
@@ -99,7 +100,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             }
 
             return AlertDialog(
-              title: Text(isEditing ? 'Edit Team Member' : 'Add Team Member'),
+              title: Text(
+                isEditing
+                    ? (l10n?.editTeamMember ?? 'Edit Team Member')
+                    : (l10n?.addTeamMember ?? 'Add Team Member'),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -108,10 +113,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     TextField(
                       controller: nameController,
                       autofocus: !isEditing,
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
+                      decoration: InputDecoration(
+                        labelText: l10n?.fullNameRequired ?? 'Full Name *',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -121,13 +126,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Roles & Instruments *',
+                          l10n?.rolesInstrumentsRequired ?? 'Roles & Instruments *',
                           style: theme.textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '${selectedRoles.length} selected',
+                          l10n?.rolesSelectedCount(selectedRoles.length) ??
+                              '${selectedRoles.length} selected',
                           style: TextStyle(
                             fontSize: 11,
                             color: theme.colorScheme.primary,
@@ -138,7 +144,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Tap to toggle roles (e.g. Pianist + Singer + Guitarist):',
+                      l10n?.tapToToggleRoles ??
+                          'Tap to toggle roles (e.g. Pianist + Singer + Guitarist):',
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -159,7 +166,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 ? theme.colorScheme.primary
                                 : theme.colorScheme.onSurfaceVariant,
                           ),
-                          label: Text(r.displayName),
+                          label: Text(r.localizedName(context)),
                           selected: isSelected,
                           onSelected: (_) => toggleRole(r),
                         );
@@ -175,10 +182,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         initialValue: selectedRange == VocalTessitura.none
                             ? VocalTessitura.soprano
                             : selectedRange,
-                        decoration: const InputDecoration(
-                          labelText: 'Vocal Tessitura (Range)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.record_voice_over_outlined),
+                        decoration: InputDecoration(
+                          labelText: l10n?.vocalTessituraRange ?? 'Vocal Tessitura (Range)',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.record_voice_over_outlined),
                         ),
                         items: VocalTessitura.values
                             .where((v) => v != VocalTessitura.none)
@@ -229,7 +236,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Vocal Tessitura: Discarded (Instrumental)',
+                                    l10n?.vocalTessituraDiscardedTitle ??
+                                        'Vocal Tessitura: Discarded (Instrumental)',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -238,7 +246,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    'Automatically omitted because only instruments or production roles are selected.',
+                                    l10n?.vocalTessituraDiscardedSubtitle ??
+                                        'Automatically omitted because only instruments or production roles are selected.',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: theme.colorScheme.onSurfaceVariant,
@@ -257,16 +266,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     DropdownButtonFormField<AvailabilityStatus>(
                       isExpanded: true,
                       initialValue: selectedAvailability,
-                      decoration: const InputDecoration(
-                        labelText: 'General Availability',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.event_available_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n?.generalAvailabilityLabel ?? 'General Availability',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.event_available_outlined),
                       ),
                       items: AvailabilityStatus.values.map((a) {
                         return DropdownMenuItem(
                           value: a,
                           child: Text(
-                            a.displayName,
+                            a.localizedName(context),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -283,10 +292,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     // Notes
                     TextField(
                       controller: notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Notes / Assignment',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.note_alt_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n?.notesAssignmentLabel ?? 'Notes / Assignment',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.note_alt_outlined),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -297,13 +306,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Arrangement Groups / Sub-teams',
+                            l10n?.arrangementGroupsSubteams ?? 'Arrangement Groups / Sub-teams',
                             style: theme.textTheme.labelMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            '${selectedGroups.length} assigned',
+                            l10n?.groupsAssignedCount(selectedGroups.length) ??
+                                '${selectedGroups.length} assigned',
                             style: TextStyle(
                               fontSize: 11,
                               color: theme.colorScheme.primary,
@@ -314,7 +324,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Member can belong to multiple rotating teams:',
+                        l10n?.memberRotatingTeamsSubtitle ??
+                            'Member can belong to multiple rotating teams:',
                         style: TextStyle(
                           fontSize: 11,
                           color: theme.colorScheme.onSurfaceVariant,
@@ -353,16 +364,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     SwitchListTile.adaptive(
                       key: const ValueKey('member_admin_switch'),
                       contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Administrator Role',
-                        style: TextStyle(
+                      title: Text(
+                        l10n?.administratorRole ?? 'Administrator Role',
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      subtitle: const Text(
-                        'Grants authority to create songs, schedule services, and assign musician replacements.',
-                        style: TextStyle(fontSize: 12),
+                      subtitle: Text(
+                        l10n?.administratorRoleSubtitle ??
+                            'Grants authority to create songs, schedule services, and assign musician replacements.',
+                        style: const TextStyle(fontSize: 12),
                       ),
                       value: isAdmin,
                       onChanged: (val) {
@@ -375,7 +387,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n?.cancel ?? 'Cancel'),
                 ),
                 FilledButton(
                   key: ValueKey(
@@ -414,7 +426,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Updated ${updatedMember.name}'),
+                          content: Text(
+                            l10n?.updatedMemberSuccess(updatedMember.name) ??
+                                'Updated ${updatedMember.name}',
+                          ),
                         ),
                       );
                     } else {
@@ -436,11 +451,20 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           .addMember(newMember);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Added $name to the team!')),
+                        SnackBar(
+                          content: Text(
+                            l10n?.addedMemberSuccess(name) ??
+                                'Added $name to the team!',
+                          ),
+                        ),
                       );
                     }
                   },
-                  child: Text(isEditing ? 'Save Changes' : 'Add Member'),
+                  child: Text(
+                    isEditing
+                        ? (l10n?.saveChanges ?? 'Save Changes')
+                        : (l10n?.addMemberAction ?? 'Add Member'),
+                  ),
                 ),
               ],
             );
@@ -484,9 +508,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
+            final l10n = AppLocalizations.of(dialogCtx);
             return AlertDialog(
               title: Text(
-                isEditing ? 'Edit Service Event' : 'Add Service / Rehearsal',
+                isEditing
+                    ? (l10n?.editServiceEvent ?? 'Edit Service Event')
+                    : (l10n?.addServiceRehearsal ?? 'Add Service / Rehearsal'),
               ),
               content: SingleChildScrollView(
                 child: Column(
@@ -494,19 +521,19 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   children: [
                     TextField(
                       controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Service Title *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.church_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n?.serviceTitleRequired ?? 'Service Title *',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.church_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<ServiceType>(
                       isExpanded: true,
                       initialValue: selectedType,
-                      decoration: const InputDecoration(
-                        labelText: 'Service Type',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n?.serviceTypeLabel ?? 'Service Type',
+                        border: const OutlineInputBorder(),
                       ),
                       items: ServiceType.values.map((t) {
                         return DropdownMenuItem(
@@ -517,7 +544,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  t.displayName,
+                                  t.localizedName(context),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),
@@ -536,16 +563,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     DropdownButtonFormField<EventRecurrence>(
                       isExpanded: true,
                       initialValue: selectedRecurrence,
-                      decoration: const InputDecoration(
-                        labelText: 'Recurrence Schedule',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.repeat),
+                      decoration: InputDecoration(
+                        labelText: l10n?.recurrenceScheduleLabel ?? 'Recurrence Schedule',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.repeat),
                       ),
                       items: EventRecurrence.values.map((r) {
                         return DropdownMenuItem(
                           value: r,
                           child: Text(
-                            r.displayName,
+                            r.localizedName(context),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -563,16 +590,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         key: const ValueKey('series_count_dropdown'),
                         isExpanded: true,
                         initialValue: seriesCount,
-                        decoration: const InputDecoration(
-                          labelText: 'Occurrences to Generate',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.date_range_outlined),
+                        decoration: InputDecoration(
+                          labelText: l10n?.occurrencesToGenerate ?? 'Occurrences to Generate',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.date_range_outlined),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 1,
                             child: Text(
-                              '1 service (Single date only)',
+                              l10n?.singleDateOnly ?? '1 service (Single date only)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -580,7 +607,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 4,
                             child: Text(
-                              '4 occurrences (~1 month)',
+                              l10n?.seriesCountServices(4, 4) ?? '4 occurrences (~1 month)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -588,7 +615,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 6,
                             child: Text(
-                              '6 occurrences (~1.5 months)',
+                              l10n?.seriesCountServices(6, 6) ?? '6 occurrences (~1.5 months)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -596,7 +623,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 12,
                             child: Text(
-                              '12 occurrences (~3 months)',
+                              l10n?.seriesCountServices(12, 12) ?? '12 occurrences (~3 months)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -604,7 +631,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 24,
                             child: Text(
-                              '24 occurrences (~6 months)',
+                              l10n?.seriesCountServices(24, 24) ?? '24 occurrences (~6 months)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -664,19 +691,19 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     const SizedBox(height: 12),
                     TextField(
                       controller: locationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Location / Venue',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.location_on_outlined),
+                      decoration: InputDecoration(
+                        labelText: l10n?.locationVenueLabel ?? 'Location / Venue',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.location_on_outlined),
                       ),
                     ),
                     const SizedBox(height: 12),
                     TextField(
                       controller: notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Call Time & Instructions',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.info_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n?.callTimeInstructionsLabel ?? 'Call Time & Instructions',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.info_outline),
                       ),
                     ),
                   ],
@@ -685,7 +712,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n?.cancel ?? 'Cancel'),
                 ),
                 FilledButton(
                   key: ValueKey(
@@ -719,7 +746,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           .updateEvent(updated);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Updated ${updated.title}')),
+                        SnackBar(
+                          content: Text(
+                            l10n?.updatedServiceSuccess(updated.title) ??
+                                'Updated ${updated.title}',
+                          ),
+                        ),
                       );
                     } else if (selectedRecurrence.isRepeating &&
                         seriesCount > 1) {
@@ -742,7 +774,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Configured recurring schedule for $title (showing next $seriesCount events)!',
+                            l10n?.recurringScheduleSuccess(title, seriesCount) ??
+                                'Configured recurring schedule for $title (showing next $seriesCount events)!',
                           ),
                         ),
                       );
@@ -763,18 +796,24 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           .addEvent(newEvent);
                       Navigator.of(dialogCtx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Scheduled ${newEvent.title}!')),
+                        SnackBar(
+                          content: Text(
+                            l10n?.scheduledServiceSuccess(newEvent.title) ??
+                                'Scheduled ${newEvent.title}!',
+                          ),
+                        ),
                       );
                     }
                   },
                   child: Text(
                     isEditing
-                        ? 'Save Changes'
+                        ? (l10n?.saveChanges ?? 'Save Changes')
                         : (!isEditing &&
                                   selectedRecurrence.isRepeating &&
                                   seriesCount > 1
-                              ? 'Create Series ($seriesCount)'
-                              : 'Create Service'),
+                              ? (l10n?.createSeriesCount(seriesCount) ??
+                                  'Create Series ($seriesCount)')
+                              : (l10n?.createService ?? 'Create Service')),
                   ),
                 ),
               ],
@@ -800,10 +839,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     showDialog<void>(
       context: context,
       builder: (dialogCtx) {
+        final l10n = AppLocalizations.of(dialogCtx);
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             return AlertDialog(
-              title: Text('Assign Musician to ${event.formattedDate}'),
+              title: Text(
+                l10n?.assignMusicianToDate(event.formattedDate) ??
+                    'Assign Musician to ${event.formattedDate}',
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -811,16 +854,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     DropdownButtonFormField<TeamMember>(
                       isExpanded: true,
                       initialValue: selectedMember,
-                      decoration: const InputDecoration(
-                        labelText: 'Band Member',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
+                      decoration: InputDecoration(
+                        labelText: l10n?.bandMemberLabel ?? 'Band Member',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person),
                       ),
                       items: members.map((m) {
                         return DropdownMenuItem(
                           value: m,
                           child: Text(
-                            '${m.name} (${m.role.shortName})',
+                            '${m.name} (${m.role.localizedShortName(context)})',
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -839,16 +882,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     DropdownButtonFormField<TeamRole>(
                       isExpanded: true,
                       initialValue: selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Assigned Role for Service',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.music_note),
+                      decoration: InputDecoration(
+                        labelText: l10n?.assignedRoleForService ?? 'Assigned Role for Service',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.music_note),
                       ),
                       items: TeamRole.values.map((r) {
                         return DropdownMenuItem(
                           value: r,
                           child: Text(
-                            r.displayName,
+                            r.localizedName(context),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -864,16 +907,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     DropdownButtonFormField<AssignmentStatus>(
                       isExpanded: true,
                       initialValue: selectedStatus,
-                      decoration: const InputDecoration(
-                        labelText: 'Attendance Status',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.check_circle_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n?.attendanceStatusLabel ?? 'Attendance Status',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.check_circle_outline),
                       ),
                       items: AssignmentStatus.values.map((s) {
                         return DropdownMenuItem(
                           value: s,
                           child: Text(
-                            s.displayName,
+                            s.localizedName(context),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -891,7 +934,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n?.cancel ?? 'Cancel'),
                 ),
                 FilledButton(
                   key: const ValueKey('confirm_assign_member_btn'),
@@ -908,12 +951,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Assigned ${selectedMember.name} to ${event.title}!',
+                          l10n?.assignedMusicianSuccess(selectedMember.name, event.title) ??
+                              'Assigned ${selectedMember.name} to ${event.title}!',
                         ),
                       ),
                     );
                   },
-                  child: const Text('Assign to Lineup'),
+                  child: Text(l10n?.assignToLineupAction ?? 'Assign to Lineup'),
                 ),
               ],
             );
@@ -930,10 +974,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   void _showAssignGroupDialog(ServiceEvent event) {
     final groups = ref.read(teamGroupsProvider);
     final members = ref.read(teamMembersProvider);
+    final l10n = AppLocalizations.of(context);
 
     if (groups.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No arrangement groups created yet.')),
+        SnackBar(
+          content: Text(
+            l10n?.noArrangementGroupsYet ??
+                'No arrangement groups created yet.',
+          ),
+        ),
       );
       return;
     }
@@ -942,7 +992,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Assign Group to Service'),
+          title: Text(l10n?.assignGroupToService ?? 'Assign Group to Service'),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.separated(
@@ -970,8 +1020,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '${groupMembers.length} members'
-                    '${unavailableCount > 0 ? " • $unavailableCount unavailable" : ""}',
+                    '${l10n?.groupMembersCount(groupMembers.length) ?? "${groupMembers.length} members"}'
+                    '${unavailableCount > 0 ? " • ${l10n?.unavailableCountSubtitle(unavailableCount) ?? "$unavailableCount unavailable"}" : ""}',
                     style: TextStyle(
                       color: unavailableCount > 0 ? AppTheme.stageRed : null,
                     ),
@@ -986,7 +1036,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Assigned ${group.name} (${groupMembers.length} members) to ${event.formattedDate}!',
+                          l10n?.assignedGroupSuccess(
+                                group.name,
+                                groupMembers.length,
+                                event.formattedDate,
+                              ) ??
+                              'Assigned ${group.name} (${groupMembers.length} members) to ${event.formattedDate}!',
                         ),
                       ),
                     );
@@ -998,7 +1053,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n?.cancel ?? 'Cancel'),
             ),
           ],
         );
@@ -1036,6 +1091,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           builder: (context, ref, _) {
             final alerts = ref.watch(adminScheduleAlertsProvider);
             final theme = Theme.of(context);
+            final l10n = AppLocalizations.of(context);
 
             return SafeArea(
               child: Padding(
@@ -1056,7 +1112,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Coverage Alerts (${alerts.length})',
+                              l10n?.coverageAlertsCount(alerts.length) ??
+                                  'Coverage Alerts (${alerts.length})',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1071,12 +1128,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const Divider(),
                     if (alerts.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
                         child: Center(
                           child: Text(
-                            'No pending scheduling gaps. All services are covered!',
-                            style: TextStyle(fontStyle: FontStyle.italic),
+                            l10n?.noPendingGaps ??
+                                'No pending scheduling gaps. All services are covered!',
+                            style: const TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
                       )
@@ -1124,7 +1182,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                                     BorderRadius.circular(4),
                                               ),
                                               child: Text(
-                                                alert.role.shortName,
+                                                alert.role.localizedShortName(context),
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
@@ -1136,7 +1194,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          '${alert.eventTitle} • ${alert.reason}',
+                                          '${alert.eventTitle} • ${() {
+                                            if (alert.reason.contains("Can't attend")) {
+                                              return l10n?.cantAttendCoverNeeded(alert.role.localizedShortName(context)) ?? alert.reason;
+                                            }
+                                            if (alert.reason.contains("Unavailable")) {
+                                              return l10n?.statusUnavailableNeedsSub ?? alert.reason;
+                                            }
+                                            return alert.reason;
+                                          }()}',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: theme
@@ -1164,9 +1230,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       Navigator.of(modalCtx).pop();
                                       _handleAlertFindCover(alert);
                                     },
-                                    child: const Text(
-                                      'Find Cover',
-                                      style: TextStyle(
+                                    child: Text(
+                                      l10n?.findCover ?? 'Find Cover',
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -1207,9 +1273,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         members.where((m) => m.id != assignment.memberId).toList();
 
     if (availableCandidates.isEmpty) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No other team members available to substitute.'),
+        SnackBar(
+          content: Text(
+            l10n?.noOtherMembersToSubstitute ??
+                'No other team members available to substitute.',
+          ),
         ),
       );
       return;
@@ -1232,10 +1302,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     showDialog<void>(
       context: context,
       builder: (dialogCtx) {
+        final l10n = AppLocalizations.of(dialogCtx);
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             return AlertDialog(
-              title: const Text('Assign Musician Replacement'),
+              title: Text(
+                l10n?.assignMusicianReplacement ??
+                    'Assign Musician Replacement',
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1263,14 +1337,22 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Cannot Attend: ${currentAssignedMember?.name ?? "Musician"}',
+                                  l10n?.cannotAttendPrefix(
+                                        currentAssignedMember?.name ??
+                                            (l10n.musician),
+                                      ) ??
+                                      'Cannot Attend: ${currentAssignedMember?.name ?? "Musician"}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                   ),
                                 ),
                                 Text(
-                                  'Role: ${assignment.role.displayName} • ${event.formattedDate}',
+                                  l10n?.roleDatePrefix(
+                                        assignment.role.localizedName(context),
+                                        event.formattedDate,
+                                      ) ??
+                                      'Role: ${assignment.role.displayName} • ${event.formattedDate}',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                               ],
@@ -1281,7 +1363,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Select Substitute Musician:',
+                      l10n?.selectSubstituteMusician ??
+                          'Select Substitute Musician:',
                       style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -1291,17 +1374,23 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       key: const ValueKey('replacement_member_dropdown'),
                       isExpanded: true,
                       initialValue: selectedSubstitute,
-                      decoration: const InputDecoration(
-                        labelText: 'Substitute Musician',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person_add),
+                      decoration: InputDecoration(
+                        labelText: l10n?.substituteMusicianLabel ??
+                            'Substitute Musician',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person_add),
                       ),
                       items: availableCandidates.map((m) {
                         final playsRole = m.roles.contains(assignment.role);
                         final isInLineup = alreadyAssignedIds.contains(m.id);
                         final roleNote = playsRole
-                            ? '★ Plays ${assignment.role.shortName}'
-                            : (isInLineup ? '(In Lineup)' : m.role.shortName);
+                            ? (l10n?.playsRoleTag(
+                                  assignment.role.localizedShortName(context),
+                                ) ??
+                                '★ Plays ${assignment.role.shortName}')
+                            : (isInLineup
+                                ? (l10n?.inLineupTag ?? '(In Lineup)')
+                                : m.role.localizedShortName(context));
 
                         return DropdownMenuItem(
                           value: m,
@@ -1330,16 +1419,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       key: const ValueKey('replacement_role_dropdown'),
                       isExpanded: true,
                       initialValue: selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Assigned Role',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.music_note),
+                      decoration: InputDecoration(
+                        labelText: l10n?.assignedRoleLabel ?? 'Assigned Role',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.music_note),
                       ),
                       items: TeamRole.values.map((r) {
                         return DropdownMenuItem(
                           value: r,
                           child: Text(
-                            r.displayName,
+                            r.localizedName(context),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -1356,16 +1445,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       key: const ValueKey('replacement_status_dropdown'),
                       isExpanded: true,
                       initialValue: selectedStatus,
-                      decoration: const InputDecoration(
-                        labelText: 'Attendance Status',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.check_circle_outline),
+                      decoration: InputDecoration(
+                        labelText: l10n?.attendanceStatusLabel ??
+                            'Attendance Status',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.check_circle_outline),
                       ),
                       items: AssignmentStatus.values.map((s) {
                         return DropdownMenuItem(
                           value: s,
                           child: Text(
-                            s.displayName,
+                            s.localizedName(context),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -1383,7 +1473,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n?.cancel ?? 'Cancel'),
                 ),
                 FilledButton(
                   key: const ValueKey('confirm_replacement_btn'),
@@ -1399,12 +1489,20 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Replaced ${currentAssignedMember?.name ?? "musician"} with ${selectedSubstitute.name} for ${event.formattedDate}!',
+                          l10n?.replacedMusicianSuccess(
+                                currentAssignedMember?.name ??
+                                    (l10n.musician),
+                                selectedSubstitute.name,
+                                event.formattedDate,
+                              ) ??
+                              'Replaced ${currentAssignedMember?.name ?? "musician"} with ${selectedSubstitute.name} for ${event.formattedDate}!',
                         ),
                       ),
                     );
                   },
-                  child: const Text('Confirm Replacement'),
+                  child: Text(
+                    l10n?.confirmReplacement ?? 'Confirm Replacement',
+                  ),
                 ),
               ],
             );
@@ -1420,7 +1518,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required TeamMember? member,
     required bool isAdmin,
   }) {
-    final memberName = member?.name ?? 'Musician';
+    final l10n = AppLocalizations.of(context);
+    final memberName = member?.name ?? (l10n?.musician ?? 'Musician');
     final currentMemberId = ref.read(currentMemberIdProvider);
     final isCurrentMember = currentMemberId == assignment.memberId;
 
@@ -1435,7 +1534,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$memberName • ${assignment.role.displayName}',
+                  '$memberName • ${assignment.role.localizedName(context)}',
                   style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1452,7 +1551,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ListTile(
                     leading:
                         const Icon(Icons.check_circle, color: Colors.green),
-                    title: const Text('Confirm Attendance'),
+                    title: Text(l10n?.confirmAttendance ?? 'Confirm Attendance'),
                     onTap: () {
                       ref.read(serviceCalendarProvider.notifier).assignMember(
                             eventId: event.id,
@@ -1468,9 +1567,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       Icons.cancel_outlined,
                       color: AppTheme.stageRed,
                     ),
-                    title: const Text('Mark Unavailable / Cannot Attend'),
-                    subtitle:
-                        const Text('Flags date so admin can set a replacement'),
+                    title: Text(
+                      l10n?.markUnavailableCannotAttend ??
+                          'Mark Unavailable / Cannot Attend',
+                    ),
+                    subtitle: Text(
+                      l10n?.flagsDateReplacement ??
+                          'Flags date so admin can set a replacement',
+                    ),
                     onTap: () {
                       ref.read(serviceCalendarProvider.notifier).assignMember(
                             eventId: event.id,
@@ -1489,9 +1593,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       Icons.swap_horiz,
                       color: AppTheme.amberAccent,
                     ),
-                    title: const Text('Find Replacement / Substitute'),
-                    subtitle: const Text(
-                      'Assign another team member to take this spot',
+                    title: Text(
+                      l10n?.findReplacementSubstitute ??
+                          'Find Replacement / Substitute',
+                    ),
+                    subtitle: Text(
+                      l10n?.assignAnotherMember ??
+                          'Assign another team member to take this spot',
                     ),
                     onTap: () {
                       Navigator.of(ctx).pop();
@@ -1506,7 +1614,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       Icons.delete_outline,
                       color: AppTheme.stageRed,
                     ),
-                    title: const Text('Remove from Lineup'),
+                    title: Text(l10n?.removeFromLineup ?? 'Remove from Lineup'),
                     onTap: () {
                       ref
                           .read(serviceCalendarProvider.notifier)
@@ -1664,6 +1772,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           builder: (ctx, ref, _) {
             final schedules = ref.watch(recurringSchedulesProvider);
             final theme = Theme.of(ctx);
+            final l10n = AppLocalizations.of(ctx);
 
             return Padding(
               padding: EdgeInsets.only(
@@ -1682,7 +1791,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         const Icon(Icons.repeat, color: Color(0xFFE5A93C)),
                         const SizedBox(width: 8),
                         Text(
-                          'Recurring Service Schedules',
+                          l10n?.recurringServiceSchedules ??
+                              'Recurring Service Schedules',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -1696,7 +1806,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.',
+                      l10n?.recurringSchedulesSubtitle ??
+                          'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.',
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -1705,12 +1816,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     const SizedBox(height: 16),
 
                     if (schedules.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Center(
                           child: Text(
-                            'No recurring schedules configured yet.',
-                            style: TextStyle(fontStyle: FontStyle.italic),
+                            l10n?.noRecurringSchedulesYet ??
+                                'No recurring schedules configured yet.',
+                            style: const TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
                       )
@@ -1775,7 +1887,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        schedule.recurrence.shortName,
+                                        schedule.recurrence.localizedShortName(ctx),
                                         style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
@@ -1820,17 +1932,18 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       color: Colors.grey.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.pause_circle_outline,
                                           size: 14,
                                           color: Colors.grey,
                                         ),
-                                        SizedBox(width: 6),
+                                        const SizedBox(width: 6),
                                         Text(
-                                          'Schedule Paused — no occurrences generated',
-                                          style: TextStyle(
+                                          l10n?.schedulePausedNotice ??
+                                              'Schedule Paused — no occurrences generated',
+                                          style: const TextStyle(
                                             fontSize: 11,
                                             color: Colors.grey,
                                           ),
@@ -1849,9 +1962,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Text(
-                                            'Show: ',
-                                            style: TextStyle(fontSize: 12),
+                                          Text(
+                                            l10n?.showLabel ?? 'Show: ',
+                                            style: const TextStyle(fontSize: 12),
                                           ),
                                           DropdownButton<int>(
                                             key: ValueKey(
@@ -1859,26 +1972,36 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                             ),
                                             value: schedule.lookaheadCount,
                                             isDense: true,
-                                            items: const [
+                                            items: [
                                               DropdownMenuItem(
                                                 value: 2,
-                                                child: Text('2 ahead'),
+                                                child: Text(
+                                                  l10n?.aheadCount(2) ?? '2 ahead',
+                                                ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 4,
-                                                child: Text('4 ahead'),
+                                                child: Text(
+                                                  l10n?.aheadCount(4) ?? '4 ahead',
+                                                ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 6,
-                                                child: Text('6 ahead'),
+                                                child: Text(
+                                                  l10n?.aheadCount(6) ?? '6 ahead',
+                                                ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 8,
-                                                child: Text('8 ahead'),
+                                                child: Text(
+                                                  l10n?.aheadCount(8) ?? '8 ahead',
+                                                ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 12,
-                                                child: Text('12 ahead'),
+                                                child: Text(
+                                                  l10n?.aheadCount(12) ?? '12 ahead',
+                                                ),
                                               ),
                                             ],
                                             onChanged: (val) {
@@ -1915,9 +2038,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                             Icons.event_busy,
                                             size: 14,
                                           ),
-                                          label: const Text(
-                                            'Disable Since Date...',
-                                            style: TextStyle(fontSize: 12),
+                                          label: Text(
+                                            l10n?.disableSinceDate ??
+                                                'Disable Since Date...',
+                                            style: const TextStyle(fontSize: 12),
                                           ),
                                           onPressed: () async {
                                             final now = DateTime.now();
@@ -1962,7 +2086,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                             color: AppTheme.stageRed,
                                           ),
                                           label: Text(
-                                            'Disabled from ${schedule.disabledAfter!.year}-${schedule.disabledAfter!.month.toString().padLeft(2, '0')}-${schedule.disabledAfter!.day.toString().padLeft(2, '0')}',
+                                            l10n?.disabledFromDate(
+                                                  '${schedule.disabledAfter!.year}-${schedule.disabledAfter!.month.toString().padLeft(2, '0')}-${schedule.disabledAfter!.day.toString().padLeft(2, '0')}',
+                                                ) ??
+                                                'Disabled from ${schedule.disabledAfter!.year}-${schedule.disabledAfter!.month.toString().padLeft(2, '0')}-${schedule.disabledAfter!.day.toString().padLeft(2, '0')}',
                                             style: const TextStyle(
                                               fontSize: 11,
                                               color: AppTheme.stageRed,
@@ -2001,7 +2128,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       child: OutlinedButton.icon(
                         key: const ValueKey('add_recurring_pattern_btn'),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Repetitive Schedule Rule'),
+                        label: Text(
+                          l10n?.addRepetitiveScheduleRule ??
+                              'Add Repetitive Schedule Rule',
+                        ),
                         onPressed: () {
                           Navigator.of(bottomSheetCtx).pop();
                           _showServiceDialog();
@@ -2558,7 +2688,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             PopupMenuButton<String>(
               key: ValueKey('member_menu_${member.id}'),
               icon: const Icon(Icons.more_vert, size: 20),
-              tooltip: 'Member options',
+              tooltip: AppLocalizations.of(context)?.memberOptionsTooltip ??
+                  'Member options',
               onSelected: (val) {
                 if (val == 'edit') {
                   _showMemberDialog(memberToEdit: member);
@@ -2592,15 +2723,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ],
                     ),
                   ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                      SizedBox(width: 8),
+                      const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                      const SizedBox(width: 8),
                       Text(
-                        'Remove Member',
-                        style: TextStyle(color: Colors.red),
+                        AppLocalizations.of(context)?.removeMember ??
+                            'Remove Member',
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ],
                   ),
@@ -2623,6 +2755,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required List<ServiceEvent> events,
     required bool isAdmin,
   }) {
+    final l10n = AppLocalizations.of(context);
     final memberMap = {for (final m in members) m.id: m};
 
     return ListView(
@@ -2649,7 +2782,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               runSpacing: 8,
               children: [
                 Text(
-                  'Periodic & Upcoming Services (${events.length})',
+                  '${l10n?.periodicServicesTitle ?? 'Periodic & Upcoming Services'} (${events.length})',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -2681,7 +2814,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Musician View',
+                          l10n?.musicianViewLabel ?? 'Musician View',
                           style: TextStyle(
                             fontSize: 11,
                             color: theme.colorScheme.onSurfaceVariant,
@@ -3180,7 +3313,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           color: AppTheme.amberAccent,
                         ),
                         label: Text(
-                          'Replace ${(memberMap[assignment.memberId]?.name ?? "Musician").split(" ").first}',
+                          l10n?.replaceMemberAction(
+                                (memberMap[assignment.memberId]?.name ??
+                                        (l10n.musician))
+                                    .split(' ')
+                                    .first,
+                              ) ??
+                              'Replace ${(memberMap[assignment.memberId]?.name ?? "Musician").split(" ").first}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,

@@ -34,14 +34,16 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
   /// Adds a new calendar service or rehearsal event.
   void addEvent(ServiceEvent event) {
-    _customEvents = [...?_customEvents, event];
+    _customEvents ??= List.of(state);
+    _customEvents = [..._customEvents!, event];
     _syncState();
   }
 
   /// Updates an existing service event.
   void updateEvent(ServiceEvent updated) {
+    _customEvents ??= List.of(state);
     _customEvents = [
-      for (final e in _customEvents ?? [])
+      for (final e in _customEvents!)
         if (e.id == updated.id) updated else e,
     ];
     _syncState();
@@ -49,17 +51,19 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
   /// Deletes a service event by id.
   void deleteEvent(String id) {
-    _customEvents = (_customEvents ?? []).where((e) => e.id != id).toList();
+    _customEvents ??= List.of(state);
+    _customEvents = _customEvents!.where((e) => e.id != id).toList();
     _syncState();
   }
 
   /// Ensures an event exists in `_customEvents` before mutating its assignments.
   void _materializeEventIfNeeded(String eventId) {
-    final exists = (_customEvents ?? []).any((e) => e.id == eventId);
+    _customEvents ??= List.of(state);
+    final exists = _customEvents!.any((e) => e.id == eventId);
     if (!exists) {
       final projected = state.where((e) => e.id == eventId).firstOrNull;
       if (projected != null) {
-        _customEvents = [...?_customEvents, projected];
+        _customEvents!.add(projected);
       }
     }
   }
@@ -181,22 +185,27 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
     if (upcoming.isEmpty) return;
 
-    final nextEvent = upcoming.first;
-    _materializeEventIfNeeded(nextEvent.id);
+    // Target the earliest upcoming event where the member is already scheduled,
+    // or fall back to the first upcoming event to assign them.
+    final targetEvent = upcoming.firstWhere(
+      (e) => e.assignments.any((a) => a.memberId == memberId),
+      orElse: () => upcoming.first,
+    );
+    _materializeEventIfNeeded(targetEvent.id);
 
-    final existingIndex = nextEvent.assignments.indexWhere(
+    final existingIndex = targetEvent.assignments.indexWhere(
       (a) => a.memberId == memberId,
     );
 
     if (existingIndex < 0) {
       assignMember(
-        eventId: nextEvent.id,
+        eventId: targetEvent.id,
         memberId: memberId,
         role: defaultRole,
         status: AssignmentStatus.confirmed,
       );
     } else {
-      final currentStatus = nextEvent.assignments[existingIndex].status;
+      final currentStatus = targetEvent.assignments[existingIndex].status;
       final nextStatus = switch (currentStatus) {
         AssignmentStatus.confirmed => AssignmentStatus.declined,
         AssignmentStatus.declined => AssignmentStatus.scheduled,
@@ -205,7 +214,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
       _customEvents = [
         for (final event in _customEvents ?? [])
-          if (event.id == nextEvent.id)
+          if (event.id == targetEvent.id)
             event.copyWith(
               assignments: <ServiceAssignment>[
                 for (final a in event.assignments)

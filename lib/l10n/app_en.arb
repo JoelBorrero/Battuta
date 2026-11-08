@@ -1654,5 +1654,592 @@
   "registerAction": "Register",
   "@registerAction": {
     "description": "Button to submit registration"
+  },
+  "schedulingAttentionNeeded": "Scheduling Attention Needed ({count})",
+  "@schedulingAttentionNeeded": {
+    "description": "Title for admin scheduling gaps banner",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "dismissAction": "Dismiss",
+  "@dismissAction": {
+    "description": "Button to dismiss alert"
+  },
+  "coverageAlertsCount": "Coverage Alerts ({count})",
+  "@coverageAlertsCount": {
+    "description": "Title for coverage alerts modal",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "noPendingGaps": "No pending scheduling gaps. All services are covered!",
+  "@noPendingGaps": {
+    "description": "Empty state for coverage alerts"
+  },
+  "assignMusicianReplacement": "Assign Musician Replacement",
+  "@assignMusicianReplacement": {
+    "description": "Dialog title for replacing musician"
+  },
+  "cannotAttendPrefix": "Cannot Attend: {name}",
+  "@cannotAttendPrefix": {
+    "description": "Label indicating which member cannot attend",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  "roleDatePrefix": "Role: {role} • {date}",
+  "@roleDatePrefix": {
+    "description": "Role and date information line",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Acoustic Guitar"
+      },
+      "date": {
+        "type": "String",
+        "example": "Sun, Nov 8"
+      }
+    }
+  },
+  "selectSubstituteMusician": "Select Substitute Musician:",
+  "@selectSubstituteMusician": {
+    "description": "Dropdown label for substitute musician"
+  },
+  "substituteMusicianLabel": "Substitute Musician",
+  "@substituteMusicianLabel": {
+    "description": "Field label for substitute musician"
+  },
+  "playsRoleTag": "★ Plays {role}",
+  "@playsRoleTag": {
+    "description": "Tag indicating substitute plays the requested role",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Keys"
+      }
+    }
+  },
+  "inLineupTag": "(In Lineup)",
+  "@inLineupTag": {
+    "description": "Tag indicating member is already scheduled"
+  },
+  "assignedRoleLabel": "Assigned Role",
+  "@assignedRoleLabel": {
+    "description": "Field label for assigned role"
+  },
+  "attendanceStatusLabel": "Attendance Status",
+  "@attendanceStatusLabel": {
+    "description": "Field label for attendance status"
+  },
+  "confirmReplacement": "Confirm Replacement",
+  "@confirmReplacement": {
+    "description": "Button to confirm replacement"
+  },
+  "replacedMusicianSuccess": "Replaced {oldMember} with {newMember} for {date}!",
+  "@replacedMusicianSuccess": {
+    "description": "Snackbar confirming musician replacement",
+    "placeholders": {
+      "oldMember": {
+        "type": "String",
+        "example": "David"
+      },
+      "newMember": {
+        "type": "String",
+        "example": "Sarah"
+      },
+      "date": {
+        "type": "String",
+        "example": "Sun, Nov 8"
+      }
+    }
+  },
+  "noOtherMembersToSubstitute": "No other team members available to substitute.",
+  "@noOtherMembersToSubstitute": {
+    "description": "Snackbar when no substitute is available"
+  },
+  "confirmAttendance": "Confirm Attendance",
+  "@confirmAttendance": {
+    "description": "Action to confirm attendance"
+  },
+  "markUnavailableCannotAttend": "Mark Unavailable / Cannot Attend",
+  "@markUnavailableCannotAttend": {
+    "description": "Action to mark unavailable"
+  },
+  "flagsDateReplacement": "Flags date so admin can set a replacement",
+  "@flagsDateReplacement": {
+    "description": "Subtitle explaining decline action"
+  },
+  "findReplacementSubstitute": "Find Replacement / Substitute",
+  "@findReplacementSubstitute": {
+    "description": "Action to find replacement"
+  },
+  "assignAnotherMember": "Assign another team member to take this spot",
+  "@assignAnotherMember": {
+    "description": "Subtitle explaining find replacement"
+  },
+  "removeFromLineup": "Remove from Lineup",
+  "@removeFromLineup": {
+    "description": "Action to remove member from lineup"
+  },
+  "assignMusicianToDate": "Assign Musician to {date}",
+  "@assignMusicianToDate": {
+    "description": "Dialog title for assigning musician",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Sun, Nov 8"
+      }
+    }
+  },
+  "bandMemberLabel": "Band Member",
+  "@bandMemberLabel": {
+    "description": "Field label for band member"
+  },
+  "assignedRoleForService": "Assigned Role for Service",
+  "@assignedRoleForService": {
+    "description": "Field label for role in service"
+  },
+  "assignToLineupAction": "Assign to Lineup",
+  "@assignToLineupAction": {
+    "description": "Button to assign musician to lineup"
+  },
+  "noArrangementGroupsYet": "No arrangement groups created yet.",
+  "@noArrangementGroupsYet": {
+    "description": "Empty state for arrangement groups"
+  },
+  "assignGroupToService": "Assign Group to Service",
+  "@assignGroupToService": {
+    "description": "Dialog title for assigning group"
+  },
+  "addRepetitiveScheduleRule": "Add Repetitive Schedule Rule",
+  "@addRepetitiveScheduleRule": {
+    "description": "Button to add recurring schedule rule"
+  },
+  "aheadCount": "{count} ahead",
+  "@aheadCount": {
+    "description": "Label for lookahead count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "fullNameRequired": "Full Name *",
+  "@fullNameRequired": {
+    "description": "Field label for full name required"
+  },
+  "rolesInstrumentsRequired": "Roles & Instruments *",
+  "@rolesInstrumentsRequired": {
+    "description": "Label for roles and instruments section"
+  },
+  "rolesSelectedCount": "{count} selected",
+  "@rolesSelectedCount": {
+    "description": "Badge showing how many roles are selected",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectAtLeastOneRole": "Select at least one role (musicians can hold multiple roles)",
+  "@selectAtLeastOneRole": {
+    "description": "Hint text for role selection"
+  },
+  "vocalTessituraRange": "Vocal Tessitura (Range)",
+  "@vocalTessituraRange": {
+    "description": "Field label for vocal tessitura"
+  },
+  "generalAvailabilityLabel": "General Availability",
+  "@generalAvailabilityLabel": {
+    "description": "Field label for general availability"
+  },
+  "notesAssignmentLabel": "Notes / Assignment",
+  "@notesAssignmentLabel": {
+    "description": "Field label for notes or assignment details"
+  },
+  "serviceTitleRequired": "Service Title *",
+  "@serviceTitleRequired": {
+    "description": "Field label for service title required"
+  },
+  "serviceTypeLabel": "Service Type",
+  "@serviceTypeLabel": {
+    "description": "Field label for service type"
+  },
+  "recurrenceScheduleLabel": "Recurrence Schedule",
+  "@recurrenceScheduleLabel": {
+    "description": "Field label for recurrence schedule"
+  },
+  "occurrencesToGenerate": "Occurrences to Generate",
+  "@occurrencesToGenerate": {
+    "description": "Field label for number of occurrences to generate"
+  },
+  "locationVenueLabel": "Location / Venue",
+  "@locationVenueLabel": {
+    "description": "Field label for location or venue"
+  },
+  "callTimeInstructionsLabel": "Call Time & Instructions",
+  "@callTimeInstructionsLabel": {
+    "description": "Field label for call time and instructions"
+  },
+  "singleDateOnly": "1 service (Single date only)",
+  "@singleDateOnly": {
+    "description": "Option for single service date"
+  },
+  "seriesCountServices": "{count} services ({weeks} weeks ahead)",
+  "@seriesCountServices": {
+    "description": "Option for recurring series generation",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      },
+      "weeks": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "cantAttendCoverNeeded": "Can''t attend — missing cover for {role}",
+  "@cantAttendCoverNeeded": {
+    "description": "Alert reason when member declined",
+    "placeholders": {
+      "role": {
+        "type": "String",
+        "example": "Bass"
+      }
+    }
+  },
+  "statusUnavailableNeedsSub": "General status is Unavailable — may need substitute",
+  "@statusUnavailableNeedsSub": {
+    "description": "Alert reason when member is unavailable"
+  },
+  "networkErrorNoInternet": "Network error: Unable to connect to Gemini AI. Please check your internet connection.",
+  "@networkErrorNoInternet": {
+    "description": "User friendly message when Gemini network connection fails"
+  },
+  "omrTimeoutError": "The AI analysis request timed out. Please check your internet connection or try again.",
+  "@omrTimeoutError": {
+    "description": "User friendly message when Gemini analysis times out"
+  },
+  "geminiApiKeyNotConfigured": "Gemini API key is not configured. Please configure your key in Settings.",
+  "@geminiApiKeyNotConfigured": {
+    "description": "User friendly message when Gemini API key is missing"
+  },
+  "omrParseError": "Could not transcribe the sheet music. Please ensure the image is clear and try again.",
+  "@omrParseError": {
+    "description": "User friendly message when Gemini response cannot be parsed"
+  },
+  "scanTitlePrefix": "Title: {title}",
+  "@scanTitlePrefix": {
+    "description": "Extracted score title prefix",
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "scanSectionsCount": "Sections: {count}",
+  "@scanSectionsCount": {
+    "description": "Extracted score sections count",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "scanSectionName": "Section: {name}",
+  "@scanSectionName": {
+    "description": "Extracted pitch section name",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "scanMeasuresCount": "Measures: {count}",
+  "@scanMeasuresCount": {
+    "description": "Extracted pitch measures count",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "removeMember": "Remove Member",
+  "@removeMember": {
+    "description": "Action to remove member from roster"
+  },
+  "memberOptionsTooltip": "Member options",
+  "@memberOptionsTooltip": {
+    "description": "Tooltip for member options popup"
+  },
+  "musicianViewLabel": "Musician View",
+  "@musicianViewLabel": {
+    "description": "Badge showing non-admin musician view"
+  },
+  "replaceMemberAction": "Replace {name}",
+  "@replaceMemberAction": {
+    "description": "Button to replace a member in lineup",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "showLabel": "Show: ",
+  "@showLabel": {
+    "description": "Label for lookahead dropdown"
+  },
+  "recurringServiceSchedules": "Recurring Service Schedules",
+  "@recurringServiceSchedules": {
+    "description": "Title for recurring series management modal"
+  },
+  "recurringSchedulesSubtitle": "Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.",
+  "@recurringSchedulesSubtitle": {
+    "description": "Subtitle explaining recurring schedules"
+  },
+  "noRecurringSchedulesYet": "No recurring schedules configured yet.",
+  "@noRecurringSchedulesYet": {
+    "description": "Empty state for recurring schedules"
+  },
+  "schedulePausedNotice": "Schedule Paused — no occurrences generated",
+  "@schedulePausedNotice": {
+    "description": "Notice banner when schedule is paused"
+  },
+  "disableSinceDate": "Disable Since Date...",
+  "@disableSinceDate": {
+    "description": "Button to set a cutoff date for a recurring schedule"
+  },
+  "disabledFromDate": "Disabled from {date}",
+  "@disabledFromDate": {
+    "description": "Chip label showing disabled date",
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "updatedMemberSuccess": "Updated {name}",
+  "@updatedMemberSuccess": {
+    "description": "Snackbar confirming member updated",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "addedMemberSuccess": "Added {name} to the team!",
+  "@addedMemberSuccess": {
+    "description": "Snackbar confirming member added",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "updatedServiceSuccess": "Updated {title}",
+  "@updatedServiceSuccess": {
+    "description": "Snackbar confirming service updated",
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "scheduledServiceSuccess": "Scheduled {title}!",
+  "@scheduledServiceSuccess": {
+    "description": "Snackbar confirming service scheduled",
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "recurringScheduleSuccess": "Configured recurring schedule for {title} (showing next {count} events)!",
+  "@recurringScheduleSuccess": {
+    "description": "Snackbar confirming recurring schedule configured",
+    "placeholders": {
+      "title": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "assignedMusicianSuccess": "Assigned {name} to {title}!",
+  "@assignedMusicianSuccess": {
+    "description": "Snackbar confirming musician assigned",
+    "placeholders": {
+      "name": { "type": "String" },
+      "title": { "type": "String" }
+    }
+  },
+  "assignedGroupSuccess": "Assigned {group} ({count} members) to {date}!",
+  "@assignedGroupSuccess": {
+    "description": "Snackbar confirming group assigned",
+    "placeholders": {
+      "group": { "type": "String" },
+      "count": { "type": "int" },
+      "date": { "type": "String" }
+    }
+  },
+  "editTeamMember": "Edit Team Member",
+  "@editTeamMember": {
+    "description": "Dialog title for editing a team member"
+  },
+  "addTeamMember": "Add Team Member",
+  "@addTeamMember": {
+    "description": "Dialog title for adding a team member"
+  },
+  "tapToToggleRoles": "Tap to toggle roles (e.g. Pianist + Singer + Guitarist):",
+  "@tapToToggleRoles": {
+    "description": "Helper text for selecting roles"
+  },
+  "vocalTessituraDiscardedTitle": "Vocal Tessitura: Discarded (Instrumental)",
+  "@vocalTessituraDiscardedTitle": {
+    "description": "Title when vocal range is discarded"
+  },
+  "vocalTessituraDiscardedSubtitle": "Automatically omitted because only instruments or production roles are selected.",
+  "@vocalTessituraDiscardedSubtitle": {
+    "description": "Subtitle when vocal range is discarded"
+  },
+  "arrangementGroupsSubteams": "Arrangement Groups / Sub-teams",
+  "@arrangementGroupsSubteams": {
+    "description": "Section title for arrangement groups"
+  },
+  "groupsAssignedCount": "{count} assigned",
+  "@groupsAssignedCount": {
+    "description": "Badge showing number of groups assigned",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberRotatingTeamsSubtitle": "Member can belong to multiple rotating teams:",
+  "@memberRotatingTeamsSubtitle": {
+    "description": "Helper text for groups"
+  },
+  "administratorRole": "Administrator Role",
+  "@administratorRole": {
+    "description": "Switch title for administrator role"
+  },
+  "administratorRoleSubtitle": "Grants authority to create songs, schedule services, and assign musician replacements.",
+  "@administratorRoleSubtitle": {
+    "description": "Subtitle explaining administrator role"
+  },
+  "saveChanges": "Save Changes",
+  "@saveChanges": {
+    "description": "Button to save form changes"
+  },
+  "addMemberAction": "Add Member",
+  "@addMemberAction": {
+    "description": "Button to add a member"
+  },
+  "editServiceEvent": "Edit Service Event",
+  "@editServiceEvent": {
+    "description": "Dialog title for editing a service"
+  },
+  "addServiceRehearsal": "Add Service / Rehearsal",
+  "@addServiceRehearsal": {
+    "description": "Dialog title for adding a service"
+  },
+  "groupMembersCount": "{count} members",
+  "@groupMembersCount": {
+    "description": "Badge showing member count of group",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "unavailableCountSubtitle": "{count} unavailable",
+  "@unavailableCountSubtitle": {
+    "description": "Subtitle showing unavailable count",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "attachReferenceAudio": "Attach Reference Audio",
+  "@attachReferenceAudio": {
+    "description": "Dialog title to attach reference audio"
+  },
+  "attachAudioInstructions": "Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):",
+  "@attachAudioInstructions": {
+    "description": "Instructions for attaching reference audio"
+  },
+  "audioTrackSource": "Audio Track Source",
+  "@audioTrackSource": {
+    "description": "Input label for audio track source"
+  },
+  "attachTrackAction": "Attach Track",
+  "@attachTrackAction": {
+    "description": "Button to attach audio track"
+  },
+  "practiceReference": "Practice Reference",
+  "@practiceReference": {
+    "description": "Practice reference default title suffix"
+  },
+  "metronomeClickTooltip": "Metronome Click ({tempo} BPM)",
+  "@metronomeClickTooltip": {
+    "description": "Tooltip for metronome button",
+    "placeholders": {
+      "tempo": { "type": "int" }
+    }
+  },
+  "attachAudioTrackTooltip": "Attach Audio Track",
+  "@attachAudioTrackTooltip": {
+    "description": "Tooltip for attaching audio track"
+  },
+  "loopingPrefix": "Looping: {section}",
+  "@loopingPrefix": {
+    "description": "Badge text when looping a section",
+    "placeholders": {
+      "section": { "type": "String" }
+    }
+  },
+  "playbackSpeedTooltip": "Playback Speed",
+  "@playbackSpeedTooltip": {
+    "description": "Tooltip for playback speed menu"
+  },
+  "speedLabel": "{speed}× Speed",
+  "@speedLabel": {
+    "description": "Label for playback speed menu items",
+    "placeholders": {
+      "speed": { "type": "double" }
+    }
+  },
+  "rewindSecondsTooltip": "Rewind {seconds} seconds",
+  "@rewindSecondsTooltip": {
+    "description": "Tooltip for rewind button",
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "forwardSecondsTooltip": "Forward {seconds} seconds",
+  "@forwardSecondsTooltip": {
+    "description": "Tooltip for forward button",
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "pauseAction": "Pause",
+  "@pauseAction": {
+    "description": "Tooltip for pause button"
+  },
+  "playAction": "Play",
+  "@playAction": {
+    "description": "Tooltip for play button"
+  },
+  "loopSectionTooltip": "Loop Section",
+  "@loopSectionTooltip": {
+    "description": "Tooltip for looping section button"
+  },
+  "noLoopFullSong": "No Loop (Full Song)",
+  "@noLoopFullSong": {
+    "description": "Option for no looping"
+  },
+  "loopSectionItem": "Loop: {section}",
+  "@loopSectionItem": {
+    "description": "Menu item to loop a specific section",
+    "placeholders": {
+      "section": { "type": "String" }
+    }
+  },
+  "createService": "Create Service",
+  "@createService": {
+    "description": "Button to create a single service"
+  },
+  "createSeriesCount": "Create Series ({count})",
+  "@createSeriesCount": {
+    "description": "Button to create a series of services",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
   }
 }

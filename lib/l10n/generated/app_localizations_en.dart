@@ -1149,4 +1149,419 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get registerAction => 'Register';
+
+  @override
+  String schedulingAttentionNeeded(int count) {
+    return 'Scheduling Attention Needed ($count)';
+  }
+
+  @override
+  String get dismissAction => 'Dismiss';
+
+  @override
+  String coverageAlertsCount(int count) {
+    return 'Coverage Alerts ($count)';
+  }
+
+  @override
+  String get noPendingGaps =>
+      'No pending scheduling gaps. All services are covered!';
+
+  @override
+  String get assignMusicianReplacement => 'Assign Musician Replacement';
+
+  @override
+  String cannotAttendPrefix(String name) {
+    return 'Cannot Attend: $name';
+  }
+
+  @override
+  String roleDatePrefix(String role, String date) {
+    return 'Role: $role • $date';
+  }
+
+  @override
+  String get selectSubstituteMusician => 'Select Substitute Musician:';
+
+  @override
+  String get substituteMusicianLabel => 'Substitute Musician';
+
+  @override
+  String playsRoleTag(String role) {
+    return '★ Plays $role';
+  }
+
+  @override
+  String get inLineupTag => '(In Lineup)';
+
+  @override
+  String get assignedRoleLabel => 'Assigned Role';
+
+  @override
+  String get attendanceStatusLabel => 'Attendance Status';
+
+  @override
+  String get confirmReplacement => 'Confirm Replacement';
+
+  @override
+  String replacedMusicianSuccess(
+    String oldMember,
+    String newMember,
+    String date,
+  ) {
+    return 'Replaced $oldMember with $newMember for $date!';
+  }
+
+  @override
+  String get noOtherMembersToSubstitute =>
+      'No other team members available to substitute.';
+
+  @override
+  String get confirmAttendance => 'Confirm Attendance';
+
+  @override
+  String get markUnavailableCannotAttend => 'Mark Unavailable / Cannot Attend';
+
+  @override
+  String get flagsDateReplacement =>
+      'Flags date so admin can set a replacement';
+
+  @override
+  String get findReplacementSubstitute => 'Find Replacement / Substitute';
+
+  @override
+  String get assignAnotherMember =>
+      'Assign another team member to take this spot';
+
+  @override
+  String get removeFromLineup => 'Remove from Lineup';
+
+  @override
+  String assignMusicianToDate(String date) {
+    return 'Assign Musician to $date';
+  }
+
+  @override
+  String get bandMemberLabel => 'Band Member';
+
+  @override
+  String get assignedRoleForService => 'Assigned Role for Service';
+
+  @override
+  String get assignToLineupAction => 'Assign to Lineup';
+
+  @override
+  String get noArrangementGroupsYet => 'No arrangement groups created yet.';
+
+  @override
+  String get assignGroupToService => 'Assign Group to Service';
+
+  @override
+  String get addRepetitiveScheduleRule => 'Add Repetitive Schedule Rule';
+
+  @override
+  String aheadCount(int count) {
+    return '$count ahead';
+  }
+
+  @override
+  String get fullNameRequired => 'Full Name *';
+
+  @override
+  String get rolesInstrumentsRequired => 'Roles & Instruments *';
+
+  @override
+  String rolesSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get selectAtLeastOneRole =>
+      'Select at least one role (musicians can hold multiple roles)';
+
+  @override
+  String get vocalTessituraRange => 'Vocal Tessitura (Range)';
+
+  @override
+  String get generalAvailabilityLabel => 'General Availability';
+
+  @override
+  String get notesAssignmentLabel => 'Notes / Assignment';
+
+  @override
+  String get serviceTitleRequired => 'Service Title *';
+
+  @override
+  String get serviceTypeLabel => 'Service Type';
+
+  @override
+  String get recurrenceScheduleLabel => 'Recurrence Schedule';
+
+  @override
+  String get occurrencesToGenerate => 'Occurrences to Generate';
+
+  @override
+  String get locationVenueLabel => 'Location / Venue';
+
+  @override
+  String get callTimeInstructionsLabel => 'Call Time & Instructions';
+
+  @override
+  String get singleDateOnly => '1 service (Single date only)';
+
+  @override
+  String seriesCountServices(int count, int weeks) {
+    return '$count services ($weeks weeks ahead)';
+  }
+
+  @override
+  String cantAttendCoverNeeded(String role) {
+    return 'Can\'t attend — missing cover for $role';
+  }
+
+  @override
+  String get statusUnavailableNeedsSub =>
+      'General status is Unavailable — may need substitute';
+
+  @override
+  String get networkErrorNoInternet =>
+      'Network error: Unable to connect to Gemini AI. Please check your internet connection.';
+
+  @override
+  String get omrTimeoutError =>
+      'The AI analysis request timed out. Please check your internet connection or try again.';
+
+  @override
+  String get geminiApiKeyNotConfigured =>
+      'Gemini API key is not configured. Please configure your key in Settings.';
+
+  @override
+  String get omrParseError =>
+      'Could not transcribe the sheet music. Please ensure the image is clear and try again.';
+
+  @override
+  String scanTitlePrefix(String title) {
+    return 'Title: $title';
+  }
+
+  @override
+  String scanSectionsCount(int count) {
+    return 'Sections: $count';
+  }
+
+  @override
+  String scanSectionName(String name) {
+    return 'Section: $name';
+  }
+
+  @override
+  String scanMeasuresCount(int count) {
+    return 'Measures: $count';
+  }
+
+  @override
+  String get removeMember => 'Remove Member';
+
+  @override
+  String get memberOptionsTooltip => 'Member options';
+
+  @override
+  String get musicianViewLabel => 'Musician View';
+
+  @override
+  String replaceMemberAction(String name) {
+    return 'Replace $name';
+  }
+
+  @override
+  String get showLabel => 'Show: ';
+
+  @override
+  String get recurringServiceSchedules => 'Recurring Service Schedules';
+
+  @override
+  String get recurringSchedulesSubtitle =>
+      'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.';
+
+  @override
+  String get noRecurringSchedulesYet =>
+      'No recurring schedules configured yet.';
+
+  @override
+  String get schedulePausedNotice =>
+      'Schedule Paused — no occurrences generated';
+
+  @override
+  String get disableSinceDate => 'Disable Since Date...';
+
+  @override
+  String disabledFromDate(String date) {
+    return 'Disabled from $date';
+  }
+
+  @override
+  String updatedMemberSuccess(String name) {
+    return 'Updated $name';
+  }
+
+  @override
+  String addedMemberSuccess(String name) {
+    return 'Added $name to the team!';
+  }
+
+  @override
+  String updatedServiceSuccess(String title) {
+    return 'Updated $title';
+  }
+
+  @override
+  String scheduledServiceSuccess(String title) {
+    return 'Scheduled $title!';
+  }
+
+  @override
+  String recurringScheduleSuccess(String title, int count) {
+    return 'Configured recurring schedule for $title (showing next $count events)!';
+  }
+
+  @override
+  String assignedMusicianSuccess(String name, String title) {
+    return 'Assigned $name to $title!';
+  }
+
+  @override
+  String assignedGroupSuccess(String group, int count, String date) {
+    return 'Assigned $group ($count members) to $date!';
+  }
+
+  @override
+  String get editTeamMember => 'Edit Team Member';
+
+  @override
+  String get addTeamMember => 'Add Team Member';
+
+  @override
+  String get tapToToggleRoles =>
+      'Tap to toggle roles (e.g. Pianist + Singer + Guitarist):';
+
+  @override
+  String get vocalTessituraDiscardedTitle =>
+      'Vocal Tessitura: Discarded (Instrumental)';
+
+  @override
+  String get vocalTessituraDiscardedSubtitle =>
+      'Automatically omitted because only instruments or production roles are selected.';
+
+  @override
+  String get arrangementGroupsSubteams => 'Arrangement Groups / Sub-teams';
+
+  @override
+  String groupsAssignedCount(int count) {
+    return '$count assigned';
+  }
+
+  @override
+  String get memberRotatingTeamsSubtitle =>
+      'Member can belong to multiple rotating teams:';
+
+  @override
+  String get administratorRole => 'Administrator Role';
+
+  @override
+  String get administratorRoleSubtitle =>
+      'Grants authority to create songs, schedule services, and assign musician replacements.';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get addMemberAction => 'Add Member';
+
+  @override
+  String get editServiceEvent => 'Edit Service Event';
+
+  @override
+  String get addServiceRehearsal => 'Add Service / Rehearsal';
+
+  @override
+  String groupMembersCount(int count) {
+    return '$count members';
+  }
+
+  @override
+  String unavailableCountSubtitle(int count) {
+    return '$count unavailable';
+  }
+
+  @override
+  String get attachReferenceAudio => 'Attach Reference Audio';
+
+  @override
+  String get attachAudioInstructions =>
+      'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):';
+
+  @override
+  String get audioTrackSource => 'Audio Track Source';
+
+  @override
+  String get attachTrackAction => 'Attach Track';
+
+  @override
+  String get practiceReference => 'Practice Reference';
+
+  @override
+  String metronomeClickTooltip(int tempo) {
+    return 'Metronome Click ($tempo BPM)';
+  }
+
+  @override
+  String get attachAudioTrackTooltip => 'Attach Audio Track';
+
+  @override
+  String loopingPrefix(String section) {
+    return 'Looping: $section';
+  }
+
+  @override
+  String get playbackSpeedTooltip => 'Playback Speed';
+
+  @override
+  String speedLabel(double speed) {
+    return '$speed× Speed';
+  }
+
+  @override
+  String rewindSecondsTooltip(int seconds) {
+    return 'Rewind $seconds seconds';
+  }
+
+  @override
+  String forwardSecondsTooltip(int seconds) {
+    return 'Forward $seconds seconds';
+  }
+
+  @override
+  String get pauseAction => 'Pause';
+
+  @override
+  String get playAction => 'Play';
+
+  @override
+  String get loopSectionTooltip => 'Loop Section';
+
+  @override
+  String get noLoopFullSong => 'No Loop (Full Song)';
+
+  @override
+  String loopSectionItem(String section) {
+    return 'Loop: $section';
+  }
+
+  @override
+  String get createService => 'Create Service';
+
+  @override
+  String createSeriesCount(int count) {
+    return 'Create Series ($count)';
+  }
 }

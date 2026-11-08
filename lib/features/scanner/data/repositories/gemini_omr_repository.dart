@@ -209,6 +209,30 @@ class GeminiOmrRepository implements OmrRepository {
         error: e,
         stackTrace: st,
       );
+      final errorStr = e.toString();
+      if (errorStr.contains('SocketException') ||
+          errorStr.contains('Failed host lookup') ||
+          errorStr.contains('Network is unreachable') ||
+          errorStr.contains('ClientException')) {
+        return Left(
+          ServerFailure(
+            message:
+                'NETWORK_ERROR: Unable to connect to Gemini AI. Check your internet connection.',
+            stackTrace: st,
+          ),
+        );
+      }
+      if (e is TimeoutException ||
+          errorStr.contains('TimeoutException') ||
+          errorStr.contains('timed out')) {
+        return Left(
+          ServerFailure(
+            message:
+                'TIMEOUT_ERROR: Gemini analysis timed out after 45 seconds.',
+            stackTrace: st,
+          ),
+        );
+      }
       return Left(
         ServerFailure(
           message: 'Gemini OMR extraction failed: $e',
@@ -331,6 +355,30 @@ class GeminiOmrRepository implements OmrRepository {
         error: e,
         stackTrace: st,
       );
+      final errorStr = e.toString();
+      if (errorStr.contains('SocketException') ||
+          errorStr.contains('Failed host lookup') ||
+          errorStr.contains('Network is unreachable') ||
+          errorStr.contains('ClientException')) {
+        return Left(
+          ServerFailure(
+            message:
+                'NETWORK_ERROR: Unable to connect to Gemini AI. Check your internet connection.',
+            stackTrace: st,
+          ),
+        );
+      }
+      if (e is TimeoutException ||
+          errorStr.contains('TimeoutException') ||
+          errorStr.contains('timed out')) {
+        return Left(
+          ServerFailure(
+            message:
+                'TIMEOUT_ERROR: Gemini analysis timed out after 45 seconds.',
+            stackTrace: st,
+          ),
+        );
+      }
       return Left(
         ServerFailure(
           message: 'Gemini OMR pitch-only extraction failed: $e',

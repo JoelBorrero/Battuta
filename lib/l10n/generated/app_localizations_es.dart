@@ -1157,4 +1157,422 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get registerAction => 'Registrarse';
+
+  @override
+  String schedulingAttentionNeeded(int count) {
+    return 'Atención de Programación Requerida ($count)';
+  }
+
+  @override
+  String get dismissAction => 'Descartar';
+
+  @override
+  String coverageAlertsCount(int count) {
+    return 'Alertas de Cobertura ($count)';
+  }
+
+  @override
+  String get noPendingGaps =>
+      'No hay ausencias pendientes. ¡Todos los servicios están cubiertos!';
+
+  @override
+  String get assignMusicianReplacement => 'Asignar Músico de Reemplazo';
+
+  @override
+  String cannotAttendPrefix(String name) {
+    return 'No puede asistir: $name';
+  }
+
+  @override
+  String roleDatePrefix(String role, String date) {
+    return 'Rol: $role • $date';
+  }
+
+  @override
+  String get selectSubstituteMusician => 'Seleccionar Músico Suplente:';
+
+  @override
+  String get substituteMusicianLabel => 'Músico Suplente';
+
+  @override
+  String playsRoleTag(String role) {
+    return '★ Toca $role';
+  }
+
+  @override
+  String get inLineupTag => '(En Alineación)';
+
+  @override
+  String get assignedRoleLabel => 'Rol Asignado';
+
+  @override
+  String get attendanceStatusLabel => 'Estado de Asistencia';
+
+  @override
+  String get confirmReplacement => 'Confirmar Reemplazo';
+
+  @override
+  String replacedMusicianSuccess(
+    String oldMember,
+    String newMember,
+    String date,
+  ) {
+    return '¡Se reemplazó a $oldMember por $newMember para $date!';
+  }
+
+  @override
+  String get noOtherMembersToSubstitute =>
+      'No hay otros miembros del equipo disponibles para sustituir.';
+
+  @override
+  String get confirmAttendance => 'Confirmar Asistencia';
+
+  @override
+  String get markUnavailableCannotAttend =>
+      'Marcar No Disponible / No Asistirá';
+
+  @override
+  String get flagsDateReplacement =>
+      'Marca la fecha para que el admin asigne un suplente';
+
+  @override
+  String get findReplacementSubstitute => 'Buscar Reemplazo / Suplente';
+
+  @override
+  String get assignAnotherMember =>
+      'Asigna a otro miembro para tomar este lugar';
+
+  @override
+  String get removeFromLineup => 'Eliminar de la Alineación';
+
+  @override
+  String assignMusicianToDate(String date) {
+    return 'Asignar Músico a $date';
+  }
+
+  @override
+  String get bandMemberLabel => 'Miembro de la Banda';
+
+  @override
+  String get assignedRoleForService => 'Rol Asignado para el Servicio';
+
+  @override
+  String get assignToLineupAction => 'Asignar a Alineación';
+
+  @override
+  String get noArrangementGroupsYet =>
+      'Aún no se han creado grupos de arreglos.';
+
+  @override
+  String get assignGroupToService => 'Asignar Grupo a Servicio';
+
+  @override
+  String get addRepetitiveScheduleRule => 'Agregar Regla de Horario Repetitivo';
+
+  @override
+  String aheadCount(int count) {
+    return '$count por delante';
+  }
+
+  @override
+  String get fullNameRequired => 'Nombre Completo *';
+
+  @override
+  String get rolesInstrumentsRequired => 'Roles e Instrumentos *';
+
+  @override
+  String rolesSelectedCount(int count) {
+    return '$count seleccionados';
+  }
+
+  @override
+  String get selectAtLeastOneRole =>
+      'Selecciona al menos un rol (los músicos pueden tener múltiples roles)';
+
+  @override
+  String get vocalTessituraRange => 'Tesitura Vocal (Rango)';
+
+  @override
+  String get generalAvailabilityLabel => 'Disponibilidad General';
+
+  @override
+  String get notesAssignmentLabel => 'Notas / Asignación';
+
+  @override
+  String get serviceTitleRequired => 'Título del Servicio *';
+
+  @override
+  String get serviceTypeLabel => 'Tipo de Servicio';
+
+  @override
+  String get recurrenceScheduleLabel => 'Horario de Repetición';
+
+  @override
+  String get occurrencesToGenerate => 'Ocurrencias a Generar';
+
+  @override
+  String get locationVenueLabel => 'Ubicación / Lugar';
+
+  @override
+  String get callTimeInstructionsLabel =>
+      'Hora de Convocatoria e Instrucciones';
+
+  @override
+  String get singleDateOnly => '1 servicio (Solo una fecha)';
+
+  @override
+  String seriesCountServices(int count, int weeks) {
+    return '$count servicios ($weeks semanas por delante)';
+  }
+
+  @override
+  String cantAttendCoverNeeded(String role) {
+    return 'No puede asistir — falta suplente para $role';
+  }
+
+  @override
+  String get statusUnavailableNeedsSub =>
+      'Estado general es No Disponible — puede necesitar suplente';
+
+  @override
+  String get networkErrorNoInternet =>
+      'Error de red: No se pudo conectar con Gemini AI. Revisa tu conexión a internet o inténtalo de nuevo.';
+
+  @override
+  String get omrTimeoutError =>
+      'El análisis de IA tardó demasiado. Comprueba tu conexión a internet o inténtalo de nuevo.';
+
+  @override
+  String get geminiApiKeyNotConfigured =>
+      'La clave de API de Gemini no está configurada. Por favor configúrala en Ajustes.';
+
+  @override
+  String get omrParseError =>
+      'No se pudo transcribir la partitura. Asegúrate de que la imagen sea nítida e inténtalo de nuevo.';
+
+  @override
+  String scanTitlePrefix(String title) {
+    return 'Título: $title';
+  }
+
+  @override
+  String scanSectionsCount(int count) {
+    return 'Secciones: $count';
+  }
+
+  @override
+  String scanSectionName(String name) {
+    return 'Sección: $name';
+  }
+
+  @override
+  String scanMeasuresCount(int count) {
+    return 'Compases: $count';
+  }
+
+  @override
+  String get removeMember => 'Eliminar Integrante';
+
+  @override
+  String get memberOptionsTooltip => 'Opciones del integrante';
+
+  @override
+  String get musicianViewLabel => 'Vista de Músico';
+
+  @override
+  String replaceMemberAction(String name) {
+    return 'Reemplazar a $name';
+  }
+
+  @override
+  String get showLabel => 'Mostrar: ';
+
+  @override
+  String get recurringServiceSchedules => 'Horarios de Servicios Recurrentes';
+
+  @override
+  String get recurringSchedulesSubtitle =>
+      'Cada evento repetitivo es una instancia recurrente única. Ajusta la proyección continua (X eventos por delante) o establece una fecha límite para dejar de generar eventos.';
+
+  @override
+  String get noRecurringSchedulesYet =>
+      'Aún no hay horarios recurrentes configurados.';
+
+  @override
+  String get schedulePausedNotice =>
+      'Horario en Pausa — no se generan ocurrencias';
+
+  @override
+  String get disableSinceDate => 'Desactivar desde fecha...';
+
+  @override
+  String disabledFromDate(String date) {
+    return 'Desactivado desde $date';
+  }
+
+  @override
+  String updatedMemberSuccess(String name) {
+    return '¡$name actualizado!';
+  }
+
+  @override
+  String addedMemberSuccess(String name) {
+    return '¡$name añadido al equipo!';
+  }
+
+  @override
+  String updatedServiceSuccess(String title) {
+    return '¡$title actualizado!';
+  }
+
+  @override
+  String scheduledServiceSuccess(String title) {
+    return '¡$title programado!';
+  }
+
+  @override
+  String recurringScheduleSuccess(String title, int count) {
+    return '¡Horario recurrente configurado para $title (mostrando próximos $count eventos)!';
+  }
+
+  @override
+  String assignedMusicianSuccess(String name, String title) {
+    return '¡$name asignado a $title!';
+  }
+
+  @override
+  String assignedGroupSuccess(String group, int count, String date) {
+    return '¡$group ($count integrantes) asignado a $date!';
+  }
+
+  @override
+  String get editTeamMember => 'Editar Integrante del Equipo';
+
+  @override
+  String get addTeamMember => 'Añadir Integrante del Equipo';
+
+  @override
+  String get tapToToggleRoles =>
+      'Toca para alternar roles (ej. Pianista + Voz + Guitarrista):';
+
+  @override
+  String get vocalTessituraDiscardedTitle =>
+      'Tesitura Vocal: Omitida (Instrumental)';
+
+  @override
+  String get vocalTessituraDiscardedSubtitle =>
+      'Omitida automáticamente porque solo se seleccionaron instrumentos o roles de producción.';
+
+  @override
+  String get arrangementGroupsSubteams => 'Grupos de Arreglos / Subequipos';
+
+  @override
+  String groupsAssignedCount(int count) {
+    return '$count asignados';
+  }
+
+  @override
+  String get memberRotatingTeamsSubtitle =>
+      'El integrante puede pertenecer a varios equipos rotativos:';
+
+  @override
+  String get administratorRole => 'Rol de Administrador';
+
+  @override
+  String get administratorRoleSubtitle =>
+      'Otorga autoridad para crear canciones, programar servicios y asignar suplentes.';
+
+  @override
+  String get saveChanges => 'Guardar Cambios';
+
+  @override
+  String get addMemberAction => 'Añadir Integrante';
+
+  @override
+  String get editServiceEvent => 'Editar Evento de Servicio';
+
+  @override
+  String get addServiceRehearsal => 'Añadir Servicio / Ensayo';
+
+  @override
+  String groupMembersCount(int count) {
+    return '$count integrantes';
+  }
+
+  @override
+  String unavailableCountSubtitle(int count) {
+    return '$count no disponibles';
+  }
+
+  @override
+  String get attachReferenceAudio => 'Adjuntar Audio de Referencia';
+
+  @override
+  String get attachAudioInstructions =>
+      'Selecciona un archivo de audio o pega un enlace de ensayo (MP3, WAV, M4A):';
+
+  @override
+  String get audioTrackSource => 'Fuente de la Pista de Audio';
+
+  @override
+  String get attachTrackAction => 'Adjuntar Pista';
+
+  @override
+  String get practiceReference => 'Referencia de Ensayo';
+
+  @override
+  String metronomeClickTooltip(int tempo) {
+    return 'Clic de Metrónomo ($tempo BPM)';
+  }
+
+  @override
+  String get attachAudioTrackTooltip => 'Adjuntar Pista de Audio';
+
+  @override
+  String loopingPrefix(String section) {
+    return 'Bucle: $section';
+  }
+
+  @override
+  String get playbackSpeedTooltip => 'Velocidad de Reproducción';
+
+  @override
+  String speedLabel(double speed) {
+    return '$speed× Velocidad';
+  }
+
+  @override
+  String rewindSecondsTooltip(int seconds) {
+    return 'Retroceder $seconds segundos';
+  }
+
+  @override
+  String forwardSecondsTooltip(int seconds) {
+    return 'Adelantar $seconds segundos';
+  }
+
+  @override
+  String get pauseAction => 'Pausa';
+
+  @override
+  String get playAction => 'Reproducir';
+
+  @override
+  String get loopSectionTooltip => 'Repetir Sección en Bucle';
+
+  @override
+  String get noLoopFullSong => 'Sin Bucle (Canción Completa)';
+
+  @override
+  String loopSectionItem(String section) {
+    return 'Bucle: $section';
+  }
+
+  @override
+  String get createService => 'Crear Servicio';
+
+  @override
+  String createSeriesCount(int count) {
+    return 'Crear Serie ($count)';
+  }
 }

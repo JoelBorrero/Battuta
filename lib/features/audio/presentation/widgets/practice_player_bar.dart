@@ -8,6 +8,7 @@ library;
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,25 +25,27 @@ class PracticePlayerBar extends ConsumerWidget {
 
   void _showAttachAudioDialog(BuildContext context, WidgetRef ref) {
     final controller = TextEditingController(text: 'Acoustic_Guide_Track.mp3');
+    final l10n = AppLocalizations.of(context);
 
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Attach Reference Audio'),
+        title: Text(l10n?.attachReferenceAudio ?? 'Attach Reference Audio'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):',
+            Text(
+              l10n?.attachAudioInstructions ??
+                  'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):',
             ),
             const SizedBox(height: 12),
             TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Audio Track Source',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.audio_file),
+              decoration: InputDecoration(
+                labelText: l10n?.audioTrackSource ?? 'Audio Track Source',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.audio_file),
               ),
             ),
           ],
@@ -50,7 +53,7 @@ class PracticePlayerBar extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             onPressed: () {
@@ -61,7 +64,7 @@ class PracticePlayerBar extends ConsumerWidget {
               }
               Navigator.of(ctx).pop();
             },
-            child: const Text('Attach Track'),
+            child: Text(l10n?.attachTrackAction ?? 'Attach Track'),
           ),
         ],
       ),
@@ -71,6 +74,7 @@ class PracticePlayerBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final audioState = ref.watch(audioPracticeControllerProvider);
     final notifier = ref.read(audioPracticeControllerProvider.notifier);
 
@@ -112,7 +116,7 @@ class PracticePlayerBar extends ConsumerWidget {
                     children: [
                       Text(
                         audioState.audioSourceTitle ??
-                            '${song.title} (Practice Reference)',
+                            '${song.title} (${l10n?.practiceReference ?? "Practice Reference"})',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -138,7 +142,8 @@ class PracticePlayerBar extends ConsumerWidget {
                         ? theme.colorScheme.primary
                         : null,
                   ),
-                  tooltip: 'Metronome Click (${song.tempo} BPM)',
+                  tooltip: l10n?.metronomeClickTooltip(song.tempo) ??
+                      'Metronome Click (${song.tempo} BPM)',
                   onPressed: notifier.toggleMetronome,
                 ),
 
@@ -146,7 +151,7 @@ class PracticePlayerBar extends ConsumerWidget {
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.add_link),
-                  tooltip: 'Attach Audio Track',
+                  tooltip: l10n?.attachAudioTrackTooltip ?? 'Attach Audio Track',
                   onPressed: () => _showAttachAudioDialog(context, ref),
                 ),
               ],
@@ -192,7 +197,8 @@ class PracticePlayerBar extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Looping: ${audioState.activeLoopSection}',
+                          l10n?.loopingPrefix(audioState.activeLoopSection!) ??
+                              'Looping: ${audioState.activeLoopSection}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -223,12 +229,15 @@ class PracticePlayerBar extends ConsumerWidget {
                 children: [
                   // Speed Selector
                   PopupMenuButton<double>(
-                    tooltip: 'Playback Speed',
+                    tooltip: l10n?.playbackSpeedTooltip ?? 'Playback Speed',
                     initialValue: audioState.speed,
                     onSelected: notifier.setSpeed,
                     itemBuilder: (_) => [
                       for (final s in [0.5, 0.75, 1.0, 1.25, 1.5])
-                        PopupMenuItem(value: s, child: Text('$s× Speed')),
+                        PopupMenuItem(
+                          value: s,
+                          child: Text(l10n?.speedLabel(s) ?? '$s× Speed'),
+                        ),
                     ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -272,7 +281,8 @@ class PracticePlayerBar extends ConsumerWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.replay_10),
-                    tooltip: 'Rewind 10 seconds',
+                    tooltip: l10n?.rewindSecondsTooltip(10) ??
+                        'Rewind 10 seconds',
                     onPressed: () =>
                         notifier.seek(position - const Duration(seconds: 10)),
                   ),
@@ -284,7 +294,9 @@ class PracticePlayerBar extends ConsumerWidget {
                     icon: Icon(
                       audioState.isPlaying ? Icons.pause : Icons.play_arrow,
                     ),
-                    tooltip: audioState.isPlaying ? 'Pause' : 'Play',
+                    tooltip: audioState.isPlaying
+                        ? (l10n?.pauseAction ?? 'Pause')
+                        : (l10n?.playAction ?? 'Play'),
                     onPressed: notifier.togglePlay,
                   ),
 
@@ -292,7 +304,8 @@ class PracticePlayerBar extends ConsumerWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.forward_10),
-                    tooltip: 'Forward 10 seconds',
+                    tooltip: l10n?.forwardSecondsTooltip(10) ??
+                        'Forward 10 seconds',
                     onPressed: () =>
                         notifier.seek(position + const Duration(seconds: 10)),
                   ),
@@ -301,17 +314,22 @@ class PracticePlayerBar extends ConsumerWidget {
 
                   // Practice Loop Selector
                   PopupMenuButton<String?>(
-                    tooltip: 'Loop Section',
+                    tooltip: l10n?.loopSectionTooltip ?? 'Loop Section',
                     onSelected: notifier.setLoop,
                     itemBuilder: (_) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: null,
-                        child: Text('No Loop (Full Song)'),
+                        child: Text(
+                          l10n?.noLoopFullSong ?? 'No Loop (Full Song)',
+                        ),
                       ),
                       for (final section in song.sections)
                         PopupMenuItem(
                           value: section.name,
-                          child: Text('Loop: ${section.name}'),
+                          child: Text(
+                            l10n?.loopSectionItem(section.name) ??
+                                'Loop: ${section.name}',
+                          ),
                         ),
                     ],
                     child: Container(

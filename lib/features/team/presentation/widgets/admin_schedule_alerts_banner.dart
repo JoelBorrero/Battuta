@@ -7,6 +7,7 @@ library;
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/team/domain/entities/schedule_alert.dart';
 import 'package:battuta/features/team/presentation/providers/schedule_alerts_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,6 +26,7 @@ class AdminScheduleAlertsBanner extends ConsumerWidget {
     if (alerts.isEmpty) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
@@ -51,7 +53,8 @@ class AdminScheduleAlertsBanner extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Scheduling Attention Needed (${alerts.length})',
+                  l10n?.schedulingAttentionNeeded(alerts.length) ??
+                      'Scheduling Attention Needed (${alerts.length})',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.stageAmber,
@@ -94,6 +97,7 @@ class _AlertItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +118,7 @@ class _AlertItemRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                alert.role.shortName,
+                alert.role.localizedShortName(context),
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -132,7 +136,17 @@ class _AlertItemRow extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          alert.reason,
+          () {
+            if (alert.reason.contains("Can't attend")) {
+              return l10n?.cantAttendCoverNeeded(
+                      alert.role.localizedShortName(context)) ??
+                  alert.reason;
+            }
+            if (alert.reason.contains('Unavailable')) {
+              return l10n?.statusUnavailableNeedsSub ?? alert.reason;
+            }
+            return alert.reason;
+          }(),
           style: TextStyle(
             fontSize: 12,
             color: Colors.red.shade400,
@@ -151,7 +165,10 @@ class _AlertItemRow extends StatelessWidget {
                 minimumSize: const Size(60, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
-              child: const Text('Dismiss', style: TextStyle(fontSize: 12)),
+              child: Text(
+                l10n?.dismissAction ?? 'Dismiss',
+                style: const TextStyle(fontSize: 12),
+              ),
             ),
             FilledButton.tonal(
               key: ValueKey('find_cover_btn_${alert.id}'),
@@ -162,12 +179,18 @@ class _AlertItemRow extends StatelessWidget {
                 minimumSize: const Size(100, 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.person_search_outlined, size: 16),
-                  SizedBox(width: 4),
-                  Text('Find Cover', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Icon(Icons.person_search_outlined, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n?.findCover ?? 'Find Cover',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
