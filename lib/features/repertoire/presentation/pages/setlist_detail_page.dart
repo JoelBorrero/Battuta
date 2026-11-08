@@ -11,6 +11,7 @@ import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist_item.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,17 +27,19 @@ class SetlistDetailPage extends ConsumerStatefulWidget {
 
 class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
   void _confirmDeleteSetlist(Setlist setlist) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Setlist?'),
+        title: Text(l10n?.deleteSetlistTitle ?? 'Delete Setlist?'),
         content: Text(
-          'Are you sure you want to delete "${setlist.title}"? This action cannot be undone.',
+          l10n?.deleteSetlistConfirm(setlist.title) ??
+              'Are you sure you want to delete "${setlist.title}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.stageRed),
@@ -49,7 +52,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                 context.pop();
               }
             },
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -57,6 +60,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
   }
 
   void _showEditInfoDialog(Setlist setlist) {
+    final l10n = AppLocalizations.of(context);
     final titleController = TextEditingController(text: setlist.title);
     final descController = TextEditingController(
       text: setlist.description ?? '',
@@ -65,23 +69,23 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit Setlist'),
+        title: Text(l10n?.editSetlist ?? 'Edit Setlist'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Setlist Title',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.setlistTitleField ?? 'Setlist Title',
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(
-                labelText: 'Description / Notes',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.descriptionNotesField ?? 'Description / Notes',
+                border: const OutlineInputBorder(),
               ),
               maxLines: 2,
             ),
@@ -90,7 +94,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             onPressed: () async {
@@ -114,7 +118,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                 ref.invalidate(setlistByIdProvider(widget.setlistId));
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n?.save ?? 'Save'),
           ),
         ],
       ),
@@ -122,6 +126,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
   }
 
   void _showAddSongDialog(Setlist setlist, List<Song> allSongs) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -145,9 +150,9 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Add Song to Setlist',
-                        style: TextStyle(
+                      Text(
+                        l10n?.addSongToSetlist ?? 'Add Song to Setlist',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -164,8 +169,10 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                       child: Center(
                         child: Text(
                           allSongs.isEmpty
-                              ? 'No songs in repertoire yet. Create or load sample songs.'
-                              : 'All songs are already in this setlist.',
+                              ? (l10n?.noSongsInRepertoireYet ??
+                                  'No songs in repertoire yet. Create or load sample songs.')
+                              : (l10n?.allSongsAlreadyInSetlist ??
+                                  'All songs are already in this setlist.'),
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.grey),
                         ),
@@ -290,12 +297,13 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final setlistAsync = ref.watch(setlistByIdProvider(widget.setlistId));
     final repertoire = ref.watch(repertoireProvider).value ?? const [];
+    final l10n = AppLocalizations.of(context);
 
     final songMap = {for (final s in repertoire) s.id: s};
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Setlist'),
+        title: Text(l10n?.setlistTitle ?? 'Setlist'),
         actions: [
           setlistAsync.when(
             data: (setlist) {
@@ -305,7 +313,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit setlist info',
+                    tooltip: l10n?.editSetlistInfoTooltip ?? 'Edit setlist info',
                     onPressed: () => _showEditInfoDialog(setlist),
                   ),
                   IconButton(
@@ -313,7 +321,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                       Icons.delete_outline,
                       color: AppTheme.stageRed,
                     ),
-                    tooltip: 'Delete setlist',
+                    tooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
                     onPressed: () => _confirmDeleteSetlist(setlist),
                   ),
                 ],
@@ -326,10 +334,10 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
       ),
       body: setlistAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error loading setlist: $e')),
+        error: (e, _) => Center(child: Text('${l10n?.failedToLoadRepertoire ?? "Error loading setlist"}: $e')),
         data: (setlist) {
           if (setlist == null) {
-            return const Center(child: Text('Setlist not found.'));
+            return Center(child: Text(l10n?.noSetlistsYet ?? 'Setlist not found.'));
           }
 
           return Column(
@@ -395,7 +403,10 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                       runSpacing: 4,
                       children: [
                         Chip(
-                          label: Text('${setlist.songCount} songs'),
+                          label: Text(
+                            l10n?.setlistSongsCount(setlist.songCount) ??
+                                '${setlist.songCount} songs',
+                          ),
                           backgroundColor: isDark
                               ? AppTheme.slateSurfaceLight
                               : AppTheme.pearlSurfaceLight,
@@ -435,17 +446,17 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                                   : AppTheme.charcoalDim,
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'This setlist has no songs yet.',
-                              style: TextStyle(
+                            Text(
+                              l10n?.setlistEmpty ?? 'This setlist has no songs yet.',
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Tap "Add Song" below to build your set.',
-                              style: TextStyle(color: Colors.grey),
+                            Text(
+                              l10n?.tapAddSongHint ?? 'Tap "Add Song" below to build your set.',
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -497,8 +508,13 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                                 children: [
                                   Text(
                                     song != null
-                                        ? '${song.artist} • Original: ${song.key} (${song.tempo} BPM)'
-                                        : 'Unknown artist',
+                                        ? (l10n?.songOriginalMeta(
+                                              song.artist,
+                                              song.key,
+                                              song.tempo,
+                                            ) ??
+                                            '${song.artist} • Original: ${song.key} (${song.tempo} BPM)')
+                                        : (l10n?.unknownArtist ?? 'Unknown artist'),
                                   ),
                                   if (item.notes != null &&
                                       item.notes!.isNotEmpty)
@@ -519,7 +535,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                                       Icons.remove_circle_outline,
                                       size: 20,
                                     ),
-                                    tooltip: 'Remove from setlist',
+                                    tooltip: l10n?.removeFromSetlistTooltip ?? 'Remove from setlist',
                                     onPressed: () =>
                                         _removeSongFromSetlist(setlist, index),
                                   ),
@@ -569,9 +585,9 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                           minimumSize: const Size(44, 48),
                         ),
                         icon: const Icon(Icons.add),
-                        label: const Text(
-                          'Add Song to Setlist',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        label: Text(
+                          l10n?.addSongToSetlist ?? 'Add Song to Setlist',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         onPressed: () =>
                             _showAddSongDialog(setlist, repertoire),

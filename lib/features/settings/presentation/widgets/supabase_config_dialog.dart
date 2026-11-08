@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -122,10 +123,11 @@ class _SupabaseConfigDialogState extends ConsumerState<SupabaseConfigDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: const Text('Supabase Project Setup'),
+      title: Text(l10n?.supabaseProjectSetup ?? 'Supabase Project Setup'),
       content: SingleChildScrollView(
         child: SizedBox(
           width: 400,
@@ -185,11 +187,11 @@ class _SupabaseConfigDialogState extends ConsumerState<SupabaseConfigDialog> {
       actions: [
         TextButton(
           onPressed: _saving ? null : _handleClear,
-          child: const Text('Restore Default'),
+          child: Text(l10n?.restoreDefault ?? 'Restore Default'),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const ValueKey('supabase_config_save_btn'),
@@ -200,7 +202,7 @@ class _SupabaseConfigDialogState extends ConsumerState<SupabaseConfigDialog> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Save & Connect'),
+              : Text(l10n?.saveAndConnect ?? 'Save & Connect'),
         ),
       ],
     );

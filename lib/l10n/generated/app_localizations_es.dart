@@ -125,16 +125,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get versionLabel => 'Versión';
 
   @override
-  String get teamRosterTab => 'Lista del Equipo';
+  String get teamRosterTab => 'Plantilla del Equipo';
 
   @override
-  String get bandCalendarTab => 'Calendario de la Banda';
+  String get bandCalendarTab => 'Calendario del Grupo';
 
   @override
-  String get addMusician => 'Añadir Músico';
+  String get addMusician => 'Añadir Miembro';
 
   @override
-  String get addService => 'Añadir Servicio';
+  String get addService => 'Nuevo Servicio';
 
   @override
   String get recurringSchedules => 'Horarios Recurrentes';
@@ -166,4 +166,780 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get developerOptionsSubtitle =>
       'Configurar URL personalizada de Supabase y claves de IA';
+
+  @override
+  String get repertoireTitle => 'Repertorio';
+
+  @override
+  String get chordChart => 'Gráfico de Acordes';
+
+  @override
+  String get musicalStaff => 'Pentagrama Musical';
+
+  @override
+  String get newSong => 'Nueva Canción';
+
+  @override
+  String get editSong => 'Editar Canción';
+
+  @override
+  String get addSong => 'Añadir Canción';
+
+  @override
+  String get deleteSong => 'Eliminar Canción';
+
+  @override
+  String get deleteSongTitle => '¿Eliminar Canción?';
+
+  @override
+  String deleteSongConfirm(String title) {
+    return '¿Estás seguro de que deseas eliminar \"$title\"? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String deletedSongSuccess(String title) {
+    return 'Se eliminó \"$title\"';
+  }
+
+  @override
+  String get newSetlist => 'Nueva Lista';
+
+  @override
+  String get createSetlist => 'Crear Lista';
+
+  @override
+  String get createNewSetlist => 'Crear Nueva Lista';
+
+  @override
+  String get editSetlist => 'Editar Lista';
+
+  @override
+  String get deleteSetlistTitle => '¿Eliminar Lista?';
+
+  @override
+  String deleteSetlistConfirm(String title) {
+    return '¿Estás seguro de que deseas eliminar \"$title\"? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String deletedSetlistSuccess(String title) {
+    return 'Se eliminó la lista \"$title\"';
+  }
+
+  @override
+  String createdSetlistSuccess(String title) {
+    return 'Se creó la lista \"$title\"';
+  }
+
+  @override
+  String songsTab(int count) {
+    return 'Canciones ($count)';
+  }
+
+  @override
+  String setlistsTab(int count) {
+    return 'Listas ($count)';
+  }
+
+  @override
+  String get scanSheetMusicTooltip => 'Escanear partitura';
+
+  @override
+  String get searchSongsTooltip => 'Buscar canciones';
+
+  @override
+  String get typeToSearchSongs => 'Escribe para buscar canciones…';
+
+  @override
+  String get noSongsFound => 'No se encontraron canciones';
+
+  @override
+  String get failedToLoadRepertoire => 'Error al cargar el repertorio';
+
+  @override
+  String get retry => 'Reintentar';
+
+  @override
+  String get repertoireEmpty => 'Tu repertorio está vacío';
+
+  @override
+  String get repertoireEmptyAdminHint =>
+      'Toca el botón + para añadir tu primera canción';
+
+  @override
+  String get repertoireEmptyMemberHint =>
+      'No hay canciones disponibles aún. Contacta a un administrador para añadir canciones.';
+
+  @override
+  String get loadSampleSongs => 'Cargar Canciones de Muestra';
+
+  @override
+  String get scanScore => 'Escanear Partitura';
+
+  @override
+  String get noSetlistsYet => 'Aún no hay listas';
+
+  @override
+  String get setlistsEmptyAdminHint =>
+      'Crea una lista organizada para servicios dominicales o ensayos.';
+
+  @override
+  String get setlistsEmptyMemberHint =>
+      'No hay listas creadas aún. Las listas aparecerán aquí cuando sean publicadas por el director.';
+
+  @override
+  String get loadSampleSetlist => 'Cargar Lista de Muestra';
+
+  @override
+  String setlistSongsCount(int count) {
+    return '$count canciones';
+  }
+
+  @override
+  String get upcomingService => 'Próximo servicio';
+
+  @override
+  String get setlistTitleField => 'Título de la Lista *';
+
+  @override
+  String get setlistTitleHint => 'ej. Domingo Mañana - Pascua';
+
+  @override
+  String get notesServiceThemeField => 'Notas / Tema del Servicio';
+
+  @override
+  String get notesServiceThemeHint => 'ej. Formato acústico, santa cena en Re';
+
+  @override
+  String get deleteSetlistTooltip => 'Eliminar lista';
+
+  @override
+  String get songDetail => 'Detalle de Canción';
+
+  @override
+  String get transposeSong => 'Transportar Tonalidad';
+
+  @override
+  String get reset => 'Restablecer';
+
+  @override
+  String get originalKey => 'Tonalidad Original';
+
+  @override
+  String semitonesCount(String prefix, int count) {
+    return '$prefix$count semitonos';
+  }
+
+  @override
+  String get downOneSemitone => 'Bajar 1 semitono';
+
+  @override
+  String get upOneSemitone => 'Subir 1 semitono';
+
+  @override
+  String saveTransposedKey(String key) {
+    return 'Guardar Tonalidad Transportada ($key) en la Canción';
+  }
+
+  @override
+  String get transposeKeyTooltip => 'Transportar Tonalidad';
+
+  @override
+  String get notationEditorTooltip => 'Editor de Notación';
+
+  @override
+  String get exportPdfTooltip => 'Exportar Partitura PDF';
+
+  @override
+  String get exportMidiTooltip => 'Exportar Archivo MIDI';
+
+  @override
+  String get interactiveNotationView => 'Vista de Notación Interactiva';
+
+  @override
+  String get editInNotationEditor => 'Editar en Editor de Notación';
+
+  @override
+  String get noSectionsYet => 'Esta canción aún no tiene secciones.';
+
+  @override
+  String repeatTimes(int count) {
+    return 'Repetir $count×';
+  }
+
+  @override
+  String beatsCount(int count) {
+    return '$count tiempos';
+  }
+
+  @override
+  String get backToRepertoire => 'Volver al Repertorio';
+
+  @override
+  String get songNotFound => 'Canción no encontrada en el repertorio';
+
+  @override
+  String songKeyBadge(String key) {
+    return 'Tonalidad: $key';
+  }
+
+  @override
+  String failedToExportPdf(String error) {
+    return 'Error al exportar PDF: $error';
+  }
+
+  @override
+  String failedToExportMidi(String error) {
+    return 'Error al exportar MIDI: $error';
+  }
+
+  @override
+  String get viewOnly => 'Solo Lectura';
+
+  @override
+  String get readOnlyAdminWarning =>
+      'Vista de solo lectura: Se requieren permisos de administrador para crear o modificar canciones del repertorio.';
+
+  @override
+  String get songTitleLabel => 'Título de la Canción *';
+
+  @override
+  String get songTitleHint => 'ej. Gracia Admirable';
+
+  @override
+  String get songTitleValidation => 'Por favor ingresa un título de canción';
+
+  @override
+  String get artistComposerLabel => 'Artista / Compositor *';
+
+  @override
+  String get artistComposerHint => 'ej. John Newton';
+
+  @override
+  String get artistValidation => 'Por favor ingresa un artista o compositor';
+
+  @override
+  String get musicalSetup => 'Configuración Musical';
+
+  @override
+  String get keyLabel => 'Tonalidad';
+
+  @override
+  String get meterLabel => 'Compás';
+
+  @override
+  String get decreaseBpm => 'Disminuir BPM';
+
+  @override
+  String get increaseBpm => 'Aumentar BPM';
+
+  @override
+  String get tapTempo => 'Pulsar Tempo';
+
+  @override
+  String get addTag => 'Añadir Etiqueta';
+
+  @override
+  String get tagHint => 'ej. adoración, alabanza, balada';
+
+  @override
+  String get notesInstructionsLabel =>
+      'Notas / Instrucciones de Interpretación';
+
+  @override
+  String get notesInstructionsHint =>
+      'ej. Capo traste 3, intro acústica lenta...';
+
+  @override
+  String songSectionsCount(int count) {
+    return 'Secciones de la Canción ($count)';
+  }
+
+  @override
+  String get addSection => 'Añadir Sección';
+
+  @override
+  String get quickAdd => 'Añadir rápido: ';
+
+  @override
+  String get noSectionsAddedHint =>
+      'No hay secciones añadidas. Toca \"+ Añadir Sección\" para construir tu canción.';
+
+  @override
+  String get sectionName => 'Nombre de la Sección';
+
+  @override
+  String get decreaseRepeats => 'Disminuir repeticiones';
+
+  @override
+  String get increaseRepeats => 'Aumentar repeticiones';
+
+  @override
+  String get moveUp => 'Subir';
+
+  @override
+  String get moveDown => 'Bajar';
+
+  @override
+  String get deleteSection => 'Eliminar Sección';
+
+  @override
+  String get chordsFieldLabel => 'Acordes (ej. C | G/B | Am | F)';
+
+  @override
+  String get chordsFieldHint =>
+      'Escribe símbolos de acordes separados por espacios o barras';
+
+  @override
+  String get applyChordsTooltip => 'Aplicar texto de acordes';
+
+  @override
+  String get addChordBuilderTooltip => 'Abrir creador de acordes';
+
+  @override
+  String get sectionLyricsLabel => 'Letra de la Sección';
+
+  @override
+  String get sectionLyricsHint => 'Ingresa la letra línea por línea...';
+
+  @override
+  String get rehearsalNotesLabel => 'Notas de Ensayo (opcional)';
+
+  @override
+  String get rehearsalNotesHint => 'ej. El solo de guitarra empieza aquí...';
+
+  @override
+  String get addChord => 'Añadir Acorde';
+
+  @override
+  String get rootNote => 'Nota Fundamental';
+
+  @override
+  String get quality => 'Tipo de Acorde';
+
+  @override
+  String get bassNote => 'Bajo (Acorde Invertido)';
+
+  @override
+  String get noneOption => 'Ninguno';
+
+  @override
+  String get beatsLabel => 'Tiempos: ';
+
+  @override
+  String get add => 'Añadir';
+
+  @override
+  String songUpdatedSuccess(String title) {
+    return 'Canción \"$title\" actualizada exitosamente';
+  }
+
+  @override
+  String songCreatedSuccess(String title) {
+    return 'Canción \"$title\" creada exitosamente';
+  }
+
+  @override
+  String failedToSaveSong(String error) {
+    return 'Error al guardar canción: $error';
+  }
+
+  @override
+  String get songDeletedSuccess => 'Canción eliminada';
+
+  @override
+  String get adminRequiredWarning =>
+      'Se requieren permisos de administrador para crear o modificar canciones.';
+
+  @override
+  String get setlistTitle => 'Lista';
+
+  @override
+  String get descriptionNotesField => 'Descripción / Notas';
+
+  @override
+  String get addSongToSetlist => 'Añadir Canción a la Lista';
+
+  @override
+  String get noSongsInRepertoireYet =>
+      'Aún no hay canciones en el repertorio. Crea o carga canciones de muestra.';
+
+  @override
+  String get allSongsAlreadyInSetlist =>
+      'Todas las canciones ya están en esta lista.';
+
+  @override
+  String get setlistEmpty => 'Esta lista aún no tiene canciones.';
+
+  @override
+  String get tapAddSongHint =>
+      'Toca \"Añadir Canción a la Lista\" abajo para armar tu lista.';
+
+  @override
+  String get removeFromSetlistTooltip => 'Quitar de la lista';
+
+  @override
+  String songOriginalMeta(String artist, String key, int tempo) {
+    return '$artist • Original: $key ($tempo BPM)';
+  }
+
+  @override
+  String get unknownArtist => 'Artista desconocido';
+
+  @override
+  String get editSetlistInfoTooltip => 'Editar información de la lista';
+
+  @override
+  String get scanLeadSheet => 'Escanear Partitura';
+
+  @override
+  String get omrScannerTitle => 'Escáner OMR';
+
+  @override
+  String get omrScannerSubtitle =>
+      'Apunta la cámara a una partitura o elige una imagen para extraer\nacordes, melodía y estructura con Gemini AI.';
+
+  @override
+  String get openCamera => 'Abrir Cámara';
+
+  @override
+  String get chooseFromLibrary => 'Elegir de la Galería';
+
+  @override
+  String addedToRepertoireSuccess(String title) {
+    return '¡Se añadió \"$title\" al Repertorio!';
+  }
+
+  @override
+  String extractedMeasuresSuccess(int measures, String section) {
+    return 'Se extrajeron $measures compases para \"$section\".';
+  }
+
+  @override
+  String get scanSheetMusic => 'Escanear Partitura';
+
+  @override
+  String get omrDebugLogs => 'Registros de Diagnóstico OMR';
+
+  @override
+  String get fullSheetSchemaA => 'Partitura Completa (Esquema A)';
+
+  @override
+  String get staffSnippetSchemaB => 'Fragmento de Pentagrama (Esquema B)';
+
+  @override
+  String get camera => 'Cámara';
+
+  @override
+  String get photos => 'Fotos';
+
+  @override
+  String get fullSheetDesc =>
+      'Captura el arreglo completo con metadatos, pentagramas, acordes y letras.';
+
+  @override
+  String get staffSnippetDesc =>
+      'Recorta un solo sistema o melodía para ingreso rápido de ritmo paso a paso.';
+
+  @override
+  String get cropSystem => 'Recortar Sistema';
+
+  @override
+  String get changeImage => 'Cambiar Imagen';
+
+  @override
+  String get analyzeWithGemini => 'Analizar con Gemini AI';
+
+  @override
+  String get recognitionError => 'Error de Reconocimiento';
+
+  @override
+  String get viewDebugLogs => 'Ver Registros de Diagnóstico';
+
+  @override
+  String get recognitionComplete => '¡Reconocimiento Completo!';
+
+  @override
+  String get openInRepertoire => 'Abrir en Repertorio';
+
+  @override
+  String get openInRhythmEditor => 'Abrir en Editor de Ritmo';
+
+  @override
+  String get analyzingSheet => 'Analizando partitura con Gemini AI...';
+
+  @override
+  String get processingImage => 'Procesando imagen...';
+
+  @override
+  String get transcribingSheet => 'Transcribiendo notas, acordes y pentagramas';
+
+  @override
+  String get omrDiagnosticLogs => 'Registros de Diagnóstico OMR';
+
+  @override
+  String get persistentFileSystemLogs => 'Registros en Sistema de Archivos';
+
+  @override
+  String get refreshLogs => 'Actualizar Registros';
+
+  @override
+  String get clearLogs => 'Limpiar Registros';
+
+  @override
+  String get clearOmrLogsTitle => '¿Limpiar Registros OMR?';
+
+  @override
+  String get clearOmrLogsConfirm =>
+      'Esto vaciará el archivo omr_debug.log en el dispositivo.';
+
+  @override
+  String get clearAction => 'Limpiar';
+
+  @override
+  String get omrLogsCleared =>
+      'Registros OMR eliminados del sistema de archivos.';
+
+  @override
+  String get locatingLogFile => 'Ubicando archivo de registro...';
+
+  @override
+  String get loadingDiagnosticLogs => 'Cargando registros de diagnóstico...';
+
+  @override
+  String get noLogsRecordedYet =>
+      'Aún no hay registros.\nEjecuta un escaneo OMR para capturar diagnósticos.';
+
+  @override
+  String get copyAllLogs => 'Copiar Todos los Registros';
+
+  @override
+  String get omrLogsCopied => 'Registros OMR copiados al portapapeles.';
+
+  @override
+  String get scoreEditor => 'Editor de Notación';
+
+  @override
+  String get notationSavedSuccess =>
+      '¡Cambios de notación guardados en la Canción!';
+
+  @override
+  String failedToSaveScore(String error) {
+    return 'Error al guardar partitura: $error';
+  }
+
+  @override
+  String get playbackTempo => 'Tempo de Reproducción';
+
+  @override
+  String get setTempo => 'Establecer Tempo';
+
+  @override
+  String get scoreAudioPreview => 'Vista Previa de Audio';
+
+  @override
+  String get pauseMelody => 'Pausar Melodía';
+
+  @override
+  String get playMelody => 'Reproducir Melodía';
+
+  @override
+  String get stopRewind => 'Detener y Rebobinar';
+
+  @override
+  String get unmuteSound => 'Activar Sonido de Notas';
+
+  @override
+  String get muteSound => 'Silenciar Sonido de Notas';
+
+  @override
+  String get apiConfigurationSection => 'Configuración de API';
+
+  @override
+  String get geminiApiKeyLabel => 'Clave de API Gemini';
+
+  @override
+  String get geminiKeyNotConfigured =>
+      'No configurada — toca para ingresar clave';
+
+  @override
+  String get customLabel => 'Personalizada';
+
+  @override
+  String get devEnvLabel => '.env Desarrollo';
+
+  @override
+  String get loadingStatus => 'Cargando estado...';
+
+  @override
+  String get errorLoadingKey => 'Error al cargar la clave';
+
+  @override
+  String get omrDiagnosticLogsSubtitle =>
+      'Inspeccionar solicitudes, latencias y respuestas de Gemini';
+
+  @override
+  String get appTagline =>
+      'Un compañero de ensayo y partituras\npara bandas y equipos de alabanza.';
+
+  @override
+  String get licensesLabel => 'Licencias';
+
+  @override
+  String get footerAttribution => 'Hecho con ♪ para equipos de alabanza';
+
+  @override
+  String get supabaseConfigSubtitle => 'Configurar URL del Proyecto y Anon Key';
+
+  @override
+  String get notSignedInOffline => 'Sesión no iniciada — SQLite local activo';
+
+  @override
+  String get synchronizingDatabase =>
+      'Sincronizando base de datos local con la nube…';
+
+  @override
+  String get offlineCached => 'Sin conexión: Cambios locales guardados';
+
+  @override
+  String get readyToSync => 'Listo para sincronizar';
+
+  @override
+  String billingPeriodScans(int count) {
+    return '$count escaneos de partituras completas en este período';
+  }
+
+  @override
+  String storageTracksCount(int count) {
+    return '$count partituras y pistas de audio almacenadas';
+  }
+
+  @override
+  String get workspaceMetricsUnavailable =>
+      'Métricas del espacio de trabajo no disponibles';
+
+  @override
+  String get worshipTeamTitle => 'Equipo de Alabanza y Banda';
+
+  @override
+  String get liveStageSync => 'Sincronización en Vivo';
+
+  @override
+  String get directorHost => 'Director (Anfitrión)';
+
+  @override
+  String get musicianFollower => 'Músico (Seguidor)';
+
+  @override
+  String get hostingStatus => 'TRANSMITIENDO';
+
+  @override
+  String get syncedStatus => 'SINCRONIZADO';
+
+  @override
+  String get standaloneStatus => 'AUTÓNOMO';
+
+  @override
+  String get syncingChangesTooltip => 'Sincronizando cambios con Supabase…';
+
+  @override
+  String get cloudSyncedTooltip => 'Sincronizado con la nube';
+
+  @override
+  String cloudSyncedWithTimeTooltip(String time) {
+    return 'Sincronizado con la nube ($time)';
+  }
+
+  @override
+  String get offlineSQLiteTooltip =>
+      'Sin conexión — trabajando con base de datos local SQLite';
+
+  @override
+  String get syncErrorTooltip => 'Error de sincronización';
+
+  @override
+  String get cloudReadyTooltip => 'Nube lista (tocar para sincronizar)';
+
+  @override
+  String get syncingStatus => 'Sincronizando…';
+
+  @override
+  String get syncedStatusLabel => 'Sincronizado';
+
+  @override
+  String get offlineStatusLabel => 'Sin conexión';
+
+  @override
+  String get switchActiveProfileTooltip => 'Cambiar perfil de usuario activo';
+
+  @override
+  String activeProfileTooltip(String name, String role) {
+    return 'Perfil activo: $name ($role)';
+  }
+
+  @override
+  String get coverageAlertsTooltip => 'Alertas de Cobertura de Músicos';
+
+  @override
+  String coverageAlertsCountTooltip(int count) {
+    return '$count alerta(s) de cobertura';
+  }
+
+  @override
+  String get addTeamMemberTooltip => 'Añadir miembro del equipo';
+
+  @override
+  String get addServiceEventTooltip => 'Añadir evento de servicio';
+
+  @override
+  String get noUpcomingServices => 'No hay servicios programados próximamente.';
+
+  @override
+  String get scheduleFirstService => 'Programar Primer Servicio';
+
+  @override
+  String get editMember => 'Editar Miembro';
+
+  @override
+  String get scheduleForService => 'Programar para Servicio';
+
+  @override
+  String get editService => 'Editar Servicio';
+
+  @override
+  String get assignGroup => 'Asignar Grupo';
+
+  @override
+  String get assignMusician => 'Asignar Músico';
+
+  @override
+  String get triggerTestCue => 'Lanzar Señal de Prueba';
+
+  @override
+  String get approveJump => 'Aprobar Salto';
+
+  @override
+  String get geminiApiKeySaved =>
+      'Clave de API Gemini guardada de forma segura.';
+
+  @override
+  String get removeApiKeyTitle => '¿Eliminar clave de API?';
+
+  @override
+  String get customApiKeyRemoved => 'Clave de API personalizada eliminada.';
+
+  @override
+  String get removeKey => 'Eliminar Clave';
+
+  @override
+  String get saveKey => 'Guardar Clave';
+
+  @override
+  String get supabaseProjectSetup => 'Configuración de Proyecto Supabase';
+
+  @override
+  String get restoreDefault => 'Restaurar Predeterminado';
+
+  @override
+  String get saveAndConnect => 'Guardar y Conectar';
 }

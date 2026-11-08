@@ -15,6 +15,7 @@ import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,6 +45,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   }
 
   void _showTransposeDialog(Song originalSong) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) {
@@ -64,7 +66,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Transpose Song',
+                        l10n?.transposeSong ?? 'Transpose Song',
                         style: Theme.of(modalCtx).textTheme.titleLarge
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -77,7 +79,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                                 );
                                 setState(() {});
                               },
-                        child: const Text('Reset'),
+                        child: Text(l10n?.reset ?? 'Reset'),
                       ),
                     ],
                   ),
@@ -107,8 +109,12 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                           ),
                           Text(
                             _transpositionSemitones == 0
-                                ? 'Original Key'
-                                : '${_transpositionSemitones > 0 ? "+" : ""}$_transpositionSemitones semitones',
+                                ? (l10n?.originalKey ?? 'Original Key')
+                                : (l10n?.semitonesCount(
+                                      _transpositionSemitones > 0 ? '+' : '',
+                                      _transpositionSemitones,
+                                    ) ??
+                                    '${_transpositionSemitones > 0 ? '+' : ''}$_transpositionSemitones semitones'),
                             style: Theme.of(modalCtx).textTheme.bodyMedium,
                           ),
                         ],
@@ -121,7 +127,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                     children: [
                       IconButton.filledTonal(
                         icon: const Icon(Icons.remove),
-                        tooltip: 'Down 1 semitone',
+                        tooltip: l10n?.downOneSemitone ?? 'Down 1 semitone',
                         onPressed: () {
                           setModalState(() => _transpositionSemitones--);
                           setState(() {});
@@ -130,7 +136,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                       const SizedBox(width: 24),
                       IconButton.filledTonal(
                         icon: const Icon(Icons.add),
-                        tooltip: 'Up 1 semitone',
+                        tooltip: l10n?.upOneSemitone ?? 'Up 1 semitone',
                         onPressed: () {
                           setModalState(() => _transpositionSemitones++);
                           setState(() {});
@@ -154,8 +160,9 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                     },
                     child: Text(
                       _transpositionSemitones == 0
-                          ? 'Done'
-                          : 'Save Transposed Key (${transposedSong.key}) to Song',
+                          ? (l10n?.done ?? 'Done')
+                          : (l10n?.saveTransposedKey(transposedSong.key) ??
+                              'Save Transposed Key (${transposedSong.key}) to Song'),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -169,6 +176,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   }
 
   Future<void> _exportPdf(Song song) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isExporting = true);
     try {
       final score = song.toScore();
@@ -176,8 +184,13 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
       await generator.shareLeadSheet(score);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to export PDF: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.failedToExportPdf(e.toString()) ?? 'Failed to export PDF: $e',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -185,6 +198,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   }
 
   Future<void> _exportMidi(Song song) async {
+    final l10n = AppLocalizations.of(context);
     setState(() => _isExporting = true);
     try {
       final score = song.toScore();
@@ -192,8 +206,14 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
       await exporter.shareMidiFile(score);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to export MIDI: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.failedToExportMidi(e.toString()) ??
+                  'Failed to export MIDI: $e',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -201,25 +221,26 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   }
 
   Future<void> _deleteSong(Song song) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Song'),
+        title: Text(l10n?.deleteSongTitle ?? 'Delete Song'),
         content: Text(
-          'Are you sure you want to delete "${song.title}"? '
-          'This action cannot be undone.',
+          l10n?.deleteSongConfirm(song.title) ??
+              'Are you sure you want to delete "${song.title}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -228,8 +249,13 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     if (confirmed == true && mounted) {
       await ref.read(repertoireProvider.notifier).deleteSong(song.id);
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Deleted "${song.title}"')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.deletedSongSuccess(song.title) ?? 'Deleted "${song.title}"',
+            ),
+          ),
+        );
         try {
           context.go('/repertoire');
         } catch (_) {
@@ -245,12 +271,13 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final songAsync = ref.watch(songByIdProvider(widget.songId));
+    final l10n = AppLocalizations.of(context);
 
     return songAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, _) => Scaffold(
-        appBar: AppBar(title: const Text('Song Detail')),
+        appBar: AppBar(title: Text(l10n?.songDetail ?? 'Song Detail')),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -263,12 +290,12 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   color: theme.colorScheme.error,
                 ),
                 const SizedBox(height: 12),
-                Text('Error loading song: $err', textAlign: TextAlign.center),
+                Text('${l10n?.failedToLoadRepertoire ?? "Error loading song"}: $err', textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () =>
                       ref.invalidate(songByIdProvider(widget.songId)),
-                  child: const Text('Retry'),
+                  child: Text(l10n?.retry ?? 'Retry'),
                 ),
               ],
             ),
@@ -278,18 +305,18 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
       data: (song) {
         if (song == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Song Detail')),
+            appBar: AppBar(title: Text(l10n?.songDetail ?? 'Song Detail')),
             body: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.music_off, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  const Text('Song not found in repertoire'),
+                  Text(l10n?.songNotFound ?? 'Song not found in repertoire'),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => context.go('/repertoire'),
-                    child: const Text('Back to Repertoire'),
+                    child: Text(l10n?.backToRepertoire ?? 'Back to Repertoire'),
                   ),
                 ],
               ),
@@ -307,33 +334,33 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.tune),
-                tooltip: 'Transpose Key',
+                tooltip: l10n?.transposeKeyTooltip ?? 'Transpose Key',
                 onPressed: () => _showTransposeDialog(song),
               ),
               IconButton(
                 icon: const Icon(Icons.queue_music),
-                tooltip: 'Notation Editor',
+                tooltip: l10n?.notationEditorTooltip ?? 'Notation Editor',
                 onPressed: () =>
                     context.push('/repertoire/${song.id}/notation'),
               ),
               IconButton(
                 icon: const Icon(Icons.picture_as_pdf_outlined),
-                tooltip: 'Export PDF Lead Sheet',
+                tooltip: l10n?.exportPdfTooltip ?? 'Export PDF Lead Sheet',
                 onPressed: _isExporting ? null : () => _exportPdf(activeSong),
               ),
               IconButton(
                 icon: const Icon(Icons.audiotrack_outlined),
-                tooltip: 'Export MIDI File',
+                tooltip: l10n?.exportMidiTooltip ?? 'Export MIDI File',
                 onPressed: _isExporting ? null : () => _exportMidi(activeSong),
               ),
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
-                tooltip: 'Edit Song',
+                tooltip: l10n?.editSong ?? 'Edit Song',
                 onPressed: () => context.push('/repertoire/${song.id}/edit'),
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline),
-                tooltip: 'Delete Song',
+                tooltip: l10n?.deleteSong ?? 'Delete Song',
                 onPressed: () => _deleteSong(song),
               ),
             ],
@@ -372,7 +399,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                         children: [
                           _MetaBadge(
                             icon: Icons.music_note,
-                            label: 'Key: ${activeSong.key}',
+                            label: l10n?.songKeyBadge(activeSong.key) ?? 'Key: ${activeSong.key}',
                             highlight: _transpositionSemitones != 0,
                           ),
                           _MetaBadge(
@@ -426,16 +453,16 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               // ── View Mode Selector (Chord Chart vs Staff Notation) ──
               Center(
                 child: SegmentedButton<bool>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: false,
-                      icon: Icon(Icons.grid_view),
-                      label: Text('Chord Chart'),
+                      icon: const Icon(Icons.grid_view),
+                      label: Text(l10n?.chordChart ?? 'Chord Chart'),
                     ),
                     ButtonSegment(
                       value: true,
-                      icon: Icon(Icons.queue_music),
-                      label: Text('Musical Staff'),
+                      icon: const Icon(Icons.queue_music),
+                      label: Text(l10n?.musicalStaff ?? 'Musical Staff'),
                     ),
                   ],
                   selected: {_showStaffNotation},
@@ -465,7 +492,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                           runSpacing: 8,
                           children: [
                             Text(
-                              'Interactive Notation View',
+                              l10n?.interactiveNotationView ?? 'Interactive Notation View',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -475,7 +502,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                                 visualDensity: VisualDensity.compact,
                               ),
                               icon: const Icon(Icons.edit, size: 16),
-                              label: const Text('Edit in Notation Editor'),
+                              label: Text(l10n?.editInNotationEditor ?? 'Edit in Notation Editor'),
                               onPressed: () => context.push(
                                 '/repertoire/${song.id}/notation',
                               ),
@@ -498,10 +525,10 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               else ...[
                 // Sections Lead Sheet Display
                 if (activeSong.sections.isEmpty)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Text('This song has no sections yet.'),
+                      padding: const EdgeInsets.all(32),
+                      child: Text(l10n?.noSectionsYet ?? 'This song has no sections yet.'),
                     ),
                   )
                 else
@@ -576,6 +603,7 @@ class _SectionDisplayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final chords = section.chords as List<ChordCell>;
     final lyrics = section.lyrics as String?;
     final notes = section.rehearsalNotes as String?;
@@ -615,7 +643,7 @@ class _SectionDisplayCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Repeat $repeatCount×',
+                      l10n?.repeatTimes(repeatCount) ?? 'Repeat $repeatCount×',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -671,7 +699,7 @@ class _SectionDisplayCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${chord.beats} beats',
+                            l10n?.beatsCount(chord.beats) ?? '${chord.beats} beats',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: theme.colorScheme.onPrimaryContainer
                                   .withValues(alpha: 0.7),

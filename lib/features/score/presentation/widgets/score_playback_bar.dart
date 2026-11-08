@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/features/score/presentation/services/score_preview_player.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// Floating or docked playback control bar for previewing musical notation.
@@ -15,13 +16,14 @@ class ScorePlaybackBar extends StatelessWidget {
   final ScorePreviewPlayer player;
 
   void _showTempoDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     var selectedTempo = player.tempo;
 
     showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Playback Tempo'),
+          title: Text(l10n?.playbackTempo ?? 'Playback Tempo'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -60,14 +62,14 @@ class ScorePlaybackBar extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n?.cancel ?? 'Cancel'),
             ),
             FilledButton(
               onPressed: () {
                 player.setTempo(selectedTempo);
                 Navigator.of(ctx).pop();
               },
-              child: const Text('Set Tempo'),
+              child: Text(l10n?.setTempo ?? 'Set Tempo'),
             ),
           ],
         ),
@@ -78,6 +80,7 @@ class ScorePlaybackBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return ListenableBuilder(
       listenable: player,
@@ -114,7 +117,9 @@ class ScorePlaybackBar extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   iconSize: 22,
                   icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                  tooltip: isPlaying ? 'Pause Melody' : 'Play / Preview Melody',
+                  tooltip: isPlaying
+                      ? (l10n?.pauseMelody ?? 'Pause Melody')
+                      : (l10n?.playMelody ?? 'Play / Preview Melody'),
                   onPressed: player.togglePlay,
                 ),
 
@@ -125,7 +130,7 @@ class ScorePlaybackBar extends StatelessWidget {
                   key: const Key('score_stop_btn'),
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.stop),
-                  tooltip: 'Stop & Rewind',
+                  tooltip: l10n?.stopRewind ?? 'Stop & Rewind',
                   onPressed: player.stop,
                 ),
 
@@ -164,7 +169,7 @@ class ScorePlaybackBar extends StatelessWidget {
                       Text(
                         isPlaying
                             ? 'M$measureNum: $playingLabel'
-                            : 'Score Audio Preview',
+                            : (l10n?.scoreAudioPreview ?? 'Score Audio Preview'),
                         style: theme.textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isPlaying
@@ -228,8 +233,8 @@ class ScorePlaybackBar extends StatelessWidget {
                     color: isMuted ? Colors.grey : theme.colorScheme.primary,
                   ),
                   tooltip: isMuted
-                      ? 'Unmute Note Sound Feedback'
-                      : 'Mute Note Sound Feedback',
+                      ? (l10n?.unmuteSound ?? 'Unmute Note Sound Feedback')
+                      : (l10n?.muteSound ?? 'Mute Note Sound Feedback'),
                   onPressed: player.toggleMute,
                 ),
               ],

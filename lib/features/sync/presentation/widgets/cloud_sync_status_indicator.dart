@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,35 +18,37 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final syncState = ref.watch(cloudSyncProvider);
 
     final (icon, color, tooltip) = switch (syncState.status) {
       CloudSyncStatus.syncing => (
         Icons.sync,
         stageAmber,
-        'Syncing changes with Supabase…',
+        l10n?.syncingChangesTooltip ?? 'Syncing changes with Supabase…',
       ),
       CloudSyncStatus.success => (
         Icons.cloud_done_outlined,
         stageAmber,
         syncState.lastSyncedAt != null
-            ? 'Cloud synced (${_formatTime(syncState.lastSyncedAt!)})'
-            : 'Cloud synced',
+            ? (l10n?.cloudSyncedWithTimeTooltip(_formatTime(syncState.lastSyncedAt!)) ??
+                'Cloud synced (${_formatTime(syncState.lastSyncedAt!)})')
+            : (l10n?.cloudSyncedTooltip ?? 'Cloud synced'),
       ),
       CloudSyncStatus.offline => (
         Icons.cloud_off_outlined,
         Colors.grey,
-        'Offline — working with local SQLite database',
+        l10n?.offlineSQLiteTooltip ?? 'Offline — working with local SQLite database',
       ),
       CloudSyncStatus.error => (
         Icons.cloud_sync_outlined,
         Colors.redAccent,
-        syncState.errorMessage ?? 'Sync error',
+        syncState.errorMessage ?? (l10n?.syncErrorTooltip ?? 'Sync error'),
       ),
       CloudSyncStatus.idle => (
         Icons.cloud_queue_outlined,
         Colors.grey.shade400,
-        'Cloud ready (tap to sync)',
+        l10n?.cloudReadyTooltip ?? 'Cloud ready (tap to sync)',
       ),
     };
 
@@ -92,12 +95,12 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(
               syncState.isSyncing
-                  ? 'Syncing…'
+                  ? (l10n?.syncingStatus ?? 'Syncing…')
                   : syncState.status == CloudSyncStatus.success
-                      ? 'Synced'
+                      ? (l10n?.syncedStatusLabel ?? 'Synced')
                       : syncState.isOffline
-                          ? 'Offline'
-                          : 'Sync Now',
+                          ? (l10n?.offlineStatusLabel ?? 'Offline')
+                          : (l10n?.syncNow ?? 'Sync Now'),
               style: TextStyle(
                 color: color,
                 fontSize: 13,

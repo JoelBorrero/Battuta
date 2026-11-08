@@ -12,6 +12,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
 import 'package:battuta/features/sync/presentation/widgets/cloud_sync_status_indicator.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,31 +30,32 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
   int _selectedTabIndex = 0; // 0: Songs, 1: Setlists
 
   void _showCreateSetlistDialog() {
+    final l10n = AppLocalizations.of(context);
     final titleController = TextEditingController();
     final descController = TextEditingController();
 
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Create New Setlist'),
+        title: Text(l10n?.createNewSetlist ?? 'Create New Setlist'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Setlist Title *',
-                hintText: 'e.g. Sunday Morning - Easter',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.setlistTitleField ?? 'Setlist Title *',
+                hintText: l10n?.setlistTitleHint ?? 'e.g. Sunday Morning - Easter',
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(
-                labelText: 'Notes / Service Theme',
-                hintText: 'e.g. Acoustic setup, communion song in D',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.notesServiceThemeField ?? 'Notes / Service Theme',
+                hintText: l10n?.notesServiceThemeHint ?? 'e.g. Acoustic setup, communion song in D',
+                border: const OutlineInputBorder(),
               ),
               maxLines: 2,
             ),
@@ -62,7 +64,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             onPressed: () async {
@@ -87,11 +89,15 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               }
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Created setlist "$title"')),
+                  SnackBar(
+                    content: Text(
+                      l10n?.createdSetlistSuccess(title) ?? 'Created setlist "$title"',
+                    ),
+                  ),
                 );
               }
             },
-            child: const Text('Create Setlist'),
+            child: Text(l10n?.createSetlist ?? 'Create Setlist'),
           ),
         ],
       ),
@@ -99,17 +105,19 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
   }
 
   void _confirmDeleteSetlist(BuildContext context, Setlist setlist) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Setlist?'),
+        title: Text(l10n?.deleteSetlistTitle ?? 'Delete Setlist?'),
         content: Text(
-          'Are you sure you want to delete "${setlist.title}"? This action cannot be undone.',
+          l10n?.deleteSetlistConfirm(setlist.title) ??
+              'Are you sure you want to delete "${setlist.title}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.stageRed),
@@ -121,11 +129,16 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   .deleteSetlist(setlist.id);
               if (mounted) {
                 scaffoldMessenger.showSnackBar(
-                  SnackBar(content: Text('Deleted setlist "${setlist.title}"')),
+                  SnackBar(
+                    content: Text(
+                      l10n?.deletedSetlistSuccess(setlist.title) ??
+                          'Deleted setlist "${setlist.title}"',
+                    ),
+                  ),
                 );
               }
             },
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -138,23 +151,24 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     final repertoire = ref.watch(repertoireProvider);
     final setlistsAsync = ref.watch(setlistsProvider);
     final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final l10n = AppLocalizations.of(context);
 
     final songCount = repertoire.value?.length ?? 0;
     final setlistCount = setlistsAsync.value?.length ?? 0;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Repertoire'),
+        title: Text(l10n?.repertoireTitle ?? 'Repertoire'),
         actions: [
           const CloudSyncStatusIndicator(compact: true),
           IconButton(
             icon: const Icon(Icons.document_scanner_outlined),
-            tooltip: 'Scan sheet music',
+            tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
             onPressed: () => context.push('/scanner'),
           ),
           IconButton(
             icon: const Icon(Icons.search),
-            tooltip: 'Search songs',
+            tooltip: l10n?.searchSongsTooltip ?? 'Search songs',
             onPressed: () => _showSearch(context, ref),
           ),
         ],
@@ -169,12 +183,12 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 ButtonSegment(
                   value: 0,
                   icon: const Icon(Icons.music_note),
-                  label: Text('Songs ($songCount)'),
+                  label: Text(l10n?.songsTab(songCount) ?? 'Songs ($songCount)'),
                 ),
                 ButtonSegment(
                   value: 1,
                   icon: const Icon(Icons.playlist_play),
-                  label: Text('Setlists ($setlistCount)'),
+                  label: Text(l10n?.setlistsTab(setlistCount) ?? 'Setlists ($setlistCount)'),
                 ),
               ],
               selected: {_selectedTabIndex},
@@ -194,12 +208,18 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
-              tooltip: _selectedTabIndex == 0 ? 'Add song' : 'Create setlist',
+              tooltip: _selectedTabIndex == 0
+                  ? (l10n?.addSong ?? 'Add song')
+                  : (l10n?.createSetlist ?? 'Create setlist'),
               onPressed: _selectedTabIndex == 0
                   ? () => context.push('/repertoire/new')
                   : _showCreateSetlistDialog,
               icon: const Icon(Icons.add),
-              label: Text(_selectedTabIndex == 0 ? 'New Song' : 'New Setlist'),
+              label: Text(
+                _selectedTabIndex == 0
+                    ? (l10n?.newSong ?? 'New Song')
+                    : (l10n?.newSetlist ?? 'New Setlist'),
+              ),
             )
           : null,
     );
@@ -210,6 +230,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     ThemeData theme, {
     required bool isAdmin,
   }) {
+    final l10n = AppLocalizations.of(context);
     return repertoire.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
@@ -225,7 +246,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Failed to load repertoire',
+                l10n?.failedToLoadRepertoire ?? 'Failed to load repertoire',
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -238,7 +259,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               FilledButton.icon(
                 onPressed: () => ref.invalidate(repertoireProvider),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(l10n?.retry ?? 'Retry'),
               ),
             ],
           ),
@@ -259,14 +280,16 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Your repertoire is empty',
+                    l10n?.repertoireEmpty ?? 'Your repertoire is empty',
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     isAdmin
-                        ? 'Tap the + button to add your first song'
-                        : 'No songs available yet. Contact an administrator to add songs.',
+                        ? (l10n?.repertoireEmptyAdminHint ??
+                            'Tap the + button to add your first song')
+                        : (l10n?.repertoireEmptyMemberHint ??
+                            'No songs available yet. Contact an administrator to add songs.'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -285,7 +308,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                             foregroundColor: AppTheme.obsidianText,
                           ),
                           icon: const Icon(Icons.auto_awesome),
-                          label: const Text('Load Sample Songs'),
+                          label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
                           onPressed: () async {
                             await ref
                                 .read(repertoireProvider.notifier)
@@ -294,13 +317,13 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                         ),
                         FilledButton.icon(
                           icon: const Icon(Icons.add),
-                          label: const Text('Add Song'),
+                          label: Text(l10n?.addSong ?? 'Add Song'),
                           onPressed: () => context.push('/repertoire/new'),
                         ),
                       ],
                       OutlinedButton.icon(
                         icon: const Icon(Icons.document_scanner_outlined),
-                        label: const Text('Scan Score'),
+                        label: Text(l10n?.scanScore ?? 'Scan Score'),
                         onPressed: () => context.push('/scanner'),
                       ),
                     ],
@@ -326,9 +349,10 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     ThemeData theme, {
     required bool isAdmin,
   }) {
+    final l10n = AppLocalizations.of(context);
     return setlistsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error loading setlists: $e')),
+      error: (e, _) => Center(child: Text('${l10n?.failedToLoadRepertoire ?? "Error loading setlists"}: $e')),
       data: (setlists) {
         if (setlists.isEmpty) {
           return Center(
@@ -343,12 +367,17 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
-                  Text('No Setlists Yet', style: theme.textTheme.titleLarge),
+                  Text(
+                    l10n?.noSetlistsYet ?? 'No Setlists Yet',
+                    style: theme.textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     isAdmin
-                        ? 'Create an ordered setlist for Sunday services or rehearsals.'
-                        : 'No setlists created yet. Setlists will appear here once published by your director.',
+                        ? (l10n?.setlistsEmptyAdminHint ??
+                            'Create an ordered setlist for Sunday services or rehearsals.')
+                        : (l10n?.setlistsEmptyMemberHint ??
+                            'No setlists created yet. Setlists will appear here once published by your director.'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -367,7 +396,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                             foregroundColor: AppTheme.obsidianText,
                           ),
                           icon: const Icon(Icons.auto_awesome),
-                          label: const Text('Load Sample Setlist'),
+                          label: Text(
+                            l10n?.loadSampleSetlist ?? 'Load Sample Setlist',
+                          ),
                           onPressed: () async {
                             await ref
                                 .read(repertoireProvider.notifier)
@@ -376,7 +407,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                         ),
                         FilledButton.icon(
                           icon: const Icon(Icons.add),
-                          label: const Text('Create Setlist'),
+                          label: Text(l10n?.createSetlist ?? 'Create Setlist'),
                           onPressed: _showCreateSetlistDialog,
                         ),
                       ],
@@ -414,7 +445,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
-                  '${setlist.songCount} songs • ${setlist.description ?? "Upcoming service"}',
+                  '${l10n?.setlistSongsCount(setlist.songCount) ?? "${setlist.songCount} songs"} • ${setlist.description ?? (l10n?.upcomingService ?? "Upcoming service")}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -425,7 +456,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                           size: 20,
                           color: AppTheme.stageRed,
                         ),
-                        tooltip: 'Delete setlist',
+                        tooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
                         onPressed: () => _confirmDeleteSetlist(context, setlist),
                       )
                     : null,
@@ -473,14 +504,15 @@ class _SongSearchDelegate extends SearchDelegate<String> {
   );
 
   @override
-  Widget buildResults(BuildContext context) => _buildSearchResults();
+  Widget buildResults(BuildContext context) => _buildSearchResults(context);
 
   @override
-  Widget buildSuggestions(BuildContext context) => _buildSearchResults();
+  Widget buildSuggestions(BuildContext context) => _buildSearchResults(context);
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (query.trim().isEmpty) {
-      return const Center(child: Text('Type to search songs…'));
+      return Center(child: Text(l10n?.typeToSearchSongs ?? 'Type to search songs…'));
     }
 
     final repertoire = _ref.watch(repertoireProvider);
@@ -497,7 +529,7 @@ class _SongSearchDelegate extends SearchDelegate<String> {
         }).toList();
 
         if (matches.isEmpty) {
-          return const Center(child: Text('No songs found'));
+          return Center(child: Text(l10n?.noSongsFound ?? 'No songs found'));
         }
         return ListView.builder(
           itemCount: matches.length,

@@ -213,5 +213,1147 @@
   "developerOptionsSubtitle": "Configure custom Supabase URL and local AI keys",
   "@developerOptionsSubtitle": {
     "description": "Subtitle for developer options"
+  },
+
+  "repertoireTitle": "Repertoire",
+  "@repertoireTitle": {
+    "description": "Repertoire screen title"
+  },
+  "chordChart": "Chord Chart",
+  "@chordChart": {
+    "description": "Chord chart view mode segment"
+  },
+  "musicalStaff": "Musical Staff",
+  "@musicalStaff": {
+    "description": "Musical staff notation view mode segment"
+  },
+  "newSong": "New Song",
+  "@newSong": {
+    "description": "Button and title for creating a new song"
+  },
+  "editSong": "Edit Song",
+  "@editSong": {
+    "description": "Title for editing a song"
+  },
+  "addSong": "Add Song",
+  "@addSong": {
+    "description": "Add song button label"
+  },
+  "deleteSong": "Delete Song",
+  "@deleteSong": {
+    "description": "Delete song button label"
+  },
+  "deleteSongTitle": "Delete Song?",
+  "@deleteSongTitle": {
+    "description": "Delete song confirmation dialog title"
+  },
+  "deleteSongConfirm": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+  "@deleteSongConfirm": {
+    "description": "Delete song confirmation message",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Amazing Grace"
+      }
+    }
+  },
+  "deletedSongSuccess": "Deleted \"{title}\"",
+  "@deletedSongSuccess": {
+    "description": "Snackbar shown after deleting a song",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Amazing Grace"
+      }
+    }
+  },
+  "newSetlist": "New Setlist",
+  "@newSetlist": {
+    "description": "Button label for creating a new setlist"
+  },
+  "createSetlist": "Create Setlist",
+  "@createSetlist": {
+    "description": "Action button to submit new setlist"
+  },
+  "createNewSetlist": "Create New Setlist",
+  "@createNewSetlist": {
+    "description": "Title for create new setlist dialog"
+  },
+  "editSetlist": "Edit Setlist",
+  "@editSetlist": {
+    "description": "Title for editing a setlist"
+  },
+  "deleteSetlistTitle": "Delete Setlist?",
+  "@deleteSetlistTitle": {
+    "description": "Title for delete setlist confirmation dialog"
+  },
+  "deleteSetlistConfirm": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+  "@deleteSetlistConfirm": {
+    "description": "Message for delete setlist dialog",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Sunday Morning"
+      }
+    }
+  },
+  "deletedSetlistSuccess": "Deleted setlist \"{title}\"",
+  "@deletedSetlistSuccess": {
+    "description": "Snackbar shown after deleting a setlist",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Sunday Morning"
+      }
+    }
+  },
+  "createdSetlistSuccess": "Created setlist \"{title}\"",
+  "@createdSetlistSuccess": {
+    "description": "Snackbar shown after creating a setlist",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Sunday Morning"
+      }
+    }
+  },
+  "songsTab": "Songs ({count})",
+  "@songsTab": {
+    "description": "Label for songs segment tab",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "setlistsTab": "Setlists ({count})",
+  "@setlistsTab": {
+    "description": "Label for setlists segment tab",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "scanSheetMusicTooltip": "Scan sheet music",
+  "@scanSheetMusicTooltip": {
+    "description": "Tooltip for scan sheet music action"
+  },
+  "searchSongsTooltip": "Search songs",
+  "@searchSongsTooltip": {
+    "description": "Tooltip for search songs action"
+  },
+  "typeToSearchSongs": "Type to search songs…",
+  "@typeToSearchSongs": {
+    "description": "Placeholder text in songs search view"
+  },
+  "noSongsFound": "No songs found",
+  "@noSongsFound": {
+    "description": "Empty state text when search yields no matches"
+  },
+  "failedToLoadRepertoire": "Failed to load repertoire",
+  "@failedToLoadRepertoire": {
+    "description": "Error banner when repertoire cannot be fetched"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "repertoireEmpty": "Your repertoire is empty",
+  "@repertoireEmpty": {
+    "description": "Title when repertoire has no songs"
+  },
+  "repertoireEmptyAdminHint": "Tap the + button to add your first song",
+  "@repertoireEmptyAdminHint": {
+    "description": "Hint for admins when repertoire is empty"
+  },
+  "repertoireEmptyMemberHint": "No songs available yet. Contact an administrator to add songs.",
+  "@repertoireEmptyMemberHint": {
+    "description": "Hint for team members when repertoire is empty"
+  },
+  "loadSampleSongs": "Load Sample Songs",
+  "@loadSampleSongs": {
+    "description": "Button to load pre-seeded sample songs"
+  },
+  "scanScore": "Scan Score",
+  "@scanScore": {
+    "description": "Button to trigger camera score scan"
+  },
+  "noSetlistsYet": "No Setlists Yet",
+  "@noSetlistsYet": {
+    "description": "Heading when setlists list is empty"
+  },
+  "setlistsEmptyAdminHint": "Create an ordered setlist for Sunday services or rehearsals.",
+  "@setlistsEmptyAdminHint": {
+    "description": "Hint for admins when setlists list is empty"
+  },
+  "setlistsEmptyMemberHint": "No setlists created yet. Setlists will appear here once published by your director.",
+  "@setlistsEmptyMemberHint": {
+    "description": "Hint for team members when setlists list is empty"
+  },
+  "loadSampleSetlist": "Load Sample Setlist",
+  "@loadSampleSetlist": {
+    "description": "Button to load a pre-seeded setlist"
+  },
+  "setlistSongsCount": "{count} songs",
+  "@setlistSongsCount": {
+    "description": "Subtitle count of songs in a setlist",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "upcomingService": "Upcoming service",
+  "@upcomingService": {
+    "description": "Default description for a setlist without notes"
+  },
+  "setlistTitleField": "Setlist Title *",
+  "@setlistTitleField": {
+    "description": "Label for setlist title input"
+  },
+  "setlistTitleHint": "e.g. Sunday Morning - Easter",
+  "@setlistTitleHint": {
+    "description": "Hint for setlist title input"
+  },
+  "notesServiceThemeField": "Notes / Service Theme",
+  "@notesServiceThemeField": {
+    "description": "Label for setlist notes input"
+  },
+  "notesServiceThemeHint": "e.g. Acoustic setup, communion song in D",
+  "@notesServiceThemeHint": {
+    "description": "Hint for setlist notes input"
+  },
+  "deleteSetlistTooltip": "Delete setlist",
+  "@deleteSetlistTooltip": {
+    "description": "Tooltip for delete setlist icon button"
+  },
+
+  "songDetail": "Song Detail",
+  "@songDetail": {
+    "description": "Title for song detail view"
+  },
+  "transposeSong": "Transpose Song",
+  "@transposeSong": {
+    "description": "Title for transpose bottom sheet"
+  },
+  "reset": "Reset",
+  "@reset": {
+    "description": "Reset action button"
+  },
+  "originalKey": "Original Key",
+  "@originalKey": {
+    "description": "Label indicating song is in original key"
+  },
+  "semitonesCount": "{prefix}{count} semitones",
+  "@semitonesCount": {
+    "description": "Semitone delta display",
+    "placeholders": {
+      "prefix": {
+        "type": "String",
+        "example": "+"
+      },
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "downOneSemitone": "Down 1 semitone",
+  "@downOneSemitone": {
+    "description": "Tooltip for lowering transposition"
+  },
+  "upOneSemitone": "Up 1 semitone",
+  "@upOneSemitone": {
+    "description": "Tooltip for raising transposition"
+  },
+  "saveTransposedKey": "Save Transposed Key ({key}) to Song",
+  "@saveTransposedKey": {
+    "description": "Button to persist transposed key",
+    "placeholders": {
+      "key": {
+        "type": "String",
+        "example": "D"
+      }
+    }
+  },
+  "transposeKeyTooltip": "Transpose Key",
+  "@transposeKeyTooltip": {
+    "description": "Tooltip for transpose button in app bar"
+  },
+  "notationEditorTooltip": "Notation Editor",
+  "@notationEditorTooltip": {
+    "description": "Tooltip for notation editor button in app bar"
+  },
+  "exportPdfTooltip": "Export PDF Lead Sheet",
+  "@exportPdfTooltip": {
+    "description": "Tooltip for exporting PDF lead sheet"
+  },
+  "exportMidiTooltip": "Export MIDI File",
+  "@exportMidiTooltip": {
+    "description": "Tooltip for exporting MIDI file"
+  },
+  "interactiveNotationView": "Interactive Notation View",
+  "@interactiveNotationView": {
+    "description": "Header for interactive notation section"
+  },
+  "editInNotationEditor": "Edit in Notation Editor",
+  "@editInNotationEditor": {
+    "description": "Button to jump directly into notation editor"
+  },
+  "noSectionsYet": "This song has no sections yet.",
+  "@noSectionsYet": {
+    "description": "Message when song has no chord sections"
+  },
+  "repeatTimes": "Repeat {count}×",
+  "@repeatTimes": {
+    "description": "Badge showing repeat count for a section",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "beatsCount": "{count} beats",
+  "@beatsCount": {
+    "description": "Duration in beats of a chord cell",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "backToRepertoire": "Back to Repertoire",
+  "@backToRepertoire": {
+    "description": "Button to return to repertoire list"
+  },
+  "songNotFound": "Song not found in repertoire",
+  "@songNotFound": {
+    "description": "Message shown when song ID does not exist"
+  },
+  "songKeyBadge": "Key: {key}",
+  "@songKeyBadge": {
+    "description": "Badge showing song musical key",
+    "placeholders": {
+      "key": {
+        "type": "String",
+        "example": "G"
+      }
+    }
+  },
+  "failedToExportPdf": "Failed to export PDF: {error}",
+  "@failedToExportPdf": {
+    "description": "Error snackbar when PDF export fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "I/O error"
+      }
+    }
+  },
+  "failedToExportMidi": "Failed to export MIDI: {error}",
+  "@failedToExportMidi": {
+    "description": "Error snackbar when MIDI export fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Track empty"
+      }
+    }
+  },
+
+  "viewOnly": "View Only",
+  "@viewOnly": {
+    "description": "Button label for non-admin viewers"
+  },
+  "readOnlyAdminWarning": "Read-only view: Administrator permissions are required to create or modify repertoire songs.",
+  "@readOnlyAdminWarning": {
+    "description": "Banner message explaining read-only song state"
+  },
+  "songTitleLabel": "Song Title *",
+  "@songTitleLabel": {
+    "description": "Form label for song title"
+  },
+  "songTitleHint": "e.g. Amazing Grace",
+  "@songTitleHint": {
+    "description": "Form placeholder for song title"
+  },
+  "songTitleValidation": "Please enter a song title",
+  "@songTitleValidation": {
+    "description": "Validation error for missing song title"
+  },
+  "artistComposerLabel": "Artist / Composer *",
+  "@artistComposerLabel": {
+    "description": "Form label for artist or composer"
+  },
+  "artistComposerHint": "e.g. John Newton",
+  "@artistComposerHint": {
+    "description": "Form placeholder for artist or composer"
+  },
+  "artistValidation": "Please enter an artist or composer",
+  "@artistValidation": {
+    "description": "Validation error for missing artist"
+  },
+  "musicalSetup": "Musical Setup",
+  "@musicalSetup": {
+    "description": "Section header for key, meter, tempo"
+  },
+  "keyLabel": "Key",
+  "@keyLabel": {
+    "description": "Label for musical key selector"
+  },
+  "meterLabel": "Meter",
+  "@meterLabel": {
+    "description": "Label for time signature selector"
+  },
+  "decreaseBpm": "Decrease BPM",
+  "@decreaseBpm": {
+    "description": "Tooltip for decrementing tempo"
+  },
+  "increaseBpm": "Increase BPM",
+  "@increaseBpm": {
+    "description": "Tooltip for incrementing tempo"
+  },
+  "tapTempo": "Tap Tempo",
+  "@tapTempo": {
+    "description": "Tap tempo button label"
+  },
+  "addTag": "Add Tag",
+  "@addTag": {
+    "description": "Input label and tooltip for adding a tag"
+  },
+  "tagHint": "e.g. worship, rock, ballad",
+  "@tagHint": {
+    "description": "Placeholder for tag input"
+  },
+  "notesInstructionsLabel": "Notes / Performance Instructions",
+  "@notesInstructionsLabel": {
+    "description": "Label for song performance notes"
+  },
+  "notesInstructionsHint": "e.g. Capo 3rd fret, slow acoustic intro...",
+  "@notesInstructionsHint": {
+    "description": "Placeholder for song performance notes"
+  },
+  "songSectionsCount": "Song Sections ({count})",
+  "@songSectionsCount": {
+    "description": "Header for song sections list",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "addSection": "Add Section",
+  "@addSection": {
+    "description": "Button to add a section"
+  },
+  "quickAdd": "Quick add: ",
+  "@quickAdd": {
+    "description": "Prefix label for quick section chips"
+  },
+  "noSectionsAddedHint": "No sections added. Tap \"+ Add Section\" to build your song.",
+  "@noSectionsAddedHint": {
+    "description": "Message when no sections have been added to editor"
+  },
+  "sectionName": "Section Name",
+  "@sectionName": {
+    "description": "Label for section name input"
+  },
+  "decreaseRepeats": "Decrease repeats",
+  "@decreaseRepeats": {
+    "description": "Tooltip for decreasing section repeats"
+  },
+  "increaseRepeats": "Increase repeats",
+  "@increaseRepeats": {
+    "description": "Tooltip for increasing section repeats"
+  },
+  "moveUp": "Move up",
+  "@moveUp": {
+    "description": "Tooltip for moving section up"
+  },
+  "moveDown": "Move down",
+  "@moveDown": {
+    "description": "Tooltip for moving section down"
+  },
+  "deleteSection": "Delete Section",
+  "@deleteSection": {
+    "description": "Tooltip for deleting section"
+  },
+  "chordsFieldLabel": "Chords (e.g. C | G/B | Am | F)",
+  "@chordsFieldLabel": {
+    "description": "Label for quick chord input field"
+  },
+  "chordsFieldHint": "Type chord symbols separated by spaces or bars",
+  "@chordsFieldHint": {
+    "description": "Placeholder for chord input field"
+  },
+  "applyChordsTooltip": "Apply chords text",
+  "@applyChordsTooltip": {
+    "description": "Tooltip for applying parsed chords"
+  },
+  "addChordBuilderTooltip": "Add chord builder",
+  "@addChordBuilderTooltip": {
+    "description": "Tooltip for launching structured chord dialog"
+  },
+  "sectionLyricsLabel": "Section Lyrics",
+  "@sectionLyricsLabel": {
+    "description": "Label for section lyrics input"
+  },
+  "sectionLyricsHint": "Enter lyrics line by line...",
+  "@sectionLyricsHint": {
+    "description": "Placeholder for section lyrics"
+  },
+  "rehearsalNotesLabel": "Rehearsal Notes (optional)",
+  "@rehearsalNotesLabel": {
+    "description": "Label for rehearsal notes"
+  },
+  "rehearsalNotesHint": "e.g. Guitar solo starts here...",
+  "@rehearsalNotesHint": {
+    "description": "Placeholder for rehearsal notes"
+  },
+  "addChord": "Add Chord",
+  "@addChord": {
+    "description": "Title and button for chord builder dialog"
+  },
+  "rootNote": "Root Note",
+  "@rootNote": {
+    "description": "Label for root note dropdown"
+  },
+  "quality": "Quality",
+  "@quality": {
+    "description": "Label for chord quality dropdown"
+  },
+  "bassNote": "Bass Note (Slash Chord)",
+  "@bassNote": {
+    "description": "Label for slash bass note dropdown"
+  },
+  "noneOption": "None",
+  "@noneOption": {
+    "description": "Option representing no selection"
+  },
+  "beatsLabel": "Beats: ",
+  "@beatsLabel": {
+    "description": "Label for beats selection chips"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Generic add button text"
+  },
+  "songUpdatedSuccess": "Song \"{title}\" updated successfully",
+  "@songUpdatedSuccess": {
+    "description": "Snackbar shown after updating song",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Way Maker"
+      }
+    }
+  },
+  "songCreatedSuccess": "Song \"{title}\" created successfully",
+  "@songCreatedSuccess": {
+    "description": "Snackbar shown after creating song",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Way Maker"
+      }
+    }
+  },
+  "failedToSaveSong": "Failed to save song: {error}",
+  "@failedToSaveSong": {
+    "description": "Snackbar error when saving song",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Database write failed"
+      }
+    }
+  },
+  "songDeletedSuccess": "Song deleted",
+  "@songDeletedSuccess": {
+    "description": "Snackbar shown after deleting song"
+  },
+  "adminRequiredWarning": "Administrator permissions required to create or modify songs.",
+  "@adminRequiredWarning": {
+    "description": "Snackbar when non-admin tries to modify repertoire"
+  },
+
+  "setlistTitle": "Setlist",
+  "@setlistTitle": {
+    "description": "Title for setlist detail view"
+  },
+  "descriptionNotesField": "Description / Notes",
+  "@descriptionNotesField": {
+    "description": "Label for setlist notes and description"
+  },
+  "addSongToSetlist": "Add Song to Setlist",
+  "@addSongToSetlist": {
+    "description": "Modal title and button to append song to setlist"
+  },
+  "noSongsInRepertoireYet": "No songs in repertoire yet. Create or load sample songs.",
+  "@noSongsInRepertoireYet": {
+    "description": "Empty state when trying to add to setlist from empty library"
+  },
+  "allSongsAlreadyInSetlist": "All songs are already in this setlist.",
+  "@allSongsAlreadyInSetlist": {
+    "description": "State when all existing songs have been added to the setlist"
+  },
+  "setlistEmpty": "This setlist has no songs yet.",
+  "@setlistEmpty": {
+    "description": "Empty state for setlist without songs"
+  },
+  "tapAddSongHint": "Tap \"Add Song\" below to build your set.",
+  "@tapAddSongHint": {
+    "description": "Hint instructing user how to add songs to setlist"
+  },
+  "removeFromSetlistTooltip": "Remove from setlist",
+  "@removeFromSetlistTooltip": {
+    "description": "Tooltip for removing song from setlist"
+  },
+  "songOriginalMeta": "{artist} • Original: {key} ({tempo} BPM)",
+  "@songOriginalMeta": {
+    "description": "Subtitle format in setlist item",
+    "placeholders": {
+      "artist": {
+        "type": "String",
+        "example": "Sinach"
+      },
+      "key": {
+        "type": "String",
+        "example": "E"
+      },
+      "tempo": {
+        "type": "int",
+        "example": "68"
+      }
+    }
+  },
+  "unknownArtist": "Unknown artist",
+  "@unknownArtist": {
+    "description": "Fallback text when song artist is unspecified"
+  },
+  "editSetlistInfoTooltip": "Edit setlist info",
+  "@editSetlistInfoTooltip": {
+    "description": "Tooltip for editing setlist metadata"
+  },
+
+  "scanLeadSheet": "Scan Lead Sheet",
+  "@scanLeadSheet": {
+    "description": "AppBar title for scanner screen"
+  },
+  "omrScannerTitle": "OMR Scanner",
+  "@omrScannerTitle": {
+    "description": "Landing page title for OMR feature"
+  },
+  "omrScannerSubtitle": "Point your camera at a lead sheet or pick an image to extract\nchords, melody, and structure using Gemini AI.",
+  "@omrScannerSubtitle": {
+    "description": "Landing page subtitle explaining OMR capabilities"
+  },
+  "openCamera": "Open Camera",
+  "@openCamera": {
+    "description": "Button to launch camera capture"
+  },
+  "chooseFromLibrary": "Choose from Library",
+  "@chooseFromLibrary": {
+    "description": "Button to launch photo gallery picker"
+  },
+  "addedToRepertoireSuccess": "Added \"{title}\" to Repertoire!",
+  "@addedToRepertoireSuccess": {
+    "description": "Snackbar confirming imported score saved to repertoire",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Por quien eres tu"
+      }
+    }
+  },
+  "extractedMeasuresSuccess": "Extracted {measures} measures for \"{section}\".",
+  "@extractedMeasuresSuccess": {
+    "description": "Snackbar confirming imported section rhythm",
+    "placeholders": {
+      "measures": {
+        "type": "int",
+        "example": "8"
+      },
+      "section": {
+        "type": "String",
+        "example": "Coro"
+      }
+    }
+  },
+  "scanSheetMusic": "Scan Sheet Music",
+  "@scanSheetMusic": {
+    "description": "Title for scan flow modal"
+  },
+  "omrDebugLogs": "OMR Debug Logs",
+  "@omrDebugLogs": {
+    "description": "Tooltip for opening OMR log viewer"
+  },
+  "fullSheetSchemaA": "Full Sheet (Schema A)",
+  "@fullSheetSchemaA": {
+    "description": "Segmented button label for full lead sheet scan"
+  },
+  "staffSnippetSchemaB": "Staff Snippet (Schema B)",
+  "@staffSnippetSchemaB": {
+    "description": "Segmented button label for melody staff system snippet"
+  },
+  "camera": "Camera",
+  "@camera": {
+    "description": "Button label for camera"
+  },
+  "photos": "Photos",
+  "@photos": {
+    "description": "Button label for photos gallery"
+  },
+  "fullSheetDesc": "Captures complete arrangement with metadata, staves, chords, and lyrics.",
+  "@fullSheetDesc": {
+    "description": "Explanation text for Schema A full sheet capture"
+  },
+  "staffSnippetDesc": "Crops a single system or melody line for rapid tap-first rhythm entry.",
+  "@staffSnippetDesc": {
+    "description": "Explanation text for Schema B snippet capture"
+  },
+  "cropSystem": "Crop System",
+  "@cropSystem": {
+    "description": "Button to crop staff snippet image"
+  },
+  "changeImage": "Change Image",
+  "@changeImage": {
+    "description": "Button to replace selected image"
+  },
+  "analyzeWithGemini": "Analyze with Gemini AI",
+  "@analyzeWithGemini": {
+    "description": "Primary action button to trigger OMR recognition"
+  },
+  "recognitionError": "Recognition Error",
+  "@recognitionError": {
+    "description": "Header for recognition failure banner"
+  },
+  "viewDebugLogs": "View Debug Logs",
+  "@viewDebugLogs": {
+    "description": "Button to open diagnostic logs modal on error"
+  },
+  "recognitionComplete": "Recognition Complete!",
+  "@recognitionComplete": {
+    "description": "Banner title for successful OMR extraction"
+  },
+  "openInRepertoire": "Open in Repertoire",
+  "@openInRepertoire": {
+    "description": "Button to review imported lead sheet in repertoire"
+  },
+  "openInRhythmEditor": "Open in Rhythm Editor",
+  "@openInRhythmEditor": {
+    "description": "Button to review imported snippet in rhythm editor"
+  },
+  "analyzingSheet": "Analyzing sheet with Gemini AI...",
+  "@analyzingSheet": {
+    "description": "Progress dialog title during Gemini analysis"
+  },
+  "processingImage": "Processing image...",
+  "@processingImage": {
+    "description": "Progress dialog title during local pre-processing"
+  },
+  "transcribingSheet": "Transcribing notes, chords & staves",
+  "@transcribingSheet": {
+    "description": "Progress dialog subtitle during transcription"
+  },
+
+  "omrDiagnosticLogs": "OMR Diagnostic Logs",
+  "@omrDiagnosticLogs": {
+    "description": "Title for OMR debug logs modal"
+  },
+  "persistentFileSystemLogs": "Persistent File System Logs",
+  "@persistentFileSystemLogs": {
+    "description": "Subtitle for OMR logs modal"
+  },
+  "refreshLogs": "Refresh Logs",
+  "@refreshLogs": {
+    "description": "Tooltip for refreshing log viewer"
+  },
+  "clearLogs": "Clear Logs",
+  "@clearLogs": {
+    "description": "Tooltip for clearing log file"
+  },
+  "clearOmrLogsTitle": "Clear OMR Logs?",
+  "@clearOmrLogsTitle": {
+    "description": "Title for clear logs confirmation dialog"
+  },
+  "clearOmrLogsConfirm": "This will empty the omr_debug.log file on the device.",
+  "@clearOmrLogsConfirm": {
+    "description": "Message for clear logs dialog"
+  },
+  "clearAction": "Clear",
+  "@clearAction": {
+    "description": "Clear action button"
+  },
+  "omrLogsCleared": "OMR logs cleared from file system.",
+  "@omrLogsCleared": {
+    "description": "Snackbar confirming logs cleared"
+  },
+  "locatingLogFile": "Locating log file...",
+  "@locatingLogFile": {
+    "description": "Placeholder while log file path is resolved"
+  },
+  "loadingDiagnosticLogs": "Loading diagnostic logs...",
+  "@loadingDiagnosticLogs": {
+    "description": "Message while logs are reading from disk"
+  },
+  "noLogsRecordedYet": "No logs recorded yet.\nRun an OMR scan to capture diagnostic logs.",
+  "@noLogsRecordedYet": {
+    "description": "Empty state message in log viewer"
+  },
+  "copyAllLogs": "Copy All Logs",
+  "@copyAllLogs": {
+    "description": "Button to copy full log file content to clipboard"
+  },
+  "omrLogsCopied": "OMR logs copied to clipboard.",
+  "@omrLogsCopied": {
+    "description": "Snackbar confirming logs copied"
+  },
+
+  "scoreEditor": "Score Editor",
+  "@scoreEditor": {
+    "description": "Title for score and notation editor"
+  },
+  "notationSavedSuccess": "Notation changes saved to Song!",
+  "@notationSavedSuccess": {
+    "description": "Snackbar confirming notation changes saved"
+  },
+  "failedToSaveScore": "Failed to save score: {error}",
+  "@failedToSaveScore": {
+    "description": "Snackbar error when saving score",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Format error"
+      }
+    }
+  },
+  "playbackTempo": "Playback Tempo",
+  "@playbackTempo": {
+    "description": "Title for playback tempo dialog"
+  },
+  "setTempo": "Set Tempo",
+  "@setTempo": {
+    "description": "Button to confirm playback tempo"
+  },
+  "scoreAudioPreview": "Score Audio Preview",
+  "@scoreAudioPreview": {
+    "description": "Status badge label when preview is idle"
+  },
+  "pauseMelody": "Pause Melody",
+  "@pauseMelody": {
+    "description": "Tooltip for pausing melody playback"
+  },
+  "playMelody": "Play / Preview Melody",
+  "@playMelody": {
+    "description": "Tooltip for starting melody playback"
+  },
+  "stopRewind": "Stop & Rewind",
+  "@stopRewind": {
+    "description": "Tooltip for stopping playback and rewinding"
+  },
+  "unmuteSound": "Unmute Note Sound Feedback",
+  "@unmuteSound": {
+    "description": "Tooltip to unmute tone feedback"
+  },
+  "muteSound": "Mute Note Sound Feedback",
+  "@muteSound": {
+    "description": "Tooltip to mute tone feedback"
+  },
+
+  "apiConfigurationSection": "API Configuration",
+  "@apiConfigurationSection": {
+    "description": "Header for API configuration settings"
+  },
+  "geminiApiKeyLabel": "Gemini API Key",
+  "@geminiApiKeyLabel": {
+    "description": "Tile label for Gemini API Key"
+  },
+  "geminiKeyNotConfigured": "Not configured — tap to enter key",
+  "@geminiKeyNotConfigured": {
+    "description": "Subtitle when Gemini key is not configured"
+  },
+  "customLabel": "Custom",
+  "@customLabel": {
+    "description": "Tag indicating user custom key"
+  },
+  "devEnvLabel": "Dev .env",
+  "@devEnvLabel": {
+    "description": "Tag indicating build environment key"
+  },
+  "loadingStatus": "Loading status...",
+  "@loadingStatus": {
+    "description": "Loading indicator text"
+  },
+  "errorLoadingKey": "Error loading key",
+  "@errorLoadingKey": {
+    "description": "Error indicator text"
+  },
+  "omrDiagnosticLogsSubtitle": "Inspect Gemini requests, latencies & responses",
+  "@omrDiagnosticLogsSubtitle": {
+    "description": "Subtitle for OMR logs tile in settings"
+  },
+  "appTagline": "A music rehearsal & lead-sheet companion\nfor worship teams and bands.",
+  "@appTagline": {
+    "description": "Application description in about section"
+  },
+  "licensesLabel": "Licenses",
+  "@licensesLabel": {
+    "description": "Licenses tile title"
+  },
+  "footerAttribution": "Made with ♪ for worship teams",
+  "@footerAttribution": {
+    "description": "Footer quote at bottom of settings"
+  },
+  "supabaseConfigSubtitle": "Configure Project URL & Anon Key",
+  "@supabaseConfigSubtitle": {
+    "description": "Subtitle for Supabase connection tile"
+  },
+  "notSignedInOffline": "Not signed in — Offline SQLite active",
+  "@notSignedInOffline": {
+    "description": "Subtitle when user is unauthenticated"
+  },
+  "synchronizingDatabase": "Synchronizing local Drift database with cloud…",
+  "@synchronizingDatabase": {
+    "description": "Status text while cloud sync is active"
+  },
+  "offlineCached": "Offline: Local changes safely cached",
+  "@offlineCached": {
+    "description": "Status text when device is offline"
+  },
+  "readyToSync": "Ready to sync",
+  "@readyToSync": {
+    "description": "Status text when idle"
+  },
+  "billingPeriodScans": "{count} full lead-sheet scans this billing period",
+  "@billingPeriodScans": {
+    "description": "Workspace metrics line for scans",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "storageTracksCount": "{count} scores and audio tracks stored",
+  "@storageTracksCount": {
+    "description": "Workspace metrics line for storage",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "workspaceMetricsUnavailable": "Workspace metrics unavailable",
+  "@workspaceMetricsUnavailable": {
+    "description": "Error banner when workspace metrics cannot be loaded"
+  },
+
+  "worshipTeamTitle": "Worship Team & Band",
+  "@worshipTeamTitle": {
+    "description": "AppBar title for team roster and calendar"
+  },
+  "liveStageSync": "Live Stage Sync",
+  "@liveStageSync": {
+    "description": "AppBar title for live sync page"
+  },
+  "directorHost": "Director (Host)",
+  "@directorHost": {
+    "description": "Segment label for director live mode"
+  },
+  "musicianFollower": "Musician (Follower)",
+  "@musicianFollower": {
+    "description": "Segment label for musician live mode"
+  },
+  "hostingStatus": "HOSTING",
+  "@hostingStatus": {
+    "description": "Connection badge for live director host"
+  },
+  "syncedStatus": "SYNCED",
+  "@syncedStatus": {
+    "description": "Connection badge for synced live follower"
+  },
+  "standaloneStatus": "STANDALONE",
+  "@standaloneStatus": {
+    "description": "Connection badge when live sync is disconnected"
+  },
+
+  "syncingChangesTooltip": "Syncing changes with Supabase…",
+  "@syncingChangesTooltip": {
+    "description": "Tooltip while syncing with Supabase"
+  },
+  "cloudSyncedTooltip": "Cloud synced",
+  "@cloudSyncedTooltip": {
+    "description": "Tooltip when synced with Supabase"
+  },
+  "cloudSyncedWithTimeTooltip": "Cloud synced ({time})",
+  "@cloudSyncedWithTimeTooltip": {
+    "description": "Tooltip when synced with Supabase with time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "14:30"
+      }
+    }
+  },
+  "offlineSQLiteTooltip": "Offline — working with local SQLite database",
+  "@offlineSQLiteTooltip": {
+    "description": "Tooltip when offline"
+  },
+  "syncErrorTooltip": "Sync error",
+  "@syncErrorTooltip": {
+    "description": "Tooltip when sync encountered error"
+  },
+  "cloudReadyTooltip": "Cloud ready (tap to sync)",
+  "@cloudReadyTooltip": {
+    "description": "Tooltip when cloud sync is idle"
+  },
+  "syncingStatus": "Syncing…",
+  "@syncingStatus": {
+    "description": "Syncing status text"
+  },
+  "syncedStatusLabel": "Synced",
+  "@syncedStatusLabel": {
+    "description": "Synced status text"
+  },
+  "offlineStatusLabel": "Offline",
+  "@offlineStatusLabel": {
+    "description": "Offline status text"
+  },
+  "teamRosterTab": "Team Roster",
+  "@teamRosterTab": {
+    "description": "Tab label for team roster"
+  },
+  "bandCalendarTab": "Band Calendar",
+  "@bandCalendarTab": {
+    "description": "Tab label for band calendar"
+  },
+  "addMusician": "Add Member",
+  "@addMusician": {
+    "description": "Button to add a musician or team member"
+  },
+  "addService": "New Service",
+  "@addService": {
+    "description": "Button to create a new service"
+  },
+  "switchActiveProfileTooltip": "Switch active user profile",
+  "@switchActiveProfileTooltip": {
+    "description": "Tooltip for active user switcher"
+  },
+  "activeProfileTooltip": "Active Profile: {name} ({role})",
+  "@activeProfileTooltip": {
+    "description": "Tooltip for active profile badge",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "David"
+      },
+      "role": {
+        "type": "String",
+        "example": "Admin"
+      }
+    }
+  },
+  "coverageAlertsTooltip": "Musician Coverage Alerts",
+  "@coverageAlertsTooltip": {
+    "description": "Tooltip for musician coverage alerts bell"
+  },
+  "coverageAlertsCountTooltip": "{count} cover alert(s)",
+  "@coverageAlertsCountTooltip": {
+    "description": "Tooltip for musician coverage alerts count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "addTeamMemberTooltip": "Add team member",
+  "@addTeamMemberTooltip": {
+    "description": "Tooltip to add a team member"
+  },
+  "addServiceEventTooltip": "Add service event",
+  "@addServiceEventTooltip": {
+    "description": "Tooltip to add a service event"
+  },
+  "noUpcomingServices": "No upcoming services scheduled.",
+  "@noUpcomingServices": {
+    "description": "Empty state text for upcoming services"
+  },
+  "scheduleFirstService": "Schedule First Service",
+  "@scheduleFirstService": {
+    "description": "Button to schedule the first service"
+  },
+  "recurringSchedules": "Recurring Schedules",
+  "@recurringSchedules": {
+    "description": "Label for recurring schedules"
+  },
+  "editMember": "Edit Member",
+  "@editMember": {
+    "description": "Action to edit team member"
+  },
+  "scheduleForService": "Schedule for Service",
+  "@scheduleForService": {
+    "description": "Action to schedule member for a service"
+  },
+  "editService": "Edit Service",
+  "@editService": {
+    "description": "Action to edit service"
+  },
+  "assignGroup": "Assign Group",
+  "@assignGroup": {
+    "description": "Action to assign group to service"
+  },
+  "assignMusician": "Assign Musician",
+  "@assignMusician": {
+    "description": "Action to assign musician to service"
+  },
+  "triggerTestCue": "Trigger Test Cue",
+  "@triggerTestCue": {
+    "description": "Button to trigger test stage cue"
+  },
+  "approveJump": "Approve Jump",
+  "@approveJump": {
+    "description": "Button to approve section jump in live sync"
+  },
+  "geminiApiKeySaved": "Gemini API key saved securely.",
+  "@geminiApiKeySaved": {
+    "description": "Notification when Gemini API key is saved"
+  },
+  "removeApiKeyTitle": "Remove API Key?",
+  "@removeApiKeyTitle": {
+    "description": "Confirmation title for removing API key"
+  },
+  "customApiKeyRemoved": "Custom API key removed.",
+  "@customApiKeyRemoved": {
+    "description": "Notification when custom API key is removed"
+  },
+  "removeKey": "Remove Key",
+  "@removeKey": {
+    "description": "Button to remove API key"
+  },
+  "saveKey": "Save Key",
+  "@saveKey": {
+    "description": "Button to save API key"
+  },
+  "supabaseProjectSetup": "Supabase Project Setup",
+  "@supabaseProjectSetup": {
+    "description": "Title for Supabase setup dialog"
+  },
+  "restoreDefault": "Restore Default",
+  "@restoreDefault": {
+    "description": "Button to restore default settings"
+  },
+  "saveAndConnect": "Save & Connect",
+  "@saveAndConnect": {
+    "description": "Button to save Supabase settings and connect"
   }
 }

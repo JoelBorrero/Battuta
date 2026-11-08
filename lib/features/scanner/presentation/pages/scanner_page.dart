@@ -10,6 +10,7 @@ import 'package:battuta/features/scanner/domain/entities/pitch_only_result.dart'
 import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ class ScannerPage extends ConsumerWidget {
     WidgetRef ref, {
     required bool fromCamera,
   }) {
+    final l10n = AppLocalizations.of(context);
     ScanFlowModal.show(
       context,
       onScoreExtracted: (Score score) async {
@@ -31,7 +33,10 @@ class ScannerPage extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Added "${song.title}" to Repertoire!'),
+              content: Text(
+                l10n?.addedToRepertoireSuccess(song.title) ??
+                    'Added "${song.title}" to Repertoire!',
+              ),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -43,7 +48,11 @@ class ScannerPage extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Extracted ${result.totalMeasures} measures for "${result.sectionName}".',
+                l10n?.extractedMeasuresSuccess(
+                      result.totalMeasures,
+                      result.sectionName,
+                    ) ??
+                    'Extracted ${result.totalMeasures} measures for "${result.sectionName}".',
               ),
               behavior: SnackBarBehavior.floating,
             ),
@@ -63,9 +72,10 @@ class ScannerPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan Lead Sheet')),
+      appBar: AppBar(title: Text(l10n?.scanLeadSheet ?? 'Scan Lead Sheet')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -79,15 +89,16 @@ class ScannerPage extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'OMR Scanner',
+                l10n?.omrScannerTitle ?? 'OMR Scanner',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'Point your camera at a lead sheet or pick an image to extract\n'
-                'chords, melody, and structure using Gemini AI.',
+                l10n?.omrScannerSubtitle ??
+                    'Point your camera at a lead sheet or pick an image to extract\n'
+                    'chords, melody, and structure using Gemini AI.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -98,7 +109,7 @@ class ScannerPage extends ConsumerWidget {
                 key: const Key('open_camera_button'),
                 onPressed: () => _openScanModal(context, ref, fromCamera: true),
                 icon: const Icon(Icons.camera_alt),
-                label: const Text('Open Camera'),
+                label: Text(l10n?.openCamera ?? 'Open Camera'),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
@@ -106,7 +117,7 @@ class ScannerPage extends ConsumerWidget {
                 onPressed: () =>
                     _openScanModal(context, ref, fromCamera: false),
                 icon: const Icon(Icons.photo_library_outlined),
-                label: const Text('Choose from Library'),
+                label: Text(l10n?.chooseFromLibrary ?? 'Choose from Library'),
               ),
             ],
           ),

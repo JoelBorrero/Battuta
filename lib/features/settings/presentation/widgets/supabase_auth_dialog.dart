@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -237,7 +238,7 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const ValueKey('supabase_auth_submit_btn'),

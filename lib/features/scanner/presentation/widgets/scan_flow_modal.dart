@@ -10,6 +10,7 @@ import 'package:battuta/features/scanner/domain/entities/pitch_only_result.dart'
 import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
 import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,11 +74,12 @@ class ScanFlowModal extends ConsumerWidget {
     final state = ref.watch(scanControllerProvider);
     final controller = ref.read(scanControllerProvider.notifier);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Scan Sheet Music'),
+        title: Text(l10n?.scanSheetMusic ?? 'Scan Sheet Music'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -86,13 +88,13 @@ class ScanFlowModal extends ConsumerWidget {
           IconButton(
             key: const ValueKey('open_omr_debug_logs_btn'),
             icon: const Icon(Icons.receipt_long_outlined),
-            tooltip: 'OMR Debug Logs',
+            tooltip: l10n?.omrDebugLogs ?? 'OMR Debug Logs',
             onPressed: () => OmrLogViewerModal.show(context),
           ),
           if (state.hasImage && !state.isLoading)
             IconButton(
               icon: const Icon(Icons.refresh),
-              tooltip: 'Reset',
+              tooltip: l10n?.reset ?? 'Reset',
               onPressed: () => controller.reset(),
             ),
         ],
@@ -108,16 +110,16 @@ class ScanFlowModal extends ConsumerWidget {
                 // Mode Selector: Full Lead Sheet vs Staff Snippet
                 // -------------------------------------------------------------
                 SegmentedButton<ScanMode>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: ScanMode.fullLeadSheet,
-                      icon: Icon(Icons.description_outlined),
-                      label: Text('Full Sheet (Schema A)'),
+                      icon: const Icon(Icons.description_outlined),
+                      label: Text(l10n?.fullSheetSchemaA ?? 'Full Sheet (Schema A)'),
                     ),
                     ButtonSegment(
                       value: ScanMode.pitchOnlySnippet,
-                      icon: Icon(Icons.crop_outlined),
-                      label: Text('Staff Snippet (Schema B)'),
+                      icon: const Icon(Icons.crop_outlined),
+                      label: Text(l10n?.staffSnippetSchemaB ?? 'Staff Snippet (Schema B)'),
                     ),
                   ],
                   selected: {state.scanMode},
@@ -137,7 +139,7 @@ class ScanFlowModal extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           key: const Key('scan_camera_btn'),
                           icon: const Icon(Icons.camera_alt_outlined),
-                          label: const Text('Camera'),
+                          label: Text(l10n?.camera ?? 'Camera'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 24),
                           ),
@@ -149,7 +151,7 @@ class ScanFlowModal extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           key: const Key('scan_gallery_btn'),
                           icon: const Icon(Icons.photo_library_outlined),
-                          label: const Text('Photos'),
+                          label: Text(l10n?.photos ?? 'Photos'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 24),
                           ),
@@ -178,8 +180,10 @@ class ScanFlowModal extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               state.scanMode == ScanMode.fullLeadSheet
-                                  ? 'Captures complete arrangement with metadata, staves, chords, and lyrics.'
-                                  : 'Crops a single system or melody line for rapid tap-first rhythm entry.',
+                                  ? (l10n?.fullSheetDesc ??
+                                      'Captures complete arrangement with metadata, staves, chords, and lyrics.')
+                                  : (l10n?.staffSnippetDesc ??
+                                      'Crops a single system or melody line for rapid tap-first rhythm entry.'),
                               style: theme.textTheme.bodyMedium,
                             ),
                           ),
@@ -209,7 +213,7 @@ class ScanFlowModal extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             icon: const Icon(Icons.crop),
-                            label: const Text('Crop System'),
+                            label: Text(l10n?.cropSystem ?? 'Crop System'),
                             onPressed: () => controller.cropStaffSnippet(),
                           ),
                         ),
@@ -218,7 +222,7 @@ class ScanFlowModal extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.photo_library_outlined),
-                          label: const Text('Change Image'),
+                          label: Text(l10n?.changeImage ?? 'Change Image'),
                           onPressed: () => controller.pickFromGallery(),
                         ),
                       ),
@@ -232,7 +236,7 @@ class ScanFlowModal extends ConsumerWidget {
                   FilledButton.icon(
                     key: const Key('scan_analyze_btn'),
                     icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Analyze with Gemini AI'),
+                    label: Text(l10n?.analyzeWithGemini ?? 'Analyze with Gemini AI'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -266,7 +270,7 @@ class ScanFlowModal extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Recognition Error',
+                                l10n?.recognitionError ?? 'Recognition Error',
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   color: theme.colorScheme.error,
                                   fontWeight: FontWeight.bold,
@@ -283,7 +287,7 @@ class ScanFlowModal extends ConsumerWidget {
                               OutlinedButton.icon(
                                 key: const ValueKey('scan_view_debug_logs_btn'),
                                 icon: const Icon(Icons.bug_report_outlined, size: 16),
-                                label: const Text('View Debug Logs'),
+                                label: Text(l10n?.viewDebugLogs ?? 'View Debug Logs'),
                                 style: OutlinedButton.styleFrom(
                                   visualDensity: VisualDensity.compact,
                                   foregroundColor: theme.colorScheme.error,
@@ -316,13 +320,13 @@ class ScanFlowModal extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.check_circle, color: Colors.green),
-                            SizedBox(width: 8),
+                            const Icon(Icons.check_circle, color: Colors.green),
+                            const SizedBox(width: 8),
                             Text(
-                              'Recognition Complete!',
-                              style: TextStyle(
+                              l10n?.recognitionComplete ?? 'Recognition Complete!',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.green,
                               ),
@@ -341,7 +345,7 @@ class ScanFlowModal extends ConsumerWidget {
                               onScoreExtracted?.call(state.extractedScore!);
                               Navigator.of(context).pop();
                             },
-                            child: const Text('Open in Repertoire'),
+                            child: Text(l10n?.openInRepertoire ?? 'Open in Repertoire'),
                           ),
                         ] else if (state.extractedPitchResult != null) ...[
                           Text(
@@ -358,7 +362,7 @@ class ScanFlowModal extends ConsumerWidget {
                               );
                               Navigator.of(context).pop();
                             },
-                            child: const Text('Open in Rhythm Editor'),
+                            child: Text(l10n?.openInRhythmEditor ?? 'Open in Rhythm Editor'),
                           ),
                         ],
                       ],
@@ -393,13 +397,13 @@ class ScanFlowModal extends ConsumerWidget {
                         const SizedBox(height: 16),
                         Text(
                           state.status == ScanStatus.analyzing
-                              ? 'Analyzing sheet with Gemini AI...'
-                              : 'Processing image...',
+                              ? (l10n?.analyzingSheet ?? 'Analyzing sheet with Gemini AI...')
+                              : (l10n?.processingImage ?? 'Processing image...'),
                           style: theme.textTheme.titleMedium,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Transcribing notes, chords & staves',
+                          l10n?.transcribingSheet ?? 'Transcribing notes, chords & staves',
                           style: theme.textTheme.bodySmall,
                         ),
                       ],

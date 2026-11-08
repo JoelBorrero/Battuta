@@ -141,7 +141,7 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(
               currentUser != null
                   ? '${currentUser.email}${currentUser.displayName != null ? ' (${currentUser.displayName})' : ''}'
-                  : 'Not signed in — Offline SQLite active',
+                  : (l10n?.notSignedInOffline ?? 'Not signed in — Offline SQLite active'),
             ),
             trailing: currentUser != null
                 ? TextButton(
@@ -158,7 +158,7 @@ class SettingsPage extends ConsumerWidget {
             key: const ValueKey('supabase_config_tile'),
             leading: const Icon(Icons.settings_ethernet),
             title: Text(l10n?.supabaseConnectionLabel ?? 'Supabase Connection'),
-            subtitle: const Text('Configure Project URL & Anon Key'),
+            subtitle: Text(l10n?.supabaseConfigSubtitle ?? 'Configure Project URL & Anon Key'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => SupabaseConfigDialog.show(context),
           ),
@@ -168,13 +168,13 @@ class SettingsPage extends ConsumerWidget {
             title: Text(l10n?.syncStatusLabel ?? 'Sync Status'),
             subtitle: Text(
               syncState.isSyncing
-                  ? 'Synchronizing local Drift database with cloud…'
+                  ? (l10n?.synchronizingDatabase ?? 'Synchronizing local Drift database with cloud…')
                   : syncState.status == CloudSyncStatus.success &&
                           syncState.lastSyncedAt != null
-                      ? 'Last synced: ${syncState.lastSyncedAt!.toLocal().hour.toString().padLeft(2, '0')}:${syncState.lastSyncedAt!.toLocal().minute.toString().padLeft(2, '0')}'
+                      ? '${l10n?.cloudSyncedTooltip ?? "Last synced"}: ${syncState.lastSyncedAt!.toLocal().hour.toString().padLeft(2, '0')}:${syncState.lastSyncedAt!.toLocal().minute.toString().padLeft(2, '0')}'
                       : syncState.isOffline
-                          ? 'Offline: Local changes safely cached'
-                          : syncState.errorMessage ?? 'Ready to sync',
+                          ? (l10n?.offlineCached ?? 'Offline: Local changes safely cached')
+                          : syncState.errorMessage ?? (l10n?.readyToSync ?? 'Ready to sync'),
             ),
             trailing: syncState.isSyncing
                 ? const SizedBox(
@@ -288,7 +288,8 @@ class SettingsPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${usage.geminiScansCount} full lead-sheet scans this billing period',
+                        l10n?.billingPeriodScans(usage.geminiScansCount) ??
+                            '${usage.geminiScansCount} full lead-sheet scans this billing period',
                         style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 11),
                       ),
 
@@ -332,7 +333,8 @@ class SettingsPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${usage.filesUploadedCount} scores and audio tracks stored',
+                        l10n?.storageTracksCount(usage.filesUploadedCount) ??
+                            '${usage.filesUploadedCount} scores and audio tracks stored',
                         style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 11),
                       ),
                     ],
@@ -343,7 +345,7 @@ class SettingsPage extends ConsumerWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                   ),
-                  error: (error, stack) => const Text('Workspace metrics unavailable'),
+                  error: (error, stack) => Text(l10n?.workspaceMetricsUnavailable ?? 'Workspace metrics unavailable'),
                 ),
               ),
             ),
@@ -352,20 +354,20 @@ class SettingsPage extends ConsumerWidget {
           const Divider(),
 
           // ── API Configuration ──
-          const _SectionHeader(
-            title: 'API Configuration',
+          _SectionHeader(
+            title: l10n?.apiConfigurationSection ?? 'API Configuration',
           ),
           ListTile(
             key: const ValueKey('gemini_api_key_tile'),
             leading: const Icon(Icons.key),
-            title: const Text('Gemini API Key'),
+            title: Text(l10n?.geminiApiKeyLabel ?? 'Gemini API Key'),
             subtitle: Text(
               apiKeyState.when(
                 data: (s) => s.isConfigured
-                    ? '${s.maskedKey} (${s.isUserCustom ? 'Custom' : 'Dev .env'})'
-                    : 'Not configured — tap to enter key',
-                loading: () => 'Loading status...',
-                error: (_, _) => 'Error loading key',
+                    ? '${s.maskedKey} (${s.isUserCustom ? (l10n?.customLabel ?? 'Custom') : (l10n?.devEnvLabel ?? 'Dev .env')})'
+                    : (l10n?.geminiKeyNotConfigured ?? 'Not configured — tap to enter key'),
+                loading: () => l10n?.loadingStatus ?? 'Loading status...',
+                error: (_, _) => l10n?.errorLoadingKey ?? 'Error loading key',
               ),
             ),
             trailing: const Icon(Icons.chevron_right),
@@ -374,8 +376,8 @@ class SettingsPage extends ConsumerWidget {
           ListTile(
             key: const ValueKey('omr_debug_logs_tile'),
             leading: const Icon(Icons.receipt_long_outlined),
-            title: const Text('OMR Diagnostic Logs'),
-            subtitle: const Text('Inspect Gemini requests, latencies & responses'),
+            title: Text(l10n?.omrDiagnosticLogs ?? 'OMR Diagnostic Logs'),
+            subtitle: Text(l10n?.omrDiagnosticLogsSubtitle ?? 'Inspect Gemini requests, latencies & responses'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => OmrLogViewerModal.show(context),
           ),
@@ -383,24 +385,24 @@ class SettingsPage extends ConsumerWidget {
           const Divider(),
 
           // ── About ──
-          const _SectionHeader(title: 'About'),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Battuta'),
+          _SectionHeader(title: l10n?.aboutSection ?? 'About'),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Battuta'),
             subtitle: Text(
-              'A music rehearsal & lead-sheet companion\n'
-              'for worship teams and bands.',
+              l10n?.appTagline ??
+                  'A music rehearsal & lead-sheet companion\nfor worship teams and bands.',
             ),
             isThreeLine: true,
           ),
-          const ListTile(
-            leading: Icon(Icons.verified),
-            title: Text('Version'),
-            subtitle: Text('0.1.0+1'),
+          ListTile(
+            leading: const Icon(Icons.verified),
+            title: Text(l10n?.versionLabel ?? 'Version'),
+            subtitle: const Text('0.1.0+1'),
           ),
           ListTile(
             leading: const Icon(Icons.code),
-            title: const Text('Licenses'),
+            title: Text(l10n?.licensesLabel ?? 'Licenses'),
             onTap: () => showLicensePage(
               context: context,
               applicationName: 'Battuta',
@@ -421,7 +423,7 @@ class SettingsPage extends ConsumerWidget {
           // ── Footer ──
           Center(
             child: Text(
-              'Made with ♪ for worship teams',
+              l10n?.footerAttribution ?? 'Made with ♪ for worship teams',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.5),
               ),

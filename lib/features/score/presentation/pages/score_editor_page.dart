@@ -15,6 +15,7 @@ import 'package:battuta/features/score/presentation/services/tone_synthesizer.da
 import 'package:battuta/features/score/presentation/widgets/rhythm_toolbar.dart';
 import 'package:battuta/features/score/presentation/widgets/score_playback_bar.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -147,6 +148,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
   }
 
   Future<void> _saveNotation() async {
+    final l10n = AppLocalizations.of(context);
     final scoreToSave = _controller?.state.score ?? _activeScore;
     if (scoreToSave == null) return;
     setState(() => _isSaving = true);
@@ -157,7 +159,11 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notation changes saved to Song!')),
+          SnackBar(
+            content: Text(
+              l10n?.notationSavedSuccess ?? 'Notation changes saved to Song!',
+            ),
+          ),
         );
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
@@ -165,8 +171,13 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to save score: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.failedToSaveScore(e.toString()) ?? 'Failed to save score: $e',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -215,19 +226,20 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final songAsync = ref.watch(songByIdProvider(widget.songId));
+    final l10n = AppLocalizations.of(context);
 
     return songAsync.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Score Editor')),
+        appBar: AppBar(title: Text(l10n?.scoreEditor ?? 'Score Editor')),
         body: Center(child: Text('Error loading song: $e')),
       ),
       data: (song) {
         if (song == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Score Editor')),
-            body: const Center(child: Text('Song not found')),
+            appBar: AppBar(title: Text(l10n?.scoreEditor ?? 'Score Editor')),
+            body: Center(child: Text(l10n?.songNotFound ?? 'Song not found')),
           );
         }
 
@@ -241,7 +253,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
               FilledButton.icon(
                 onPressed: _isSaving ? null : _saveNotation,
                 icon: const Icon(Icons.check),
-                label: const Text('Save'),
+                label: Text(l10n?.save ?? 'Save'),
               ),
               const SizedBox(width: 8),
             ],

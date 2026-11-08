@@ -13,6 +13,7 @@ import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -201,12 +202,14 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   }
 
   Future<void> _saveSong() async {
+    final l10n = AppLocalizations.of(context);
     final isAdmin = ref.read(isCurrentUserAdminProvider);
     if (!isAdmin) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Administrator permissions required to create or modify songs.',
+            l10n?.adminRequiredWarning ??
+                'Administrator permissions required to create or modify songs.',
           ),
         ),
       );
@@ -275,8 +278,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
           SnackBar(
             content: Text(
               widget.songId != null
-                  ? 'Song "${song.title}" updated successfully'
-                  : 'Song "${song.title}" created successfully',
+                  ? (l10n?.songUpdatedSuccess(song.title) ??
+                      'Song "${song.title}" updated successfully')
+                  : (l10n?.songCreatedSuccess(song.title) ??
+                      'Song "${song.title}" created successfully'),
             ),
           ),
         );
@@ -286,7 +291,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save song: $e'),
+            content: Text(
+              l10n?.failedToSaveSong(e.toString()) ?? 'Failed to save song: $e',
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -300,26 +307,27 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
 
   Future<void> _confirmDelete() async {
     if (widget.songId == null) return;
+    final l10n = AppLocalizations.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Song'),
+        title: Text(l10n?.deleteSongTitle ?? 'Delete Song'),
         content: Text(
-          'Are you sure you want to delete "${_titleController.text}"? '
-          'This action cannot be undone.',
+          l10n?.deleteSongConfirm(_titleController.text) ??
+              'Are you sure you want to delete "${_titleController.text}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -328,8 +336,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     if (confirmed == true && mounted) {
       await ref.read(repertoireProvider.notifier).deleteSong(widget.songId!);
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Song deleted')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n?.songDeletedSuccess ?? 'Song deleted'),
+          ),
+        );
         try {
           context.go('/repertoire');
         } catch (_) {
@@ -343,6 +354,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isEditing = widget.songId != null;
 
@@ -352,14 +364,14 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
         loading: () =>
             const Scaffold(body: Center(child: CircularProgressIndicator())),
         error: (err, _) => Scaffold(
-          appBar: AppBar(title: const Text('Edit Song')),
-          body: Center(child: Text('Error loading song: $err')),
+          appBar: AppBar(title: Text(l10n?.editSong ?? 'Edit Song')),
+          body: Center(child: Text('${l10n?.failedToLoadRepertoire ?? "Error loading song"}: $err')),
         ),
         data: (song) {
           if (song == null) {
             return Scaffold(
-              appBar: AppBar(title: const Text('Edit Song')),
-              body: const Center(child: Text('Song not found')),
+              appBar: AppBar(title: Text(l10n?.editSong ?? 'Edit Song')),
+              body: Center(child: Text(l10n?.songNotFound ?? 'Song not found')),
             );
           }
           _populateFromSong(song);
@@ -373,14 +385,15 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
 
   Widget _buildScaffold(ThemeData theme, bool isEditing) {
     final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Song' : 'New Song'),
+        title: Text(isEditing ? (l10n?.editSong ?? 'Edit Song') : (l10n?.newSong ?? 'New Song')),
         actions: [
           if (isEditing && isAdmin)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete Song',
+              tooltip: l10n?.deleteSong ?? 'Delete Song',
               onPressed: _isSaving ? null : _confirmDelete,
             ),
           FilledButton.icon(
@@ -392,7 +405,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save),
-            label: Text(isAdmin ? 'Save' : 'View Only'),
+            label: Text(isAdmin ? (l10n?.save ?? 'Save') : (l10n?.viewOnly ?? 'View Only')),
           ),
           const SizedBox(width: 8),
         ],
@@ -421,7 +434,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Read-only view: Administrator permissions are required to create or modify repertoire songs.',
+                        l10n?.readOnlyAdminWarning ??
+                            'Read-only view: Administrator permissions are required to create or modify repertoire songs.',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface,
@@ -435,15 +449,15 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               key: const Key('song_title_field'),
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Song Title *',
-                hintText: 'e.g. Amazing Grace',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.title),
+              decoration: InputDecoration(
+                labelText: l10n?.songTitleLabel ?? 'Song Title *',
+                hintText: l10n?.songTitleHint ?? 'e.g. Amazing Grace',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.title),
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return 'Please enter a song title';
+                  return l10n?.songTitleValidation ?? 'Please enter a song title';
                 }
                 return null;
               },
@@ -452,15 +466,15 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               key: const Key('song_artist_field'),
               controller: _artistController,
-              decoration: const InputDecoration(
-                labelText: 'Artist / Composer *',
-                hintText: 'e.g. John Newton',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
+              decoration: InputDecoration(
+                labelText: l10n?.artistComposerLabel ?? 'Artist / Composer *',
+                hintText: l10n?.artistComposerHint ?? 'e.g. John Newton',
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.person),
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return 'Please enter an artist or composer';
+                  return l10n?.artistValidation ?? 'Please enter an artist or composer';
                 }
                 return null;
               },
@@ -479,7 +493,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Musical Setup',
+                      l10n?.musicalSetup ?? 'Musical Setup',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -499,10 +513,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                                 )
                                 ? _selectedKey
                                 : MusicalKey.cMajor.name,
-                            decoration: const InputDecoration(
-                              labelText: 'Key',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
+                            decoration: InputDecoration(
+                              labelText: l10n?.keyLabel ?? 'Key',
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 8,
                               ),
@@ -536,10 +550,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                             key: const Key('song_meter_dropdown'),
                             isExpanded: true,
                             initialValue: _timeSignature,
-                            decoration: const InputDecoration(
-                              labelText: 'Meter',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
+                            decoration: InputDecoration(
+                              labelText: l10n?.meterLabel ?? 'Meter',
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 8,
                               ),
@@ -574,7 +588,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                             children: [
                               IconButton.filledTonal(
                                 icon: const Icon(Icons.remove),
-                                tooltip: 'Decrease BPM',
+                                tooltip: l10n?.decreaseBpm ?? 'Decrease BPM',
                                 onPressed: () {
                                   if (_tempo > 30) {
                                     setState(() => _tempo--);
@@ -592,7 +606,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                               ),
                               IconButton.filledTonal(
                                 icon: const Icon(Icons.add),
-                                tooltip: 'Increase BPM',
+                                tooltip: l10n?.increaseBpm ?? 'Increase BPM',
                                 onPressed: () {
                                   if (_tempo < 300) {
                                     setState(() => _tempo++);
@@ -606,7 +620,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                         OutlinedButton.icon(
                           onPressed: _recordTapTempo,
                           icon: const Icon(Icons.touch_app),
-                          label: const Text('Tap Tempo'),
+                          label: Text(l10n?.tapTempo ?? 'Tap Tempo'),
                         ),
                       ],
                     ),
@@ -623,11 +637,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                   child: TextField(
                     key: const Key('song_tag_input'),
                     controller: _tagInputController,
-                    decoration: const InputDecoration(
-                      labelText: 'Add Tag',
-                      hintText: 'e.g. worship, rock, ballad',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
+                    decoration: InputDecoration(
+                      labelText: l10n?.addTag ?? 'Add Tag',
+                      hintText: l10n?.tagHint ?? 'e.g. worship, rock, ballad',
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
                       ),
@@ -638,7 +652,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                 const SizedBox(width: 8),
                 IconButton.filled(
                   icon: const Icon(Icons.add),
-                  tooltip: 'Add Tag',
+                  tooltip: l10n?.addTag ?? 'Add Tag',
                   onPressed: _addTag,
                 ),
               ],
@@ -663,10 +677,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             // ── Notes Section ──
             TextFormField(
               controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes / Performance Instructions',
-                hintText: 'e.g. Capo 3rd fret, slow acoustic intro...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.notesInstructionsLabel ?? 'Notes / Performance Instructions',
+                hintText: l10n?.notesInstructionsHint ?? 'e.g. Capo 3rd fret, slow acoustic intro...',
+                border: const OutlineInputBorder(),
               ),
               maxLines: 2,
             ),
@@ -677,14 +691,14 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Song Sections (${_sections.length})',
+                  l10n?.songSectionsCount(_sections.length) ?? 'Song Sections (${_sections.length})',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Section'),
+                  label: Text(l10n?.addSection ?? 'Add Section'),
                   onPressed: () => _addSection(),
                 ),
               ],
@@ -696,7 +710,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  const Text('Quick add: ', style: TextStyle(fontSize: 12)),
+                  Text(l10n?.quickAdd ?? 'Quick add: ', style: const TextStyle(fontSize: 12)),
                   const SizedBox(width: 4),
                   for (final name in [
                     'Intro',
@@ -725,7 +739,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                 padding: const EdgeInsets.all(24),
                 child: Center(
                   child: Text(
-                    'No sections added. Tap "+ Add Section" to build your song.',
+                    l10n?.noSectionsAddedHint ?? 'No sections added. Tap "+ Add Section" to build your song.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -831,6 +845,7 @@ class _SectionCardState extends State<_SectionCard> {
   }
 
   void _showAddChordDialog() {
+    final l10n = AppLocalizations.of(context);
     String root = 'C';
     ChordQuality quality = ChordQuality.major;
     int beats = 4;
@@ -842,7 +857,7 @@ class _SectionCardState extends State<_SectionCard> {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
             return AlertDialog(
-              title: const Text('Add Chord'),
+              title: Text(l10n?.addChord ?? 'Add Chord'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -850,7 +865,9 @@ class _SectionCardState extends State<_SectionCard> {
                     DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: root,
-                      decoration: const InputDecoration(labelText: 'Root Note'),
+                      decoration: InputDecoration(
+                        labelText: l10n?.rootNote ?? 'Root Note',
+                      ),
                       items:
                           const [
                                 'C',
@@ -890,7 +907,9 @@ class _SectionCardState extends State<_SectionCard> {
                     DropdownButtonFormField<ChordQuality>(
                       isExpanded: true,
                       initialValue: quality,
-                      decoration: const InputDecoration(labelText: 'Quality'),
+                      decoration: InputDecoration(
+                        labelText: l10n?.quality ?? 'Quality',
+                      ),
                       items: ChordQuality.values
                           .map(
                             (q) => DropdownMenuItem(
@@ -911,14 +930,14 @@ class _SectionCardState extends State<_SectionCard> {
                     DropdownButtonFormField<String?>(
                       isExpanded: true,
                       initialValue: bass,
-                      decoration: const InputDecoration(
-                        labelText: 'Bass Note (Slash Chord)',
+                      decoration: InputDecoration(
+                        labelText: l10n?.bassNote ?? 'Bass Note (Slash Chord)',
                       ),
                       items: [
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                           value: null,
                           child: Text(
-                            'None',
+                            l10n?.noneOption ?? 'None',
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -952,7 +971,7 @@ class _SectionCardState extends State<_SectionCard> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Text('Beats: '),
+                        Text(l10n?.beatsLabel ?? 'Beats: '),
                         for (final b in [1, 2, 3, 4, 6])
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -960,7 +979,7 @@ class _SectionCardState extends State<_SectionCard> {
                               label: Text('$b'),
                               selected: beats == b,
                               onSelected: (_) =>
-                                  setDialogState(() => beats = b),
+                                   setDialogState(() => beats = b),
                             ),
                           ),
                       ],
@@ -971,7 +990,7 @@ class _SectionCardState extends State<_SectionCard> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n?.cancel ?? 'Cancel'),
                 ),
                 FilledButton(
                   onPressed: () {
@@ -992,7 +1011,7 @@ class _SectionCardState extends State<_SectionCard> {
                     widget.onChordsUpdated();
                     Navigator.of(dialogCtx).pop();
                   },
-                  child: const Text('Add'),
+                  child: Text(l10n?.add ?? 'Add'),
                 ),
               ],
             );
@@ -1005,6 +1024,7 @@ class _SectionCardState extends State<_SectionCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final sec = widget.section;
 
     return Card(
@@ -1021,10 +1041,10 @@ class _SectionCardState extends State<_SectionCard> {
                 Expanded(
                   child: TextFormField(
                     controller: sec.nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Section Name',
+                    decoration: InputDecoration(
+                      labelText: l10n?.sectionName ?? 'Section Name',
                       isDense: true,
-                      border: UnderlineInputBorder(),
+                      border: const UnderlineInputBorder(),
                     ),
                   ),
                 ),
@@ -1036,7 +1056,7 @@ class _SectionCardState extends State<_SectionCard> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline, size: 20),
-                      tooltip: 'Decrease repeats',
+                      tooltip: l10n?.decreaseRepeats ?? 'Decrease repeats',
                       onPressed: sec.repeatCount > 1
                           ? () {
                               setState(() => sec.repeatCount--);
@@ -1050,7 +1070,7 @@ class _SectionCardState extends State<_SectionCard> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline, size: 20),
-                      tooltip: 'Increase repeats',
+                      tooltip: l10n?.increaseRepeats ?? 'Increase repeats',
                       onPressed: () {
                         setState(() => sec.repeatCount++);
                         widget.onChordsUpdated();
@@ -1063,13 +1083,13 @@ class _SectionCardState extends State<_SectionCard> {
                 if (widget.onMoveUp != null)
                   IconButton(
                     icon: const Icon(Icons.arrow_upward, size: 20),
-                    tooltip: 'Move up',
+                    tooltip: l10n?.moveUp ?? 'Move up',
                     onPressed: widget.onMoveUp,
                   ),
                 if (widget.onMoveDown != null)
                   IconButton(
                     icon: const Icon(Icons.arrow_downward, size: 20),
-                    tooltip: 'Move down',
+                    tooltip: l10n?.moveDown ?? 'Move down',
                     onPressed: widget.onMoveDown,
                   ),
 
@@ -1080,7 +1100,7 @@ class _SectionCardState extends State<_SectionCard> {
                     color: theme.colorScheme.error,
                     size: 20,
                   ),
-                  tooltip: 'Delete Section',
+                  tooltip: l10n?.deleteSection ?? 'Delete Section',
                   onPressed: widget.onDelete,
                 ),
               ],
@@ -1094,14 +1114,14 @@ class _SectionCardState extends State<_SectionCard> {
                   child: TextField(
                     controller: sec.quickChordsController,
                     decoration: InputDecoration(
-                      labelText: 'Chords (e.g. C | G/B | Am | F)',
-                      hintText:
+                      labelText: l10n?.chordsFieldLabel ?? 'Chords (e.g. C | G/B | Am | F)',
+                      hintText: l10n?.chordsFieldHint ??
                           'Type chord symbols separated by spaces or bars',
                       isDense: true,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.check_circle_outline),
-                        tooltip: 'Apply chords text',
+                        tooltip: l10n?.applyChordsTooltip ?? 'Apply chords text',
                         onPressed: _applyQuickChords,
                       ),
                     ),
@@ -1111,7 +1131,7 @@ class _SectionCardState extends State<_SectionCard> {
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
                   icon: const Icon(Icons.music_note),
-                  tooltip: 'Add chord builder',
+                  tooltip: l10n?.addChordBuilderTooltip ?? 'Add chord builder',
                   onPressed: _showAddChordDialog,
                 ),
               ],
@@ -1149,10 +1169,10 @@ class _SectionCardState extends State<_SectionCard> {
             // Lyrics
             TextFormField(
               controller: sec.lyricsController,
-              decoration: const InputDecoration(
-                labelText: 'Section Lyrics',
-                hintText: 'Enter lyrics line by line...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.sectionLyricsLabel ?? 'Section Lyrics',
+                hintText: l10n?.sectionLyricsHint ?? 'Enter lyrics line by line...',
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
@@ -1161,11 +1181,11 @@ class _SectionCardState extends State<_SectionCard> {
             // Rehearsal Notes
             TextFormField(
               controller: sec.notesController,
-              decoration: const InputDecoration(
-                labelText: 'Rehearsal Notes (optional)',
-                hintText: 'e.g. Guitar solo starts here...',
+              decoration: InputDecoration(
+                labelText: l10n?.rehearsalNotesLabel ?? 'Rehearsal Notes (optional)',
+                hintText: l10n?.rehearsalNotesHint ?? 'e.g. Guitar solo starts here...',
                 isDense: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               maxLines: 1,
             ),

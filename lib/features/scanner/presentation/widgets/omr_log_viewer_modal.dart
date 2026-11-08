@@ -6,6 +6,7 @@
 library;
 
 import 'package:battuta/features/scanner/presentation/providers/omr_log_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,26 +55,27 @@ class OmrLogViewerModal extends ConsumerWidget {
     final notifier = ref.read(omrLogNotifierProvider.notifier);
     final state = stateAsync.asData?.value ?? const OmrLogState();
     final isLoading = stateAsync.isLoading;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: const Color(0xFF16181D),
         elevation: 0,
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'OMR Diagnostic Logs',
-              style: TextStyle(
+              l10n?.omrDiagnosticLogs ?? 'OMR Diagnostic Logs',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
             Text(
-              'Persistent File System Logs',
-              style: TextStyle(fontSize: 11, color: Color(0xFF8A8F98)),
+              l10n?.persistentFileSystemLogs ?? 'Persistent File System Logs',
+              style: const TextStyle(fontSize: 11, color: Color(0xFF8A8F98)),
             ),
           ],
         ),
@@ -85,13 +87,13 @@ class OmrLogViewerModal extends ConsumerWidget {
           IconButton(
             key: const ValueKey('omr_logs_refresh_btn'),
             icon: const Icon(Icons.refresh, color: Colors.white70),
-            tooltip: 'Refresh Logs',
+            tooltip: l10n?.refreshLogs ?? 'Refresh Logs',
             onPressed: isLoading ? null : () => notifier.loadLogs(),
           ),
           IconButton(
             key: const ValueKey('omr_logs_clear_btn'),
             icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
-            tooltip: 'Clear Logs',
+            tooltip: l10n?.clearLogs ?? 'Clear Logs',
             onPressed: isLoading
                 ? null
                 : () async {
@@ -99,20 +101,24 @@ class OmrLogViewerModal extends ConsumerWidget {
                       context: context,
                       builder: (ctx) => AlertDialog(
                         backgroundColor: const Color(0xFF1E2024),
-                        title: const Text('Clear OMR Logs?', style: TextStyle(color: Colors.white)),
-                        content: const Text(
-                          'This will empty the omr_debug.log file on the device.',
-                          style: TextStyle(color: Colors.white70),
+                        title: Text(
+                          l10n?.clearOmrLogsTitle ?? 'Clear OMR Logs?',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        content: Text(
+                          l10n?.clearOmrLogsConfirm ??
+                              'This will empty the omr_debug.log file on the device.',
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(ctx).pop(false),
-                            child: const Text('Cancel'),
+                            child: Text(l10n?.cancel ?? 'Cancel'),
                           ),
                           FilledButton(
                             style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
                             onPressed: () => Navigator.of(ctx).pop(true),
-                            child: const Text('Clear'),
+                            child: Text(l10n?.clearAction ?? 'Clear'),
                           ),
                         ],
                       ),
@@ -122,9 +128,11 @@ class OmrLogViewerModal extends ConsumerWidget {
                       await notifier.clearLogs();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('OMR logs cleared from file system.'),
-                            duration: Duration(seconds: 2),
+                          SnackBar(
+                            content: Text(
+                              l10n?.omrLogsCleared ?? 'OMR logs cleared from file system.',
+                            ),
+                            duration: const Duration(seconds: 2),
                           ),
                         );
                       }
@@ -145,7 +153,9 @@ class OmrLogViewerModal extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    state.filePath.isEmpty ? 'Locating log file...' : state.filePath,
+                    state.filePath.isEmpty
+                        ? (l10n?.locatingLogFile ?? 'Locating log file...')
+                        : state.filePath,
                     style: const TextStyle(
                       fontFamily: 'monospace',
                       fontSize: 11,
@@ -178,12 +188,12 @@ class OmrLogViewerModal extends ConsumerWidget {
           // Log Content Area
           Expanded(
             child: isLoading && state.content.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Text(
-                        'Loading diagnostic logs...',
-                        style: TextStyle(color: Color(0xFF8A8F98), fontSize: 13),
+                        l10n?.loadingDiagnosticLogs ?? 'Loading diagnostic logs...',
+                        style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 13),
                       ),
                     ),
                   )
@@ -200,7 +210,8 @@ class OmrLogViewerModal extends ConsumerWidget {
                       key: const ValueKey('omr_logs_scroll_view'),
                       child: Text(
                         state.content.isEmpty
-                            ? 'No logs recorded yet.\nRun an OMR scan to capture diagnostic logs.'
+                            ? (l10n?.noLogsRecordedYet ??
+                                'No logs recorded yet.\nRun an OMR scan to capture diagnostic logs.')
                             : state.content,
                         style: const TextStyle(
                           fontFamily: 'monospace',
@@ -226,7 +237,7 @@ class OmrLogViewerModal extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     key: const ValueKey('omr_logs_copy_btn'),
                     icon: const Icon(Icons.copy, size: 16),
-                    label: const Text('Copy All Logs'),
+                    label: Text(l10n?.copyAllLogs ?? 'Copy All Logs'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFE5A93C),
                       side: const BorderSide(color: Color(0xFFE5A93C)),
@@ -238,9 +249,11 @@ class OmrLogViewerModal extends ConsumerWidget {
                             await notifier.copyToClipboard();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('OMR logs copied to clipboard.'),
-                                  duration: Duration(seconds: 2),
+                                SnackBar(
+                                  content: Text(
+                                    l10n?.omrLogsCopied ?? 'OMR logs copied to clipboard.',
+                                  ),
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             }

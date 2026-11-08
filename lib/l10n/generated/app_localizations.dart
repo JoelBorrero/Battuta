@@ -326,31 +326,31 @@ abstract class AppLocalizations {
   /// **'Version'**
   String get versionLabel;
 
-  /// Tab title for team roster
+  /// Tab label for team roster
   ///
   /// In en, this message translates to:
   /// **'Team Roster'**
   String get teamRosterTab;
 
-  /// Tab title for band calendar
+  /// Tab label for band calendar
   ///
   /// In en, this message translates to:
   /// **'Band Calendar'**
   String get bandCalendarTab;
 
-  /// Button to add a musician
+  /// Button to add a musician or team member
   ///
   /// In en, this message translates to:
-  /// **'Add Musician'**
+  /// **'Add Member'**
   String get addMusician;
 
-  /// Button to add a service event
+  /// Button to create a new service
   ///
   /// In en, this message translates to:
-  /// **'Add Service'**
+  /// **'New Service'**
   String get addService;
 
-  /// Button to open recurring schedules manager
+  /// Label for recurring schedules
   ///
   /// In en, this message translates to:
   /// **'Recurring Schedules'**
@@ -409,6 +409,1392 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure custom Supabase URL and local AI keys'**
   String get developerOptionsSubtitle;
+
+  /// Repertoire screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Repertoire'**
+  String get repertoireTitle;
+
+  /// Chord chart view mode segment
+  ///
+  /// In en, this message translates to:
+  /// **'Chord Chart'**
+  String get chordChart;
+
+  /// Musical staff notation view mode segment
+  ///
+  /// In en, this message translates to:
+  /// **'Musical Staff'**
+  String get musicalStaff;
+
+  /// Button and title for creating a new song
+  ///
+  /// In en, this message translates to:
+  /// **'New Song'**
+  String get newSong;
+
+  /// Title for editing a song
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Song'**
+  String get editSong;
+
+  /// Add song button label
+  ///
+  /// In en, this message translates to:
+  /// **'Add Song'**
+  String get addSong;
+
+  /// Delete song button label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Song'**
+  String get deleteSong;
+
+  /// Delete song confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Song?'**
+  String get deleteSongTitle;
+
+  /// Delete song confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"? This action cannot be undone.'**
+  String deleteSongConfirm(String title);
+
+  /// Snackbar shown after deleting a song
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{title}\"'**
+  String deletedSongSuccess(String title);
+
+  /// Button label for creating a new setlist
+  ///
+  /// In en, this message translates to:
+  /// **'New Setlist'**
+  String get newSetlist;
+
+  /// Action button to submit new setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Create Setlist'**
+  String get createSetlist;
+
+  /// Title for create new setlist dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Setlist'**
+  String get createNewSetlist;
+
+  /// Title for editing a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Setlist'**
+  String get editSetlist;
+
+  /// Title for delete setlist confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Setlist?'**
+  String get deleteSetlistTitle;
+
+  /// Message for delete setlist dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"? This action cannot be undone.'**
+  String deleteSetlistConfirm(String title);
+
+  /// Snackbar shown after deleting a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted setlist \"{title}\"'**
+  String deletedSetlistSuccess(String title);
+
+  /// Snackbar shown after creating a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Created setlist \"{title}\"'**
+  String createdSetlistSuccess(String title);
+
+  /// Label for songs segment tab
+  ///
+  /// In en, this message translates to:
+  /// **'Songs ({count})'**
+  String songsTab(int count);
+
+  /// Label for setlists segment tab
+  ///
+  /// In en, this message translates to:
+  /// **'Setlists ({count})'**
+  String setlistsTab(int count);
+
+  /// Tooltip for scan sheet music action
+  ///
+  /// In en, this message translates to:
+  /// **'Scan sheet music'**
+  String get scanSheetMusicTooltip;
+
+  /// Tooltip for search songs action
+  ///
+  /// In en, this message translates to:
+  /// **'Search songs'**
+  String get searchSongsTooltip;
+
+  /// Placeholder text in songs search view
+  ///
+  /// In en, this message translates to:
+  /// **'Type to search songs…'**
+  String get typeToSearchSongs;
+
+  /// Empty state text when search yields no matches
+  ///
+  /// In en, this message translates to:
+  /// **'No songs found'**
+  String get noSongsFound;
+
+  /// Error banner when repertoire cannot be fetched
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load repertoire'**
+  String get failedToLoadRepertoire;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Title when repertoire has no songs
+  ///
+  /// In en, this message translates to:
+  /// **'Your repertoire is empty'**
+  String get repertoireEmpty;
+
+  /// Hint for admins when repertoire is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add your first song'**
+  String get repertoireEmptyAdminHint;
+
+  /// Hint for team members when repertoire is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No songs available yet. Contact an administrator to add songs.'**
+  String get repertoireEmptyMemberHint;
+
+  /// Button to load pre-seeded sample songs
+  ///
+  /// In en, this message translates to:
+  /// **'Load Sample Songs'**
+  String get loadSampleSongs;
+
+  /// Button to trigger camera score scan
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Score'**
+  String get scanScore;
+
+  /// Heading when setlists list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No Setlists Yet'**
+  String get noSetlistsYet;
+
+  /// Hint for admins when setlists list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Create an ordered setlist for Sunday services or rehearsals.'**
+  String get setlistsEmptyAdminHint;
+
+  /// Hint for team members when setlists list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No setlists created yet. Setlists will appear here once published by your director.'**
+  String get setlistsEmptyMemberHint;
+
+  /// Button to load a pre-seeded setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Load Sample Setlist'**
+  String get loadSampleSetlist;
+
+  /// Subtitle count of songs in a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'{count} songs'**
+  String setlistSongsCount(int count);
+
+  /// Default description for a setlist without notes
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming service'**
+  String get upcomingService;
+
+  /// Label for setlist title input
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist Title *'**
+  String get setlistTitleField;
+
+  /// Hint for setlist title input
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Sunday Morning - Easter'**
+  String get setlistTitleHint;
+
+  /// Label for setlist notes input
+  ///
+  /// In en, this message translates to:
+  /// **'Notes / Service Theme'**
+  String get notesServiceThemeField;
+
+  /// Hint for setlist notes input
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Acoustic setup, communion song in D'**
+  String get notesServiceThemeHint;
+
+  /// Tooltip for delete setlist icon button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete setlist'**
+  String get deleteSetlistTooltip;
+
+  /// Title for song detail view
+  ///
+  /// In en, this message translates to:
+  /// **'Song Detail'**
+  String get songDetail;
+
+  /// Title for transpose bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Transpose Song'**
+  String get transposeSong;
+
+  /// Reset action button
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// Label indicating song is in original key
+  ///
+  /// In en, this message translates to:
+  /// **'Original Key'**
+  String get originalKey;
+
+  /// Semitone delta display
+  ///
+  /// In en, this message translates to:
+  /// **'{prefix}{count} semitones'**
+  String semitonesCount(String prefix, int count);
+
+  /// Tooltip for lowering transposition
+  ///
+  /// In en, this message translates to:
+  /// **'Down 1 semitone'**
+  String get downOneSemitone;
+
+  /// Tooltip for raising transposition
+  ///
+  /// In en, this message translates to:
+  /// **'Up 1 semitone'**
+  String get upOneSemitone;
+
+  /// Button to persist transposed key
+  ///
+  /// In en, this message translates to:
+  /// **'Save Transposed Key ({key}) to Song'**
+  String saveTransposedKey(String key);
+
+  /// Tooltip for transpose button in app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Transpose Key'**
+  String get transposeKeyTooltip;
+
+  /// Tooltip for notation editor button in app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Notation Editor'**
+  String get notationEditorTooltip;
+
+  /// Tooltip for exporting PDF lead sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Export PDF Lead Sheet'**
+  String get exportPdfTooltip;
+
+  /// Tooltip for exporting MIDI file
+  ///
+  /// In en, this message translates to:
+  /// **'Export MIDI File'**
+  String get exportMidiTooltip;
+
+  /// Header for interactive notation section
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive Notation View'**
+  String get interactiveNotationView;
+
+  /// Button to jump directly into notation editor
+  ///
+  /// In en, this message translates to:
+  /// **'Edit in Notation Editor'**
+  String get editInNotationEditor;
+
+  /// Message when song has no chord sections
+  ///
+  /// In en, this message translates to:
+  /// **'This song has no sections yet.'**
+  String get noSectionsYet;
+
+  /// Badge showing repeat count for a section
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat {count}×'**
+  String repeatTimes(int count);
+
+  /// Duration in beats of a chord cell
+  ///
+  /// In en, this message translates to:
+  /// **'{count} beats'**
+  String beatsCount(int count);
+
+  /// Button to return to repertoire list
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Repertoire'**
+  String get backToRepertoire;
+
+  /// Message shown when song ID does not exist
+  ///
+  /// In en, this message translates to:
+  /// **'Song not found in repertoire'**
+  String get songNotFound;
+
+  /// Badge showing song musical key
+  ///
+  /// In en, this message translates to:
+  /// **'Key: {key}'**
+  String songKeyBadge(String key);
+
+  /// Error snackbar when PDF export fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export PDF: {error}'**
+  String failedToExportPdf(String error);
+
+  /// Error snackbar when MIDI export fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export MIDI: {error}'**
+  String failedToExportMidi(String error);
+
+  /// Button label for non-admin viewers
+  ///
+  /// In en, this message translates to:
+  /// **'View Only'**
+  String get viewOnly;
+
+  /// Banner message explaining read-only song state
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only view: Administrator permissions are required to create or modify repertoire songs.'**
+  String get readOnlyAdminWarning;
+
+  /// Form label for song title
+  ///
+  /// In en, this message translates to:
+  /// **'Song Title *'**
+  String get songTitleLabel;
+
+  /// Form placeholder for song title
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Amazing Grace'**
+  String get songTitleHint;
+
+  /// Validation error for missing song title
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a song title'**
+  String get songTitleValidation;
+
+  /// Form label for artist or composer
+  ///
+  /// In en, this message translates to:
+  /// **'Artist / Composer *'**
+  String get artistComposerLabel;
+
+  /// Form placeholder for artist or composer
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. John Newton'**
+  String get artistComposerHint;
+
+  /// Validation error for missing artist
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an artist or composer'**
+  String get artistValidation;
+
+  /// Section header for key, meter, tempo
+  ///
+  /// In en, this message translates to:
+  /// **'Musical Setup'**
+  String get musicalSetup;
+
+  /// Label for musical key selector
+  ///
+  /// In en, this message translates to:
+  /// **'Key'**
+  String get keyLabel;
+
+  /// Label for time signature selector
+  ///
+  /// In en, this message translates to:
+  /// **'Meter'**
+  String get meterLabel;
+
+  /// Tooltip for decrementing tempo
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease BPM'**
+  String get decreaseBpm;
+
+  /// Tooltip for incrementing tempo
+  ///
+  /// In en, this message translates to:
+  /// **'Increase BPM'**
+  String get increaseBpm;
+
+  /// Tap tempo button label
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Tempo'**
+  String get tapTempo;
+
+  /// Input label and tooltip for adding a tag
+  ///
+  /// In en, this message translates to:
+  /// **'Add Tag'**
+  String get addTag;
+
+  /// Placeholder for tag input
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. worship, rock, ballad'**
+  String get tagHint;
+
+  /// Label for song performance notes
+  ///
+  /// In en, this message translates to:
+  /// **'Notes / Performance Instructions'**
+  String get notesInstructionsLabel;
+
+  /// Placeholder for song performance notes
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Capo 3rd fret, slow acoustic intro...'**
+  String get notesInstructionsHint;
+
+  /// Header for song sections list
+  ///
+  /// In en, this message translates to:
+  /// **'Song Sections ({count})'**
+  String songSectionsCount(int count);
+
+  /// Button to add a section
+  ///
+  /// In en, this message translates to:
+  /// **'Add Section'**
+  String get addSection;
+
+  /// Prefix label for quick section chips
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add: '**
+  String get quickAdd;
+
+  /// Message when no sections have been added to editor
+  ///
+  /// In en, this message translates to:
+  /// **'No sections added. Tap \"+ Add Section\" to build your song.'**
+  String get noSectionsAddedHint;
+
+  /// Label for section name input
+  ///
+  /// In en, this message translates to:
+  /// **'Section Name'**
+  String get sectionName;
+
+  /// Tooltip for decreasing section repeats
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease repeats'**
+  String get decreaseRepeats;
+
+  /// Tooltip for increasing section repeats
+  ///
+  /// In en, this message translates to:
+  /// **'Increase repeats'**
+  String get increaseRepeats;
+
+  /// Tooltip for moving section up
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get moveUp;
+
+  /// Tooltip for moving section down
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get moveDown;
+
+  /// Tooltip for deleting section
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Section'**
+  String get deleteSection;
+
+  /// Label for quick chord input field
+  ///
+  /// In en, this message translates to:
+  /// **'Chords (e.g. C | G/B | Am | F)'**
+  String get chordsFieldLabel;
+
+  /// Placeholder for chord input field
+  ///
+  /// In en, this message translates to:
+  /// **'Type chord symbols separated by spaces or bars'**
+  String get chordsFieldHint;
+
+  /// Tooltip for applying parsed chords
+  ///
+  /// In en, this message translates to:
+  /// **'Apply chords text'**
+  String get applyChordsTooltip;
+
+  /// Tooltip for launching structured chord dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add chord builder'**
+  String get addChordBuilderTooltip;
+
+  /// Label for section lyrics input
+  ///
+  /// In en, this message translates to:
+  /// **'Section Lyrics'**
+  String get sectionLyricsLabel;
+
+  /// Placeholder for section lyrics
+  ///
+  /// In en, this message translates to:
+  /// **'Enter lyrics line by line...'**
+  String get sectionLyricsHint;
+
+  /// Label for rehearsal notes
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal Notes (optional)'**
+  String get rehearsalNotesLabel;
+
+  /// Placeholder for rehearsal notes
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Guitar solo starts here...'**
+  String get rehearsalNotesHint;
+
+  /// Title and button for chord builder dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add Chord'**
+  String get addChord;
+
+  /// Label for root note dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Root Note'**
+  String get rootNote;
+
+  /// Label for chord quality dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get quality;
+
+  /// Label for slash bass note dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Bass Note (Slash Chord)'**
+  String get bassNote;
+
+  /// Option representing no selection
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noneOption;
+
+  /// Label for beats selection chips
+  ///
+  /// In en, this message translates to:
+  /// **'Beats: '**
+  String get beatsLabel;
+
+  /// Generic add button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// Snackbar shown after updating song
+  ///
+  /// In en, this message translates to:
+  /// **'Song \"{title}\" updated successfully'**
+  String songUpdatedSuccess(String title);
+
+  /// Snackbar shown after creating song
+  ///
+  /// In en, this message translates to:
+  /// **'Song \"{title}\" created successfully'**
+  String songCreatedSuccess(String title);
+
+  /// Snackbar error when saving song
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save song: {error}'**
+  String failedToSaveSong(String error);
+
+  /// Snackbar shown after deleting song
+  ///
+  /// In en, this message translates to:
+  /// **'Song deleted'**
+  String get songDeletedSuccess;
+
+  /// Snackbar when non-admin tries to modify repertoire
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator permissions required to create or modify songs.'**
+  String get adminRequiredWarning;
+
+  /// Title for setlist detail view
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist'**
+  String get setlistTitle;
+
+  /// Label for setlist notes and description
+  ///
+  /// In en, this message translates to:
+  /// **'Description / Notes'**
+  String get descriptionNotesField;
+
+  /// Modal title and button to append song to setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Add Song to Setlist'**
+  String get addSongToSetlist;
+
+  /// Empty state when trying to add to setlist from empty library
+  ///
+  /// In en, this message translates to:
+  /// **'No songs in repertoire yet. Create or load sample songs.'**
+  String get noSongsInRepertoireYet;
+
+  /// State when all existing songs have been added to the setlist
+  ///
+  /// In en, this message translates to:
+  /// **'All songs are already in this setlist.'**
+  String get allSongsAlreadyInSetlist;
+
+  /// Empty state for setlist without songs
+  ///
+  /// In en, this message translates to:
+  /// **'This setlist has no songs yet.'**
+  String get setlistEmpty;
+
+  /// Hint instructing user how to add songs to setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Add Song\" below to build your set.'**
+  String get tapAddSongHint;
+
+  /// Tooltip for removing song from setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from setlist'**
+  String get removeFromSetlistTooltip;
+
+  /// Subtitle format in setlist item
+  ///
+  /// In en, this message translates to:
+  /// **'{artist} • Original: {key} ({tempo} BPM)'**
+  String songOriginalMeta(String artist, String key, int tempo);
+
+  /// Fallback text when song artist is unspecified
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown artist'**
+  String get unknownArtist;
+
+  /// Tooltip for editing setlist metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Edit setlist info'**
+  String get editSetlistInfoTooltip;
+
+  /// AppBar title for scanner screen
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Lead Sheet'**
+  String get scanLeadSheet;
+
+  /// Landing page title for OMR feature
+  ///
+  /// In en, this message translates to:
+  /// **'OMR Scanner'**
+  String get omrScannerTitle;
+
+  /// Landing page subtitle explaining OMR capabilities
+  ///
+  /// In en, this message translates to:
+  /// **'Point your camera at a lead sheet or pick an image to extract\nchords, melody, and structure using Gemini AI.'**
+  String get omrScannerSubtitle;
+
+  /// Button to launch camera capture
+  ///
+  /// In en, this message translates to:
+  /// **'Open Camera'**
+  String get openCamera;
+
+  /// Button to launch photo gallery picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Library'**
+  String get chooseFromLibrary;
+
+  /// Snackbar confirming imported score saved to repertoire
+  ///
+  /// In en, this message translates to:
+  /// **'Added \"{title}\" to Repertoire!'**
+  String addedToRepertoireSuccess(String title);
+
+  /// Snackbar confirming imported section rhythm
+  ///
+  /// In en, this message translates to:
+  /// **'Extracted {measures} measures for \"{section}\".'**
+  String extractedMeasuresSuccess(int measures, String section);
+
+  /// Title for scan flow modal
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Sheet Music'**
+  String get scanSheetMusic;
+
+  /// Tooltip for opening OMR log viewer
+  ///
+  /// In en, this message translates to:
+  /// **'OMR Debug Logs'**
+  String get omrDebugLogs;
+
+  /// Segmented button label for full lead sheet scan
+  ///
+  /// In en, this message translates to:
+  /// **'Full Sheet (Schema A)'**
+  String get fullSheetSchemaA;
+
+  /// Segmented button label for melody staff system snippet
+  ///
+  /// In en, this message translates to:
+  /// **'Staff Snippet (Schema B)'**
+  String get staffSnippetSchemaB;
+
+  /// Button label for camera
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// Button label for photos gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
+  /// Explanation text for Schema A full sheet capture
+  ///
+  /// In en, this message translates to:
+  /// **'Captures complete arrangement with metadata, staves, chords, and lyrics.'**
+  String get fullSheetDesc;
+
+  /// Explanation text for Schema B snippet capture
+  ///
+  /// In en, this message translates to:
+  /// **'Crops a single system or melody line for rapid tap-first rhythm entry.'**
+  String get staffSnippetDesc;
+
+  /// Button to crop staff snippet image
+  ///
+  /// In en, this message translates to:
+  /// **'Crop System'**
+  String get cropSystem;
+
+  /// Button to replace selected image
+  ///
+  /// In en, this message translates to:
+  /// **'Change Image'**
+  String get changeImage;
+
+  /// Primary action button to trigger OMR recognition
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze with Gemini AI'**
+  String get analyzeWithGemini;
+
+  /// Header for recognition failure banner
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition Error'**
+  String get recognitionError;
+
+  /// Button to open diagnostic logs modal on error
+  ///
+  /// In en, this message translates to:
+  /// **'View Debug Logs'**
+  String get viewDebugLogs;
+
+  /// Banner title for successful OMR extraction
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition Complete!'**
+  String get recognitionComplete;
+
+  /// Button to review imported lead sheet in repertoire
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Repertoire'**
+  String get openInRepertoire;
+
+  /// Button to review imported snippet in rhythm editor
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Rhythm Editor'**
+  String get openInRhythmEditor;
+
+  /// Progress dialog title during Gemini analysis
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing sheet with Gemini AI...'**
+  String get analyzingSheet;
+
+  /// Progress dialog title during local pre-processing
+  ///
+  /// In en, this message translates to:
+  /// **'Processing image...'**
+  String get processingImage;
+
+  /// Progress dialog subtitle during transcription
+  ///
+  /// In en, this message translates to:
+  /// **'Transcribing notes, chords & staves'**
+  String get transcribingSheet;
+
+  /// Title for OMR debug logs modal
+  ///
+  /// In en, this message translates to:
+  /// **'OMR Diagnostic Logs'**
+  String get omrDiagnosticLogs;
+
+  /// Subtitle for OMR logs modal
+  ///
+  /// In en, this message translates to:
+  /// **'Persistent File System Logs'**
+  String get persistentFileSystemLogs;
+
+  /// Tooltip for refreshing log viewer
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Logs'**
+  String get refreshLogs;
+
+  /// Tooltip for clearing log file
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Logs'**
+  String get clearLogs;
+
+  /// Title for clear logs confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Clear OMR Logs?'**
+  String get clearOmrLogsTitle;
+
+  /// Message for clear logs dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This will empty the omr_debug.log file on the device.'**
+  String get clearOmrLogsConfirm;
+
+  /// Clear action button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearAction;
+
+  /// Snackbar confirming logs cleared
+  ///
+  /// In en, this message translates to:
+  /// **'OMR logs cleared from file system.'**
+  String get omrLogsCleared;
+
+  /// Placeholder while log file path is resolved
+  ///
+  /// In en, this message translates to:
+  /// **'Locating log file...'**
+  String get locatingLogFile;
+
+  /// Message while logs are reading from disk
+  ///
+  /// In en, this message translates to:
+  /// **'Loading diagnostic logs...'**
+  String get loadingDiagnosticLogs;
+
+  /// Empty state message in log viewer
+  ///
+  /// In en, this message translates to:
+  /// **'No logs recorded yet.\nRun an OMR scan to capture diagnostic logs.'**
+  String get noLogsRecordedYet;
+
+  /// Button to copy full log file content to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy All Logs'**
+  String get copyAllLogs;
+
+  /// Snackbar confirming logs copied
+  ///
+  /// In en, this message translates to:
+  /// **'OMR logs copied to clipboard.'**
+  String get omrLogsCopied;
+
+  /// Title for score and notation editor
+  ///
+  /// In en, this message translates to:
+  /// **'Score Editor'**
+  String get scoreEditor;
+
+  /// Snackbar confirming notation changes saved
+  ///
+  /// In en, this message translates to:
+  /// **'Notation changes saved to Song!'**
+  String get notationSavedSuccess;
+
+  /// Snackbar error when saving score
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save score: {error}'**
+  String failedToSaveScore(String error);
+
+  /// Title for playback tempo dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Playback Tempo'**
+  String get playbackTempo;
+
+  /// Button to confirm playback tempo
+  ///
+  /// In en, this message translates to:
+  /// **'Set Tempo'**
+  String get setTempo;
+
+  /// Status badge label when preview is idle
+  ///
+  /// In en, this message translates to:
+  /// **'Score Audio Preview'**
+  String get scoreAudioPreview;
+
+  /// Tooltip for pausing melody playback
+  ///
+  /// In en, this message translates to:
+  /// **'Pause Melody'**
+  String get pauseMelody;
+
+  /// Tooltip for starting melody playback
+  ///
+  /// In en, this message translates to:
+  /// **'Play / Preview Melody'**
+  String get playMelody;
+
+  /// Tooltip for stopping playback and rewinding
+  ///
+  /// In en, this message translates to:
+  /// **'Stop & Rewind'**
+  String get stopRewind;
+
+  /// Tooltip to unmute tone feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute Note Sound Feedback'**
+  String get unmuteSound;
+
+  /// Tooltip to mute tone feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Mute Note Sound Feedback'**
+  String get muteSound;
+
+  /// Header for API configuration settings
+  ///
+  /// In en, this message translates to:
+  /// **'API Configuration'**
+  String get apiConfigurationSection;
+
+  /// Tile label for Gemini API Key
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API Key'**
+  String get geminiApiKeyLabel;
+
+  /// Subtitle when Gemini key is not configured
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured — tap to enter key'**
+  String get geminiKeyNotConfigured;
+
+  /// Tag indicating user custom key
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get customLabel;
+
+  /// Tag indicating build environment key
+  ///
+  /// In en, this message translates to:
+  /// **'Dev .env'**
+  String get devEnvLabel;
+
+  /// Loading indicator text
+  ///
+  /// In en, this message translates to:
+  /// **'Loading status...'**
+  String get loadingStatus;
+
+  /// Error indicator text
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading key'**
+  String get errorLoadingKey;
+
+  /// Subtitle for OMR logs tile in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect Gemini requests, latencies & responses'**
+  String get omrDiagnosticLogsSubtitle;
+
+  /// Application description in about section
+  ///
+  /// In en, this message translates to:
+  /// **'A music rehearsal & lead-sheet companion\nfor worship teams and bands.'**
+  String get appTagline;
+
+  /// Licenses tile title
+  ///
+  /// In en, this message translates to:
+  /// **'Licenses'**
+  String get licensesLabel;
+
+  /// Footer quote at bottom of settings
+  ///
+  /// In en, this message translates to:
+  /// **'Made with ♪ for worship teams'**
+  String get footerAttribution;
+
+  /// Subtitle for Supabase connection tile
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Project URL & Anon Key'**
+  String get supabaseConfigSubtitle;
+
+  /// Subtitle when user is unauthenticated
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in — Offline SQLite active'**
+  String get notSignedInOffline;
+
+  /// Status text while cloud sync is active
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronizing local Drift database with cloud…'**
+  String get synchronizingDatabase;
+
+  /// Status text when device is offline
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: Local changes safely cached'**
+  String get offlineCached;
+
+  /// Status text when idle
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to sync'**
+  String get readyToSync;
+
+  /// Workspace metrics line for scans
+  ///
+  /// In en, this message translates to:
+  /// **'{count} full lead-sheet scans this billing period'**
+  String billingPeriodScans(int count);
+
+  /// Workspace metrics line for storage
+  ///
+  /// In en, this message translates to:
+  /// **'{count} scores and audio tracks stored'**
+  String storageTracksCount(int count);
+
+  /// Error banner when workspace metrics cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace metrics unavailable'**
+  String get workspaceMetricsUnavailable;
+
+  /// AppBar title for team roster and calendar
+  ///
+  /// In en, this message translates to:
+  /// **'Worship Team & Band'**
+  String get worshipTeamTitle;
+
+  /// AppBar title for live sync page
+  ///
+  /// In en, this message translates to:
+  /// **'Live Stage Sync'**
+  String get liveStageSync;
+
+  /// Segment label for director live mode
+  ///
+  /// In en, this message translates to:
+  /// **'Director (Host)'**
+  String get directorHost;
+
+  /// Segment label for musician live mode
+  ///
+  /// In en, this message translates to:
+  /// **'Musician (Follower)'**
+  String get musicianFollower;
+
+  /// Connection badge for live director host
+  ///
+  /// In en, this message translates to:
+  /// **'HOSTING'**
+  String get hostingStatus;
+
+  /// Connection badge for synced live follower
+  ///
+  /// In en, this message translates to:
+  /// **'SYNCED'**
+  String get syncedStatus;
+
+  /// Connection badge when live sync is disconnected
+  ///
+  /// In en, this message translates to:
+  /// **'STANDALONE'**
+  String get standaloneStatus;
+
+  /// Tooltip while syncing with Supabase
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing changes with Supabase…'**
+  String get syncingChangesTooltip;
+
+  /// Tooltip when synced with Supabase
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud synced'**
+  String get cloudSyncedTooltip;
+
+  /// Tooltip when synced with Supabase with time
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud synced ({time})'**
+  String cloudSyncedWithTimeTooltip(String time);
+
+  /// Tooltip when offline
+  ///
+  /// In en, this message translates to:
+  /// **'Offline — working with local SQLite database'**
+  String get offlineSQLiteTooltip;
+
+  /// Tooltip when sync encountered error
+  ///
+  /// In en, this message translates to:
+  /// **'Sync error'**
+  String get syncErrorTooltip;
+
+  /// Tooltip when cloud sync is idle
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud ready (tap to sync)'**
+  String get cloudReadyTooltip;
+
+  /// Syncing status text
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncingStatus;
+
+  /// Synced status text
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get syncedStatusLabel;
+
+  /// Offline status text
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offlineStatusLabel;
+
+  /// Tooltip for active user switcher
+  ///
+  /// In en, this message translates to:
+  /// **'Switch active user profile'**
+  String get switchActiveProfileTooltip;
+
+  /// Tooltip for active profile badge
+  ///
+  /// In en, this message translates to:
+  /// **'Active Profile: {name} ({role})'**
+  String activeProfileTooltip(String name, String role);
+
+  /// Tooltip for musician coverage alerts bell
+  ///
+  /// In en, this message translates to:
+  /// **'Musician Coverage Alerts'**
+  String get coverageAlertsTooltip;
+
+  /// Tooltip for musician coverage alerts count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cover alert(s)'**
+  String coverageAlertsCountTooltip(int count);
+
+  /// Tooltip to add a team member
+  ///
+  /// In en, this message translates to:
+  /// **'Add team member'**
+  String get addTeamMemberTooltip;
+
+  /// Tooltip to add a service event
+  ///
+  /// In en, this message translates to:
+  /// **'Add service event'**
+  String get addServiceEventTooltip;
+
+  /// Empty state text for upcoming services
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming services scheduled.'**
+  String get noUpcomingServices;
+
+  /// Button to schedule the first service
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule First Service'**
+  String get scheduleFirstService;
+
+  /// Action to edit team member
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Member'**
+  String get editMember;
+
+  /// Action to schedule member for a service
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule for Service'**
+  String get scheduleForService;
+
+  /// Action to edit service
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Service'**
+  String get editService;
+
+  /// Action to assign group to service
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Group'**
+  String get assignGroup;
+
+  /// Action to assign musician to service
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Musician'**
+  String get assignMusician;
+
+  /// Button to trigger test stage cue
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger Test Cue'**
+  String get triggerTestCue;
+
+  /// Button to approve section jump in live sync
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Jump'**
+  String get approveJump;
+
+  /// Notification when Gemini API key is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API key saved securely.'**
+  String get geminiApiKeySaved;
+
+  /// Confirmation title for removing API key
+  ///
+  /// In en, this message translates to:
+  /// **'Remove API Key?'**
+  String get removeApiKeyTitle;
+
+  /// Notification when custom API key is removed
+  ///
+  /// In en, this message translates to:
+  /// **'Custom API key removed.'**
+  String get customApiKeyRemoved;
+
+  /// Button to remove API key
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Key'**
+  String get removeKey;
+
+  /// Button to save API key
+  ///
+  /// In en, this message translates to:
+  /// **'Save Key'**
+  String get saveKey;
+
+  /// Title for Supabase setup dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase Project Setup'**
+  String get supabaseProjectSetup;
+
+  /// Button to restore default settings
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default'**
+  String get restoreDefault;
+
+  /// Button to save Supabase settings and connect
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Connect'**
+  String get saveAndConnect;
 }
 
 class _AppLocalizationsDelegate

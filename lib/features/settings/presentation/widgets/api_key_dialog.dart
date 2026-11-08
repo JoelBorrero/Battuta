@@ -3,6 +3,7 @@ library;
 
 import 'package:battuta/core/services/api_key_service.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,10 +60,11 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
     try {
       await ref.read(apiKeyNotifierProvider.notifier).setCustomKey(key);
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gemini API key saved securely.'),
+          SnackBar(
+            content: Text(l10n?.geminiApiKeySaved ?? 'Gemini API key saved securely.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -78,10 +80,11 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
   }
 
   Future<void> _handleClear() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove API Key?'),
+        title: Text(l10n?.removeApiKeyTitle ?? 'Remove API Key?'),
         content: const Text(
           'This will delete your custom API key from secure storage. '
           'AI-powered features may be unavailable unless a fallback key exists.',
@@ -89,14 +92,14 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Remove'),
+            child: Text(l10n?.delete ?? 'Remove'),
           ),
         ],
       ),
@@ -105,10 +108,11 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
     if (confirmed == true && mounted) {
       await ref.read(apiKeyNotifierProvider.notifier).clearCustomKey();
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Custom API key removed.'),
+          SnackBar(
+            content: Text(l10n?.customApiKeyRemoved ?? 'Custom API key removed.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -129,13 +133,18 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final apiKeyState = ref.watch(apiKeyNotifierProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return AlertDialog(
-      title: const Row(
-        children: [Icon(Icons.key), SizedBox(width: 8), Text('Gemini API Key')],
+      title: Row(
+        children: [
+          const Icon(Icons.key),
+          const SizedBox(width: 8),
+          Text(l10n?.geminiApiKeyLabel ?? 'Gemini API Key'),
+        ],
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -276,11 +285,11 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
           TextButton(
             style: TextButton.styleFrom(foregroundColor: colorScheme.error),
             onPressed: _isSaving ? null : _handleClear,
-            child: const Text('Remove Key'),
+            child: Text(l10n?.removeKey ?? 'Remove Key'),
           ),
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           onPressed: _isSaving ? null : _handleSave,
@@ -290,7 +299,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Save Key'),
+              : Text(l10n?.saveKey ?? 'Save Key'),
         ),
       ],
     );

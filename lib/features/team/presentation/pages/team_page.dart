@@ -17,6 +17,7 @@ import 'package:battuta/features/team/presentation/providers/service_calendar_pr
 import 'package:battuta/features/team/presentation/providers/team_group_provider.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/features/team/presentation/widgets/admin_schedule_alerts_banner.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -2043,11 +2044,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
         : 0;
 
     final availableCount = members.length - scheduledCount;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Worship Team & Band',
+        title: Text(
+          l10n?.worshipTeamTitle ?? 'Worship Team & Band',
           overflow: TextOverflow.ellipsis,
         ),
         actions: [
@@ -2058,8 +2060,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               color: isAdmin ? AppTheme.amberAccent : theme.colorScheme.primary,
             ),
             tooltip: currentMember != null
-                ? 'Active Profile: ${currentMember.name} (${isAdmin ? 'Admin' : 'Musician'})'
-                : 'Switch active user profile',
+                ? (l10n?.activeProfileTooltip(currentMember.name, isAdmin ? 'Admin' : 'Musician') ??
+                    'Active Profile: ${currentMember.name} (${isAdmin ? 'Admin' : 'Musician'})')
+                : (l10n?.switchActiveProfileTooltip ?? 'Switch active user profile'),
             onPressed: () => _showActiveUserSwitcherModal(members),
           ),
           if (isAdmin) ...[
@@ -2080,8 +2083,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       color: alertCount > 0 ? AppTheme.stageAmber : null,
                     ),
                     tooltip: alertCount > 0
-                        ? '$alertCount cover alert${alertCount > 1 ? 's' : ''}'
-                        : 'Musician Coverage Alerts',
+                        ? (l10n?.coverageAlertsCountTooltip(alertCount) ??
+                            '$alertCount cover alert${alertCount > 1 ? 's' : ''}')
+                        : (l10n?.coverageAlertsTooltip ?? 'Musician Coverage Alerts'),
                     onPressed: () => _showAdminAlertsModal(),
                   ),
                 );
@@ -2090,8 +2094,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             IconButton(
               icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
               tooltip: _selectedTabIndex == 0
-                  ? 'Add team member'
-                  : 'Add service event',
+                  ? (l10n?.addTeamMemberTooltip ?? 'Add team member')
+                  : (l10n?.addServiceEventTooltip ?? 'Add service event'),
               onPressed: _selectedTabIndex == 0
                   ? () => _showMemberDialog()
                   : () => _showServiceDialog(),
@@ -2111,12 +2115,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ButtonSegment(
                     value: 0,
                     icon: const Icon(Icons.people_outline),
-                    label: Text('Team Roster (${members.length})'),
+                    label: Text('${l10n?.teamRosterTab ?? "Team Roster"} (${members.length})'),
                   ),
                   ButtonSegment(
                     value: 1,
                     icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text('Band Calendar (${upcomingEvents.length})'),
+                    label: Text('${l10n?.bandCalendarTab ?? "Band Calendar"} (${upcomingEvents.length})'),
                   ),
                 ],
                 selected: {_selectedTabIndex},
@@ -2150,13 +2154,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
               tooltip: _selectedTabIndex == 0
-                  ? 'Add team member'
-                  : 'Add service event',
+                  ? (l10n?.addTeamMemberTooltip ?? 'Add team member')
+                  : (l10n?.addServiceEventTooltip ?? 'Add service event'),
               onPressed: _selectedTabIndex == 0
                   ? () => _showMemberDialog()
                   : () => _showServiceDialog(),
               icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
-              label: Text(_selectedTabIndex == 0 ? 'Add Member' : 'New Service'),
+              label: Text(_selectedTabIndex == 0
+                  ? (l10n?.addMusician ?? 'Add Member')
+                  : (l10n?.addService ?? 'New Service')),
             )
           : null,
     );
@@ -2545,24 +2551,24 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 }
               },
               itemBuilder: (_) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
                   child: Row(
                     children: [
-                      Icon(Icons.edit_outlined, size: 18),
-                      SizedBox(width: 8),
-                      Text('Edit Member'),
+                      const Icon(Icons.edit_outlined, size: 18),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context)?.editMember ?? 'Edit Member'),
                     ],
                   ),
                 ),
                 if (nextEvent != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'schedule',
                     child: Row(
                       children: [
-                        Icon(Icons.calendar_today_outlined, size: 18),
-                        SizedBox(width: 8),
-                        Text('Schedule for Service'),
+                        const Icon(Icons.calendar_today_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)?.scheduleForService ?? 'Schedule for Service'),
                       ],
                     ),
                   ),
@@ -2632,7 +2638,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   OutlinedButton.icon(
                     key: const ValueKey('recurring_schedules_btn'),
                     icon: const Icon(Icons.repeat, size: 16),
-                    label: const Text('Recurring Schedules'),
+                    label: Text(AppLocalizations.of(context)?.recurringSchedules ?? 'Recurring Schedules'),
                     onPressed: _showRecurringSeriesModal,
                   )
                 else
@@ -2682,12 +2688,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 12),
-                  const Text('No upcoming services scheduled.'),
+                  Text(AppLocalizations.of(context)?.noUpcomingServices ?? 'No upcoming services scheduled.'),
                   const SizedBox(height: 8),
                   if (isAdmin)
                     FilledButton.icon(
                       icon: const Icon(Icons.add),
-                      label: const Text('Schedule First Service'),
+                      label: Text(AppLocalizations.of(context)?.scheduleFirstService ?? 'Schedule First Service'),
                       onPressed: () => _showServiceDialog(),
                     ),
                 ],
@@ -3024,7 +3030,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                         ),
                         icon: const Icon(Icons.group_add_outlined, size: 16),
-                        label: const Text('Assign Group'),
+                        label: Text(AppLocalizations.of(context)?.assignGroup ?? 'Assign Group'),
                         onPressed: () => _showAssignGroupDialog(event),
                       ),
                       TextButton.icon(
@@ -3034,7 +3040,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                         ),
                         icon: const Icon(Icons.person_add_alt_1, size: 16),
-                        label: const Text('Assign Musician'),
+                        label: Text(AppLocalizations.of(context)?.assignMusician ?? 'Assign Musician'),
                         onPressed: () => _showAssignMemberDialog(event),
                       ),
                     ],

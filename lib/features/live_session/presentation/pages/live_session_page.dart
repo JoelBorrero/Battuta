@@ -10,6 +10,7 @@ import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/sync/domain/services/live_sync_service.dart';
 import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
 import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,6 +46,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final syncState = ref.watch(liveSyncControllerProvider);
     final syncNotifier = ref.read(liveSyncControllerProvider.notifier);
@@ -60,7 +62,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Live Stage Sync'),
+        title: Text(l10n?.liveStageSync ?? 'Live Stage Sync'),
         actions: [
           // Connection Status Pill
           Container(
@@ -96,8 +98,10 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                 const SizedBox(width: 6),
                 Text(
                   syncState.isConnected
-                      ? (syncState.isDirector ? 'HOSTING' : 'SYNCED')
-                      : 'STANDALONE',
+                      ? (syncState.isDirector
+                          ? (l10n?.hostingStatus ?? 'HOSTING')
+                          : (l10n?.syncedStatus ?? 'SYNCED'))
+                      : (l10n?.standaloneStatus ?? 'STANDALONE'),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -163,7 +167,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'Director (Host)',
+                                    l10n?.directorHost ?? 'Director (Host)',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
@@ -204,7 +208,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'Musician (Follower)',
+                                    l10n?.musicianFollower ?? 'Musician (Follower)',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
@@ -417,7 +421,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 icon: const Icon(
                                   Icons.notifications_active_outlined,
                                 ),
-                                label: const Text('Trigger Test Cue'),
+                                label: Text(l10n?.triggerTestCue ?? 'Trigger Test Cue'),
                                 onPressed: _triggerSampleCue,
                               ),
                             ],
@@ -555,7 +559,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                     req.currentSectionId,
                                   );
                                 },
-                                child: const Text('Approve Jump'),
+                                child: Text(l10n?.approveJump ?? 'Approve Jump'),
                               ),
                             ),
                         ],
