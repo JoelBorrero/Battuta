@@ -6,45 +6,138 @@
 /// or sequenced in the score editor.
 library;
 
+import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:battuta/features/score/domain/entities/pitch.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Contract for underlying audio playback to allow platform-independent unit testing.
 abstract class AudioTonePlayer {
-  Future<void> playBytes(Uint8List bytes);
+  Future<void> playBytes(Uint8List bytes, {String? cacheKey});
   Future<void> stop();
   void dispose();
 }
 
-/// Production [AudioTonePlayer] using [AudioPlayer] with low-latency mode.
+/// Production [AudioTonePlayer] using [AudioPlayer] with a round-robin player pool
+/// and disk-backed audio caching for ultra-low latency hardware playback.
 class SystemAudioTonePlayer implements AudioTonePlayer {
-  SystemAudioTonePlayer({this.customPlayer});
+  SystemAudioTonePlayer({this.customPlayer, this.poolSize = 4});
 
   final AudioPlayer? customPlayer;
-  AudioPlayer? _player;
-  bool _configured = false;
+  final int poolSize;
+  final List<AudioPlayer> _players = [];
+  int _roundRobinIndex = 0;
+  Directory? _cacheDir;
+  final Map<String, String> _filePathCache = {};
+  bool _initialized = false;
 
-  Future<AudioPlayer> _ensurePlayer() async {
-    _player ??= customPlayer ?? AudioPlayer();
-    if (!_configured) {
+  Future<void> _ensureInitialized() async {
+    if (_initialized) return;
+    _initialized = true;
+
+    // 1. Resolve local temporary cache directory for synthesized tone WAV files
+    if (!kIsWeb) {
       try {
-        await _player!.setPlayerMode(PlayerMode.lowLatency);
-        _configured = true;
+        final baseDir = await getTemporaryDirectory();
+        final synthDir = Directory('${baseDir.path}/battuta_synth_tones');
+        if (!synthDir.existsSync()) {
+          synthDir.createSync(recursive: true);
+        }
+        _cacheDir = synthDir;
       } catch (_) {
-        // Platform or testing environment fallback
+        try {
+          _cacheDir = Directory.systemTemp.createTempSync('battuta_synth_');
+        } catch (_) {
+          _cacheDir = null;
+        }
       }
     }
-    return _player!;
+
+    // 2. Configure audio context to avoid ducking/stealing system audio
+    try {
+      await AudioPlayer.global.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: false,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.none,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.ambient,
+            options: const {
+              AVAudioSessionOptions.mixWithOthers,
+            },
+          ),
+        ),
+      );
+    } catch (_) {}
+
+    // 3. Initialize player pool
+    if (customPlayer != null) {
+      _players.add(customPlayer!);
+    } else {
+      for (var i = 0; i < poolSize; i++) {
+        final p = AudioPlayer();
+        try {
+          await p.setPlayerMode(PlayerMode.lowLatency);
+        } catch (_) {}
+        _players.add(p);
+      }
+    }
   }
 
   @override
-  Future<void> playBytes(Uint8List bytes) async {
+  Future<void> playBytes(Uint8List bytes, {String? cacheKey}) async {
     try {
-      final player = await _ensurePlayer();
-      await player.play(BytesSource(bytes, mimeType: 'audio/wav'));
+      await _ensureInitialized();
+      if (_players.isEmpty) return;
+
+      final player = _players[_roundRobinIndex % _players.length];
+      _roundRobinIndex++;
+
+      // 1. Write tone bytes to disk cache
+      String? filePath;
+      if (_cacheDir != null && !kIsWeb) {
+        final key = cacheKey ?? bytes.length.toString();
+        filePath = _filePathCache[key];
+        if (filePath == null || !File(filePath).existsSync()) {
+          final file = File('${_cacheDir!.path}/tone_$key.wav');
+          await file.writeAsBytes(bytes, flush: true);
+          filePath = file.path;
+          _filePathCache[key] = filePath;
+        }
+      }
+
+      // 2. Stop player to reset native stream state before triggering new note
+      try {
+        await player.stop();
+      } catch (_) {}
+
+      // 3. Primary: Play via DeviceFileSource (supports low latency SoundPool & MediaPlayer)
+      if (filePath != null) {
+        try {
+          await player.play(DeviceFileSource(filePath));
+          return;
+        } catch (_) {
+          // If low-latency SoundPool playback fails, retry with MediaPlayer mode
+          try {
+            await player.setPlayerMode(PlayerMode.mediaPlayer);
+            await player.play(DeviceFileSource(filePath));
+            return;
+          } catch (_) {}
+        }
+      }
+
+      // 4. Secondary fallback: BytesSource with standard MediaPlayer mode
+      try {
+        await player.setPlayerMode(PlayerMode.mediaPlayer);
+        await player.play(BytesSource(bytes, mimeType: 'audio/wav'));
+      } catch (_) {}
     } catch (_) {
       // Safe fallback for environments without audio hardware
     }
@@ -52,16 +145,22 @@ class SystemAudioTonePlayer implements AudioTonePlayer {
 
   @override
   Future<void> stop() async {
-    try {
-      await _player?.stop();
-    } catch (_) {}
+    for (final p in _players) {
+      try {
+        await p.stop();
+      } catch (_) {}
+    }
   }
 
   @override
   void dispose() {
-    try {
-      _player?.dispose();
-    } catch (_) {}
+    for (final p in _players) {
+      try {
+        p.dispose();
+      } catch (_) {}
+    }
+    _players.clear();
+    _filePathCache.clear();
   }
 }
 
@@ -78,6 +177,25 @@ class ToneSynthesizer {
 
   /// Whether sound feedback is currently muted.
   bool isMuted = false;
+
+  /// Pre-synthesizes and caches common diatonic notes (C4 to B5) for instant response.
+  void preWarm() {
+    const commonPitches = [
+      60, 62, 64, 65, 67, 69, 71, // C4 to B4
+      72, 74, 76, 77, 79, 81, 83, // C5 to B5
+    ];
+    for (final midi in commonPitches) {
+      final p = Pitch.fromMidi(midi);
+      final key = '${p.midiNumber}_320';
+      _cache.putIfAbsent(
+        key,
+        () => synthesizeWav(
+          frequencyHz: p.frequencyHz,
+          duration: const Duration(milliseconds: 320),
+        ),
+      );
+    }
+  }
 
   /// Toggles mute state and returns the new state.
   bool toggleMute() {
@@ -192,7 +310,7 @@ class ToneSynthesizer {
       ),
     );
 
-    await player.playBytes(wavBytes);
+    await player.playBytes(wavBytes, cacheKey: key);
   }
 
   /// Stops any currently playing tone.

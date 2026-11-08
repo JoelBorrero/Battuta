@@ -6,12 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 class FakeAudioTonePlayer implements AudioTonePlayer {
   final List<Uint8List> played = [];
+  final List<String?> cacheKeys = [];
   bool stopped = false;
   bool disposed = false;
 
   @override
-  Future<void> playBytes(Uint8List bytes) async {
+  Future<void> playBytes(Uint8List bytes, {String? cacheKey}) async {
     played.add(bytes);
+    cacheKeys.add(cacheKey);
     stopped = false;
   }
 
@@ -120,9 +122,19 @@ void main() {
       expect(fakePlayer.stopped, isTrue);
     });
 
+    test('preWarm caches common diatonic notes without throwing', () {
+      expect(() => synthesizer.preWarm(), returnsNormally);
+    });
+
     test('dispose cleans up resources', () {
       synthesizer.dispose();
       expect(fakePlayer.disposed, isTrue);
+    });
+
+    test('SystemAudioTonePlayer initializes and disposes safely', () {
+      final sysPlayer = SystemAudioTonePlayer(poolSize: 2);
+      expect(() => sysPlayer.stop(), returnsNormally);
+      expect(() => sysPlayer.dispose(), returnsNormally);
     });
   });
 }

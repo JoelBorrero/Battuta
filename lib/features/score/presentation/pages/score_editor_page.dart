@@ -41,6 +41,7 @@ class _ScoreEditorPageState extends ConsumerState<ScoreEditorPage> {
     if (_activeScore == null) {
       _activeScore = score;
       _synthesizer ??= widget.synthesizer ?? ToneSynthesizer();
+      _synthesizer!.preWarm();
       _controller = RhythmEditorController(initialScore: score);
       _controller!.addListener(_onControllerChanged);
       _previewPlayer = ScorePreviewPlayer(

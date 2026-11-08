@@ -18,7 +18,7 @@ class MockAudioTonePlayer implements AudioTonePlayer {
   bool disposed = false;
 
   @override
-  Future<void> playBytes(Uint8List bytes) async {
+  Future<void> playBytes(Uint8List bytes, {String? cacheKey}) async {
     played.add(bytes);
     stopped = false;
   }
