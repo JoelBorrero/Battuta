@@ -935,4 +935,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveAndConnect => 'Save & Connect';
+
+  @override
+  String get selectActiveProfileTitle => 'Select Active User Profile';
+
+  @override
+  String get switchActiveProfileDesc =>
+      'Switch active user to preview musician permissions vs administrator capabilities.';
+
+  @override
+  String get adminRole => 'Admin';
+
+  @override
+  String get administrator => 'Administrator';
+
+  @override
+  String get musician => 'Musician';
+
+  @override
+  String activeUserChanged(String name, String role) {
+    return 'Active user: $name ($role)';
+  }
+
+  @override
+  String get totalRoster => 'Total Roster';
+
+  @override
+  String get scheduledLabel => 'Scheduled';
+
+  @override
+  String get availableLabel => 'Available';
+
+  @override
+  String get availableStatus => 'Available';
+
+  @override
+  String get nextServicePrefix => 'Next:';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterScheduled => 'Scheduled';
+
+  @override
+  String get filterVocals => 'Vocals';
+
+  @override
+  String get filterBand => 'Band';
+
+  @override
+  String get noMembersMatchFilter => 'No team members match this filter.';
+
+  @override
+  String get nextServiceBadge => 'NEXT SERVICE';
+
+  @override
+  String get bandLineupTitle => 'Band Lineup';
+
+  @override
+  String get cantAttendBadge => 'Can\'t attend';
+
+  @override
+  String get notScheduledForServices =>
+      'Not currently scheduled for upcoming services';
+
+  @override
+  String cloudSyncSuccess(int pushed, int pulled) {
+    return 'Cloud synced successfully ($pushed pushed, $pulled pulled)';
+  }
+
+  @override
+  String get cloudSyncStatusTitle => 'Cloud Synchronization';
+
+  @override
+  String get cloudSignInRequired =>
+      'Please sign in to Supabase to enable cloud sync.';
+
+  @override
+  String get cloudOfflineMode =>
+      'Offline mode active. All changes are saved safely to local SQLite.';
+
+  @override
+  String get signInAction => 'Sign In';
+
+  @override
+  String get configureAction => 'Configure';
+
+  @override
+  String get retryAction => 'Retry';
+
+  @override
+  String get noMusiciansAssignedYet =>
+      'No musicians assigned yet. Tap \"Assign Musician\" to schedule band members.';
+
+  @override
+  String get deleteService => 'Delete Service';
 }

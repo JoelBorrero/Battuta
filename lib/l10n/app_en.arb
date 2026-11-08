@@ -1355,5 +1355,142 @@
   "saveAndConnect": "Save & Connect",
   "@saveAndConnect": {
     "description": "Button to save Supabase settings and connect"
+  },
+
+  "selectActiveProfileTitle": "Select Active User Profile",
+  "@selectActiveProfileTitle": {
+    "description": "Title for modal to select active profile"
+  },
+  "switchActiveProfileDesc": "Switch active user to preview musician permissions vs administrator capabilities.",
+  "@switchActiveProfileDesc": {
+    "description": "Explanation for active user switcher"
+  },
+  "adminRole": "Admin",
+  "@adminRole": {
+    "description": "Badge label for admin role"
+  },
+  "administrator": "Administrator",
+  "@administrator": {
+    "description": "Full title for administrator"
+  },
+  "musician": "Musician",
+  "@musician": {
+    "description": "Full title for musician"
+  },
+  "activeUserChanged": "Active user: {name} ({role})",
+  "@activeUserChanged": {
+    "description": "Snackbar text when active profile changes",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "David"
+      },
+      "role": {
+        "type": "String",
+        "example": "Administrator"
+      }
+    }
+  },
+  "totalRoster": "Total Roster",
+  "@totalRoster": {
+    "description": "Summary label for total roster count"
+  },
+  "scheduledLabel": "Scheduled",
+  "@scheduledLabel": {
+    "description": "Summary label for scheduled count"
+  },
+  "availableLabel": "Available",
+  "@availableLabel": {
+    "description": "Summary label for available count"
+  },
+  "availableStatus": "Available",
+  "@availableStatus": {
+    "description": "Status text for member availability"
+  },
+  "nextServicePrefix": "Next:",
+  "@nextServicePrefix": {
+    "description": "Prefix for next service date"
+  },
+  "filterAll": "All",
+  "@filterAll": {
+    "description": "Filter chip for all members"
+  },
+  "filterScheduled": "Scheduled",
+  "@filterScheduled": {
+    "description": "Filter chip for scheduled members"
+  },
+  "filterVocals": "Vocals",
+  "@filterVocals": {
+    "description": "Filter chip for vocal members"
+  },
+  "filterBand": "Band",
+  "@filterBand": {
+    "description": "Filter chip for instrumental band members"
+  },
+  "noMembersMatchFilter": "No team members match this filter.",
+  "@noMembersMatchFilter": {
+    "description": "Empty state text when filter matches 0 members"
+  },
+  "nextServiceBadge": "NEXT SERVICE",
+  "@nextServiceBadge": {
+    "description": "Badge highlighting the next upcoming service"
+  },
+  "bandLineupTitle": "Band Lineup",
+  "@bandLineupTitle": {
+    "description": "Title for band lineup section in service card"
+  },
+  "cantAttendBadge": "Can''t attend",
+  "@cantAttendBadge": {
+    "description": "Badge text for declined member assignment"
+  },
+  "notScheduledForServices": "Not currently scheduled for upcoming services",
+  "@notScheduledForServices": {
+    "description": "Subtitle when member is not in any lineup"
+  },
+  "cloudSyncSuccess": "Cloud synced successfully ({pushed} pushed, {pulled} pulled)",
+  "@cloudSyncSuccess": {
+    "description": "Snackbar when cloud sync succeeds",
+    "placeholders": {
+      "pushed": {
+        "type": "int",
+        "example": "2"
+      },
+      "pulled": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "cloudSyncStatusTitle": "Cloud Synchronization",
+  "@cloudSyncStatusTitle": {
+    "description": "Title for cloud sync bottom sheet"
+  },
+  "cloudSignInRequired": "Please sign in to Supabase to enable cloud sync.",
+  "@cloudSignInRequired": {
+    "description": "Message when cloud sync requires sign in"
+  },
+  "cloudOfflineMode": "Offline mode active. All changes are saved safely to local SQLite.",
+  "@cloudOfflineMode": {
+    "description": "Message when sync is in offline mode"
+  },
+  "signInAction": "Sign In",
+  "@signInAction": {
+    "description": "Button to open sign-in dialog"
+  },
+  "configureAction": "Configure",
+  "@configureAction": {
+    "description": "Button to configure Supabase credentials"
+  },
+  "retryAction": "Retry",
+  "@retryAction": {
+    "description": "Button to retry action"
+  },
+  "noMusiciansAssignedYet": "No musicians assigned yet. Tap \"Assign Musician\" to schedule band members.",
+  "@noMusiciansAssignedYet": {
+    "description": "Empty state text in band lineup"
+  },
+  "deleteService": "Delete Service",
+  "@deleteService": {
+    "description": "Action to delete a service"
   }
 }

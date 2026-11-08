@@ -5,6 +5,8 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 /// Instrument or production role within the band or worship team.
 enum TeamRole {
@@ -21,6 +23,44 @@ enum TeamRole {
   const TeamRole(this.displayName, this.shortName);
   final String displayName;
   final String shortName;
+
+  /// Localized full display name (e.g. Spanish vs English).
+  String localizedName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return displayName;
+    return switch (this) {
+      TeamRole.director => 'Director de Alabanza',
+      TeamRole.leadVocal => 'Voz Principal',
+      TeamRole.backingVocal => 'Voz de Apoyo',
+      TeamRole.acousticGuitar => 'Guitarra Acústica',
+      TeamRole.electricGuitar => 'Guitarra Eléctrica',
+      TeamRole.bass => 'Bajo Eléctrico',
+      TeamRole.keys => 'Teclados / Piano',
+      TeamRole.drums => 'Batería / Percusión',
+      TeamRole.sound => 'Ingeniero de Sonido',
+    };
+  }
+
+  /// Localized short badge name.
+  String localizedShortName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return shortName;
+    return switch (this) {
+      TeamRole.director => 'Director',
+      TeamRole.leadVocal => 'Voz Princ.',
+      TeamRole.backingVocal => 'Voces',
+      TeamRole.acousticGuitar => 'Acústica',
+      TeamRole.electricGuitar => 'Eléctrica',
+      TeamRole.bass => 'Bajo',
+      TeamRole.keys => 'Teclas',
+      TeamRole.drums => 'Batería',
+      TeamRole.sound => 'Audio',
+    };
+  }
 
   /// True if this role is a singing / vocal role.
   bool get isVocal =>
@@ -47,6 +87,22 @@ enum VocalTessitura {
   const VocalTessitura(this.displayName, this.rangeLabel);
   final String displayName;
   final String rangeLabel;
+
+  /// Localized display name.
+  String localizedName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return displayName;
+    return switch (this) {
+      VocalTessitura.none => 'Instrumental',
+      VocalTessitura.soprano => 'Soprano',
+      VocalTessitura.alto => 'Contralto',
+      VocalTessitura.tenor => 'Tenor',
+      VocalTessitura.baritone => 'Barítono',
+      VocalTessitura.bass => 'Bajo',
+    };
+  }
 }
 
 /// Scheduling availability state for upcoming services and rehearsals.
@@ -57,6 +113,19 @@ enum AvailabilityStatus {
 
   const AvailabilityStatus(this.displayName);
   final String displayName;
+
+  /// Localized display name.
+  String localizedName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return displayName;
+    return switch (this) {
+      AvailabilityStatus.available => 'Disponible',
+      AvailabilityStatus.scheduled => 'Programado',
+      AvailabilityStatus.unavailable => 'No disponible',
+    };
+  }
 }
 
 /// An immutable team member entity.

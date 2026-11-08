@@ -7,6 +7,7 @@ library;
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 /// Category of worship service or band event.
 enum ServiceType {
@@ -20,6 +21,36 @@ enum ServiceType {
   final String displayName;
   final String shortName;
   final IconData icon;
+
+  /// Localized full display name.
+  String localizedName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return displayName;
+    return switch (this) {
+      ServiceType.sundayService => 'Servicio Dominical',
+      ServiceType.rehearsal => 'Ensayo de Banda',
+      ServiceType.midweek => 'Reunión Semanal',
+      ServiceType.youthService => 'Servicio de Jóvenes',
+      ServiceType.specialEvent => 'Evento Especial',
+    };
+  }
+
+  /// Localized short name for compact badges.
+  String localizedShortName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return shortName;
+    return switch (this) {
+      ServiceType.sundayService => 'Culto Dom',
+      ServiceType.rehearsal => 'Ensayo',
+      ServiceType.midweek => 'Semanal',
+      ServiceType.youthService => 'Jóvenes',
+      ServiceType.specialEvent => 'Especial',
+    };
+  }
 }
 
 /// Periodic recurrence rule for calendar services and band rehearsals.
@@ -37,6 +68,44 @@ enum EventRecurrence {
   const EventRecurrence(this.displayName, this.shortName);
   final String displayName;
   final String shortName;
+
+  /// Localized full display name.
+  String localizedName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return displayName;
+    return switch (this) {
+      EventRecurrence.none => 'Evento Único',
+      EventRecurrence.weekly => 'Cada Domingo (Semanal)',
+      EventRecurrence.weeklyThursday => 'Cada Jueves (Ensayo Semanal)',
+      EventRecurrence.biweekly => 'Quincenal (Cada 2 semanas)',
+      EventRecurrence.firstSundayOfMonth => '1.er Domingo del Mes (ej. Santa Cena)',
+      EventRecurrence.secondSundayOfMonth => '2.º Domingo del Mes',
+      EventRecurrence.thirdSundayOfMonth => '3.er Domingo del Mes',
+      EventRecurrence.lastSundayOfMonth => 'Último Domingo del Mes',
+      EventRecurrence.monthly => 'Mensual el mismo día',
+    };
+  }
+
+  /// Localized short name for compact badges.
+  String localizedShortName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return shortName;
+    return switch (this) {
+      EventRecurrence.none => 'Ninguno',
+      EventRecurrence.weekly => 'Semanal Dom',
+      EventRecurrence.weeklyThursday => 'Semanal Jue',
+      EventRecurrence.biweekly => 'Quincenal',
+      EventRecurrence.firstSundayOfMonth => '1.er Dom',
+      EventRecurrence.secondSundayOfMonth => '2.º Dom',
+      EventRecurrence.thirdSundayOfMonth => '3.er Dom',
+      EventRecurrence.lastSundayOfMonth => 'Último Dom',
+      EventRecurrence.monthly => 'Mensual',
+    };
+  }
 
   /// Whether this rule is a repeating schedule.
   bool get isRepeating => this != EventRecurrence.none;
@@ -264,6 +333,19 @@ enum AssignmentStatus {
   const AssignmentStatus(this.displayName, this.color);
   final String displayName;
   final Color color;
+
+  /// Localized status name.
+  String localizedName([BuildContext? context]) {
+    final isEs = context != null
+        ? Localizations.localeOf(context).languageCode == 'es'
+        : (Intl.defaultLocale?.startsWith('es') ?? false);
+    if (!isEs) return displayName;
+    return switch (this) {
+      AssignmentStatus.confirmed => 'Confirmado',
+      AssignmentStatus.scheduled => 'Programado',
+      AssignmentStatus.declined => 'No disponible',
+    };
+  }
 }
 
 /// A specific role assignment for a team member on a calendar service date.
@@ -339,8 +421,29 @@ class ServiceEvent {
         dateTime.isAtSameMomentAs(todayStart);
   }
 
-  /// Formatted date string (e.g. "Sun, Nov 8").
+  /// Formatted date string (e.g. "Sun, Nov 8" or "Dom, 8 nov").
   String get formattedDate {
+    final isSpanish = Intl.defaultLocale?.startsWith('es') ?? false;
+    if (isSpanish) {
+      const monthsEs = [
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic',
+      ];
+      const weekdaysEs = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      final weekday = weekdaysEs[dateTime.weekday - 1];
+      final month = monthsEs[dateTime.month - 1];
+      return '$weekday, ${dateTime.day} $month';
+    }
     const months = [
       'Jan',
       'Feb',

@@ -1795,6 +1795,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save & Connect'**
   String get saveAndConnect;
+
+  /// Title for modal to select active profile
+  ///
+  /// In en, this message translates to:
+  /// **'Select Active User Profile'**
+  String get selectActiveProfileTitle;
+
+  /// Explanation for active user switcher
+  ///
+  /// In en, this message translates to:
+  /// **'Switch active user to preview musician permissions vs administrator capabilities.'**
+  String get switchActiveProfileDesc;
+
+  /// Badge label for admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminRole;
+
+  /// Full title for administrator
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator'**
+  String get administrator;
+
+  /// Full title for musician
+  ///
+  /// In en, this message translates to:
+  /// **'Musician'**
+  String get musician;
+
+  /// Snackbar text when active profile changes
+  ///
+  /// In en, this message translates to:
+  /// **'Active user: {name} ({role})'**
+  String activeUserChanged(String name, String role);
+
+  /// Summary label for total roster count
+  ///
+  /// In en, this message translates to:
+  /// **'Total Roster'**
+  String get totalRoster;
+
+  /// Summary label for scheduled count
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get scheduledLabel;
+
+  /// Summary label for available count
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableLabel;
+
+  /// Status text for member availability
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableStatus;
+
+  /// Prefix for next service date
+  ///
+  /// In en, this message translates to:
+  /// **'Next:'**
+  String get nextServicePrefix;
+
+  /// Filter chip for all members
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// Filter chip for scheduled members
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get filterScheduled;
+
+  /// Filter chip for vocal members
+  ///
+  /// In en, this message translates to:
+  /// **'Vocals'**
+  String get filterVocals;
+
+  /// Filter chip for instrumental band members
+  ///
+  /// In en, this message translates to:
+  /// **'Band'**
+  String get filterBand;
+
+  /// Empty state text when filter matches 0 members
+  ///
+  /// In en, this message translates to:
+  /// **'No team members match this filter.'**
+  String get noMembersMatchFilter;
+
+  /// Badge highlighting the next upcoming service
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT SERVICE'**
+  String get nextServiceBadge;
+
+  /// Title for band lineup section in service card
+  ///
+  /// In en, this message translates to:
+  /// **'Band Lineup'**
+  String get bandLineupTitle;
+
+  /// Badge text for declined member assignment
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'\'t attend'**
+  String get cantAttendBadge;
+
+  /// Subtitle when member is not in any lineup
+  ///
+  /// In en, this message translates to:
+  /// **'Not currently scheduled for upcoming services'**
+  String get notScheduledForServices;
+
+  /// Snackbar when cloud sync succeeds
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud synced successfully ({pushed} pushed, {pulled} pulled)'**
+  String cloudSyncSuccess(int pushed, int pulled);
+
+  /// Title for cloud sync bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Synchronization'**
+  String get cloudSyncStatusTitle;
+
+  /// Message when cloud sync requires sign in
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to Supabase to enable cloud sync.'**
+  String get cloudSignInRequired;
+
+  /// Message when sync is in offline mode
+  ///
+  /// In en, this message translates to:
+  /// **'Offline mode active. All changes are saved safely to local SQLite.'**
+  String get cloudOfflineMode;
+
+  /// Button to open sign-in dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signInAction;
+
+  /// Button to configure Supabase credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Configure'**
+  String get configureAction;
+
+  /// Button to retry action
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryAction;
+
+  /// Empty state text in band lineup
+  ///
+  /// In en, this message translates to:
+  /// **'No musicians assigned yet. Tap \"Assign Musician\" to schedule band members.'**
+  String get noMusiciansAssignedYet;
+
+  /// Action to delete a service
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Service'**
+  String get deleteService;
 }
 
 class _AppLocalizationsDelegate

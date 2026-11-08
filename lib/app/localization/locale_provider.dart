@@ -4,9 +4,11 @@
 /// Persists language preference securely across app sessions.
 library;
 
+import 'dart:ui';
 import 'package:battuta/core/services/api_key_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 /// Available language choices in Battuta.
 enum AppLanguageOption {
@@ -104,5 +106,8 @@ final appLanguageOptionProvider =
 /// Emits `null` when [AppLanguageOption.system] is active.
 final appLocaleProvider = Provider<Locale?>((ref) {
   final option = ref.watch(appLanguageOptionProvider);
-  return option.toLocale();
+  final loc = option.toLocale();
+  Intl.defaultLocale = loc?.languageCode ??
+      (PlatformDispatcher.instance.locales.firstOrNull?.languageCode ?? 'en');
+  return loc;
 });

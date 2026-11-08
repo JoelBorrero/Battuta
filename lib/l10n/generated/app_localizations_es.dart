@@ -942,4 +942,100 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get saveAndConnect => 'Guardar y Conectar';
+
+  @override
+  String get selectActiveProfileTitle => 'Seleccionar Perfil de Usuario Activo';
+
+  @override
+  String get switchActiveProfileDesc =>
+      'Cambia de usuario activo para probar permisos de músico o funciones de administrador.';
+
+  @override
+  String get adminRole => 'Admin';
+
+  @override
+  String get administrator => 'Administrador';
+
+  @override
+  String get musician => 'Músico';
+
+  @override
+  String activeUserChanged(String name, String role) {
+    return 'Usuario activo: $name ($role)';
+  }
+
+  @override
+  String get totalRoster => 'Plantilla Total';
+
+  @override
+  String get scheduledLabel => 'Programado';
+
+  @override
+  String get availableLabel => 'Disponible';
+
+  @override
+  String get availableStatus => 'Disponible';
+
+  @override
+  String get nextServicePrefix => 'Próximo:';
+
+  @override
+  String get filterAll => 'Todos';
+
+  @override
+  String get filterScheduled => 'Programados';
+
+  @override
+  String get filterVocals => 'Voces';
+
+  @override
+  String get filterBand => 'Banda';
+
+  @override
+  String get noMembersMatchFilter => 'Ningún miembro coincide con este filtro.';
+
+  @override
+  String get nextServiceBadge => 'PRÓXIMO SERVICIO';
+
+  @override
+  String get bandLineupTitle => 'Alineación de la Banda';
+
+  @override
+  String get cantAttendBadge => 'No puede asistir';
+
+  @override
+  String get notScheduledForServices =>
+      'No está programado actualmente para próximos servicios';
+
+  @override
+  String cloudSyncSuccess(int pushed, int pulled) {
+    return 'Sincronizado con éxito ($pushed enviados, $pulled recibidos)';
+  }
+
+  @override
+  String get cloudSyncStatusTitle => 'Sincronización en la Nube';
+
+  @override
+  String get cloudSignInRequired =>
+      'Inicia sesión en Supabase para sincronizar con la nube.';
+
+  @override
+  String get cloudOfflineMode =>
+      'Modo sin conexión activo. Todos los cambios se guardan localmente en SQLite.';
+
+  @override
+  String get signInAction => 'Iniciar Sesión';
+
+  @override
+  String get configureAction => 'Configurar';
+
+  @override
+  String get retryAction => 'Reintentar';
+
+  @override
+  String get noMusiciansAssignedYet =>
+      'Aún no hay músicos asignados. Toca \"Asignar Músico\" para programar miembros de la banda.';
+
+  @override
+  String get deleteService => 'Eliminar Servicio';
 }

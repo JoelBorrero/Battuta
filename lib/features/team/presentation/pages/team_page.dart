@@ -20,6 +20,7 @@ import 'package:battuta/features/team/presentation/widgets/admin_schedule_alerts
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 /// The main team roster and band calendar screen.
 class TeamPage extends ConsumerStatefulWidget {
@@ -1542,7 +1543,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Select Active User Profile',
+                      AppLocalizations.of(context)?.selectActiveProfileTitle ??
+                          'Select Active User Profile',
                       style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -1554,7 +1556,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ],
                 ),
                 Text(
-                  'Switch active user to preview musician permissions vs administrator capabilities.',
+                  AppLocalizations.of(context)?.switchActiveProfileDesc ??
+                      'Switch active user to preview musician permissions vs administrator capabilities.',
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(ctx).colorScheme.onSurfaceVariant,
@@ -1595,12 +1598,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
                                 color:
-                                    AppTheme.amberAccent.withValues(alpha: 0.4),
+                                  AppTheme.amberAccent.withValues(alpha: 0.4),
                               ),
                             ),
-                            child: const Text(
-                              'Admin',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)?.adminRole ?? 'Admin',
+                              style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.amberAccent,
@@ -1611,7 +1614,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ],
                     ),
                     subtitle: Text(
-                      '${member.roles.map((r) => r.displayName).join(", ")} • ${member.availability.displayName}',
+                      '${member.roles.map((r) => r.localizedName(context)).join(", ")} • ${member.availability.localizedName(context)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
@@ -1624,10 +1627,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           .read(currentMemberIdProvider.notifier)
                           .setMemberId(member.id);
                       Navigator.of(ctx).pop();
+                      final l10n = AppLocalizations.of(context);
+                      final roleStr = member.isAdmin
+                          ? (l10n?.administrator ?? 'Administrator')
+                          : (l10n?.musician ?? 'Musician');
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Active user: ${member.name} (${member.isAdmin ? 'Administrator' : 'Musician'})',
+                            l10n?.activeUserChanged(member.name, roleStr) ??
+                                'Active user: ${member.name} ($roleStr)',
                           ),
                         ),
                       );
@@ -2172,6 +2180,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   // ROSTER VIEW
   // ═══════════════════════════════════════════════════════════════════════════
 
+  String _getFilterLabel(String filter, AppLocalizations? l10n) {
+    return switch (filter) {
+      'All' => l10n?.filterAll ?? 'All',
+      'Scheduled' => l10n?.filterScheduled ?? 'Scheduled',
+      'Vocals' => l10n?.filterVocals ?? 'Vocals',
+      'Band' => l10n?.filterBand ?? 'Band',
+      _ => filter,
+    };
+  }
+
   Widget _buildRosterView({
     required ThemeData theme,
     required List<TeamMember> members,
@@ -2220,7 +2238,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 Expanded(
                   child: _SummaryStat(
                     count: '${members.length}',
-                    label: 'Total Roster',
+                    label: AppLocalizations.of(context)?.totalRoster ?? 'Total Roster',
                     color: theme.colorScheme.primary,
                   ),
                 ),
@@ -2228,15 +2246,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   child: _SummaryStat(
                     count: '$scheduledCount',
                     label: nextEvent != null
-                        ? 'Next: ${nextEvent.formattedDate}'
-                        : 'Scheduled',
+                        ? '${AppLocalizations.of(context)?.nextServicePrefix ?? "Next:"} ${nextEvent.formattedDate}'
+                        : (AppLocalizations.of(context)?.scheduledLabel ?? 'Scheduled'),
                     color: Colors.green,
                   ),
                 ),
                 Expanded(
                   child: _SummaryStat(
                     count: '$availableCount',
-                    label: 'Available',
+                    label: AppLocalizations.of(context)?.availableLabel ?? 'Available',
                     color: Colors.blue,
                   ),
                 ),
@@ -2255,7 +2273,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
                     key: ValueKey('filter_chip_${filter.toLowerCase()}'),
-                    label: Text(filter),
+                    label: Text(_getFilterLabel(filter, AppLocalizations.of(context))),
                     selected: _selectedFilter == filter,
                     onSelected: (selected) {
                       if (selected) {
@@ -2293,7 +2311,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             padding: const EdgeInsets.all(32),
             child: Center(
               child: Text(
-                'No team members match this filter.',
+                AppLocalizations.of(context)?.noMembersMatchFilter ??
+                    'No team members match this filter.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -2338,8 +2357,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     final isScheduled = nextAssignment != null;
     final statusColor = isScheduled ? nextAssignment.status.color : Colors.blue;
     final statusText = isScheduled
-        ? nextAssignment.status.displayName
-        : 'Available';
+        ? nextAssignment.status.localizedName(context)
+        : (AppLocalizations.of(context)?.availableStatus ?? 'Available');
 
     final initials = member.name
         .split(' ')
@@ -2393,18 +2412,18 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         color: AppTheme.amberAccent.withValues(alpha: 0.4),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.shield_outlined,
                           size: 11,
                           color: AppTheme.amberAccent,
                         ),
-                        SizedBox(width: 3),
+                        const SizedBox(width: 3),
                         Text(
-                          'Admin',
-                          style: TextStyle(
+                          AppLocalizations.of(context)?.adminRole ?? 'Admin',
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.amberAccent,
@@ -2424,7 +2443,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      role.displayName,
+                      role.localizedName(context),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -2485,7 +2504,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
             const SizedBox(height: 4),
             if (isScheduled && assignedEvent != null)
               Text(
-                '📅 Next: ${assignedEvent.formattedDate} (${nextAssignment.role.displayName})',
+                '📅 ${AppLocalizations.of(context)?.nextServicePrefix ?? "Next:"} ${assignedEvent.formattedDate} (${nextAssignment.role.localizedName(context)})',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -2494,7 +2513,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               )
             else
               Text(
-                'Not currently scheduled for upcoming services',
+                AppLocalizations.of(context)?.notScheduledForServices ??
+                    'Not currently scheduled for upcoming services',
                 style: TextStyle(
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
@@ -2722,7 +2742,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     required Map<String, TeamMember> memberMap,
     required bool isAdmin,
   }) {
-    const months = [
+    final l10n = AppLocalizations.of(context);
+    final isSpanish = Intl.defaultLocale?.startsWith('es') ?? false;
+    const monthsEn = [
       'JAN',
       'FEB',
       'MAR',
@@ -2736,7 +2758,25 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       'NOV',
       'DEC',
     ];
-    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+    const daysEn = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+    const monthsEs = [
+      'ENE',
+      'FEB',
+      'MAR',
+      'ABR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DIC',
+    ];
+    const daysEs = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+
+    final months = isSpanish ? monthsEs : monthsEn;
+    final days = isSpanish ? daysEs : daysEn;
 
     final monthStr = months[event.dateTime.month - 1];
     final dayStr = '${event.dateTime.day}';
@@ -2840,9 +2880,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 color: const Color(0xFFE5A93C),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Text(
-                                'NEXT SERVICE',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)?.nextServiceBadge ??
+                                    'NEXT SERVICE',
+                                style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -2890,7 +2931,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
-                                  '${event.type.shortName} • ${event.recurrence.shortName}',
+                                  '${event.type.localizedShortName(context)} • ${event.recurrence.localizedShortName(context)}',
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 12,
@@ -2944,29 +2985,29 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       }
                     },
                     itemBuilder: (_) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('Edit Service'),
+                            const Icon(Icons.edit_outlined, size: 18),
+                            const SizedBox(width: 8),
+                            Text(l10n?.editService ?? 'Edit Service'),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.delete_outline,
                               size: 18,
                               color: Colors.red,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'Delete Service',
-                              style: TextStyle(color: Colors.red),
+                              l10n?.deleteService ?? 'Delete Service',
+                              style: const TextStyle(color: Colors.red),
                             ),
                           ],
                         ),
@@ -3013,7 +3054,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               runSpacing: 4,
               children: [
                 Text(
-                  'Band Lineup (${event.assignments.length})',
+                  '${l10n?.bandLineupTitle ?? 'Band Lineup'} (${event.assignments.length})',
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -3053,7 +3094,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  'No musicians assigned yet. Tap "Assign Musician" to schedule band members.',
+                  l10n?.noMusiciansAssignedYet ??
+                      'No musicians assigned yet. Tap "Assign Musician" to schedule band members.',
                   style: TextStyle(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
@@ -3069,8 +3111,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   for (final assignment in event.assignments) ...[
                     () {
                       final member = memberMap[assignment.memberId];
-                      final memberName = member?.name ?? 'Musician';
-                      final roleName = assignment.role.shortName;
+                      final memberName = member?.name ?? (l10n?.musician ?? 'Musician');
+                      final roleName = assignment.role.localizedShortName(context);
                       final isDeclined =
                           assignment.status == AssignmentStatus.declined;
 
@@ -3097,7 +3139,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                               : assignment.status.color,
                         ),
                         label: Text(
-                          '$memberName ($roleName)${isDeclined ? " • Can't attend" : ""}',
+                          '$memberName ($roleName)${isDeclined ? " • ${l10n?.cantAttendBadge ?? "Can't attend"}" : ""}',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDeclined ? AppTheme.stageRed : null,
