@@ -169,5 +169,129 @@ void main() {
       // Tempo should be near 120 BPM
       expect(find.textContaining('BPM'), findsOneWidget);
     });
+
+    testWidgets(
+      'inserting section with matching name pre-loads chords and lyrics from previous section',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // 1. Rename default section to "Intro"
+        final sectionNameFields = find.widgetWithText(
+          TextFormField,
+          'Section Name',
+        );
+        expect(sectionNameFields, findsOneWidget);
+        await tester.enterText(sectionNameFields.first, 'Intro');
+        await tester.pumpAndSettle();
+
+        // 2. Set chords for Intro
+        final chordFields = find.widgetWithText(
+          TextField,
+          'Type chord symbols separated by spaces or bars',
+        );
+        await tester.enterText(chordFields.first, 'G C D');
+        await tester.tap(find.byTooltip('Apply chords text').first);
+        await tester.pumpAndSettle();
+
+        // 3. Set lyrics for Intro
+        final lyricsFields = find.widgetWithText(
+          TextFormField,
+          'Enter lyrics line by line...',
+        );
+        await tester.enterText(lyricsFields.first, 'Intro lyrics line');
+        await tester.pumpAndSettle();
+
+        expect(find.text('G C D'), findsOneWidget);
+
+        // 4. Tap Quick add: Intro ActionChip to insert another Intro
+        final quickIntroChip = find.widgetWithText(ActionChip, 'Intro');
+        expect(quickIntroChip, findsOneWidget);
+        await tester.tap(quickIntroChip);
+        await tester.pumpAndSettle();
+
+        // 5. Verify 2 sections now exist
+        expect(find.text('Song Sections (2)'), findsOneWidget);
+
+        // Chords 'G C D' and lyrics 'Intro lyrics line' should now appear twice (pre-loaded!)
+        expect(find.text('G C D'), findsNWidgets(2));
+        expect(find.text('Intro lyrics line'), findsNWidgets(2));
+        expect(
+          find.text('Pre-loaded chords and lyrics from previous Intro'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'duplicating a section creates an exact clone right below it',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject(songId: 'song-test-1'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Song Sections (1)'), findsOneWidget);
+        expect(find.text('The falling leaves...'), findsOneWidget);
+
+        // Tap Duplicate section icon
+        final duplicateBtn = find.byTooltip('Duplicate section');
+        expect(duplicateBtn, findsOneWidget);
+        await tester.tap(duplicateBtn);
+        await tester.pumpAndSettle();
+
+        // Verify section was cloned
+        expect(find.text('Song Sections (2)'), findsOneWidget);
+        expect(find.text('The falling leaves...'), findsNWidgets(2));
+        expect(find.text('Duplicated Verse'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'pre-load chip appears when renaming empty section to match existing section',
+      (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(buildSubject(songId: 'song-test-1'));
+        await tester.pumpAndSettle();
+
+        // Add a new empty section
+        await tester.tap(find.text('Add Section'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Song Sections (2)'), findsOneWidget);
+
+        // The second section name field: rename it to "Verse" (matching section 1)
+        final sectionNameFields = find.widgetWithText(
+          TextFormField,
+          'Section Name',
+        );
+        expect(sectionNameFields, findsNWidgets(2));
+        await tester.enterText(sectionNameFields.at(1), 'Verse');
+        await tester.pumpAndSettle();
+
+        // Pre-load ActionChip appears
+        final preloadChip = find.widgetWithText(
+          ActionChip,
+          'Pre-load from previous Verse',
+        );
+        expect(preloadChip, findsOneWidget);
+
+        // Tap pre-load chip
+        await tester.tap(preloadChip);
+        await tester.pumpAndSettle();
+
+        // Chords and lyrics are now populated in the second section!
+        expect(find.text('The falling leaves...'), findsNWidgets(2));
+      },
+    );
   });
 }

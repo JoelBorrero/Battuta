@@ -2301,5 +2301,47 @@
   "noLyricsForSection": "No lyrics or chord alignment for this section yet.",
   "@noLyricsForSection": {
     "description": "Placeholder when section has no lyrics"
+  },
+  "duplicateSection": "Duplicate section",
+  "@duplicateSection": {
+    "description": "Tooltip for duplicate section action"
+  },
+  "sectionDuplicatedNotice": "Duplicated {name}",
+  "@sectionDuplicatedNotice": {
+    "description": "Snackbar notice when section is duplicated",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Intro"
+      }
+    }
+  },
+  "sectionPreloadedNotice": "Pre-loaded chords and lyrics from previous {name}",
+  "@sectionPreloadedNotice": {
+    "description": "Snackbar notice when chords and lyrics are pre-loaded from an earlier section with the same name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Intro"
+      }
+    }
+  },
+  "preloadFromPrevious": "Pre-load from previous {name}",
+  "@preloadFromPrevious": {
+    "description": "Chip or button to pre-load chords/lyrics from earlier section of same name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Intro"
+      }
+    }
+  },
+  "copyFromExistingSection": "Copy from another section...",
+  "@copyFromExistingSection": {
+    "description": "Action to copy chords and lyrics from another section"
+  },
+  "copySectionContent": "Copy Content",
+  "@copySectionContent": {
+    "description": "Dialog title for copying section content"
   }
 }

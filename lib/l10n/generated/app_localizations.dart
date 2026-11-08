@@ -2927,6 +2927,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No lyrics or chord alignment for this section yet.'**
   String get noLyricsForSection;
+
+  /// Tooltip for duplicate section action
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate section'**
+  String get duplicateSection;
+
+  /// Snackbar notice when section is duplicated
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicated {name}'**
+  String sectionDuplicatedNotice(String name);
+
+  /// Snackbar notice when chords and lyrics are pre-loaded from an earlier section with the same name
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-loaded chords and lyrics from previous {name}'**
+  String sectionPreloadedNotice(String name);
+
+  /// Chip or button to pre-load chords/lyrics from earlier section of same name
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-load from previous {name}'**
+  String preloadFromPrevious(String name);
+
+  /// Action to copy chords and lyrics from another section
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from another section...'**
+  String get copyFromExistingSection;
+
+  /// Dialog title for copying section content
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Content'**
+  String get copySectionContent;
 }
 
 class _AppLocalizationsDelegate

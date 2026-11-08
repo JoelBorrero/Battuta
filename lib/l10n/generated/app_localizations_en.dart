@@ -1612,4 +1612,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noLyricsForSection =>
       'No lyrics or chord alignment for this section yet.';
+
+  @override
+  String get duplicateSection => 'Duplicate section';
+
+  @override
+  String sectionDuplicatedNotice(String name) {
+    return 'Duplicated $name';
+  }
+
+  @override
+  String sectionPreloadedNotice(String name) {
+    return 'Pre-loaded chords and lyrics from previous $name';
+  }
+
+  @override
+  String preloadFromPrevious(String name) {
+    return 'Pre-load from previous $name';
+  }
+
+  @override
+  String get copyFromExistingSection => 'Copy from another section...';
+
+  @override
+  String get copySectionContent => 'Copy Content';
 }

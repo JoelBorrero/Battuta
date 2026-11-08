@@ -492,5 +492,11 @@
   "liveCueMode": "Cue en Vivo",
   "stopCueMode": "Detener Cue",
   "chordProEditorInstructions": "Edita notación ChordPro directamente. Escribe los acordes entre corchetes antes de las palabras: [G]Sublime [C]gracia",
-  "noLyricsForSection": "Esta sección aún no tiene letra ni acordes alineados."
+  "noLyricsForSection": "Esta sección aún no tiene letra ni acordes alineados.",
+  "duplicateSection": "Duplicar sección",
+  "sectionDuplicatedNotice": "Se duplicó {name}",
+  "sectionPreloadedNotice": "Se precargaron acordes y letra del {name} anterior",
+  "preloadFromPrevious": "Precargar de {name} anterior",
+  "copyFromExistingSection": "Copiar de otra sección...",
+  "copySectionContent": "Copiar Contenido"
 }

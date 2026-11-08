@@ -5,6 +5,7 @@
 /// with chord chart parsing, reordering, and lyrics.
 library;
 
+import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
 import 'package:battuta/features/repertoire/domain/entities/musical_key.dart';
@@ -172,18 +173,114 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     }
   }
 
-  void _addSection([String defaultName = 'New Section']) {
+  _EditableSection? _findPreviousSection(String name, [int? beforeIndex]) {
+    final searchLimit = beforeIndex ?? _sections.length;
+    final trimmedName = name.trim().toLowerCase();
+    if (trimmedName.isEmpty || trimmedName == 'new section') return null;
+
+    for (var i = searchLimit - 1; i >= 0; i--) {
+      final s = _sections[i];
+      if (s.nameController.text.trim().toLowerCase() == trimmedName) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  void _addSection([String defaultName = 'New Section', int? insertIndex]) {
+    final l10n = AppLocalizations.of(context);
+    final previous = _findPreviousSection(defaultName, insertIndex);
+
+    final newSection = _EditableSection(
+      id: 'sec_${DateTime.now().millisecondsSinceEpoch}_${_sections.length}',
+      name: defaultName,
+      chords: previous != null
+          ? previous.chords.map((c) => c.copyWith()).toList()
+          : [],
+      lyrics: previous?.lyricsController.text ?? '',
+      rehearsalNotes: previous?.notesController.text ?? '',
+      repeatCount: previous?.repeatCount ?? 1,
+    );
+
     setState(() {
-      _sections.add(
-        _EditableSection(
-          id: 'sec_${DateTime.now().millisecondsSinceEpoch}_${_sections.length}',
-          name: defaultName,
-          chords: [],
-          lyrics: '',
-          repeatCount: 1,
+      if (insertIndex != null &&
+          insertIndex >= 0 &&
+          insertIndex <= _sections.length) {
+        _sections.insert(insertIndex, newSection);
+      } else {
+        _sections.add(newSection);
+      }
+    });
+
+    if (previous != null && mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.sectionPreloadedNotice(defaultName) ??
+                'Pre-loaded chords and lyrics from previous $defaultName',
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
+    }
+  }
+
+  void _duplicateSection(int index) {
+    if (index < 0 || index >= _sections.length) return;
+    final l10n = AppLocalizations.of(context);
+    final source = _sections[index];
+    final sectionName = source.nameController.text.trim().isEmpty
+        ? 'Section'
+        : source.nameController.text.trim();
+
+    final duplicated = source.clone(
+      newId: 'sec_${DateTime.now().millisecondsSinceEpoch}_${_sections.length}',
+    );
+
+    setState(() {
+      _sections.insert(index + 1, duplicated);
     });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.sectionDuplicatedNotice(sectionName) ??
+                'Duplicated $sectionName',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _copySectionContent(int targetIndex, _EditableSection source) {
+    if (targetIndex < 0 || targetIndex >= _sections.length) return;
+    final l10n = AppLocalizations.of(context);
+    final target = _sections[targetIndex];
+    setState(() {
+      target.chords = source.chords.map((c) => c.copyWith()).toList();
+      target.quickChordsController.text =
+          target.chords.map((c) => c.displayLabel).join(' ');
+      target.lyricsController.text = source.lyricsController.text;
+      target.notesController.text = source.notesController.text;
+      target.repeatCount = source.repeatCount;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n?.sectionPreloadedNotice(source.nameController.text) ??
+                'Pre-loaded chords and lyrics from ${source.nameController.text}',
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _removeSection(int index) {
@@ -724,6 +821,13 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: ActionChip(
+                        avatar: _findPreviousSection(name) != null
+                            ? const Icon(
+                                Icons.replay,
+                                size: 14,
+                                color: AppTheme.amberAccent,
+                              )
+                            : null,
                         label: Text(name),
                         onPressed: () => _addSection(name),
                       ),
@@ -760,6 +864,13 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     totalSections: _sections.length,
                     section: section,
                     onDelete: () => _removeSection(index),
+                    onDuplicate: () => _duplicateSection(index),
+                    onCopyFrom: (source) => _copySectionContent(index, source),
+                    otherSections: _sections
+                        .where((s) => s.id != section.id)
+                        .toList(),
+                    onFindPreviousMatch: (name) =>
+                        _findPreviousSection(name, index),
                     onMoveUp: index > 0
                         ? () => _moveSection(index, index - 1)
                         : null,
@@ -802,6 +913,17 @@ class _EditableSection {
   List<ChordCell> chords;
   int repeatCount;
 
+  _EditableSection clone({String? newId, String? newName}) {
+    return _EditableSection(
+      id: newId ?? 'sec_${DateTime.now().millisecondsSinceEpoch}',
+      name: newName ?? nameController.text,
+      chords: chords.map((c) => c.copyWith()).toList(),
+      lyrics: lyricsController.text,
+      rehearsalNotes: notesController.text,
+      repeatCount: repeatCount,
+    );
+  }
+
   void dispose() {
     nameController.dispose();
     lyricsController.dispose();
@@ -817,6 +939,10 @@ class _SectionCard extends StatefulWidget {
     required this.totalSections,
     required this.section,
     required this.onDelete,
+    required this.onDuplicate,
+    required this.onCopyFrom,
+    required this.otherSections,
+    required this.onFindPreviousMatch,
     required this.onMoveUp,
     required this.onMoveDown,
     required this.onChordsUpdated,
@@ -826,6 +952,10 @@ class _SectionCard extends StatefulWidget {
   final int totalSections;
   final _EditableSection section;
   final VoidCallback onDelete;
+  final VoidCallback onDuplicate;
+  final ValueChanged<_EditableSection> onCopyFrom;
+  final List<_EditableSection> otherSections;
+  final _EditableSection? Function(String name) onFindPreviousMatch;
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
   final VoidCallback onChordsUpdated;
@@ -835,6 +965,31 @@ class _SectionCard extends StatefulWidget {
 }
 
 class _SectionCardState extends State<_SectionCard> {
+  @override
+  void initState() {
+    super.initState();
+    widget.section.nameController.addListener(_onNameChanged);
+  }
+
+  @override
+  void didUpdateWidget(_SectionCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.section != widget.section) {
+      oldWidget.section.nameController.removeListener(_onNameChanged);
+      widget.section.nameController.addListener(_onNameChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.section.nameController.removeListener(_onNameChanged);
+    super.dispose();
+  }
+
+  void _onNameChanged() {
+    if (mounted) setState(() {});
+  }
+
   void _applyQuickChords() {
     final text = widget.section.quickChordsController.text;
     final parsed = ChordParser.parseProgression(text);
@@ -1026,6 +1181,7 @@ class _SectionCardState extends State<_SectionCard> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final sec = widget.section;
+    final previousMatch = widget.onFindPreviousMatch(sec.nameController.text);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1093,6 +1249,45 @@ class _SectionCardState extends State<_SectionCard> {
                     onPressed: widget.onMoveDown,
                   ),
 
+                // Duplicate Section
+                IconButton(
+                  icon: const Icon(Icons.copy_rounded, size: 20),
+                  tooltip: l10n?.duplicateSection ?? 'Duplicate section',
+                  onPressed: widget.onDuplicate,
+                ),
+
+                // Copy from other section menu (if other sections exist with content)
+                if (widget.otherSections.any(
+                  (s) =>
+                      s.chords.isNotEmpty || s.lyricsController.text.isNotEmpty,
+                ))
+                  PopupMenuButton<_EditableSection>(
+                    icon: const Icon(Icons.content_copy, size: 20),
+                    tooltip: l10n?.copyFromExistingSection ??
+                        'Copy from another section...',
+                    onSelected: widget.onCopyFrom,
+                    itemBuilder: (context) {
+                      return widget.otherSections
+                          .where(
+                            (s) =>
+                                s.chords.isNotEmpty ||
+                                s.lyricsController.text.isNotEmpty,
+                          )
+                          .map((s) {
+                        final chordPreview = s.chords.isEmpty
+                            ? ''
+                            : ' (${s.chords.take(4).map((c) => c.displayLabel).join(' ')})';
+                        return PopupMenuItem<_EditableSection>(
+                          value: s,
+                          child: Text(
+                            '${s.nameController.text.trim().isEmpty ? "Section" : s.nameController.text.trim()}$chordPreview',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+
                 // Delete Section
                 IconButton(
                   icon: Icon(
@@ -1105,6 +1300,42 @@ class _SectionCardState extends State<_SectionCard> {
                 ),
               ],
             ),
+
+            // Pre-load helper chip when current section is empty and previous match exists
+            if (previousMatch != null &&
+                sec.chords.isEmpty &&
+                sec.lyricsController.text.trim().isEmpty) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ActionChip(
+                  avatar: const Icon(
+                    Icons.auto_awesome,
+                    size: 16,
+                    color: AppTheme.amberAccent,
+                  ),
+                  label: Text(
+                    l10n?.preloadFromPrevious(previousMatch.nameController.text.trim()) ??
+                        'Pre-load from previous ${previousMatch.nameController.text.trim()}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      sec.chords =
+                          previousMatch.chords.map((c) => c.copyWith()).toList();
+                      sec.quickChordsController.text =
+                          sec.chords.map((c) => c.displayLabel).join(' ');
+                      sec.lyricsController.text =
+                          previousMatch.lyricsController.text;
+                      sec.notesController.text =
+                          previousMatch.notesController.text;
+                      sec.repeatCount = previousMatch.repeatCount;
+                    });
+                    widget.onChordsUpdated();
+                  },
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
 
             // Chord Progression Editor Row
