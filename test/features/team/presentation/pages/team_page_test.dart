@@ -770,16 +770,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Assign Group to Service'), findsOneWidget);
-      expect(find.text('Youth Band'), findsOneWidget);
+      expect(find.text('Ensamble 3'), findsOneWidget);
 
-      // Select Youth Band
+      // Select Ensamble 3
       await tester.tap(
         find.byKey(const ValueKey('assign_group_item_group-gamma')),
       );
       await tester.pumpAndSettle();
 
-      // Members of Youth Band (David Chen, Elena Rostova, James Wilson) assigned
-      expect(find.textContaining('Assigned Youth Band'), findsOneWidget);
+      // Members of Ensamble 3 assigned
+      expect(find.textContaining('Assigned Ensamble 3'), findsOneWidget);
     });
   });
 }
