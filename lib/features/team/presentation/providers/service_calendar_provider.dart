@@ -7,6 +7,7 @@
 library;
 
 import 'package:battuta/core/services/demo_mode_provider.dart';
+import 'package:battuta/features/sync/data/demo_cloud_sync_service.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
@@ -25,6 +26,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
   List<ServiceEvent> build() {
     final schedules = ref.watch(recurringSchedulesProvider);
     final isDemo = ref.watch(demoModeProvider);
+    if (isDemo) {
+      Future.microtask(() => _initDemoCloudSync());
+    }
     final userEventIds = _userEvents.map((e) => e.id).toSet();
     final baseEvents = isDemo
         ? [
@@ -33,6 +37,35 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
           ]
         : _userEvents;
     return _computeProjectedEvents(baseEvents, schedules);
+  }
+
+  Future<void> _initDemoCloudSync() async {
+    final syncService = ref.read(demoCloudSyncServiceProvider);
+    final remoteEvents = await syncService.pullDemoEvents();
+    if (remoteEvents != null && remoteEvents.isNotEmpty) {
+      final Map<String, ServiceEvent> map = {
+        for (final e in _userEvents) e.id: e,
+      };
+      for (final re in remoteEvents) {
+        map[re.id] = re;
+      }
+      _userEvents
+        ..clear()
+        ..addAll(map.values);
+      _syncState();
+    }
+
+    syncService.subscribeToRealtime(
+      onEventUpdated: (remoteEvent) {
+        final idx = _userEvents.indexWhere((e) => e.id == remoteEvent.id);
+        if (idx != -1) {
+          _userEvents[idx] = remoteEvent;
+        } else {
+          _userEvents.add(remoteEvent);
+        }
+        _syncState();
+      },
+    );
   }
 
   void _syncState() {
@@ -52,6 +85,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
   void addEvent(ServiceEvent event) {
     _userEvents.add(event);
     _syncState();
+    if (ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoEvent(event);
+    }
   }
 
   /// Updates an existing service event.
@@ -61,6 +97,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
       _userEvents[idx] = updated;
     }
     _syncState();
+    if (ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoEvent(updated);
+    }
   }
 
   /// Deletes a service event by id.
@@ -88,6 +127,9 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     final idx = _userEvents.indexWhere((e) => e.id == eventId);
     if (idx != -1) {
       _userEvents[idx] = updater(_userEvents[idx]);
+      if (ref.read(demoModeProvider)) {
+        ref.read(demoCloudSyncServiceProvider).pushDemoEvent(_userEvents[idx]);
+      }
     }
     _syncState();
   }

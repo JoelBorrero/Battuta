@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/core/services/demo_mode_provider.dart';
+import 'package:battuta/features/sync/data/demo_cloud_sync_service.dart';
 import 'package:battuta/features/team/domain/entities/team_group.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,14 +21,32 @@ class TeamGroupsNotifier extends Notifier<List<TeamGroup>> {
   List<TeamGroup> build() {
     final isDemo = ref.watch(demoModeProvider);
     if (isDemo) {
+      Future.microtask(() => _initDemoCloudSync());
       return [..._userGroups, ..._initialSampleGroups()];
     }
     return List.unmodifiable(_userGroups);
   }
 
+  Future<void> _initDemoCloudSync() async {
+    final syncService = ref.read(demoCloudSyncServiceProvider);
+    final remoteGroups = await syncService.pullDemoGroups();
+    if (remoteGroups != null && remoteGroups.isNotEmpty) {
+      final Map<String, TeamGroup> merged = {
+        for (final g in state) g.id: g,
+      };
+      for (final rg in remoteGroups) {
+        merged[rg.id] = rg;
+      }
+      state = merged.values.toList();
+    }
+  }
+
   void addGroup(TeamGroup group) {
     _userGroups.add(group);
     ref.invalidateSelf();
+    if (ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoGroup(group);
+    }
   }
 
   void updateGroup(TeamGroup updated) {
@@ -39,6 +58,9 @@ class TeamGroupsNotifier extends Notifier<List<TeamGroup>> {
       for (final g in state)
         if (g.id == updated.id) updated else g,
     ];
+    if (ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoGroup(updated);
+    }
   }
 
   void removeGroup(String id) {

@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/utils/logger.dart';
+import 'package:battuta/features/sync/data/demo_cloud_sync_service.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
 import 'package:battuta/features/sync/domain/services/cloud_sync_service.dart';
 import 'package:drift/drift.dart';
@@ -21,10 +22,12 @@ class SupabaseCloudSyncService implements CloudSyncService {
   SupabaseCloudSyncService({
     required this.db,
     required this.clientManager,
+    this.demoSyncService,
   });
 
   final AppDatabase db;
   final SupabaseClientManager clientManager;
+  final DemoCloudSyncService? demoSyncService;
 
   bool _isSyncing = false;
   DateTime? _lastSyncedAt;
@@ -38,7 +41,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
   supa.SupabaseClient? get _client => clientManager.client;
 
   @override
-  Future<CloudSyncResult> syncAll({String? teamId}) async {
+  Future<CloudSyncResult> syncAll({String? teamId, bool isDemo = false}) async {
     if (_isSyncing) {
       return CloudSyncResult.failure(error: 'A sync cycle is already active.');
     }
@@ -53,22 +56,29 @@ class SupabaseCloudSyncService implements CloudSyncService {
       }
 
       final currentUser = client.auth.currentUser;
-      if (currentUser == null) {
+      if (!isDemo && currentUser == null) {
         return CloudSyncResult.failure(
           error: 'Please sign in to sync with the cloud.',
         );
       }
 
       // Step 1: Push pending local changes to Supabase
-      final pushResult = await pushLocalChanges();
+      final pushResult = await pushLocalChanges(isDemo: isDemo);
       if (!pushResult.isSuccess && pushResult.isOffline) {
         return pushResult;
       }
 
       // Step 2: Pull newer remote changes from Supabase into Drift
-      final pullResult = await pullRemoteChanges(teamId: teamId);
+      final pullResult = await pullRemoteChanges(teamId: teamId, isDemo: isDemo);
       if (!pullResult.isSuccess && pullResult.isOffline) {
         return pullResult;
+      }
+
+      // Step 3: If in demo mode, also pull demo team roster, groups, and calendar
+      if (isDemo && demoSyncService != null) {
+        await demoSyncService!.pullDemoMembers();
+        await demoSyncService!.pullDemoGroups();
+        await demoSyncService!.pullDemoEvents();
       }
 
       _lastSyncedAt = DateTime.now();
@@ -92,11 +102,16 @@ class SupabaseCloudSyncService implements CloudSyncService {
   }
 
   @override
-  Future<CloudSyncResult> pushLocalChanges() async {
+  Future<CloudSyncResult> pushLocalChanges({bool isDemo = false}) async {
     final client = _client;
     if (client == null) return CloudSyncResult.offline();
     final user = client.auth.currentUser;
-    if (user == null) {
+    if (!isDemo && user == null) {
+      return CloudSyncResult.failure(error: 'User not signed in.');
+    }
+
+    final ownerId = user?.id ?? (isDemo ? '00000000-0000-0000-0000-000000000000' : null);
+    if (ownerId == null) {
       return CloudSyncResult.failure(error: 'User not signed in.');
     }
 
@@ -108,7 +123,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
       for (final song in localSongs) {
         final payload = {
           'id': song.id,
-          'owner_id': user.id,
+          'owner_id': ownerId,
           'title': song.title,
           'artist': song.artist,
           'key': song.key,
@@ -119,6 +134,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
           'tags_json': song.tagsJson,
           'cover_image_path': song.coverImagePath,
           'notes': song.notes,
+          'is_demo': isDemo,
           'updated_at': song.updatedAt.toUtc().toIso8601String(),
         };
         await client.from('songs').upsert(payload);
@@ -145,7 +161,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
 
         final payload = {
           'id': score.id,
-          'owner_id': user.id,
+          'owner_id': ownerId,
           'song_id': score.songId,
           'title': score.title,
           'composer': score.composer,
@@ -155,6 +171,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
           'tempo': score.tempo,
           'sections': sections,
           'metadata': metadata,
+          'is_demo': isDemo,
           'updated_at': score.updatedAt.toUtc().toIso8601String(),
         };
         await client.from('scores').upsert(payload);
@@ -166,12 +183,13 @@ class SupabaseCloudSyncService implements CloudSyncService {
       for (final setlist in localSetlists) {
         final payload = {
           'id': setlist.id,
-          'owner_id': user.id,
+          'owner_id': ownerId,
           'title': setlist.title,
           'description': setlist.description,
           'event_date': setlist.eventDate?.toUtc().toIso8601String(),
           'items_json': setlist.itemsJson,
           'tags_json': setlist.tagsJson,
+          'is_demo': isDemo,
           'updated_at': setlist.updatedAt.toUtc().toIso8601String(),
         };
         await client.from('setlists').upsert(payload);
@@ -187,11 +205,11 @@ class SupabaseCloudSyncService implements CloudSyncService {
   }
 
   @override
-  Future<CloudSyncResult> pullRemoteChanges({String? teamId}) async {
+  Future<CloudSyncResult> pullRemoteChanges({String? teamId, bool isDemo = false}) async {
     final client = _client;
     if (client == null) return CloudSyncResult.offline();
     final user = client.auth.currentUser;
-    if (user == null) {
+    if (!isDemo && user == null) {
       return CloudSyncResult.failure(error: 'User not signed in.');
     }
 
@@ -199,7 +217,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
 
     try {
       // 1. Pull Songs
-      var songQuery = client.from('songs').select();
+      var songQuery = client.from('songs').select().eq('is_demo', isDemo);
       if (_lastSyncedAt != null) {
         songQuery = songQuery.gte(
           'updated_at',
@@ -242,7 +260,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
       }
 
       // 2. Pull Scores
-      var scoreQuery = client.from('scores').select();
+      var scoreQuery = client.from('scores').select().eq('is_demo', isDemo);
       if (_lastSyncedAt != null) {
         scoreQuery = scoreQuery.gte(
           'updated_at',
@@ -289,7 +307,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
       }
 
       // 3. Pull Setlists
-      var setlistQuery = client.from('setlists').select();
+      var setlistQuery = client.from('setlists').select().eq('is_demo', isDemo);
       if (_lastSyncedAt != null) {
         setlistQuery = setlistQuery.gte(
           'updated_at',

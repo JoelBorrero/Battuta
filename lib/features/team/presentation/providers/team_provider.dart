@@ -5,6 +5,7 @@
 library;
 
 import 'package:battuta/core/services/demo_mode_provider.dart';
+import 'package:battuta/features/sync/data/demo_cloud_sync_service.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,6 +59,7 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
   List<TeamMember> build() {
     final isDemo = ref.watch(demoModeProvider);
     if (isDemo) {
+      Future.microtask(() => _initDemoCloudSync());
       final userIds = _userMembers.map((m) => m.id).toSet();
       return [
         ..._userMembers,
@@ -67,9 +69,35 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
     return List.unmodifiable(_userMembers);
   }
 
+  Future<void> _initDemoCloudSync() async {
+    final syncService = ref.read(demoCloudSyncServiceProvider);
+    final remoteMembers = await syncService.pullDemoMembers();
+    if (remoteMembers != null && remoteMembers.isNotEmpty) {
+      final Map<String, TeamMember> merged = {
+        for (final m in state) m.id: m,
+      };
+      for (final rm in remoteMembers) {
+        merged[rm.id] = rm;
+      }
+      state = merged.values.toList();
+    }
+
+    syncService.subscribeToRealtime(
+      onMemberUpdated: (remoteMember) {
+        state = [
+          for (final m in state)
+            if (m.id == remoteMember.id) remoteMember else m,
+        ];
+      },
+    );
+  }
+
   void addMember(TeamMember member) {
     _userMembers.add(member);
     ref.invalidateSelf();
+    if (ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoMember(member);
+    }
   }
 
   void updateMember(TeamMember updated) {
@@ -81,6 +109,9 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
       for (final m in state)
         if (m.id == updated.id) updated else m,
     ];
+    if (ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoMember(updated);
+    }
   }
 
   void removeMember(String id) {
@@ -89,19 +120,24 @@ class TeamMembersNotifier extends Notifier<List<TeamMember>> {
   }
 
   void cycleAvailability(String id) {
-    state = [
-      for (final m in state)
-        if (m.id == id)
-          m.copyWith(
-            availability: switch (m.availability) {
-              AvailabilityStatus.available => AvailabilityStatus.scheduled,
-              AvailabilityStatus.scheduled => AvailabilityStatus.unavailable,
-              AvailabilityStatus.unavailable => AvailabilityStatus.available,
-            },
-          )
-        else
-          m,
-    ];
+    TeamMember? updatedMember;
+    state = state.map((m) {
+      if (m.id == id) {
+        final next = m.copyWith(
+          availability: switch (m.availability) {
+            AvailabilityStatus.available => AvailabilityStatus.scheduled,
+            AvailabilityStatus.scheduled => AvailabilityStatus.unavailable,
+            AvailabilityStatus.unavailable => AvailabilityStatus.available,
+          },
+        );
+        updatedMember = next;
+        return next;
+      }
+      return m;
+    }).toList();
+    if (updatedMember != null && ref.read(demoModeProvider)) {
+      ref.read(demoCloudSyncServiceProvider).pushDemoMember(updatedMember!);
+    }
   }
 
   static List<TeamMember> _initialSampleMembers() {
