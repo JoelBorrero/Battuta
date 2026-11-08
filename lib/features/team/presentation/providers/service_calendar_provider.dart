@@ -382,27 +382,27 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         seriesId: 'series-sunday-morning',
         assignments: const [
           ServiceAssignment(
-            memberId: 'member-1', // Sarah Jenkins
+            memberId: 'member-5', // Amparito (Lead Voice)
             role: TeamRole.leadVocal,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-2', // David Chen
+            memberId: 'member-2', // Raúl (Acoustic Guitar)
             role: TeamRole.acousticGuitar,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-3', // Marcus Miller
+            memberId: 'member-3', // Pipe (Bass)
             role: TeamRole.bass,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-4', // Elena Rostova
+            memberId: 'member-1', // Joel (Keys / Piano)
             role: TeamRole.keys,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-5', // James Wilson
+            memberId: 'member-4', // Jose (Drums)
             role: TeamRole.drums,
             status: AssignmentStatus.confirmed,
           ),
@@ -419,17 +419,17 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         seriesId: 'series-thursday-rehearsal',
         assignments: const [
           ServiceAssignment(
-            memberId: 'member-1',
+            memberId: 'member-5', // Amparito
             role: TeamRole.leadVocal,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-2',
+            memberId: 'member-2', // Raúl
             role: TeamRole.acousticGuitar,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-4',
+            memberId: 'member-1', // Joel
             role: TeamRole.keys,
             status: AssignmentStatus.confirmed,
           ),
@@ -446,22 +446,22 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         seriesId: 'series-sunday-morning',
         assignments: const [
           ServiceAssignment(
-            memberId: 'member-1',
+            memberId: 'member-5', // Amparito
             role: TeamRole.leadVocal,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-2',
+            memberId: 'member-6', // Andrés
             role: TeamRole.backingVocal,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-4',
+            memberId: 'member-1', // Joel
             role: TeamRole.keys,
             status: AssignmentStatus.confirmed,
           ),
           ServiceAssignment(
-            memberId: 'member-6', // Mateo Rodriguez
+            memberId: 'member-20', // Nico
             role: TeamRole.electricGuitar,
             status: AssignmentStatus.scheduled,
           ),
@@ -478,17 +478,17 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         seriesId: 'series-sunday-morning',
         assignments: const [
           ServiceAssignment(
-            memberId: 'member-2',
+            memberId: 'member-2', // Raúl
             role: TeamRole.acousticGuitar,
             status: AssignmentStatus.scheduled,
           ),
           ServiceAssignment(
-            memberId: 'member-3',
+            memberId: 'member-3', // Pipe
             role: TeamRole.bass,
             status: AssignmentStatus.scheduled,
           ),
           ServiceAssignment(
-            memberId: 'member-5',
+            memberId: 'member-4', // Jose
             role: TeamRole.drums,
             status: AssignmentStatus.scheduled,
           ),

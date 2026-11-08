@@ -17,6 +17,7 @@ enum TeamRole {
   electricGuitar('Electric Guitar', 'Electric'),
   bass('Bass Guitar', 'Bass'),
   keys('Keys / Piano', 'Keys'),
+  synth('Synthesizer', 'Synth'),
   drums('Drums / Percussion', 'Drums'),
   sound('Audio Engineer', 'Audio');
 
@@ -38,6 +39,7 @@ enum TeamRole {
       TeamRole.electricGuitar => 'Guitarra Eléctrica',
       TeamRole.bass => 'Bajo Eléctrico',
       TeamRole.keys => 'Teclados / Piano',
+      TeamRole.synth => 'Sintetizador',
       TeamRole.drums => 'Batería / Percusión',
       TeamRole.sound => 'Ingeniero de Sonido',
     };
@@ -57,6 +59,7 @@ enum TeamRole {
       TeamRole.electricGuitar => 'Eléctrica',
       TeamRole.bass => 'Bajo',
       TeamRole.keys => 'Teclas',
+      TeamRole.synth => 'Sint.',
       TeamRole.drums => 'Batería',
       TeamRole.sound => 'Audio',
     };
@@ -72,6 +75,7 @@ enum TeamRole {
       this == TeamRole.electricGuitar ||
       this == TeamRole.bass ||
       this == TeamRole.keys ||
+      this == TeamRole.synth ||
       this == TeamRole.drums;
 }
 

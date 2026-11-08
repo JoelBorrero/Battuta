@@ -50,9 +50,9 @@ void main() {
       expect(find.text('Total Roster'), findsOneWidget);
       expect(find.text('Scheduled'), findsWidgets);
       expect(find.text('Available'), findsWidgets);
-      expect(find.text('Sarah Jenkins'), findsOneWidget);
-      expect(find.text('David Chen'), findsOneWidget);
-      expect(find.text('Marcus Miller'), findsOneWidget);
+      expect(find.text('Joel'), findsOneWidget);
+      expect(find.text('Raúl'), findsOneWidget);
+      expect(find.text('Pipe'), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
 
@@ -64,8 +64,8 @@ void main() {
       await tester.tap(find.widgetWithText(FilterChip, 'Vocals'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Sarah Jenkins'), findsOneWidget);
-      expect(find.text('David Chen'), findsOneWidget); // tenor vocal
+      expect(find.text('Amparito'), findsOneWidget);
+      expect(find.text('Andrés'), findsOneWidget); // tenor vocal
     });
 
     testWidgets('cycles availability status on tap', (tester) async {
@@ -115,17 +115,17 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      // Tap Sarah Jenkins card to edit
-      await tester.tap(find.text('Sarah Jenkins'));
+      // Tap Amparito card to edit
+      await tester.tap(find.text('Amparito'));
       await tester.pumpAndSettle();
 
       expect(find.text('Edit Team Member'), findsOneWidget);
-      expect(find.widgetWithText(TextField, 'Sarah Jenkins'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'Amparito'), findsOneWidget);
 
       // Edit name
       await tester.enterText(
-        find.widgetWithText(TextField, 'Sarah Jenkins'),
-        'Sarah Jenkins-Smith',
+        find.widgetWithText(TextField, 'Amparito'),
+        'Amparito Gómez',
       );
 
       // Add Keys / Piano role (so she sings and plays piano)
@@ -136,7 +136,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('save_member_btn')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Sarah Jenkins-Smith'), findsOneWidget);
+      expect(find.text('Amparito Gómez'), findsOneWidget);
       expect(find.text('Lead Vocalist'), findsWidgets);
       expect(find.text('Keys / Piano'), findsWidgets);
     });
@@ -250,7 +250,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('Sarah Jenkins'), findsOneWidget);
+      expect(find.text('Joel'), findsOneWidget);
     });
 
     testWidgets('switches to Band Calendar tab and renders periodic services', (
@@ -275,7 +275,7 @@ void main() {
       expect(find.text('Sunday Morning Worship'), findsWidgets);
       expect(find.text('Midweek Band Rehearsal'), findsWidgets);
       expect(find.text('NEXT SERVICE'), findsOneWidget);
-      expect(find.textContaining('Sarah Jenkins'), findsWidgets);
+      expect(find.textContaining('Amparito'), findsWidgets);
       expect(find.text('Recurring Schedules'), findsOneWidget);
       expect(find.text('Auto-Sundays'), findsNothing);
     });
@@ -593,7 +593,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Assign Musician Replacement'), findsOneWidget);
-        expect(find.textContaining('Cannot Attend: David Chen'), findsOneWidget);
+        expect(find.textContaining('Cannot Attend: Raúl'), findsOneWidget);
 
         // Confirm replacement
         await tester.tap(find.byKey(const ValueKey('confirm_replacement_btn')));
@@ -632,11 +632,11 @@ void main() {
       await tester.tap(betaChip);
       await tester.pumpAndSettle();
 
-      // Sarah Jenkins and Elena Rostova belong to Group Beta
-      expect(find.text('Sarah Jenkins'), findsOneWidget);
-      expect(find.text('Elena Rostova'), findsOneWidget);
-      // Marcus Miller does not belong to Group Beta
-      expect(find.text('Marcus Miller'), findsNothing);
+      // Joel and Amparito belong to Group Beta
+      expect(find.text('Joel'), findsOneWidget);
+      expect(find.text('Amparito'), findsOneWidget);
+      // Pipe does not belong to Group Beta
+      expect(find.text('Pipe'), findsNothing);
     });
 
     testWidgets('member belongs to multiple groups and displays badges', (tester) async {
@@ -697,7 +697,7 @@ void main() {
 
       // Replacement dialog opens
       expect(find.text('Assign Musician Replacement'), findsOneWidget);
-      expect(find.textContaining('Cannot Attend: David Chen'), findsOneWidget);
+      expect(find.textContaining('Cannot Attend: Raúl'), findsOneWidget);
 
       // Confirm replacement
       await tester.tap(find.byKey(const ValueKey('confirm_replacement_btn')));

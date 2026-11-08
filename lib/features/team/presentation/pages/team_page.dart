@@ -1642,9 +1642,13 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       builder: (ctx) {
         final currentMemberId = ref.watch(currentMemberIdProvider);
         return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Column(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1673,90 +1677,100 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                for (final member in members) ...[
-                  ListTile(
-                    key: ValueKey('switch_user_${member.id}'),
-                    leading: CircleAvatar(
-                      backgroundColor: member.isAdmin
-                          ? AppTheme.amberAccent.withValues(alpha: 0.2)
-                          : Theme.of(ctx).colorScheme.primaryContainer,
-                      child: Icon(
-                        member.isAdmin ? Icons.shield : Icons.person,
-                        size: 18,
-                        color: member.isAdmin
-                            ? AppTheme.amberAccent
-                            : Theme.of(ctx).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    title: Row(
-                      children: [
-                        Text(
-                          member.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        if (member.isAdmin) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  AppTheme.amberAccent.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color:
-                                  AppTheme.amberAccent.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            child: Text(
-                              AppLocalizations.of(context)?.adminRole ?? 'Admin',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.amberAccent,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    subtitle: Text(
-                      '${member.roles.map((r) => r.localizedName(context)).join(", ")} • ${member.availability.localizedName(context)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    trailing: currentMemberId == member.id
-                        ? const Icon(Icons.check_circle, color: Colors.green)
-                        : null,
-                    onTap: () {
-                      ref
-                          .read(currentMemberIdProvider.notifier)
-                          .setMemberId(member.id);
-                      Navigator.of(ctx).pop();
-                      final l10n = AppLocalizations.of(context);
-                      final roleStr = member.isAdmin
-                          ? (l10n?.administrator ?? 'Administrator')
-                          : (l10n?.musician ?? 'Musician');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.activeUserChanged(member.name, roleStr) ??
-                                'Active user: ${member.name} ($roleStr)',
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: members.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final member = members[index];
+                      return ListTile(
+                        key: ValueKey('switch_user_${member.id}'),
+                        leading: CircleAvatar(
+                          backgroundColor: member.isAdmin
+                              ? AppTheme.amberAccent.withValues(alpha: 0.2)
+                              : Theme.of(ctx).colorScheme.primaryContainer,
+                          child: Icon(
+                            member.isAdmin ? Icons.shield : Icons.person,
+                            size: 18,
+                            color: member.isAdmin
+                                ? AppTheme.amberAccent
+                                : Theme.of(ctx).colorScheme.onPrimaryContainer,
                           ),
                         ),
+                        title: Row(
+                          children: [
+                            Text(
+                              member.name,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            if (member.isAdmin) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.amberAccent
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: AppTheme.amberAccent
+                                        .withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context)?.adminRole ??
+                                      'Admin',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.amberAccent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        subtitle: Text(
+                          '${member.roles.map((r) => r.localizedName(context)).join(", ")} • ${member.availability.localizedName(context)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: currentMemberId == member.id
+                            ? const Icon(Icons.check_circle,
+                                color: Colors.green)
+                            : null,
+                        onTap: () {
+                          ref
+                              .read(currentMemberIdProvider.notifier)
+                              .setMemberId(member.id);
+                          Navigator.of(ctx).pop();
+                          final l10n = AppLocalizations.of(context);
+                          final roleStr = member.isAdmin
+                              ? (l10n?.administrator ?? 'Administrator')
+                              : (l10n?.musician ?? 'Musician');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                l10n?.activeUserChanged(member.name, roleStr) ??
+                                    'Active user: ${member.name} ($roleStr)',
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
-                  const Divider(height: 1),
-                ],
+                ),
               ],
             ),
           ),
-        );
-      },
+        ),
+      );
+    },
     );
   }
 
@@ -2158,6 +2172,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       TeamRole.electricGuitar => Icons.bolt,
       TeamRole.bass => Icons.graphic_eq,
       TeamRole.keys => Icons.piano,
+      TeamRole.synth => Icons.tune,
       TeamRole.drums => Icons.album_outlined,
       TeamRole.sound => Icons.headphones,
     };
