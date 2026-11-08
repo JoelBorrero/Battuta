@@ -477,5 +477,20 @@
   "noLoopFullSong": "Sin Bucle (Canción Completa)",
   "loopSectionItem": "Bucle: {section}",
   "createService": "Crear Servicio",
-  "createSeriesCount": "Crear Serie ({count})"
+  "createSeriesCount": "Crear Serie ({count})",
+  "lyricsAndChords": "Letra y Acordes",
+  "alignChordsAction": "Alinear Acordes",
+  "karaokeAlignTitle": "Alineación de Acordes Karaoke",
+  "karaokeAlignSubtitle": "Toca un acorde y luego la palabra donde entra.",
+  "visualTapMode": "Toque Visual / Karaoke",
+  "chordProTextMode": "Texto ChordPro",
+  "chordPalette": "Paleta de Acordes",
+  "addChordLabel": "Agregar Acorde",
+  "eraserMode": "Borrador",
+  "autoAlignAction": "Distribuir Auto",
+  "clearChordsAction": "Quitar Acordes",
+  "liveCueMode": "Cue en Vivo",
+  "stopCueMode": "Detener Cue",
+  "chordProEditorInstructions": "Edita notación ChordPro directamente. Escribe los acordes entre corchetes antes de las palabras: [G]Sublime [C]gracia",
+  "noLyricsForSection": "Esta sección aún no tiene letra ni acordes alineados."
 }

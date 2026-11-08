@@ -126,7 +126,14 @@ class SongTransposer {
       final updatedChords = section.chords
           .map((c) => transposeChord(c, semitones, preferSharps: preferSharps))
           .toList();
-      return section.copyWith(chords: updatedChords);
+      final updatedLyrics = section.lyrics != null
+          ? transposeChordProText(
+              section.lyrics!,
+              semitones,
+              preferSharps: preferSharps,
+            )
+          : null;
+      return section.copyWith(chords: updatedChords, lyrics: updatedLyrics);
     }).toList();
 
     return song.copyWith(
@@ -134,6 +141,49 @@ class SongTransposer {
       sections: updatedSections,
       updatedAt: DateTime.now(),
     );
+  }
+
+  static final RegExp _bracketChordRegex = RegExp(r'\[([^\]]+)\]');
+
+  /// Transposes all bracketed `[Chord]` tags in a ChordPro text string.
+  static String transposeChordProText(
+    String text,
+    int semitones, {
+    bool preferSharps = true,
+  }) {
+    if (semitones == 0 || text.isEmpty) return text;
+
+    return text.replaceAllMapped(_bracketChordRegex, (match) {
+      final chordStr = match.group(1)!.trim();
+      final transposed = transposeChordString(
+        chordStr,
+        semitones,
+        preferSharps: preferSharps,
+      );
+      return '[$transposed]';
+    });
+  }
+
+  /// Transposes an individual chord string (e.g. `"G"`, `"Am7"`, `"D/F#"`) by [semitones].
+  static String transposeChordString(
+    String chord,
+    int semitones, {
+    bool preferSharps = true,
+  }) {
+    if (semitones == 0 || chord.trim().isEmpty) return chord;
+
+    final cell = ChordParser.parseChord(chord);
+    if (cell == null) {
+      // If it's a section header or non-chord tag like [Intro], [Chorus], return untouched
+      return chord;
+    }
+
+    final transposed = transposeChord(
+      cell,
+      semitones,
+      preferSharps: preferSharps,
+    );
+    return transposed.displayLabel;
   }
 }
 

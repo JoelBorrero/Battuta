@@ -1564,4 +1564,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String createSeriesCount(int count) {
     return 'Create Series ($count)';
   }
+
+  @override
+  String get lyricsAndChords => 'Lyrics & Chords';
+
+  @override
+  String get alignChordsAction => 'Align Chords';
+
+  @override
+  String get karaokeAlignTitle => 'Karaoke Chord Alignment';
+
+  @override
+  String get karaokeAlignSubtitle =>
+      'Tap a chord, then tap the target word where it enters.';
+
+  @override
+  String get visualTapMode => 'Visual Tap / Karaoke';
+
+  @override
+  String get chordProTextMode => 'ChordPro Text';
+
+  @override
+  String get chordPalette => 'Chord Palette';
+
+  @override
+  String get addChordLabel => 'Add Chord';
+
+  @override
+  String get eraserMode => 'Eraser';
+
+  @override
+  String get autoAlignAction => 'Auto Distribute';
+
+  @override
+  String get clearChordsAction => 'Clear Chords';
+
+  @override
+  String get liveCueMode => 'Live Cue';
+
+  @override
+  String get stopCueMode => 'Stop Cue';
+
+  @override
+  String get chordProEditorInstructions =>
+      'Edit ChordPro notation directly. Enclose chords in brackets before words: [G]Amazing [C]grace';
+
+  @override
+  String get noLyricsForSection =>
+      'No lyrics or chord alignment for this section yet.';
 }

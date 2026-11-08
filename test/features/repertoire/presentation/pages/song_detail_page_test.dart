@@ -68,6 +68,11 @@ void main() {
       expect(find.text('jazz'), findsOneWidget);
       expect(find.text('Acoustic bossa style'), findsOneWidget);
       expect(find.text('Intro'), findsOneWidget);
+      expect(find.text('Fly'), findsOneWidget);
+
+      // Switching to Chord Chart view mode displays the chord cards and raw text
+      await tester.tap(find.text('Chord Chart'));
+      await tester.pumpAndSettle();
       expect(
         find.text('Fly me to the moon and let me play among the stars...'),
         findsOneWidget,
@@ -141,7 +146,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Switch to Musical Staff
-        await tester.tap(find.text('Musical Staff'));
+        final staffFinder = find.text('Musical Staff');
+        await tester.ensureVisible(staffFinder);
+        await tester.pumpAndSettle();
+        await tester.tap(staffFinder);
         await tester.pumpAndSettle();
 
         expect(tester.takeException(), isNull);

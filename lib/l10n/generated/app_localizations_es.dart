@@ -1575,4 +1575,52 @@ class AppLocalizationsEs extends AppLocalizations {
   String createSeriesCount(int count) {
     return 'Crear Serie ($count)';
   }
+
+  @override
+  String get lyricsAndChords => 'Letra y Acordes';
+
+  @override
+  String get alignChordsAction => 'Alinear Acordes';
+
+  @override
+  String get karaokeAlignTitle => 'Alineación de Acordes Karaoke';
+
+  @override
+  String get karaokeAlignSubtitle =>
+      'Toca un acorde y luego la palabra donde entra.';
+
+  @override
+  String get visualTapMode => 'Toque Visual / Karaoke';
+
+  @override
+  String get chordProTextMode => 'Texto ChordPro';
+
+  @override
+  String get chordPalette => 'Paleta de Acordes';
+
+  @override
+  String get addChordLabel => 'Agregar Acorde';
+
+  @override
+  String get eraserMode => 'Borrador';
+
+  @override
+  String get autoAlignAction => 'Distribuir Auto';
+
+  @override
+  String get clearChordsAction => 'Quitar Acordes';
+
+  @override
+  String get liveCueMode => 'Cue en Vivo';
+
+  @override
+  String get stopCueMode => 'Detener Cue';
+
+  @override
+  String get chordProEditorInstructions =>
+      'Edita notación ChordPro directamente. Escribe los acordes entre corchetes antes de las palabras: [G]Sublime [C]gracia';
+
+  @override
+  String get noLyricsForSection =>
+      'Esta sección aún no tiene letra ni acordes alineados.';
 }

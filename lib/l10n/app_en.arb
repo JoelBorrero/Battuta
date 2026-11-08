@@ -2241,5 +2241,65 @@
     "placeholders": {
       "count": { "type": "int" }
     }
+  },
+  "lyricsAndChords": "Lyrics & Chords",
+  "@lyricsAndChords": {
+    "description": "View mode segment for lyrics with chords over words"
+  },
+  "alignChordsAction": "Align Chords",
+  "@alignChordsAction": {
+    "description": "Button to open karaoke chord alignment editor"
+  },
+  "karaokeAlignTitle": "Karaoke Chord Alignment",
+  "@karaokeAlignTitle": {
+    "description": "Title for karaoke chord alignment modal"
+  },
+  "karaokeAlignSubtitle": "Tap a chord, then tap the target word where it enters.",
+  "@karaokeAlignSubtitle": {
+    "description": "Instructions for karaoke chord alignment"
+  },
+  "visualTapMode": "Visual Tap / Karaoke",
+  "@visualTapMode": {
+    "description": "Visual word-tap alignment tab"
+  },
+  "chordProTextMode": "ChordPro Text",
+  "@chordProTextMode": {
+    "description": "ChordPro text editor tab"
+  },
+  "chordPalette": "Chord Palette",
+  "@chordPalette": {
+    "description": "Label for available chords palette"
+  },
+  "addChordLabel": "Add Chord",
+  "@addChordLabel": {
+    "description": "Button to add a custom chord to the palette"
+  },
+  "eraserMode": "Eraser",
+  "@eraserMode": {
+    "description": "Tool to remove chords from words"
+  },
+  "autoAlignAction": "Auto Distribute",
+  "@autoAlignAction": {
+    "description": "Button to automatically space chords evenly across words"
+  },
+  "clearChordsAction": "Clear Chords",
+  "@clearChordsAction": {
+    "description": "Button to remove all chords from lyrics"
+  },
+  "liveCueMode": "Live Cue",
+  "@liveCueMode": {
+    "description": "Button to start live karaoke cueing"
+  },
+  "stopCueMode": "Stop Cue",
+  "@stopCueMode": {
+    "description": "Button to stop live karaoke cueing"
+  },
+  "chordProEditorInstructions": "Edit ChordPro notation directly. Enclose chords in brackets before words: [G]Amazing [C]grace",
+  "@chordProEditorInstructions": {
+    "description": "Instructions for ChordPro text editor"
+  },
+  "noLyricsForSection": "No lyrics or chord alignment for this section yet.",
+  "@noLyricsForSection": {
+    "description": "Placeholder when section has no lyrics"
   }
 }

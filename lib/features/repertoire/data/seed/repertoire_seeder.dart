@@ -31,7 +31,8 @@ abstract final class RepertoireSeeder {
             id: 'wm-sec-1',
             name: 'Verso 1',
             orderIndex: 0,
-            lyrics: 'Aquí estás, te vemos mover\nTe adoraré, te adoraré\nAquí estás, obrando en mí\nTe adoraré, te adoraré',
+            lyrics:
+                '[E]Aquí estás, te [B]vemos mover\n[C#m]Te adoraré, [A]te adoraré\n[E]Aquí estás, o[B]brando en mí\n[C#m]Te adoraré, [A]te adoraré',
             chords: [
               ChordCell(root: 'E', quality: ChordQuality.major, beats: 4),
               ChordCell(root: 'B', quality: ChordQuality.major, beats: 4),
@@ -43,7 +44,8 @@ abstract final class RepertoireSeeder {
             id: 'wm-sec-2',
             name: 'Coro',
             orderIndex: 1,
-            lyrics: 'Milagroso, abres camino, cumples promesas\nLuz en tinieblas, mi Dios, así eres Tú',
+            lyrics:
+                '[E]Milagroso, abres [B]camino, cumples promesas\n[C#m]Luz en tinieblas, mi [A]Dios, así eres Tú',
             chords: [
               ChordCell(root: 'E', quality: ChordQuality.major, beats: 4),
               ChordCell(root: 'B', quality: ChordQuality.major, beats: 4),
@@ -55,7 +57,8 @@ abstract final class RepertoireSeeder {
             id: 'wm-sec-3',
             name: 'Puente',
             orderIndex: 2,
-            lyrics: 'Aunque no pueda ver, estás obrando\nAunque no pueda ver, estás obrando\nSiempre estás, siempre estás obrando',
+            lyrics:
+                '[E]Aunque no pueda ver, [B]estás obrando\n[C#m]Aunque no pueda ver, [A]estás obrando\n[E]Siempre estás, [B]siempre estás o[C#m]brando [A]',
             chords: [
               ChordCell(root: 'E', quality: ChordQuality.major, beats: 4),
               ChordCell(root: 'B', quality: ChordQuality.major, beats: 4),
@@ -80,7 +83,8 @@ abstract final class RepertoireSeeder {
             id: 'tf-sec-1',
             name: 'Verso 1',
             orderIndex: 0,
-            lyrics: 'Tu fidelidad es grande\nTu fidelidad incomparable es\nNadie como Tú, bendito Dios\nGrande es Tu fidelidad',
+            lyrics:
+                '[D]Tu fidelidad es [Bm]grande\n[Em]Tu fidelidad incomp[A7]arable [D]es\n[G]Nadie como [A]Tú, bendito [F#m]Dios [Bm]\n[Em]Grande es Tu fideli[A7]dad [D]',
             chords: [
               ChordCell(root: 'D', quality: ChordQuality.major, beats: 4),
               ChordCell(root: 'B', quality: ChordQuality.minor, beats: 4),
@@ -93,7 +97,8 @@ abstract final class RepertoireSeeder {
             id: 'tf-sec-2',
             name: 'Coro',
             orderIndex: 1,
-            lyrics: 'Nadie como Tú, bendito Dios\nGrande es Tu fidelidad',
+            lyrics:
+                '[G]Nadie como [A]Tú, bendito [F#m]Dios [Bm]\n[Em]Grande es Tu fideli[A7]dad [D]',
             chords: [
               ChordCell(root: 'G', quality: ChordQuality.major, beats: 4),
               ChordCell(root: 'A', quality: ChordQuality.major, beats: 4),
@@ -121,7 +126,8 @@ abstract final class RepertoireSeeder {
             id: 'ag-sec-1',
             name: 'Verse 1',
             orderIndex: 0,
-            lyrics: 'Amazing grace how sweet the sound\nThat saved a wretch like me\nI once was lost, but now am found\nWas blind, but now I see',
+            lyrics:
+                '[G]Amazing grace how [C]sweet the [G]sound\nThat saved a [D]wretch like me\nI [G]once was lost, but [C]now am [G]found\nWas blind, but [D]now I [G]see',
             chords: [
               ChordCell(root: 'G', quality: ChordQuality.major, beats: 3),
               ChordCell(root: 'C', quality: ChordQuality.major, beats: 3),

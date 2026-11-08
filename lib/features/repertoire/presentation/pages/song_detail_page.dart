@@ -11,6 +11,7 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/chord_lyrics_view.dart';
 import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
@@ -36,7 +37,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   final _toneSynthesizer = ToneSynthesizer();
   int _transpositionSemitones = 0;
   bool _isExporting = false;
-  bool _showStaffNotation = false;
+  int _selectedViewMode = 0; // 0: Lyrics & Chords, 1: Chord Grid, 2: Musical Staff
 
   @override
   void dispose() {
@@ -450,31 +451,48 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               PracticePlayerBar(song: activeSong),
               const SizedBox(height: 12),
 
-              // ── View Mode Selector (Chord Chart vs Staff Notation) ──
+              // ── View Mode Selector (Lyrics & Chords vs Chord Chart vs Staff Notation) ──
               Center(
-                child: SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment(
-                      value: false,
-                      icon: const Icon(Icons.grid_view),
-                      label: Text(l10n?.chordChart ?? 'Chord Chart'),
-                    ),
-                    ButtonSegment(
-                      value: true,
-                      icon: const Icon(Icons.queue_music),
-                      label: Text(l10n?.musicalStaff ?? 'Musical Staff'),
-                    ),
-                  ],
-                  selected: {_showStaffNotation},
-                  onSelectionChanged: (modes) {
-                    setState(() => _showStaffNotation = modes.first);
-                  },
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SegmentedButton<int>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: 0,
+                        icon: const Icon(Icons.lyrics_outlined),
+                        label: Text(l10n?.lyricsAndChords ?? 'Lyrics & Chords'),
+                      ),
+                      ButtonSegment(
+                        value: 1,
+                        icon: const Icon(Icons.grid_view),
+                        label: Text(l10n?.chordChart ?? 'Chord Chart'),
+                      ),
+                      ButtonSegment(
+                        value: 2,
+                        icon: const Icon(Icons.queue_music),
+                        label: Text(l10n?.musicalStaff ?? 'Musical Staff'),
+                      ),
+                    ],
+                    selected: {_selectedViewMode},
+                    onSelectionChanged: (modes) {
+                      setState(() => _selectedViewMode = modes.first);
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // ── Main Content: Chord Cards or Staff Notation ──
-              if (_showStaffNotation)
+              // ── Main Content: Lyrics & Chords vs Chord Cards vs Staff Notation ──
+              if (_selectedViewMode == 0)
+                ChordLyricsView(
+                  song: activeSong,
+                  transpositionSemitones: _transpositionSemitones,
+                  onSongUpdated: (updatedSong) {
+                    ref.read(repertoireProvider.notifier).updateSong(updatedSong);
+                  },
+                )
+              else if (_selectedViewMode == 2)
                 Card(
                   elevation: 1,
                   shape: RoundedRectangleBorder(

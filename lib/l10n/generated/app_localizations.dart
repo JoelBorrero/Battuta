@@ -2837,6 +2837,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Series ({count})'**
   String createSeriesCount(int count);
+
+  /// View mode segment for lyrics with chords over words
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics & Chords'**
+  String get lyricsAndChords;
+
+  /// Button to open karaoke chord alignment editor
+  ///
+  /// In en, this message translates to:
+  /// **'Align Chords'**
+  String get alignChordsAction;
+
+  /// Title for karaoke chord alignment modal
+  ///
+  /// In en, this message translates to:
+  /// **'Karaoke Chord Alignment'**
+  String get karaokeAlignTitle;
+
+  /// Instructions for karaoke chord alignment
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a chord, then tap the target word where it enters.'**
+  String get karaokeAlignSubtitle;
+
+  /// Visual word-tap alignment tab
+  ///
+  /// In en, this message translates to:
+  /// **'Visual Tap / Karaoke'**
+  String get visualTapMode;
+
+  /// ChordPro text editor tab
+  ///
+  /// In en, this message translates to:
+  /// **'ChordPro Text'**
+  String get chordProTextMode;
+
+  /// Label for available chords palette
+  ///
+  /// In en, this message translates to:
+  /// **'Chord Palette'**
+  String get chordPalette;
+
+  /// Button to add a custom chord to the palette
+  ///
+  /// In en, this message translates to:
+  /// **'Add Chord'**
+  String get addChordLabel;
+
+  /// Tool to remove chords from words
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get eraserMode;
+
+  /// Button to automatically space chords evenly across words
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Distribute'**
+  String get autoAlignAction;
+
+  /// Button to remove all chords from lyrics
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Chords'**
+  String get clearChordsAction;
+
+  /// Button to start live karaoke cueing
+  ///
+  /// In en, this message translates to:
+  /// **'Live Cue'**
+  String get liveCueMode;
+
+  /// Button to stop live karaoke cueing
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Cue'**
+  String get stopCueMode;
+
+  /// Instructions for ChordPro text editor
+  ///
+  /// In en, this message translates to:
+  /// **'Edit ChordPro notation directly. Enclose chords in brackets before words: [G]Amazing [C]grace'**
+  String get chordProEditorInstructions;
+
+  /// Placeholder when section has no lyrics
+  ///
+  /// In en, this message translates to:
+  /// **'No lyrics or chord alignment for this section yet.'**
+  String get noLyricsForSection;
 }
 
 class _AppLocalizationsDelegate
