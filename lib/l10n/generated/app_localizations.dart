@@ -428,6 +428,36 @@ abstract class AppLocalizations {
   /// **'Musical Staff'**
   String get musicalStaff;
 
+  /// Segment label for viewing both lyrics and chords
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get viewModeBoth;
+
+  /// Segment label for viewing lyrics only
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics Only'**
+  String get viewModeLyricsOnly;
+
+  /// Segment label for viewing chords only
+  ///
+  /// In en, this message translates to:
+  /// **'Chords Only'**
+  String get viewModeChordsOnly;
+
+  /// Indicator that a section has no lyrics and is instrumental
+  ///
+  /// In en, this message translates to:
+  /// **'Instrumental (No lyrics)'**
+  String get instrumentalSection;
+
+  /// Notice when a section has no chords
+  ///
+  /// In en, this message translates to:
+  /// **'No chords entered for this section.'**
+  String get noChordsForSection;
+
   /// Button and title for creating a new song
   ///
   /// In en, this message translates to:

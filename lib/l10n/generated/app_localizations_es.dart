@@ -177,6 +177,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get musicalStaff => 'Pentagrama Musical';
 
   @override
+  String get viewModeBoth => 'Ambos';
+
+  @override
+  String get viewModeLyricsOnly => 'Solo letra';
+
+  @override
+  String get viewModeChordsOnly => 'Solo acordes';
+
+  @override
+  String get instrumentalSection => 'Instrumental (Sin letra)';
+
+  @override
+  String get noChordsForSection =>
+      'No hay acordes ingresados para esta sección.';
+
+  @override
   String get newSong => 'Nueva Canción';
 
   @override

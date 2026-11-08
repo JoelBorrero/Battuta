@@ -28,8 +28,8 @@ void main() {
         repeatCount: 1,
         orderIndex: 0,
         chords: [
-          ChordCell(root: 'Am', quality: ChordQuality.minor7, beats: 4),
-          ChordCell(root: 'Dm', quality: ChordQuality.minor7, beats: 4),
+          ChordCell(root: 'A', quality: ChordQuality.minor7, beats: 4),
+          ChordCell(root: 'D', quality: ChordQuality.minor7, beats: 4),
         ],
         lyrics: 'Fly me to the moon and let me play among the stars...',
       ),
@@ -70,13 +70,29 @@ void main() {
       expect(find.text('Intro'), findsOneWidget);
       expect(find.text('Fly'), findsOneWidget);
 
-      // Switching to Chord Chart view mode displays the chord cards and raw text
-      await tester.tap(find.text('Chord Chart'));
+      // Switching to Lyrics Only view mode displays lyrics without chords
+      await tester.tap(find.text('Lyrics Only'));
       await tester.pumpAndSettle();
       expect(
         find.text('Fly me to the moon and let me play among the stars...'),
         findsOneWidget,
       );
+
+      // Switching to Chords Only view mode displays chord cells and hides lyrics
+      await tester.tap(find.text('Chords Only'));
+      await tester.pumpAndSettle();
+      expect(find.text('Am7'), findsOneWidget);
+      expect(find.text('Dm7'), findsOneWidget);
+      expect(find.text('4 beats'), findsNWidgets(2));
+      expect(
+        find.text('Fly me to the moon and let me play among the stars...'),
+        findsNothing,
+      );
+
+      // Switching to Both view mode restores both chords and lyrics
+      await tester.tap(find.text('Both'));
+      await tester.pumpAndSettle();
+      expect(find.text('Fly'), findsOneWidget);
     });
 
     testWidgets('shows transpose dialog and updates displayed key', (

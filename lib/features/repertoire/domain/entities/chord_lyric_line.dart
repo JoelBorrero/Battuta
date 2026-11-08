@@ -107,6 +107,16 @@ class ChordLyricsParser {
     return text.replaceAll(_bracketChordRegex, '');
   }
 
+  /// Extracts all chord symbols found in bracket notation (e.g. `"[G]...[C]"`) in order.
+  static List<String> extractChords(String? text) {
+    if (text == null || text.trim().isEmpty) return const [];
+    return _bracketChordRegex
+        .allMatches(text)
+        .map((m) => m.group(1)?.trim() ?? '')
+        .where((c) => c.isNotEmpty)
+        .toList();
+  }
+
   /// Parses a multi-line ChordPro or plain text string into structured [ChordLyricLine]s.
   ///
   /// Handles:

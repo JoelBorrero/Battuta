@@ -176,6 +176,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get musicalStaff => 'Musical Staff';
 
   @override
+  String get viewModeBoth => 'Both';
+
+  @override
+  String get viewModeLyricsOnly => 'Lyrics Only';
+
+  @override
+  String get viewModeChordsOnly => 'Chords Only';
+
+  @override
+  String get instrumentalSection => 'Instrumental (No lyrics)';
+
+  @override
+  String get noChordsForSection => 'No chords entered for this section.';
+
+  @override
   String get newSong => 'New Song';
 
   @override

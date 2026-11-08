@@ -227,6 +227,26 @@
   "@musicalStaff": {
     "description": "Musical staff notation view mode segment"
   },
+  "viewModeBoth": "Both",
+  "@viewModeBoth": {
+    "description": "Segment label for viewing both lyrics and chords"
+  },
+  "viewModeLyricsOnly": "Lyrics Only",
+  "@viewModeLyricsOnly": {
+    "description": "Segment label for viewing lyrics only"
+  },
+  "viewModeChordsOnly": "Chords Only",
+  "@viewModeChordsOnly": {
+    "description": "Segment label for viewing chords only"
+  },
+  "instrumentalSection": "Instrumental (No lyrics)",
+  "@instrumentalSection": {
+    "description": "Indicator that a section has no lyrics and is instrumental"
+  },
+  "noChordsForSection": "No chords entered for this section.",
+  "@noChordsForSection": {
+    "description": "Notice when a section has no chords"
+  },
   "newSong": "New Song",
   "@newSong": {
     "description": "Button and title for creating a new song"

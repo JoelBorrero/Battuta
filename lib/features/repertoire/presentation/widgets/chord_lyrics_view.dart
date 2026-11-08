@@ -2,22 +2,31 @@
 ///
 /// Renders song lyrics with chords floating directly over their corresponding
 /// words in a stage-ready, high-contrast, responsive layout.
+/// Also supports dedicated Lyrics Only and Chords Only stage display modes.
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_lyric_line.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_view_mode.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/karaoke_chord_alignment_modal.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-/// Full lead-sheet view presenting song sections with chords placed over lyrics.
+export 'package:battuta/features/repertoire/domain/entities/song_view_mode.dart';
+
+/// Full lead-sheet view presenting song sections with selectable display modes:
+/// - Both (Lyrics & Chords floating above words)
+/// - Lyrics Only (Clean, distraction-free stage text for vocalists)
+/// - Chords Only (Pure chord charts & progression blocks for instrumentalists)
 class ChordLyricsView extends StatelessWidget {
   const ChordLyricsView({
     required this.song,
     required this.transpositionSemitones,
+    this.viewMode = SongViewMode.both,
     super.key,
     this.onSongUpdated,
   });
@@ -27,6 +36,9 @@ class ChordLyricsView extends StatelessWidget {
 
   /// Active transposition in semitones (-12 to +12).
   final int transpositionSemitones;
+
+  /// Current display mode (both, lyricsOnly, or chordsOnly).
+  final SongViewMode viewMode;
 
   /// Callback when a section's chord alignment is edited and saved.
   final ValueChanged<Song>? onSongUpdated;
@@ -58,6 +70,7 @@ class ChordLyricsView extends StatelessWidget {
             key: ValueKey(section.id),
             section: section,
             transpositionSemitones: transpositionSemitones,
+            viewMode: viewMode,
             onEditAlignment: () => _openAlignmentModal(context, section),
           ),
       ],
@@ -90,17 +103,19 @@ class ChordLyricsView extends StatelessWidget {
   }
 }
 
-/// A flush, stage-ready card displaying a single song section's chords over lyrics.
+/// A flush, stage-ready card displaying a single song section.
 class _SectionChordLyricsCard extends StatelessWidget {
   const _SectionChordLyricsCard({
     required this.section,
     required this.transpositionSemitones,
+    required this.viewMode,
     required this.onEditAlignment,
     super.key,
   });
 
   final SongSection section;
   final int transpositionSemitones;
+  final SongViewMode viewMode;
   final VoidCallback onEditAlignment;
 
   @override
@@ -117,8 +132,22 @@ class _SectionChordLyricsCard extends StatelessWidget {
           )
         : (section.lyrics ?? '');
 
+    // Transpose section chord cells if transposed
+    final effectiveChords = transpositionSemitones != 0
+        ? section.chords
+            .map(
+              (c) => SongTransposer.transposeChord(
+                c,
+                transpositionSemitones,
+                preferSharps: true,
+              ),
+            )
+            .toList()
+        : section.chords;
+
     final parsedLines = ChordLyricsParser.parse(effectiveLyrics);
-    final hasContent = parsedLines.isNotEmpty;
+    final hasLyricsContent =
+        parsedLines.isNotEmpty && parsedLines.any((l) => l.rawLyrics.isNotEmpty);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -176,34 +205,36 @@ class _SectionChordLyricsCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Karaoke / Align Chords Button
-                OutlinedButton.icon(
-                  key: ValueKey('align_chords_btn_${section.id}'),
-                  style: OutlinedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
+
+                // Karaoke / Align Chords Button (only in Both mode)
+                if (viewMode == SongViewMode.both)
+                  OutlinedButton.icon(
+                    key: ValueKey('align_chords_btn_${section.id}'),
+                    style: OutlinedButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      side: BorderSide(
+                        color: AppTheme.amberAccent.withValues(alpha: 0.5),
+                      ),
                     ),
-                    side: BorderSide(
-                      color: AppTheme.amberAccent.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  icon: const Icon(
-                    Icons.mic_external_on,
-                    size: 15,
-                    color: AppTheme.amberAccent,
-                  ),
-                  label: Text(
-                    l10n?.alignChordsAction ?? 'Align Chords',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                    icon: const Icon(
+                      Icons.mic_external_on,
+                      size: 15,
                       color: AppTheme.amberAccent,
                     ),
+                    label: Text(
+                      l10n?.alignChordsAction ?? 'Align Chords',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.amberAccent,
+                      ),
+                    ),
+                    onPressed: onEditAlignment,
                   ),
-                  onPressed: onEditAlignment,
-                ),
               ],
             ),
 
@@ -221,57 +252,313 @@ class _SectionChordLyricsCard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // ── Chords-over-Lyrics Body ──
-            if (!hasContent) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppTheme.slateSurfaceLight
-                      : AppTheme.pearlSurfaceLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.queue_music,
-                        size: 32,
-                        color: theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n?.noLyricsForSection ??
-                            'No lyrics or chord alignment for this section yet.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton.icon(
-                        icon: const Icon(Icons.add, size: 16),
-                        label: Text(
-                          l10n?.alignChordsAction ?? 'Align Chords',
-                        ),
-                        onPressed: onEditAlignment,
-                      ),
-                    ],
-                  ),
-                ),
+            // ── Mode-Specific Body ──
+            if (viewMode == SongViewMode.lyricsOnly)
+              _buildLyricsOnlyBody(
+                context,
+                parsedLines,
+                hasLyricsContent,
+                isDark,
+              )
+            else if (viewMode == SongViewMode.chordsOnly)
+              _buildChordsOnlyBody(
+                context,
+                effectiveChords,
+                effectiveLyrics,
+                isDark,
+              )
+            else
+              _buildBothBody(
+                context,
+                parsedLines,
+                effectiveChords,
+                isDark,
               ),
-            ] else ...[
-              for (var i = 0; i < parsedLines.length; i++) ...[
-                if (i > 0) const SizedBox(height: 12),
-                _ChordLyricLineRow(line: parsedLines[i]),
-              ],
-            ],
           ],
         ),
+      ),
+    );
+  }
+
+  // ── Lyrics Only: Clean, legible stage text without chords ──
+  Widget _buildLyricsOnlyBody(
+    BuildContext context,
+    List<ChordLyricLine> parsedLines,
+    bool hasLyricsContent,
+    bool isDark,
+  ) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    if (!hasLyricsContent) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppTheme.slateSurfaceLight
+              : AppTheme.pearlSurfaceLight,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.music_note,
+              size: 18,
+              color: AppTheme.amberAccent,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n?.instrumentalSection ?? 'Instrumental (No lyrics)',
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final line in parsedLines)
+          if (line.rawLyrics.isEmpty)
+            const SizedBox(height: 12)
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3.0),
+              child: Text(
+                line.rawLyrics,
+                style: TextStyle(
+                  fontSize: 17,
+                  height: 1.5,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? AppTheme.obsidianText : AppTheme.charcoalText,
+                ),
+              ),
+            ),
+      ],
+    );
+  }
+
+  // ── Chords Only: Pure chord progression blocks without lyrics ──
+  Widget _buildChordsOnlyBody(
+    BuildContext context,
+    List<ChordCell> effectiveChords,
+    String effectiveLyrics,
+    bool isDark,
+  ) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    // Prefer structured chord progression cells
+    if (effectiveChords.isNotEmpty) {
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final chord in effectiveChords)
+            _ChordBlockCard(
+              chordLabel: chord.displayLabel,
+              beats: chord.beats,
+              isDark: isDark,
+            ),
+        ],
+      );
+    }
+
+    // Fallback: extracted bracket chords from lyrics
+    final extractedChords = ChordLyricsParser.extractChords(effectiveLyrics);
+    if (extractedChords.isNotEmpty) {
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final chord in extractedChords)
+            _ChordBlockCard(
+              chordLabel: chord,
+              beats: null,
+              isDark: isDark,
+            ),
+        ],
+      );
+    }
+
+    // No chords found
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppTheme.slateSurfaceLight
+            : AppTheme.pearlSurfaceLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.music_off,
+            size: 18,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            l10n?.noChordsForSection ?? 'No chords entered for this section.',
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Both: Interactive Chords floating over words ──
+  Widget _buildBothBody(
+    BuildContext context,
+    List<ChordLyricLine> parsedLines,
+    List<ChordCell> effectiveChords,
+    bool isDark,
+  ) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final hasContent = parsedLines.isNotEmpty;
+
+    if (!hasContent) {
+      // If lyrics are absent but section has chords, display chord progression
+      if (effectiveChords.isNotEmpty) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final chord in effectiveChords)
+                  _ChordBlockCard(
+                    chordLabel: chord.displayLabel,
+                    beats: chord.beats,
+                    isDark: isDark,
+                  ),
+              ],
+            ),
+          ],
+        );
+      }
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppTheme.slateSurfaceLight
+              : AppTheme.pearlSurfaceLight,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(
+                Icons.queue_music,
+                size: 32,
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n?.noLyricsForSection ??
+                    'No lyrics or chord alignment for this section yet.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                icon: const Icon(Icons.add, size: 16),
+                label: Text(
+                  l10n?.alignChordsAction ?? 'Align Chords',
+                ),
+                onPressed: onEditAlignment,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < parsedLines.length; i++) ...[
+          if (i > 0) const SizedBox(height: 12),
+          _ChordLyricLineRow(line: parsedLines[i]),
+        ],
+      ],
+    );
+  }
+}
+
+/// Displays a high-contrast chord badge for chords-only view.
+class _ChordBlockCard extends StatelessWidget {
+  const _ChordBlockCard({
+    required this.chordLabel,
+    this.beats,
+    required this.isDark,
+  });
+
+  final String chordLabel;
+  final int? beats;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppTheme.slateSurfaceLight
+            : AppTheme.pearlSurfaceLight,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppTheme.amberAccent.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            chordLabel,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.amberAccent,
+            ),
+          ),
+          if (beats != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              l10n?.beatsCount(beats!) ?? '$beats beats',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

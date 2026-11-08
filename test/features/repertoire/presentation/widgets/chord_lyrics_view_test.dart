@@ -42,6 +42,7 @@ void main() {
   Widget buildSubject({
     required Song song,
     int transpositionSemitones = 0,
+    SongViewMode viewMode = SongViewMode.both,
     ValueChanged<Song>? onSongUpdated,
   }) {
     return MaterialApp(
@@ -52,6 +53,7 @@ void main() {
           child: ChordLyricsView(
             song: song,
             transpositionSemitones: transpositionSemitones,
+            viewMode: viewMode,
             onSongUpdated: onSongUpdated ?? (_) {},
           ),
         ),
@@ -60,7 +62,7 @@ void main() {
   }
 
   group('ChordLyricsView', () {
-    testWidgets('renders sections, chord badges, and lyrics tokens', (
+    testWidgets('renders sections, chord badges, and lyrics tokens in Both mode', (
       tester,
     ) async {
       await tester.pumpWidget(buildSubject(song: testSong));
@@ -73,7 +75,7 @@ void main() {
       expect(find.text('grace'), findsOneWidget);
     });
 
-    testWidgets('renders empty placeholder for section with no lyrics', (
+    testWidgets('renders empty placeholder for section with no lyrics in Both mode', (
       tester,
     ) async {
       await tester.pumpWidget(buildSubject(song: testSong));
@@ -82,6 +84,49 @@ void main() {
       expect(find.text('Chorus'), findsOneWidget);
       expect(
         find.textContaining('No lyrics or chord alignment for this section yet'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('renders Lyrics Only mode with stripped lyrics and no chord badges', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(song: testSong, viewMode: SongViewMode.lyricsOnly),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Verse 1'), findsOneWidget);
+      // Clean lyrics without brackets or isolated chords
+      expect(
+        find.text('Amazing grace how sweet the sound'),
+        findsOneWidget,
+      );
+      // Align Chords button should NOT be rendered in Lyrics Only mode
+      expect(find.text('Align Chords'), findsNothing);
+      // Section without lyrics displays instrumental badge
+      expect(find.text('Chorus'), findsOneWidget);
+      expect(find.text('Instrumental (No lyrics)'), findsOneWidget);
+    });
+
+    testWidgets('renders Chords Only mode with progression blocks and no lyrics', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(song: testSong, viewMode: SongViewMode.chordsOnly),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Verse 1'), findsOneWidget);
+      expect(find.text('G'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+      expect(find.text('4 beats'), findsNWidgets(2));
+      // Lyrics text must NOT be rendered in Chords Only mode
+      expect(find.textContaining('Amazing grace'), findsNothing);
+      // Section without chords displays clean notice
+      expect(find.text('Chorus'), findsOneWidget);
+      expect(
+        find.text('No chords entered for this section.'),
         findsOneWidget,
       );
     });

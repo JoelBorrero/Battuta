@@ -6,7 +6,6 @@
 library;
 
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
-import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
@@ -37,7 +36,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   final _toneSynthesizer = ToneSynthesizer();
   int _transpositionSemitones = 0;
   bool _isExporting = false;
-  int _selectedViewMode = 0; // 0: Lyrics & Chords, 1: Chord Grid, 2: Musical Staff
+  SongViewMode _selectedViewMode = SongViewMode.both;
 
   @override
   void dispose() {
@@ -451,25 +450,30 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               PracticePlayerBar(song: activeSong),
               const SizedBox(height: 12),
 
-              // ── View Mode Selector (Lyrics & Chords vs Chord Chart vs Staff Notation) ──
+              // ── View Mode Selector (Both vs Lyrics Only vs Chords Only vs Staff Notation) ──
               Center(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: SegmentedButton<int>(
+                  child: SegmentedButton<SongViewMode>(
                     showSelectedIcon: false,
                     segments: [
                       ButtonSegment(
-                        value: 0,
-                        icon: const Icon(Icons.lyrics_outlined),
-                        label: Text(l10n?.lyricsAndChords ?? 'Lyrics & Chords'),
+                        value: SongViewMode.both,
+                        icon: const Icon(Icons.library_music),
+                        label: Text(l10n?.viewModeBoth ?? 'Both'),
                       ),
                       ButtonSegment(
-                        value: 1,
+                        value: SongViewMode.lyricsOnly,
+                        icon: const Icon(Icons.article_outlined),
+                        label: Text(l10n?.viewModeLyricsOnly ?? 'Lyrics Only'),
+                      ),
+                      ButtonSegment(
+                        value: SongViewMode.chordsOnly,
                         icon: const Icon(Icons.grid_view),
-                        label: Text(l10n?.chordChart ?? 'Chord Chart'),
+                        label: Text(l10n?.viewModeChordsOnly ?? 'Chords Only'),
                       ),
                       ButtonSegment(
-                        value: 2,
+                        value: SongViewMode.staff,
                         icon: const Icon(Icons.queue_music),
                         label: Text(l10n?.musicalStaff ?? 'Musical Staff'),
                       ),
@@ -483,16 +487,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
               ),
               const SizedBox(height: 16),
 
-              // ── Main Content: Lyrics & Chords vs Chord Cards vs Staff Notation ──
-              if (_selectedViewMode == 0)
-                ChordLyricsView(
-                  song: activeSong,
-                  transpositionSemitones: _transpositionSemitones,
-                  onSongUpdated: (updatedSong) {
-                    ref.read(repertoireProvider.notifier).updateSong(updatedSong);
-                  },
-                )
-              else if (_selectedViewMode == 2)
+              // ── Main Content: Both / Lyrics Only / Chords Only / Staff Notation ──
+              if (_selectedViewMode == SongViewMode.staff)
                 Card(
                   elevation: 1,
                   shape: RoundedRectangleBorder(
@@ -510,7 +506,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                           runSpacing: 8,
                           children: [
                             Text(
-                              l10n?.interactiveNotationView ?? 'Interactive Notation View',
+                              l10n?.interactiveNotationView ??
+                                  'Interactive Notation View',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -520,7 +517,10 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                                 visualDensity: VisualDensity.compact,
                               ),
                               icon: const Icon(Icons.edit, size: 16),
-                              label: Text(l10n?.editInNotationEditor ?? 'Edit in Notation Editor'),
+                              label: Text(
+                                l10n?.editInNotationEditor ??
+                                    'Edit in Notation Editor',
+                              ),
                               onPressed: () => context.push(
                                 '/repertoire/${song.id}/notation',
                               ),
@@ -540,22 +540,15 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                     ),
                   ),
                 )
-              else ...[
-                // Sections Lead Sheet Display
-                if (activeSong.sections.isEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Text(l10n?.noSectionsYet ?? 'This song has no sections yet.'),
-                    ),
-                  )
-                else
-                  for (final section in activeSong.sections)
-                    _SectionDisplayCard(
-                      section: section,
-                      key: ValueKey(section.id),
-                    ),
-              ],
+              else
+                ChordLyricsView(
+                  song: activeSong,
+                  transpositionSemitones: _transpositionSemitones,
+                  viewMode: _selectedViewMode,
+                  onSongUpdated: (updatedSong) {
+                    ref.read(repertoireProvider.notifier).updateSong(updatedSong);
+                  },
+                ),
 
               const SizedBox(height: 32),
             ],
@@ -613,142 +606,3 @@ class _MetaBadge extends StatelessWidget {
   }
 }
 
-class _SectionDisplayCard extends StatelessWidget {
-  const _SectionDisplayCard({required this.section, super.key});
-
-  final dynamic section;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final chords = section.chords as List<ChordCell>;
-    final lyrics = section.lyrics as String?;
-    final notes = section.rehearsalNotes as String?;
-    final repeatCount = section.repeatCount as int;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Title and Repeat Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    section.name as String,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (repeatCount > 1) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      l10n?.repeatTimes(repeatCount) ?? 'Repeat $repeatCount×',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-
-            if (notes != null && notes.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                notes,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-
-            // Chords Row / Wrap
-            if (chords.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final chord in chords)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            chord.displayLabel,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                          Text(
-                            l10n?.beatsCount(chord.beats) ?? '${chord.beats} beats',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer
-                                  .withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ],
-
-            // Lyrics
-            if (lyrics != null && lyrics.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  lyrics,
-                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
