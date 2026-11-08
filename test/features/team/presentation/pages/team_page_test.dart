@@ -475,7 +475,7 @@ void main() {
     );
 
     testWidgets(
-      'shows admin badge on Sarah Jenkins and allows adding an Admin member',
+      'shows admin badge on Joel and allows adding an Admin member',
       (tester) async {
         tester.view.physicalSize = const Size(1024, 2048);
         tester.view.devicePixelRatio = 1.0;
