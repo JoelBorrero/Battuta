@@ -57,8 +57,8 @@ class SupabaseCloudSyncService implements CloudSyncService {
 
       final currentUser = client.auth.currentUser;
       if (!isDemo && currentUser == null) {
-        return CloudSyncResult.failure(
-          error: 'Please sign in to sync with the cloud.',
+        return CloudSyncResult.offline(
+          reason: 'Please sign in to sync personal workspace with the cloud.',
         );
       }
 

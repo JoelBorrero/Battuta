@@ -16,13 +16,28 @@ class SupabaseClientManager {
 
   final SupabaseConfigService _configService;
   bool _initialized = false;
+  static bool _globalInitialized = false;
+
+  /// Visible for testing: resets static initialization tracker.
+  static void resetForTesting() {
+    _globalInitialized = false;
+  }
 
   /// Whether the Supabase SDK has been successfully initialized.
-  bool get isInitialized => _initialized;
+  bool get isInitialized {
+    if (_initialized || _globalInitialized) return true;
+    try {
+      // In supabase_flutter, accessing Supabase.instance throws if uninitialized
+      Supabase.instance.client;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   /// Returns the active [SupabaseClient] if initialized, or null.
   SupabaseClient? get client {
-    if (!_initialized) return null;
+    if (!isInitialized) return null;
     try {
       return Supabase.instance.client;
     } catch (_) {
@@ -36,6 +51,10 @@ class SupabaseClientManager {
   /// are absent or initialization was skipped. Never throws.
   Future<bool> initialize({String? customUrl, String? customAnonKey}) async {
     try {
+      if (isInitialized && customUrl == null && customAnonKey == null) {
+        return true;
+      }
+
       final url = customUrl ?? await _configService.getActiveUrl();
       final anonKey = customAnonKey ?? await _configService.getActiveAnonKey();
 
@@ -44,6 +63,7 @@ class SupabaseClientManager {
           'Supabase credentials not configured. Operating in local offline mode.',
         );
         _initialized = false;
+        _globalInitialized = false;
         return false;
       }
 
@@ -57,6 +77,7 @@ class SupabaseClientManager {
       );
 
       _initialized = true;
+      _globalInitialized = true;
       AppLogger.info('Supabase client initialized successfully.');
       return true;
     } catch (e, stack) {
@@ -66,6 +87,7 @@ class SupabaseClientManager {
         stackTrace: stack,
       );
       _initialized = false;
+      _globalInitialized = false;
       return false;
     }
   }

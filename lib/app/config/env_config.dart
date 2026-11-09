@@ -6,6 +6,7 @@
 /// through the top-level [envConfig] getter.
 library;
 
+import 'package:battuta/app/config/app_constants.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// The three deployment environments the app can target.
@@ -108,13 +109,15 @@ final class DevConfig extends EnvConfig {
 
   @override
   String get supabaseUrl => dotenv.isInitialized
-      ? (dotenv.env['SUPABASE_URL'] ?? 'https://placeholder.supabase.co')
-      : 'https://placeholder.supabase.co';
+      ? (dotenv.env['SUPABASE_URL'] ?? AppConstants.defaultSupabaseUrl)
+      : AppConstants.defaultSupabaseUrl;
 
   @override
   String get supabaseAnonKey => dotenv.isInitialized
-      ? (dotenv.env['SUPABASE_ANON_KEY'] ?? 'placeholder-anon-key')
-      : 'placeholder-anon-key';
+      ? ((dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
+              dotenv.env['SUPABASE_ANON_KEY']) ??
+          AppConstants.defaultSupabaseAnonKey)
+      : AppConstants.defaultSupabaseAnonKey;
 
   @override
   Environment get environment => Environment.dev;
@@ -138,13 +141,15 @@ final class StagingConfig extends EnvConfig {
 
   @override
   String get supabaseUrl => dotenv.isInitialized
-      ? (dotenv.env['SUPABASE_URL'] ?? 'https://staging.supabase.co')
-      : 'https://staging.supabase.co';
+      ? (dotenv.env['SUPABASE_URL'] ?? AppConstants.defaultSupabaseUrl)
+      : AppConstants.defaultSupabaseUrl;
 
   @override
   String get supabaseAnonKey => dotenv.isInitialized
-      ? (dotenv.env['SUPABASE_ANON_KEY'] ?? 'staging-anon-key')
-      : 'staging-anon-key';
+      ? ((dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
+              dotenv.env['SUPABASE_ANON_KEY']) ??
+          AppConstants.defaultSupabaseAnonKey)
+      : AppConstants.defaultSupabaseAnonKey;
 
   @override
   Environment get environment => Environment.staging;
@@ -168,13 +173,15 @@ final class ProdConfig extends EnvConfig {
 
   @override
   String get supabaseUrl => dotenv.isInitialized
-      ? (dotenv.env['SUPABASE_URL'] ?? 'https://prod.supabase.co')
-      : 'https://prod.supabase.co';
+      ? (dotenv.env['SUPABASE_URL'] ?? AppConstants.defaultSupabaseUrl)
+      : AppConstants.defaultSupabaseUrl;
 
   @override
   String get supabaseAnonKey => dotenv.isInitialized
-      ? (dotenv.env['SUPABASE_ANON_KEY'] ?? 'prod-anon-key')
-      : 'prod-anon-key';
+      ? ((dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
+              dotenv.env['SUPABASE_ANON_KEY']) ??
+          AppConstants.defaultSupabaseAnonKey)
+      : AppConstants.defaultSupabaseAnonKey;
 
   @override
   Environment get environment => Environment.prod;

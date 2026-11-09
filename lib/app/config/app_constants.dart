@@ -43,6 +43,16 @@ final class AppConstants {
   /// Maximum number of automatic retry attempts for transient failures.
   static const int maxRetries = 3;
 
+  // ── Cloud / Supabase Defaults ─────────────────────────────────────────
+
+  /// Default production Supabase endpoint for automated zero-config connectivity.
+  static const String defaultSupabaseUrl =
+      'https://gyiofbbzxgrwvxpssirh.supabase.co';
+
+  /// Default anonymous public key for automated zero-config connectivity.
+  static const String defaultSupabaseAnonKey =
+      'sb_publishable_z8m5oJOFzQfV8YPNrO9acQ_CfNSLGp-';
+
   // ── Music Domain ──────────────────────────────────────────────────────
 
   /// Default BPM when no tempo is specified for a song.

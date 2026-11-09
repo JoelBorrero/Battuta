@@ -33,6 +33,10 @@ class DemoCloudSyncService {
   final SupabaseClientManager clientManager;
   supa.RealtimeChannel? _realtimeChannel;
 
+  final List<void Function(TeamMember)> _memberListeners = [];
+  final List<void Function(TeamGroup)> _groupListeners = [];
+  final List<void Function(ServiceEvent)> _eventListeners = [];
+
   supa.SupabaseClient? get _client => clientManager.client;
 
   /// Helper converting `member-X` string IDs to deterministic UUIDs.
@@ -253,11 +257,19 @@ class DemoCloudSyncService {
     void Function(TeamGroup group)? onGroupUpdated,
     void Function(ServiceEvent event)? onEventUpdated,
   }) {
+    if (onMemberUpdated != null && !_memberListeners.contains(onMemberUpdated)) {
+      _memberListeners.add(onMemberUpdated);
+    }
+    if (onGroupUpdated != null && !_groupListeners.contains(onGroupUpdated)) {
+      _groupListeners.add(onGroupUpdated);
+    }
+    if (onEventUpdated != null && !_eventListeners.contains(onEventUpdated)) {
+      _eventListeners.add(onEventUpdated);
+    }
+
     final client = _client;
     if (client == null) return;
-
-    // Dispose any previous channel
-    _realtimeChannel?.unsubscribe();
+    if (_realtimeChannel != null) return;
 
     try {
       _realtimeChannel = client.channel('public:demo_team_sync');
@@ -276,8 +288,10 @@ class DemoCloudSyncService {
           final row = payload.newRecord;
           if (row.isNotEmpty) {
             final member = _mapRowToMember(row);
-            if (member != null && onMemberUpdated != null) {
-              onMemberUpdated(member);
+            if (member != null) {
+              for (final listener in List.of(_memberListeners)) {
+                listener(member);
+              }
             }
           }
         },
@@ -297,8 +311,10 @@ class DemoCloudSyncService {
           final row = payload.newRecord;
           if (row.isNotEmpty) {
             final event = _mapRowToEvent(row);
-            if (event != null && onEventUpdated != null) {
-              onEventUpdated(event);
+            if (event != null) {
+              for (final listener in List.of(_eventListeners)) {
+                listener(event);
+              }
             }
           }
         },
@@ -316,13 +332,16 @@ class DemoCloudSyncService {
         ),
         callback: (payload) {
           final row = payload.newRecord;
-          if (row.isNotEmpty && onGroupUpdated != null) {
-            onGroupUpdated(TeamGroup(
+          if (row.isNotEmpty) {
+            final group = TeamGroup(
               id: row['id'] as String,
               name: row['name'] as String? ?? 'Group',
               description: row['description'] as String?,
               colorValue: (row['color_value'] as num?)?.toInt() ?? 0xFFE5A93C,
-            ));
+            );
+            for (final listener in List.of(_groupListeners)) {
+              listener(group);
+            }
           }
         },
       );
@@ -336,6 +355,9 @@ class DemoCloudSyncService {
 
   /// Unsubscribes from the realtime channel when demo mode is disabled.
   void unsubscribeRealtime() {
+    _memberListeners.clear();
+    _groupListeners.clear();
+    _eventListeners.clear();
     _realtimeChannel?.unsubscribe();
     _realtimeChannel = null;
   }

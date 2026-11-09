@@ -4,6 +4,7 @@
 /// securely using [ApiKeyStorage] with fallback to environment variables.
 library;
 
+import 'package:battuta/app/config/app_constants.dart';
 import 'package:battuta/core/services/api_key_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -22,7 +23,9 @@ class SupabaseConfigService {
 
   /// Retrieves the active Supabase Project URL.
   ///
-  /// Checks custom secure storage first; falls back to `.env` if absent.
+  /// Checks custom secure storage first; falls back to `.env` if available,
+  /// and finally falls back to [AppConstants.defaultSupabaseUrl] for automated
+  /// zero-config cloud connectivity.
   Future<String?> getActiveUrl() async {
     final customUrl = await _storage.read(SupabaseConfigKeys.customUrl);
     if (customUrl != null && customUrl.trim().isNotEmpty) {
@@ -34,12 +37,14 @@ class SupabaseConfigService {
         return envUrl;
       }
     }
-    return null;
+    return AppConstants.defaultSupabaseUrl;
   }
 
   /// Retrieves the active Supabase Anon Public Key.
   ///
-  /// Checks custom secure storage first; falls back to `.env` if absent.
+  /// Checks custom secure storage first; falls back to `.env` if available,
+  /// and finally falls back to [AppConstants.defaultSupabaseAnonKey] for
+  /// automated zero-config cloud connectivity.
   Future<String?> getActiveAnonKey() async {
     final customKey = await _storage.read(SupabaseConfigKeys.customAnonKey);
     if (customKey != null && customKey.trim().isNotEmpty) {
@@ -53,7 +58,7 @@ class SupabaseConfigService {
         return envKey;
       }
     }
-    return null;
+    return AppConstants.defaultSupabaseAnonKey;
   }
 
   /// Saves a user-provided custom Supabase URL and Anon Key.
