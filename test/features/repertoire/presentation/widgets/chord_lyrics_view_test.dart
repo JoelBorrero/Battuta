@@ -144,10 +144,52 @@ void main() {
       expect(find.text('D'), findsOneWidget);
     });
 
-    testWidgets('tapping Align Chords opens KaraokeChordAlignmentModal', (
+    testWidgets('renders high-contrast off-white lyrics text in Dark Mode', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject(song: testSong));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ChordLyricsView(
+                song: testSong,
+                transpositionSemitones: 0,
+                viewMode: SongViewMode.both,
+                onSongUpdated: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final amazingText = tester.widget<Text>(find.text('Amazing'));
+      expect(amazingText.style?.color, equals(const Color(0xFFF2F2F2)));
+    });
+
+    testWidgets('tapping Align Chords opens KaraokeChordAlignmentModal with readable words in Dark Mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ChordLyricsView(
+                song: testSong,
+                transpositionSemitones: 0,
+                viewMode: SongViewMode.both,
+                onSongUpdated: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Tap first "Align Chords" button
@@ -159,6 +201,14 @@ void main() {
 
       expect(find.byType(KaraokeChordAlignmentModal), findsOneWidget);
       expect(find.text('Karaoke Chord Alignment'), findsOneWidget);
+
+      // Verify that words inside the alignment modal are high-contrast off-white
+      final modalWordFinder = find.descendant(
+        of: find.byType(KaraokeChordAlignmentModal),
+        matching: find.text('Amazing'),
+      );
+      final modalWordText = tester.widget<Text>(modalWordFinder);
+      expect(modalWordText.style?.color, equals(const Color(0xFFF2F2F2)));
     });
   });
 }

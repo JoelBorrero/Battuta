@@ -616,14 +616,14 @@ class _KaraokeChordAlignmentModalState
               ? AppTheme.amberAccent.withValues(alpha: 0.3)
               : hasChord
                   ? AppTheme.amberAccent.withValues(alpha: 0.1)
-                  : theme.colorScheme.surfaceContainerLow,
+                  : (isDark ? AppTheme.slateSurfaceLight : theme.colorScheme.surfaceContainerLow),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isCueActiveForWord
                 ? AppTheme.amberAccent
                 : hasChord
                     ? AppTheme.amberAccent.withValues(alpha: 0.5)
-                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    : (isDark ? AppTheme.slateBorder : theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
             width: isCueActiveForWord ? 2 : 1,
           ),
         ),
@@ -658,7 +658,7 @@ class _KaraokeChordAlignmentModalState
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: isCueActiveForWord ? FontWeight.bold : FontWeight.w500,
-                color: isDark ? AppTheme.obsidianText : AppTheme.charcoalText,
+                color: isDark ? AppTheme.textOffWhite : AppTheme.charcoalText,
               ),
             ),
           ],
@@ -692,10 +692,11 @@ class _KaraokeChordAlignmentModalState
               controller: _textController,
               maxLines: null,
               expands: true,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 15,
                 height: 1.5,
+                color: isDark ? AppTheme.textOffWhite : AppTheme.charcoalText,
               ),
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
