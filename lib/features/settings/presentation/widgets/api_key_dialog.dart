@@ -3,6 +3,7 @@ library;
 
 import 'package:battuta/core/services/api_key_service.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -133,6 +134,28 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    if (!isAdmin) {
+      return AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.lock_outline, color: Colors.redAccent),
+            SizedBox(width: 8),
+            Text('Access Restricted'),
+          ],
+        ),
+        content: const Text(
+          'Gemini API key configuration is restricted to church administrators only.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    }
+
     final l10n = AppLocalizations.of(context);
     final apiKeyState = ref.watch(apiKeyNotifierProvider);
     final theme = Theme.of(context);

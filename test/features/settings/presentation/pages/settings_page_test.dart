@@ -1,6 +1,8 @@
 import 'package:battuta/core/services/api_key_storage.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
+import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -120,5 +122,77 @@ void main() {
       find.byType(SegmentedButton<ThemeMode>),
     );
     expect(segmentedBtn.selected, equals({ThemeMode.dark}));
+  });
+
+  testWidgets('Non-admin user cannot see or access Gemini API Key section', (
+    WidgetTester tester,
+  ) async {
+    final fakeStorage = FakeApiKeyStorage();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(fakeStorage),
+          isCurrentUserAdminProvider.overrideWithValue(false),
+        ],
+        child: const MaterialApp(home: SettingsPage()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify Appearance and other non-admin sections exist
+    expect(find.text('Appearance'), findsOneWidget);
+    expect(find.text('Theme'), findsOneWidget);
+
+    // Verify API Configuration section and Gemini API Key tile are NOT rendered
+    expect(find.text('API Configuration'), findsNothing);
+    expect(find.byKey(const ValueKey('gemini_api_key_tile')), findsNothing);
+    expect(find.byKey(const ValueKey('omr_debug_logs_tile')), findsNothing);
+  });
+
+  testWidgets('ApiKeyDialog displays Access Restricted when accessed by non-admin', (
+    WidgetTester tester,
+  ) async {
+    final fakeStorage = FakeApiKeyStorage();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(fakeStorage),
+          isCurrentUserAdminProvider.overrideWithValue(false),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => ApiKeyDialog.show(context),
+                child: const Text('Open Dialog'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap to open dialog
+    await tester.tap(find.text('Open Dialog'));
+    await tester.pumpAndSettle();
+
+    // Verify Access Restricted dialog
+    expect(find.text('Access Restricted'), findsOneWidget);
+    expect(
+      find.text('Gemini API key configuration is restricted to church administrators only.'),
+      findsOneWidget,
+    );
+    expect(find.text('Enter new API Key'), findsNothing);
+
+    // Tap OK to close
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
   });
 }

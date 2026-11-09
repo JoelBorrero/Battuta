@@ -15,6 +15,7 @@ import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.da
 import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
 import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
+import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/features/workspace/presentation/providers/workspace_usage_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class SettingsPage extends ConsumerWidget {
     final currentUser = ref.watch(currentUserProvider);
     final syncState = ref.watch(cloudSyncProvider);
     final languageOption = ref.watch(appLanguageOptionProvider);
+    final isAdmin = ref.watch(isCurrentUserAdminProvider);
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -352,36 +354,38 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
 
-          const Divider(),
+          if (isAdmin) ...[
+            const Divider(),
 
-          // ── API Configuration ──
-          _SectionHeader(
-            title: l10n?.apiConfigurationSection ?? 'API Configuration',
-          ),
-          ListTile(
-            key: const ValueKey('gemini_api_key_tile'),
-            leading: const Icon(Icons.key),
-            title: Text(l10n?.geminiApiKeyLabel ?? 'Gemini API Key'),
-            subtitle: Text(
-              apiKeyState.when(
-                data: (s) => s.isConfigured
-                    ? '${s.maskedKey} (${s.isUserCustom ? (l10n?.customLabel ?? 'Custom') : (l10n?.devEnvLabel ?? 'Dev .env')})'
-                    : (l10n?.geminiKeyNotConfigured ?? 'Not configured — tap to enter key'),
-                loading: () => l10n?.loadingStatus ?? 'Loading status...',
-                error: (_, _) => l10n?.errorLoadingKey ?? 'Error loading key',
-              ),
+            // ── API Configuration (Admin Only) ──
+            _SectionHeader(
+              title: l10n?.apiConfigurationSection ?? 'API Configuration',
             ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => ApiKeyDialog.show(context),
-          ),
-          ListTile(
-            key: const ValueKey('omr_debug_logs_tile'),
-            leading: const Icon(Icons.receipt_long_outlined),
-            title: Text(l10n?.omrDiagnosticLogs ?? 'OMR Diagnostic Logs'),
-            subtitle: Text(l10n?.omrDiagnosticLogsSubtitle ?? 'Inspect Gemini requests, latencies & responses'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => OmrLogViewerModal.show(context),
-          ),
+            ListTile(
+              key: const ValueKey('gemini_api_key_tile'),
+              leading: const Icon(Icons.key),
+              title: Text(l10n?.geminiApiKeyLabel ?? 'Gemini API Key'),
+              subtitle: Text(
+                apiKeyState.when(
+                  data: (s) => s.isConfigured
+                      ? '${s.maskedKey} (${s.isUserCustom ? (l10n?.customLabel ?? 'Custom') : (l10n?.devEnvLabel ?? 'Dev .env')})'
+                      : (l10n?.geminiKeyNotConfigured ?? 'Not configured — tap to enter key'),
+                  loading: () => l10n?.loadingStatus ?? 'Loading status...',
+                  error: (_, _) => l10n?.errorLoadingKey ?? 'Error loading key',
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => ApiKeyDialog.show(context),
+            ),
+            ListTile(
+              key: const ValueKey('omr_debug_logs_tile'),
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: Text(l10n?.omrDiagnosticLogs ?? 'OMR Diagnostic Logs'),
+              subtitle: Text(l10n?.omrDiagnosticLogsSubtitle ?? 'Inspect Gemini requests, latencies & responses'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => OmrLogViewerModal.show(context),
+            ),
+          ],
 
           const Divider(),
 
