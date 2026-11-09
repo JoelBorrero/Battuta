@@ -8,6 +8,7 @@ library;
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/shell/scaffold_with_nav_bar.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
+import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/setlist_detail_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/song_detail_page.dart';
@@ -49,7 +50,9 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: 'new',
                 name: 'newSong',
-                builder: (context, state) => const SongEditorPage(),
+                builder: (context, state) => SongEditorPage(
+                  initialSong: state.extra is Song ? state.extra as Song : null,
+                ),
               ),
               // Setlist detail & song editor
               GoRoute(

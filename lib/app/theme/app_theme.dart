@@ -103,6 +103,9 @@ abstract final class AppTheme {
   /// Stage green for connected / sync / in-time cues.
   static const Color stageGreen = Color(0xFF4CAF50);
 
+  /// Stage blue for informational / data badges.
+  static const Color stageBlue = Color(0xFF42A5F5);
+
   // ── 2. Typography Constants ──────────────────────────────────────────
 
   static const String primaryFontFamily = 'SF Pro Display';

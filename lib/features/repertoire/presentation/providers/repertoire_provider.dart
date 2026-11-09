@@ -127,6 +127,30 @@ class Repertoire extends _$Repertoire {
     );
   }
 
+  /// Imports multiple [songs] into the database and refreshes state.
+  /// Returns the count of successfully saved songs.
+  Future<int> importSongs(List<Song> songs) async {
+    final repository = ref.read(songRepositoryProvider);
+    final savedSongs = <Song>[];
+    for (final song in songs) {
+      final res = await repository.saveSong(song);
+      res.fold((_) {}, (saved) => savedSongs.add(saved));
+    }
+    if (ref.mounted) {
+      if (state.hasValue) {
+        final current = state.value ?? [];
+        final currentMap = {for (final s in current) s.id: s};
+        for (final s in savedSongs) {
+          currentMap[s.id] = s;
+        }
+        state = AsyncData(currentMap.values.toList());
+      } else {
+        ref.invalidateSelf();
+      }
+    }
+    return savedSongs.length;
+  }
+
   /// Updates an existing [song] in the repertoire.
   ///
   /// Replaces the song with a matching [Song.id] in the local state.

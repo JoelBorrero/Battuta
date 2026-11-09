@@ -8,12 +8,15 @@ library;
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
+import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/song_import_modal.dart';
 import 'package:battuta/features/sync/presentation/widgets/cloud_sync_status_indicator.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -162,6 +165,11 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
         actions: [
           const CloudSyncStatusIndicator(compact: true),
           IconButton(
+            icon: const Icon(Icons.file_download_outlined),
+            tooltip: 'Import song or lead sheet',
+            onPressed: () => SongImportModal.show(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.document_scanner_outlined),
             tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
             onPressed: () => context.push('/scanner'),
@@ -170,6 +178,55 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
             icon: const Icon(Icons.search),
             tooltip: l10n?.searchSongsTooltip ?? 'Search songs',
             onPressed: () => _showSearch(context, ref),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: 'More options',
+            onSelected: (value) async {
+              if (value == 'import') {
+                SongImportModal.show(context);
+              } else if (value == 'export_all') {
+                final songs = repertoire.value ?? [];
+                if (songs.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No songs in repertoire to export')),
+                  );
+                  return;
+                }
+                final jsonStr = SongImportExportService.exportRepertoireToJson(songs);
+                await Clipboard.setData(ClipboardData(text: jsonStr));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: AppTheme.stageGreen,
+                      content: Text('Exported ${songs.length} songs to clipboard (JSON)'),
+                    ),
+                  );
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download_outlined, size: 20),
+                    SizedBox(width: 10),
+                    Text('Import Song / Leadsheet'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export_all',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_upload_outlined, size: 20),
+                    SizedBox(width: 10),
+                    Text('Export Repertoire (JSON Backup)'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

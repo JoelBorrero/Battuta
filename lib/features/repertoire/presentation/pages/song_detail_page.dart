@@ -5,9 +5,11 @@
 /// MIDI generation, and direct navigation to edit or delete.
 library;
 
+import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
+import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/chord_lyrics_view.dart';
@@ -17,6 +19,7 @@ import 'package:battuta/features/score/presentation/services/tone_synthesizer.da
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -343,15 +346,88 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                 onPressed: () =>
                     context.push('/repertoire/${song.id}/notation'),
               ),
-              IconButton(
-                icon: const Icon(Icons.picture_as_pdf_outlined),
-                tooltip: l10n?.exportPdfTooltip ?? 'Export PDF Lead Sheet',
-                onPressed: _isExporting ? null : () => _exportPdf(activeSong),
-              ),
-              IconButton(
-                icon: const Icon(Icons.audiotrack_outlined),
-                tooltip: l10n?.exportMidiTooltip ?? 'Export MIDI File',
-                onPressed: _isExporting ? null : () => _exportMidi(activeSong),
+              PopupMenuButton<String>(
+                enabled: !_isExporting,
+                icon: _isExporting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.share_outlined),
+                tooltip: 'Export & Share',
+                onSelected: (val) async {
+                  if (val == 'text') {
+                    final textStr = SongImportExportService.exportSongToPlainText(activeSong);
+                    await Clipboard.setData(ClipboardData(text: textStr));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: AppTheme.stageGreen,
+                          content: Text('Song lead sheet copied to clipboard (ChordPro)'),
+                        ),
+                      );
+                    }
+                  } else if (val == 'json') {
+                    final jsonStr = SongImportExportService.exportSongToJson(activeSong);
+                    await Clipboard.setData(ClipboardData(text: jsonStr));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: AppTheme.stageGreen,
+                          content: Text('Song JSON copied to clipboard'),
+                        ),
+                      );
+                    }
+                  } else if (val == 'pdf') {
+                    _exportPdf(activeSong);
+                  } else if (val == 'midi') {
+                    _exportMidi(activeSong);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'text',
+                    child: Row(
+                      children: [
+                        Icon(Icons.notes, size: 20),
+                        SizedBox(width: 10),
+                        Text('Copy Plain Text / ChordPro'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'json',
+                    child: Row(
+                      children: [
+                        Icon(Icons.data_object, size: 20),
+                        SizedBox(width: 10),
+                        Text('Copy JSON'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem(
+                    value: 'pdf',
+                    child: Row(
+                      children: [
+                        Icon(Icons.picture_as_pdf_outlined, size: 20),
+                        SizedBox(width: 10),
+                        Text('Export PDF Lead Sheet'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'midi',
+                    child: Row(
+                      children: [
+                        Icon(Icons.audiotrack_outlined, size: 20),
+                        SizedBox(width: 10),
+                        Text('Export MIDI File'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               IconButton(
                 icon: const Icon(Icons.edit_outlined),

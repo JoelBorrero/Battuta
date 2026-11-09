@@ -23,12 +23,16 @@ import 'package:go_router/go_router.dart';
 ///
 /// When [songId] is null, operates in creation mode.
 /// When [songId] is provided, loads existing data from the database.
+/// When [initialSong] is provided, pre-populates fields (e.g. from an import).
 class SongEditorPage extends ConsumerStatefulWidget {
   /// Creates a [SongEditorPage].
-  const SongEditorPage({this.songId, super.key});
+  const SongEditorPage({this.songId, this.initialSong, super.key});
 
   /// The ID of the song to edit, or null for creating a new song.
   final String? songId;
+
+  /// Optional initial song to populate fields with (e.g. from an import).
+  final Song? initialSong;
 
   @override
   ConsumerState<SongEditorPage> createState() => _SongEditorPageState();
@@ -72,7 +76,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     _tagInputController = TextEditingController();
     _notesController = TextEditingController();
 
-    if (widget.songId == null) {
+    if (widget.initialSong != null) {
+      _populateFromSong(widget.initialSong!);
+    } else if (widget.songId == null) {
       // Creation mode: seed with a single default verse
       _sections.add(
         _EditableSection(
