@@ -7,7 +7,6 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
-import 'package:battuta/features/repertoire/data/datasources/cifra_club_service.dart';
 import 'package:battuta/features/repertoire/data/datasources/song_url_import_service.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
@@ -67,7 +66,7 @@ class _SongImportModalState extends ConsumerState<SongImportModal> {
   final SongUrlImportService _urlService = SongUrlImportService();
   bool _isFetchingUrl = false;
   String? _urlError;
-  CifraClubParsedSong? _urlParsedSong;
+  ScrapedSongResult? _urlParsedSong;
   Song? _urlConvertedSong;
 
   // ── Text / Backup Import State ──
@@ -122,15 +121,6 @@ Unending [D]love amazing [G]grace
       return;
     }
 
-    final provider = SongUrlImportService.detectProvider(rawUrl);
-    if (provider == SupportedUrlProvider.laCuerda) {
-      setState(() {
-        _urlError =
-            'LaCuerda importer is coming soon! Cifra Club (cifraclub.com) is currently active.';
-      });
-      return;
-    }
-
     setState(() {
       _isFetchingUrl = true;
       _urlError = null;
@@ -138,7 +128,7 @@ Unending [D]love amazing [G]grace
 
     try {
       final parsed = await _urlService.fetchPreview(rawUrl);
-      final song = CifraClubService.toDomainSong(parsed);
+      final song = parsed.toSong();
 
       if (mounted) {
         setState(() {
@@ -491,7 +481,7 @@ Unending [D]love amazing [G]grace
           children: [
             _buildProviderChip('Cifra Club', isActive: true),
             const SizedBox(width: 8),
-            _buildProviderChip('LaCuerda', isActive: false, label: 'Coming Soon'),
+            _buildProviderChip('LaCuerda', isActive: true),
           ],
         ),
         const SizedBox(height: 12),
@@ -502,8 +492,8 @@ Unending [D]love amazing [G]grace
           controller: _urlController,
           style: TextStyle(fontSize: 14, color: primaryTextColor),
           decoration: InputDecoration(
-            labelText: 'Full Song URL',
-            hintText: 'https://www.cifraclub.com/la-ibi/santo-por-siempre/',
+            labelText: 'Full Song URL or Slug',
+            hintText: 'e.g. cifraclub.com/... or lacuerda.net/...',
             prefixIcon: const Icon(Icons.link, color: AppTheme.stageAmber),
             suffixIcon: Row(
               mainAxisSize: MainAxisSize.min,
@@ -646,11 +636,12 @@ Unending [D]love amazing [G]grace
                 ),
                 const SizedBox(height: 12),
 
-                // Badges: Key, Tempo, Tuning, Capo
+                // Badges: Provider, Key, Tempo, Tuning, Capo
                 Wrap(
                   spacing: 8,
                   runSpacing: 6,
                   children: [
+                    _buildMetaChip(_urlParsedSong!.provider.displayName),
                     _buildMetaChip('Key: ${_urlParsedSong!.key}'),
                     if (_urlParsedSong!.bpm != null)
                       _buildMetaChip('${_urlParsedSong!.bpm} BPM'),

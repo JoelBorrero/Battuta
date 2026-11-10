@@ -39,6 +39,7 @@ void main() {
       expect(find.text('Text / JSON'), findsOneWidget);
       expect(find.byKey(const ValueKey('song_import_url_field')), findsOneWidget);
       expect(find.text('Cifra Club'), findsOneWidget);
+      expect(find.text('LaCuerda'), findsOneWidget);
     });
 
     testWidgets('switches to Gemini Scan tab and displays camera & gallery action buttons', (tester) async {

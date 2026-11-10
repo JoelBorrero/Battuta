@@ -195,6 +195,14 @@ class ChordParser {
     r'^([A-Ga-g][#b]?)([^/]*)(?:/(.*))?$',
   );
 
+  static final _validSuffixRegex = RegExp(
+    r'^(?:m|min|maj|dim|aug|sus|add|M|dom|[0-9#b\+\-\(\)/Δ°ø\^])*$',
+    caseSensitive: false,
+  );
+
+  /// Common lowercase words starting with A-G that should not be parsed as chords.
+  static const _commonNonChordWords = {'es', 'el', 'en', 'al', 'as', 'an', 'am'};
+
   /// Parses a space, bar, comma, or newline-separated chord progression.
   ///
   /// For example:
@@ -217,15 +225,22 @@ class ChordParser {
 
   /// Parses an individual chord token into a [ChordCell].
   static ChordCell? parseChord(String token, {int beats = 4}) {
-    final match = _chordPattern.firstMatch(token.trim());
+    final trimmed = token.trim();
+    if (_commonNonChordWords.contains(trimmed)) return null;
+
+    final match = _chordPattern.firstMatch(trimmed);
     if (match == null) return null;
+
+    final rawQuality = (match.group(2) ?? '').trim();
+    if (rawQuality.isNotEmpty && !_validSuffixRegex.hasMatch(rawQuality)) {
+      return null;
+    }
 
     final rawRoot = match.group(1)!;
     final root =
         rawRoot.substring(0, 1).toUpperCase() +
         (rawRoot.length > 1 ? rawRoot.substring(1) : '');
 
-    final rawQuality = (match.group(2) ?? '').trim();
     final rawBass = match.group(3)?.trim();
     final bass = (rawBass != null && rawBass.isNotEmpty)
         ? rawBass.substring(0, 1).toUpperCase() +

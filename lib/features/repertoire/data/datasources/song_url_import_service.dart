@@ -1,32 +1,26 @@
 /// Battuta — URL Song Import Service.
 ///
 /// Coordinates fetching, parsing, and converting web lead sheets from supported
-/// chord sites (Cifra Club, and LaCuerda soon) into Battuta [Song] domain entities.
+/// chord sites (Cifra Club and LaCuerda) into Battuta [Song] domain entities.
 library;
 
-import 'dart:io';
-
 import 'package:battuta/features/repertoire/data/datasources/cifra_club_service.dart';
+import 'package:battuta/features/repertoire/data/datasources/la_cuerda_service.dart';
+import 'package:battuta/features/repertoire/data/datasources/scraped_song_result.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 
-/// Supported external chord/tab website providers.
-enum SupportedUrlProvider {
-  cifraClub('Cifra Club', 'cifraclub.com'),
-  laCuerda('LaCuerda', 'lacuerda.net'),
-  unknown('Web Link', '');
-
-  const SupportedUrlProvider(this.displayName, this.domain);
-  final String displayName;
-  final String domain;
-}
+export 'package:battuta/features/repertoire/data/datasources/scraped_song_result.dart';
 
 /// Service that ingests full URLs and returns parsed [Song] entities.
 class SongUrlImportService {
   SongUrlImportService({
     CifraClubService? cifraClubService,
-  }) : _cifraClubService = cifraClubService ?? CifraClubService();
+    LaCuerdaService? laCuerdaService,
+  })  : _cifraClubService = cifraClubService ?? CifraClubService(),
+        _laCuerdaService = laCuerdaService ?? LaCuerdaService();
 
   final CifraClubService _cifraClubService;
+  final LaCuerdaService _laCuerdaService;
 
   /// Detects the target provider from a raw [urlOrPath].
   static SupportedUrlProvider detectProvider(String urlOrPath) {
@@ -38,7 +32,12 @@ class SongUrlImportService {
       return SupportedUrlProvider.laCuerda;
     }
 
-    // Default to CifraClub if it looks like an artist/song slug (e.g. 'la-ibi/santo-por-siempre')
+    // Check if it matches LaCuerda artist/song-version pattern (e.g. 'coalo_zamorano/por_quien_eres_tu-5')
+    if (lower.contains('_') || RegExp(r'-\d+(\.(shtml|txt))?$').hasMatch(lower)) {
+      return SupportedUrlProvider.laCuerda;
+    }
+
+    // Default to CifraClub if it looks like standard slug (e.g. 'la-ibi/santo-por-siempre')
     if (RegExp(r'^[a-z0-9\-]+/[a-z0-9\-]+/?$').hasMatch(lower)) {
       return SupportedUrlProvider.cifraClub;
     }
@@ -53,34 +52,31 @@ class SongUrlImportService {
     switch (provider) {
       case SupportedUrlProvider.cifraClub:
         final parsed = await _cifraClubService.fetchSong(url);
-        return CifraClubService.toDomainSong(parsed, id: customId);
+        return parsed.toSong(id: customId);
 
       case SupportedUrlProvider.laCuerda:
-        throw const HttpException(
-          'LaCuerda scraper is coming soon! Cifra Club URLs are currently supported.',
-        );
+        final parsed = await _laCuerdaService.fetchSong(url);
+        return parsed.toSong(id: customId);
 
       case SupportedUrlProvider.unknown:
         throw const FormatException(
-          'Unsupported URL. Supported providers: Cifra Club (cifraclub.com) and LaCuerda (coming soon).',
+          'Unsupported URL. Supported providers: Cifra Club (cifraclub.com) and LaCuerda (lacuerda.net).',
         );
     }
   }
 
   /// Fetches raw parsed data from [url] without full domain conversion (for live preview).
-  Future<CifraClubParsedSong> fetchPreview(String url) async {
+  Future<ScrapedSongResult> fetchPreview(String url) async {
     final provider = detectProvider(url);
-    if (provider == SupportedUrlProvider.cifraClub) {
-      return _cifraClubService.fetchSong(url);
-    } else if (provider == SupportedUrlProvider.laCuerda) {
-      throw const HttpException(
-        'LaCuerda scraper is coming soon! Cifra Club URLs are currently supported.',
-      );
-    } else {
-      throw const FormatException(
-        'Unsupported URL. Supported providers: Cifra Club (cifraclub.com).',
-      );
+    switch (provider) {
+      case SupportedUrlProvider.cifraClub:
+        return _cifraClubService.fetchSong(url);
+      case SupportedUrlProvider.laCuerda:
+        return _laCuerdaService.fetchSong(url);
+      case SupportedUrlProvider.unknown:
+        throw const FormatException(
+          'Unsupported URL. Supported providers: Cifra Club (cifraclub.com) and LaCuerda (lacuerda.net).',
+        );
     }
   }
 }
-

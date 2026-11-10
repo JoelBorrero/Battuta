@@ -7,13 +7,14 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:battuta/features/repertoire/data/datasources/scraped_song_result.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 
 /// Structured song data parsed from a Cifra Club HTML response.
-class CifraClubParsedSong {
+class CifraClubParsedSong implements ScrapedSongResult {
   const CifraClubParsedSong({
     required this.title,
     required this.artist,
@@ -27,57 +28,81 @@ class CifraClubParsedSong {
     required this.chordProText,
   });
 
+  @override
+  SupportedUrlProvider get provider => SupportedUrlProvider.cifraClub;
+
   /// The song title (e.g. "Santo Por Siempre").
+  @override
   final String title;
 
   /// The artist or worship ministry (e.g. "Adoración La IBI").
+  @override
   final String artist;
 
   /// Root musical key / "Tom" (e.g. "G", "C#m").
+  @override
   final String key;
 
   /// Tempo in beats per minute, if available.
+  @override
   final int? bpm;
 
   /// Capotasto fret offset (0 if no capo).
+  @override
   final int capo;
 
   /// Instrument tuning (e.g. "E A D G B E").
+  @override
   final String tuning;
 
   /// All unique chord names identified in the chart.
+  @override
   final List<String> chordsUsed;
 
   /// Parsed sections (Intro, Verse, Chorus, Bridge, etc.).
+  @override
   final List<CifraClubSection> sections;
 
   /// Clean plain-text chord chart with chords positioned above lyrics.
+  @override
   final String plainText;
 
   /// Standard ChordPro-formatted text with inline bracketed chords (e.g. "[G]Santo").
+  @override
   final String chordProText;
+
+  @override
+  Song toSong({String? id}) => CifraClubService.toDomainSong(this, id: id);
 }
 
 /// A parsed section from Cifra Club.
-class CifraClubSection {
+class CifraClubSection implements ScrapedSongSection {
   const CifraClubSection({
     required this.name,
     required this.lyrics,
     required this.chords,
     required this.rawContent,
+    this.repeatCount = 1,
   });
 
   /// Section heading (e.g. "Intro", "Primera Parte", "Estribillo 1", "Puente").
+  @override
   final String name;
 
   /// Pure lyrics text for this section.
+  @override
   final String lyrics;
 
   /// Ordered list of chord names appearing in this section.
+  @override
   final List<String> chords;
 
   /// Raw text content of this section with bracketed chord annotations.
+  @override
   final String rawContent;
+
+  @override
+  final int repeatCount;
 }
 
 /// Production-ready service that fetches and extracts Cifra Club songs.
