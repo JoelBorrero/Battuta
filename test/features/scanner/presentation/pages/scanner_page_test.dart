@@ -1,14 +1,19 @@
 import 'dart:typed_data';
 
+import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/scanner/data/services/image_capture_service.dart';
 import 'package:battuta/features/scanner/domain/repositories/omr_repository.dart';
 import 'package:battuta/features/scanner/presentation/pages/scanner_page.dart';
 import 'package:battuta/features/scanner/presentation/providers/omr_provider.dart';
 import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
+import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockImageCaptureService extends Mock implements ImageCaptureService {}
@@ -86,6 +91,10 @@ final kTransparent1x1Png = Uint8List.fromList([
 ]);
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(Uint8List(0));
+  });
+
   late MockImageCaptureService mockCaptureService;
   late MockOmrRepository mockOmrRepo;
 
@@ -152,6 +161,70 @@ void main() {
 
         expect(find.byType(ScanFlowModal), findsOneWidget);
         verify(() => mockCaptureService.pickFromGallery()).called(1);
+      },
+    );
+
+    testWidgets(
+      'extracting score navigates to song detail and shows SnackBar',
+      (tester) async {
+        final inMemoryRepo = InMemorySongRepository(initialSongs: []);
+        const score = Score(id: 'score-123', title: 'Way Maker');
+        when(
+          () => mockOmrRepo.extractFullLeadSheet(
+            imageBytes: any(named: 'imageBytes'),
+            mimeType: any(named: 'mimeType'),
+          ),
+        ).thenAnswer((_) async => const Right(score));
+
+        final router = GoRouter(
+          initialLocation: '/scanner',
+          routes: [
+            GoRoute(
+              path: '/scanner',
+              builder: (context, state) => const ScannerPage(),
+            ),
+            GoRoute(
+              path: '/repertoire/:songId',
+              builder: (context, state) => Scaffold(
+                body: Text('Navigated to Song ${state.pathParameters['songId']}'),
+              ),
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              imageCaptureServiceProvider.overrideWithValue(mockCaptureService),
+              omrRepositoryProvider.overrideWithValue(mockOmrRepo),
+              songRepositoryProvider.overrideWithValue(inMemoryRepo),
+            ],
+            child: MaterialApp.router(
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('open_camera_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ScanFlowModal), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('scan_analyze_btn')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const ValueKey('open_in_repertoire_btn')), findsOneWidget);
+
+        await tester.ensureVisible(find.byKey(const ValueKey('open_in_repertoire_btn')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const ValueKey('open_in_repertoire_btn')));
+        await tester.pumpAndSettle();
+
+        // Verifies navigation occurred to the song detail page
+        expect(find.text('Navigated to Song score-123'), findsOneWidget);
+        expect(find.text('Added "Way Maker" to Repertoire!'), findsOneWidget);
       },
     );
   });

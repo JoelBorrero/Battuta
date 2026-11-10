@@ -345,9 +345,11 @@ class ScanFlowModal extends ConsumerWidget {
                           ),
                           const SizedBox(height: 12),
                           FilledButton.tonal(
+                            key: const ValueKey('open_in_repertoire_btn'),
                             onPressed: () {
-                              onScoreExtracted?.call(state.extractedScore!);
+                              final score = state.extractedScore!;
                               Navigator.of(context).pop();
+                              onScoreExtracted?.call(score);
                             },
                             child: Text(l10n?.openInRepertoire ?? 'Open in Repertoire'),
                           ),
@@ -362,11 +364,11 @@ class ScanFlowModal extends ConsumerWidget {
                           ),
                           const SizedBox(height: 12),
                           FilledButton.tonal(
+                            key: const ValueKey('open_in_rhythm_editor_btn'),
                             onPressed: () {
-                              onSectionExtracted?.call(
-                                state.extractedPitchResult!,
-                              );
+                              final result = state.extractedPitchResult!;
                               Navigator.of(context).pop();
+                              onSectionExtracted?.call(result);
                             },
                             child: Text(l10n?.openInRhythmEditor ?? 'Open in Rhythm Editor'),
                           ),

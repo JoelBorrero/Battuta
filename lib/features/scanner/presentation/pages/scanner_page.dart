@@ -38,8 +38,22 @@ class ScannerPage extends ConsumerWidget {
                     'Added "${song.title}" to Repertoire!',
               ),
               behavior: SnackBarBehavior.floating,
+              action: SnackBarAction(
+                label: l10n?.openInRepertoire ?? 'Open in Repertoire',
+                onPressed: () {
+                  if (context.mounted) {
+                    while (context.canPop()) {
+                      context.pop();
+                    }
+                    context.go('/repertoire/${song.id}');
+                  }
+                },
+              ),
             ),
           );
+          while (context.canPop()) {
+            context.pop();
+          }
           context.go('/repertoire/${song.id}');
         }
       },

@@ -114,15 +114,19 @@ class Repertoire extends _$Repertoire {
     final result = await repository.saveSong(song);
     result.fold(
       (failure) {
-        state = previousState; // rollback
-        state = AsyncError(failure, StackTrace.current);
+        if (ref.mounted) {
+          state = previousState; // rollback
+          state = AsyncError(failure, StackTrace.current);
+        }
       },
       (saved) {
-        final current = state.value ?? [];
-        state = AsyncData([
-          for (final s in current)
-            if (s.id == song.id) saved else s,
-        ]);
+        if (ref.mounted) {
+          final current = state.value ?? [];
+          state = AsyncData([
+            for (final s in current)
+              if (s.id == song.id) saved else s,
+          ]);
+        }
       },
     );
   }
@@ -167,14 +171,18 @@ class Repertoire extends _$Repertoire {
     final result = await repository.saveSong(song);
     result.fold(
       (failure) {
-        state = previousState; // rollback
-        state = AsyncError(failure, StackTrace.current);
+        if (ref.mounted) {
+          state = previousState; // rollback
+          state = AsyncError(failure, StackTrace.current);
+        }
       },
       (saved) {
-        state = AsyncData([
-          for (final s in state.value ?? [])
-            if (s.id == song.id) saved else s,
-        ]);
+        if (ref.mounted) {
+          state = AsyncData([
+            for (final s in state.value ?? [])
+              if (s.id == song.id) saved else s,
+          ]);
+        }
       },
     );
   }
@@ -193,8 +201,10 @@ class Repertoire extends _$Repertoire {
     final result = await repository.deleteSong(songId);
     result.fold(
       (failure) {
-        state = previousState; // rollback
-        state = AsyncError(failure, StackTrace.current);
+        if (ref.mounted) {
+          state = previousState; // rollback
+          state = AsyncError(failure, StackTrace.current);
+        }
       },
       (_) {
         /* already removed optimistically */

@@ -172,7 +172,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           IconButton(
             icon: const Icon(Icons.document_scanner_outlined),
             tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
-            onPressed: () => context.push('/scanner'),
+            onPressed: () => context.go(AppRoutes.scanner),
           ),
           IconButton(
             icon: const Icon(Icons.search),
@@ -381,7 +381,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                       OutlinedButton.icon(
                         icon: const Icon(Icons.document_scanner_outlined),
                         label: Text(l10n?.scanScore ?? 'Scan Score'),
-                        onPressed: () => context.push('/scanner'),
+                        onPressed: () => context.go(AppRoutes.scanner),
                       ),
                     ],
                   ),
