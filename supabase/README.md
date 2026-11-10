@@ -1,54 +1,225 @@
-# Battuta Supabase Cloud Architecture & Sync Strategy
+# Battuta Supabase backend
 
-This directory contains the PostgreSQL schema and Row Level Security (RLS) policies for Battuta's cloud synchronization and band collaboration backend.
+Schema, Row Level Security (RLS), RPCs and tests for real accounts, organizations and bands.
+Battuta stays offline-first: Drift (SQLite) is the source of truth for the UI, and signing in is only
+needed for organizations and shared data (cached locally). Without an account the app runs on local data.
 
----
-
-## 1. Architectural Philosophy: Offline-First Invariant (FR-1.2)
-
-Battuta is designed primarily for live musical performance on stage (iPadOS and macOS) where WiFi can drop unexpectedly.
-- **Local Drift (SQLite)** is the single source of truth for the UI layer.
-- The UI never waits for or directly queries remote Supabase endpoints.
-- All writes are committed locally to Drift instantly.
-- When an internet connection is available, the `SupabaseCloudSyncService` executes two-way background synchronization:
-  1. **Push**: Uploads local changes (Songs, Scores, Setlists) to Supabase tables.
-  2. **Pull**: Fetches records modified since the `lastSyncedAt` timestamp.
-  3. **Conflict Resolution**: Employs deterministic **Last-Write-Wins (LWW)** using ISO-8601 UTC timestamps (`updated_at`), preserving whichever change was authored most recently.
+Everything lives in one baseline migration: `migrations/20261110000000_baseline.sql`.
+The backend is a test environment, so the schema is rebuilt from scratch rather than patched.
 
 ---
 
-## 2. PostgreSQL Schema & RLS
+## 1. Model
 
-The database migration is located in:
-`supabase/migrations/20261107000000_battuta_schema.sql`
+user -> organization -> bands. A user can administer several organizations and be a plain member of
+others. Inside an organization a musician can play in several bands.
 
-### Tables Included:
-1. `teams`: Team/band workspace entity.
-2. `team_members`: Band roster with roles (`pianist`, `electricGuitar`, etc.), vocal pitch ranges, availability status, and `is_admin` privileges.
-3. `scores`: Root musical score tree (tempo, key, time signature, JSON sections, metadata).
-4. `sections`: Sections of a score (Intro, Verse, Chorus, Bridge, etc.) with format and indications.
-5. `measures`: Granular measure details, measure numbers, and time signatures.
-6. `note_events`: Pitches, duration in ticks, and lyrics.
-7. `chord_symbols`: Harmonic symbols with beat offset ticks.
-8. `songs`: Repertoire song catalog (chords, sections, lyrics, tags).
-9. `setlists`: Performance setlists with ordered items.
-10. `calendar_events`: Scheduled rehearsal and service events with assigned musicians.
+| Table | Purpose |
+| --- | --- |
+| `profiles` | One per account, created by trigger on sign-up. `username` (unique, case-insensitive, 3-30 chars of `[a-z0-9_.]`, stored lowercase), `display_name`, `avatar_url`, `deactivated_at`. No email. No foreign key to `auth.users`: a profile outlives its auth user. |
+| `organizations` | `name`, `created_by`, `archived_at`. |
+| `organization_members` | `(organization_id, user_id)` unique, `role` (`admin` or `member`), per-organization musician profile (`instruments`, `min_pitch`, `max_pitch`, `notes`), `deactivated_at`. |
+| `organization_archive_requests`, `organization_archive_approvals` | Open archive request and the admins who approved it. |
+| `bands` / `band_members` | Bands of an organization; a member can be in several. Composite foreign keys make it impossible to link a band and a member of different organizations. |
+| `invite_links` | Join token (64 hex chars) + optional `band_id`, `expires_at`, `max_uses`, `use_count`, `revoked_at`. |
+| `invitations` | Invite by username: `pending`, `accepted`, `declined`, `cancelled`. One pending invitation per user and organization. |
+| `songs` | The work: `title`, `artist`, `created_by`, `merged_into_id` (redirect after a merge). No chord content. |
+| `song_versions` | Arrangements of a song: `owner_id`, `label`, `forked_from_version_id`, `visibility` (`private`, `organizations`, `public`) and the content (key, tempo, sections, lyrics, ...). |
+| `version_shares` | Organizations a version with visibility `organizations` is shared with. |
+| `scores` (+ `sections`, `measures`, `note_events`, `chord_symbols`) | Notation of a version. |
+| `organization_repertoire` | The versions an organization plays (picked by admins among versions visible to it). |
+| `song_merge_requests` | Merge of two separately created copies of the same work. |
+| `setlists`, `setlist_items` | Setlists reference repertoire versions; items keep a title snapshot. |
+| `calendar_events`, `recurring_schedules` | Belong to an organization, optional `band_id`. |
+| `event_assignments` | Who plays what at an event, with `response` (`pending`, `accepted`, `declined`), `responded_at`, `decline_reason`. |
+| `member_absences` | Days a member is away (`starts_on`, `ends_on`, `note`). |
+| `notifications` | `recipient_id`, `organization_id?`, `type`, `payload`, `read_at`. Created only by triggers and RPCs. |
+| `workspace_quotas`, `workspace_usage` | Gemini credit and storage metering per organization. A quota row is only an override of the free default (`organization_quota(org)`). |
 
-### Row Level Security (RLS):
-- All tables enforce strict RLS.
-- Helper functions `public.is_team_member(team_id)` and `public.is_team_admin(team_id)` ensure that users can only read and write scores, songs, setlists, and calendar entries belonging to teams they are members of.
-- Direct user ownership (`owner_id = auth.uid()`) is also respected for private lead sheets.
+Removed from the old schema: `teams`, `team_members`, `team_groups`, every `is_demo` column, demo seed
+data, the anonymous demo policies and the free-text `availability` column. Song, setlist and event ids
+that used to be client-generated text: `songs`, `song_versions` and `scores` are now `uuid`;
+`setlists`, `calendar_events` and `recurring_schedules` keep text ids.
+
+## 2. Permissions
+
+Defense in depth: table/column `GRANT`s, then RLS. `anon` can only read public song content.
+
+- Organization data is visible only to active members.
+- Writes to organization content (bands, band members, setlists and items, events, schedules,
+  assignments, repertoire): organization admins only, and only while the organization is not archived.
+- A member can update only their own musician fields through a column-level grant. Nobody, admins
+  included, can change `role`, `organization_id` or `user_id` directly. Admins may edit members' musician
+  fields; the member is notified (`member_profile_edited`, with the changed fields).
+- `organization_members`, `organizations`, `invite_links`, `invitations`, `notifications` have no insert/delete
+  access for clients: they change only through the RPCs below or triggers. This closes the old hole where
+  any signed-in user could insert themselves into any team as admin.
+- An active organization always keeps one active admin: the last admin cannot leave, be removed, be
+  demoted or deactivated (`last_admin`). Archive the organization instead.
+- Removing a member (or a member leaving) deletes their band memberships and future event assignments.
+  Past assignments are kept with `member_id` null. Their song versions stay shared with the organization
+  (and in its repertoire and setlists), exactly as after deactivation, until the owner unshares them.
+  Events cannot be assigned to a deactivated member (`member_deactivated`).
+- Profiles are visible to yourself, people sharing an organization (deactivated ones included, as history),
+  the inviter of your pending invitations, admins' invitees, owners of versions you can see and the other
+  side of a merge request. `search_profiles` is the only way to find other users (username/display name,
+  never email, never deactivated accounts).
+
+### Archiving organizations
+
+`request_organization_archive(org)` (admin) opens a request and counts as the requester's approval. Every
+*current* admin must `approve_organization_archive(org)`; admins added or removed meanwhile change who is
+needed, and removing/demoting the last missing admin completes the request. Any admin can
+`cancel_organization_archive(org)`. When everyone approved, `archived_at` is set. Nothing is deleted.
+An archived organization is read-only for everyone (members keep read access to history), pending
+invitations are cancelled, invite links revoked, joins and invitations fail with `organization_archived`, and
+it disappears from `my_organizations()` unless `my_organizations(true)`. Members can still leave. A single admin
+approves on their own, so a sole admin archives immediately. **Archiving cannot be undone from the app**:
+there is no unarchive RPC, only the service role can clear `archived_at`, so clients should ask for an
+explicit confirmation.
+
+### Deactivated accounts
+
+`deactivate_account()` sets `profiles.deactivated_at`, clears the avatar, keeps `username`/`display_name`,
+marks every membership inactive (`organization_members.deactivated_at`), removes band memberships and future
+assignments, and cancels pending invitations to the user. Past assignments and everything authored stay.
+A last admin of an active organization with other active members is blocked (`last_admin`); a sole member
+archives the organization. Deleting the `auth.users` row does the same (trigger) and never deletes profiles
+or content (no cascade from `auth.users`). Deactivated users cannot call RPCs (`account_deactivated`), cannot
+be invited or searched, cannot join, see no organization data and cannot edit their versions. Their
+usernames stay reserved. Sign-in itself is not blocked at the auth layer (see doubts in the task report).
+
+### Songs, versions, visibility, forks, merges
+
+One song (the work) has many versions by different owners, like LaCuerda.
+
+- `visibility` is per version: `private` (owner only), `organizations` (members of the orgs in
+  `version_shares`; the owner can share only to organizations they actively belong to and that are not
+  archived), `public` (anyone, including `anon`).
+- A song is visible if you created it or can see one of its versions (or the surviving song after a
+  merge): a private version never leaks its title.
+- Only the version owner edits or deletes a version and its score tree. Admins cannot. The song title/artist
+  is edited by the song's creator.
+- `fork_song_version(version, label?)`: anyone who can see a version copies it (content and score tree)
+  under the same song as a private version they own. The original owner is notified (`song_version_forked`).
+- `request_song_merge(source, target)`: the requester must have created one of the songs; the creator of
+  the other approves with `respond_to_song_merge(request, accept)`. On approval every version of the source
+  moves under the target, the source gets `merged_into_id`, versions keep owner and visibility. The request stores `source_title` / `target_title` snapshots (also in
+  the `song_merge_requested` notification) so the approver sees both titles without read access. Both creators
+  the same, or the other creator deactivated: approved automatically. Both ids are resolved through earlier
+  merges first (`resolve_song`); a merge that would end in the same song is `merge_cycle`.
+- A version inserted under a merged-away song is attached to the surviving song (trigger).
+- Org repertoire: admins pick a **version** among versions visible to the organization (shared to it or
+  public). Setlist items reference repertoire versions. When a version stops being visible to an organization
+  (unshared, or made private/public, which also deletes its `version_shares` rows) it leaves that repertoire and setlist items
+  keep their title snapshot with `version_id` null.
+
+### Availability
+
+`member_absences` are managed by the member and readable by the member and the organization's admins.
+`members_available_on(org, date)` lists active members without an absence that day (any member may call it).
+`event_assignments.response` can only be set by the assigned member (`not_assignee` otherwise); only
+admins (re)assign (`not_admin` otherwise) and reassigning resets the response to `pending`.
+
+### Notifications
+
+Rows are created by triggers/RPCs only; recipients read their own and set `read_at` (or call
+`mark_notifications_read(ids?)`). Types: `invitation`, `role_changed`, `removed`, `member_profile_edited`,
+`event_assigned`, `event_unassigned`, `assignment_declined` (to admins), `archive_requested` /
+`archive_cancelled` (to the other admins), `archive_completed` (to all members), `song_version_forked`,
+`song_merge_requested`, `song_merge_accepted`, `song_merge_declined`. Deactivated users are never notified.
+Clean-up caused by removal, deactivation or deleting an event does not produce unassignment notifications.
+
+## 3. RPCs
+
+All are `SECURITY DEFINER` with a pinned `search_path`. Errors use the SQL error code and a machine
+readable message, e.g. `invite_expired`.
+
+| RPC | Who | Notes |
+| --- | --- | --- |
+| `create_organization(name)` | signed in | Creator becomes admin. No quota row (free default). |
+| `my_organizations(include_archived = false)` | signed in | Organizations the caller actively belongs to. |
+| `organization_quota(org)` | member | Stored override or the free default. |
+| `request_organization_archive(org)` / `approve_organization_archive(org)` / `cancel_organization_archive(org)` | admin | See archiving. |
+| `deactivate_account()` | signed in | See deactivated accounts. |
+| `create_invite_link(org, band?, expires_in = 7 days, max_uses?)` | admin | Returns the row including `token`. |
+| `revoke_invite_link(id)` | admin | Idempotent. |
+| `join_with_invite_link(token)` | signed in | Creates a `member` row. Already a member (also a concurrent double submit): succeeds, no duplicate, no use consumed, band still added. |
+| `invite_user_by_username(org, username, band?)` | admin | Username is trimmed and case-insensitive. Notifies the user. |
+| `respond_to_invitation(id, accept)` | the invitee | Accept creates the membership (and band membership). |
+| `cancel_invitation(id)` | admin | Pending only. |
+| `set_member_role(member_id, role)` | admin | `admin` or `member`. |
+| `remove_member(member_id)` | admin | |
+| `leave_organization(org)` | member | |
+| `members_available_on(org, date)` | member | |
+| `fork_song_version(version, label?)` | signed in | |
+| `request_song_merge(source, target)` / `respond_to_song_merge(request, accept)` | song creators | |
+| `search_profiles(query)` | signed in | 3+ characters, max 20 rows, excludes the caller and deactivated accounts. |
+| `is_username_available(username)` | anyone | Sign-up pre-check; the unique index is the real guard. |
+| `mark_notifications_read(ids?)` | signed in | Returns how many were marked. |
+| `record_gemini_scan_usage(org, tokens, credits)` | member | Atomic usage counter. |
+
+Error codes:
+
+| SQLSTATE | Messages |
+| --- | --- |
+| `28000` | `not_authenticated` |
+| `42501` | `not_admin`, `not_member`, `not_assignee`, `not_song_creator` (and `permission denied` / RLS violations for direct table access) |
+| `22023` | `invalid_name`, `invalid_username`, `invalid_role`, `invalid_expiry`, `invalid_max_uses`, `invalid_amount` |
+| `P0002` | `invite_not_found`, `user_not_found`, `invitation_not_found`, `member_not_found`, `version_not_found`, `song_not_found`, `merge_request_not_found` |
+| `P0001` | `invite_revoked`, `invite_expired`, `invite_used_up`, `already_member`, `already_invited`, `cannot_invite_self`, `invitation_not_pending`, `last_admin`, `band_not_in_organization`, `organization_archived`, `archive_already_requested`, `archive_not_requested`, `account_deactivated`, `member_deactivated`, `merge_same_song`, `merge_cycle`, `merge_already_requested`, `merge_not_pending` |
+| `23505` | `username_taken` |
+
+`join_with_invite_link` checks, in order: not found, organization archived, revoked, expired, used up.
+
+### Sign-up
+
+The username comes from user metadata: `signUp(..., data: {'username': 'jane', 'display_name': 'Jane'})`.
+A missing or malformed username makes sign-up fail (`invalid_username`), and a taken one fails with
+`username_taken`. Call `is_username_available` first for a friendly check.
+
+### Realtime
+
+`organization_members`, `calendar_events`, `event_assignments`, `invitations` and `notifications` are in the
+`supabase_realtime` publication (RLS applies to realtime too).
 
 ---
 
-## 3. How to Deploy to Supabase
+## 4. Local development and tests
 
-1. Create a free or Pro project at [supabase.com](https://supabase.com).
-2. Go to the **SQL Editor** in your Supabase Dashboard.
-3. Paste the contents of `supabase/migrations/20261107000000_battuta_schema.sql` and click **Run**.
-4. Go to **Project Settings > API**:
-   - Copy the **Project URL**.
-   - Copy the **`anon` `public` key**.
-5. Configure in Battuta:
-   - Either add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to your local `.env` file, or
-   - In the Battuta app, navigate to **Settings > Cloud Synchronization (Supabase) > Supabase Connection** and paste the credentials directly.
+Requires the Supabase CLI and Docker.
+
+```bash
+supabase start        # first run pulls images and can take several minutes
+supabase db reset     # applies migrations/ to an empty local database (safe to repeat)
+supabase test db      # runs the pgTAP tests in supabase/tests/
+```
+
+Tests (`supabase/tests/*.test.sql`) run as different users by switching role and JWT claims
+(alice/admin, bob/member, carol/outsider, anonymous, deactivated users, ...) and roll back at the end.
+Each file is self-contained and defines a small `tests` helper schema (`tests.as_user('bob')`,
+`tests.as_anon()`, `tests.reset()`).
+
+- `01_profiles_and_schema`: schema shape, RLS everywhere, sign-up trigger, username rules, search, anonymous access.
+- `02_organizations_and_permissions`: membership, role changes, self-promotion attack, last admin, band
+  membership, setlists/events/assignments permissions, quotas.
+- `03_invites`: invite links and invitations, every RPC happy path and error code.
+- `04_archive`: archive request/approve/cancel, read-only archived organizations.
+- `05_deactivation`: deactivated accounts and `auth.users` deletion.
+- `06_songs`: visibility (anon/outsider/member/admin), owner-only editing, repertoire, setlist tombstones, forks, merges.
+- `07_availability_notifications`: absences, assignment responses, notifications.
+
+`supabase/.gitignore` keeps local-only files (`.branches`, `.temp`) out of git.
+
+## 5. Deploying to a hosted project
+
+```bash
+supabase link --project-ref <ref>
+supabase db push
+```
+
+Then copy the Project URL and the publishable (anon) key into the app (`SUPABASE_URL` and
+`SUPABASE_ANON_KEY` in `.env`, or Settings > Cloud Synchronization).
+
+Note: until the Dart data layer is migrated (task 003), the existing cloud sync still targets the old
+`team_id` tables and will fail gracefully against this schema.

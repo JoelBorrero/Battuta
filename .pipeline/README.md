@@ -13,7 +13,8 @@ subagents (see `.claude/agents/`) run one at a time and communicate only through
    - `APPROVE` or no accepted blockers/majors → go to step 5.
    - Otherwise → short fix plan appended to `04-triage.md`, back to step 2 (round + 1).
 5. **Close** (main session): write `summaries/<NNN-slug>.md` from `templates/summary.md`, delete the task
-   folder `<NNN-slug>/`, then make one Conventional Commit with the code and the summary.
+   folder `<NNN-slug>/`, add every deferred finding to `backlog.md`, then make one Conventional Commit with
+   the code, the summary and the backlog.
 
 ## The task record
 
