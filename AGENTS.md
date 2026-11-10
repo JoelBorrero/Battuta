@@ -52,3 +52,9 @@ Every task, whether adding a new feature, fixing a bug, resolving a layout overf
 - **Git Branches**:
   - Do not create new branches or worktrees. Make all changes on the currently checked-out branch, and do not switch branches unless the user explicitly asks.
 
+---
+
+## 3. Plan → Implement → Adversarial Review Pipeline
+
+For non-trivial tasks, follow `.pipeline/README.md`: the main session plans and triages, the `implementer` subagent builds, the `adversary` subagent reviews. Handoffs are files in `.pipeline/<NNN-slug>/`. Max 3 rounds; only blocker/major findings block; the implementer never commits until the review is approved.
+
