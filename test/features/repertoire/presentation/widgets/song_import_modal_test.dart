@@ -27,24 +27,46 @@ void main() {
   }
 
   group('SongImportModal', () {
-    testWidgets('opens modal and displays header and formatting instructions', (tester) async {
+    testWidgets('opens modal and displays header and import mode options', (tester) async {
       await tester.pumpWidget(buildTestWidget());
 
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Import Song / Repertoire'), findsOneWidget);
-      expect(find.text('Paste Clipboard'), findsOneWidget);
-      expect(find.text('Load Sample'), findsOneWidget);
-      expect(find.text('How to Format Your Song'), findsOneWidget);
-      expect(find.text('Import Song'), findsOneWidget);
+      expect(find.text('Import Song / Lead Sheet'), findsOneWidget);
+      expect(find.text('By URL'), findsOneWidget);
+      expect(find.text('Gemini Scan'), findsOneWidget);
+      expect(find.text('Text / JSON'), findsOneWidget);
+      expect(find.byKey(const ValueKey('song_import_url_field')), findsOneWidget);
+      expect(find.text('Cifra Club'), findsOneWidget);
     });
 
-    testWidgets('typing plain text with // comments updates preview and sections live', (tester) async {
+    testWidgets('switches to Gemini Scan tab and displays camera & gallery action buttons', (tester) async {
       await tester.pumpWidget(buildTestWidget());
 
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Gemini Scan'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Read Sheet Music with Gemini AI'), findsOneWidget);
+      expect(find.text('Capture with Camera'), findsOneWidget);
+      expect(find.text('Select from Photo Library'), findsOneWidget);
+    });
+
+    testWidgets('typing plain text on Text tab updates preview and sections live', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Text / JSON'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Paste Clipboard'), findsOneWidget);
+      expect(find.text('Load Sample'), findsOneWidget);
+      expect(find.text('How to Format Your Lead Sheet'), findsOneWidget);
 
       const leadSheet = '''
 // Title: Living Hope
@@ -68,20 +90,19 @@ void main() {
 
       expect(find.text('Living Hope'), findsOneWidget);
       expect(find.text('Phil Wickham'), findsOneWidget);
-      expect(find.text('Key Eb'), findsOneWidget);
-      expect(find.text('72 BPM'), findsOneWidget);
-      expect(find.text('4/4'), findsOneWidget);
+      expect(find.text('Key: Eb'), findsOneWidget);
       expect(find.text('Plain Text Lead Sheet (with // comments)'), findsOneWidget);
-      expect(find.text('SECTIONS DETECTED'), findsOneWidget);
-      expect(find.textContaining('Verse 1 ·'), findsOneWidget);
-      expect(find.textContaining('Chorus (2x) ·'), findsOneWidget);
+      expect(find.text('2 sections • 72 BPM'), findsOneWidget);
     });
 
-    testWidgets('tapping Load Sample populates template and saves to repository', (tester) async {
+    testWidgets('tapping Load Sample on Text tab populates template and saves to repository', (tester) async {
       final repo = InMemorySongRepository();
       await tester.pumpWidget(buildTestWidget(repo: repo));
 
       await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Text / JSON'));
       await tester.pumpAndSettle();
 
       // Tap Load Sample
@@ -90,8 +111,8 @@ void main() {
 
       expect(find.text('Amazing Grace'), findsOneWidget);
       expect(find.text('John Newton'), findsOneWidget);
-      expect(find.text('Key G'), findsOneWidget);
-      expect(find.textContaining('Chorus (2x) ·'), findsOneWidget);
+      expect(find.text('Key: G'), findsOneWidget);
+      expect(find.text('2 sections • 72 BPM'), findsOneWidget);
 
       // Tap Import Song
       await tester.tap(find.widgetWithText(FilledButton, 'Import Song'));
@@ -110,6 +131,9 @@ void main() {
       await tester.pumpWidget(buildTestWidget(repo: repo));
 
       await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Text / JSON'));
       await tester.pumpAndSettle();
 
       const jsonStr = r'''
@@ -144,8 +168,9 @@ void main() {
 
       expect(find.text('King of Kings'), findsOneWidget);
       expect(find.text('Hillsong'), findsOneWidget);
-      expect(find.text('Key D'), findsOneWidget);
+      expect(find.text('Key: D'), findsOneWidget);
       expect(find.text('JSON Backup (1 song)'), findsOneWidget);
+      expect(find.text('1 section • 68 BPM'), findsOneWidget);
 
       await tester.tap(find.text('Import Song'));
       await tester.pumpAndSettle();

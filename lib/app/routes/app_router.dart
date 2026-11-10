@@ -95,15 +95,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Tab 2 — Scanner
-          GoRoute(
-            path: AppRoutes.scanner,
-            name: 'scanner',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: ScannerPage()),
-          ),
-
-          // Tab 3 — Team
+          // Tab 2 — Team
           GoRoute(
             path: AppRoutes.team,
             name: 'team',
@@ -111,7 +103,7 @@ GoRouter appRouter(Ref ref) {
                 const NoTransitionPage(child: TeamPage()),
           ),
 
-          // Tab 4 — Live session
+          // Tab 3 — Live session
           GoRoute(
             path: AppRoutes.live,
             name: 'live',
@@ -126,7 +118,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Tab 5 — Settings
+          // Tab 4 — Settings
           GoRoute(
             path: AppRoutes.settings,
             name: 'settings',
@@ -134,6 +126,13 @@ GoRouter appRouter(Ref ref) {
                 const NoTransitionPage(child: SettingsPage()),
           ),
         ],
+      ),
+
+      // Standalone Scanner Route (Accessible directly or via deep link)
+      GoRoute(
+        path: AppRoutes.scanner,
+        name: 'scanner',
+        builder: (context, state) => const ScannerPage(),
       ),
     ],
   );

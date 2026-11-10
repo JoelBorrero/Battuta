@@ -34,11 +34,6 @@ class ScaffoldWithNavBar extends StatelessWidget {
             label: l10n?.navRepertoire ?? 'Repertoire',
           ),
           NavigationDestination(
-            icon: const Icon(Icons.document_scanner_outlined),
-            selectedIcon: const Icon(Icons.document_scanner),
-            label: l10n?.navScan ?? 'Scan',
-          ),
-          NavigationDestination(
             icon: const Icon(Icons.groups_outlined),
             selectedIcon: const Icon(Icons.groups),
             label: l10n?.navTeam ?? 'Team',
@@ -60,10 +55,9 @@ class ScaffoldWithNavBar extends StatelessWidget {
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
-    if (location.startsWith(AppRoutes.scanner)) return 1;
-    if (location.startsWith(AppRoutes.team)) return 2;
-    if (location.startsWith(AppRoutes.live)) return 3;
-    if (location.startsWith(AppRoutes.settings)) return 4;
+    if (location.startsWith(AppRoutes.team)) return 1;
+    if (location.startsWith(AppRoutes.live)) return 2;
+    if (location.startsWith(AppRoutes.settings)) return 3;
     return 0; // Repertoire is default
   }
 
@@ -72,12 +66,10 @@ class ScaffoldWithNavBar extends StatelessWidget {
       case 0:
         context.go(AppRoutes.repertoire);
       case 1:
-        context.go(AppRoutes.scanner);
-      case 2:
         context.go(AppRoutes.team);
-      case 3:
+      case 2:
         context.go(AppRoutes.live);
-      case 4:
+      case 3:
         context.go(AppRoutes.settings);
     }
   }

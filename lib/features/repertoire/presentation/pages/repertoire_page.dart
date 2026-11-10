@@ -8,10 +8,13 @@ library;
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_import_modal.dart';
+import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
+import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:battuta/features/sync/presentation/widgets/cloud_sync_status_indicator.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -148,6 +151,115 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     );
   }
 
+  void _openScannerDirect(BuildContext context) {
+    ScanFlowModal.show(
+      context,
+      onScoreExtracted: (Score score) async {
+        final song = score.toSong();
+        await ref.read(repertoireProvider.notifier).addSong(song);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppTheme.stageGreen,
+              content: Text('Added "${song.title}" to Repertoire!'),
+            ),
+          );
+          context.push('/repertoire/${song.id}');
+        }
+      },
+    );
+  }
+
+  void _showAddSongOptions(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                'Add Song to Repertoire',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0x22E5A93C),
+                  child: Icon(Icons.link, color: AppTheme.stageAmber),
+                ),
+                title: const Text('Import by Web URL',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('Scrape chords & lyrics from Cifra Club or web link'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  SongImportModal.show(context, initialTab: SongImportTab.url);
+                },
+              ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0x222E86DE),
+                  child: Icon(Icons.document_scanner_outlined, color: AppTheme.stageBlue),
+                ),
+                title: const Text('Scan with Gemini AI (OMR)',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('Scan printed sheet music from camera or photos'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _openScannerDirect(context);
+                },
+              ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0x2210B981),
+                  child: Icon(Icons.edit_note, color: AppTheme.stageGreen),
+                ),
+                title: const Text('Write in Song Editor',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('Create a blank lead sheet and enter sections manually'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  context.push('/repertoire/new');
+                },
+              ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0x229C27B0),
+                  child: Icon(Icons.content_paste, color: Colors.purple),
+                ),
+                title: const Text('Paste Text / Backup',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('Paste ChordPro text, plain lead sheets, or JSON backups'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  SongImportModal.show(context, initialTab: SongImportTab.text);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -172,7 +284,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           IconButton(
             icon: const Icon(Icons.document_scanner_outlined),
             tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
-            onPressed: () => context.go(AppRoutes.scanner),
+            onPressed: () => _openScannerDirect(context),
           ),
           IconButton(
             icon: const Icon(Icons.search),
@@ -269,7 +381,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   ? (l10n?.addSong ?? 'Add song')
                   : (l10n?.createSetlist ?? 'Create setlist'),
               onPressed: _selectedTabIndex == 0
-                  ? () => context.push('/repertoire/new')
+                  ? () => _showAddSongOptions(context)
                   : _showCreateSetlistDialog,
               icon: const Icon(Icons.add),
               label: Text(
@@ -375,13 +487,21 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                         FilledButton.icon(
                           icon: const Icon(Icons.add),
                           label: Text(l10n?.addSong ?? 'Add Song'),
-                          onPressed: () => context.push('/repertoire/new'),
+                          onPressed: () => _showAddSongOptions(context),
                         ),
                       ],
                       OutlinedButton.icon(
+                        icon: const Icon(Icons.link),
+                        label: const Text('Import by URL'),
+                        onPressed: () => SongImportModal.show(
+                          context,
+                          initialTab: SongImportTab.url,
+                        ),
+                      ),
+                      OutlinedButton.icon(
                         icon: const Icon(Icons.document_scanner_outlined),
                         label: Text(l10n?.scanScore ?? 'Scan Score'),
-                        onPressed: () => context.go(AppRoutes.scanner),
+                        onPressed: () => _openScannerDirect(context),
                       ),
                     ],
                   ),
