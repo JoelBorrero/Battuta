@@ -14,6 +14,9 @@
 /// - **Anti-Material**: Complete removal of drop shadows, elevations, and ink splashes.
 library;
 
+import 'package:battuta/app/design_system/motion/page_transitions.dart';
+import 'package:battuta/app/theme/battuta_brand.dart';
+import 'package:battuta/app/theme/battuta_tokens.dart';
 import 'package:flutter/material.dart';
 
 /// Central theme provider and design system tokens for Battuta.
@@ -402,6 +405,27 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: slateBackground,
       canvasColor: slateBackground,
 
+      // Brand tokens & signature motion
+      extensions: const <ThemeExtension<dynamic>>[BattutaBrand.dark],
+      pageTransitionsTheme: battutaPageTransitionsTheme,
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: amberAccent,
+        linearTrackColor: slateBorder,
+        circularTrackColor: Colors.transparent,
+      ),
+      tooltipTheme: const TooltipThemeData(
+        waitDuration: BattutaMotion.bar,
+        decoration: BoxDecoration(
+          color: textOffWhite,
+          borderRadius: BattutaRadius.smAll,
+        ),
+        textStyle: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 12,
+          color: charcoalText,
+        ),
+      ),
+
       // Anti-Material: Completely disable ripple and ink splash effects
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -409,15 +433,15 @@ abstract final class AppTheme {
       splashFactory: NoSplash.splashFactory,
 
       // ── Card Theme ───────────────────────────────────────────────────
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         elevation: 0,
         color: slateSurface,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: slateBorder, width: 1),
+          borderRadius: BattutaRadius.mdAll,
+          side: BorderSide(color: slateBorder, width: 1),
         ),
         clipBehavior: Clip.antiAlias,
       ),
@@ -606,7 +630,9 @@ abstract final class AppTheme {
         backgroundColor: slateSurface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(BattutaRadius.lg),
+          ),
           side: BorderSide(color: slateBorder, width: 1),
         ),
         showDragHandle: true,
@@ -619,9 +645,9 @@ abstract final class AppTheme {
         elevation: 0,
         backgroundColor: slateSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: slateBorder, width: 1),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BattutaRadius.lgAll,
+          side: BorderSide(color: slateBorder, width: 1),
         ),
         titleTextStyle: typography.titleLarge?.copyWith(color: textOffWhite),
       ),
@@ -660,13 +686,13 @@ abstract final class AppTheme {
           splashFactory: NoSplash.splashFactory,
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return slateBorder;
+              return amberMuted;
             }
             return slateSurface;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return textOffWhite;
+              return amberAccent;
             }
             return textMuted;
           }),
@@ -714,7 +740,7 @@ abstract final class AppTheme {
       ),
 
       // ── Floating Action Button Theme ─────────────────────────────────
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 0,
         focusElevation: 0,
         hoverElevation: 0,
@@ -722,7 +748,13 @@ abstract final class AppTheme {
         backgroundColor: amberAccent,
         foregroundColor: obsidianText,
         splashColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: StadiumBorder(),
+        extendedTextStyle: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
       ),
     );
   }
@@ -741,6 +773,27 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: pearlBackground,
       canvasColor: pearlBackground,
 
+      // Brand tokens & signature motion
+      extensions: const <ThemeExtension<dynamic>>[BattutaBrand.light],
+      pageTransitionsTheme: battutaPageTransitionsTheme,
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: amberAccent,
+        linearTrackColor: pearlBorder,
+        circularTrackColor: Colors.transparent,
+      ),
+      tooltipTheme: const TooltipThemeData(
+        waitDuration: BattutaMotion.bar,
+        decoration: BoxDecoration(
+          color: charcoalText,
+          borderRadius: BattutaRadius.smAll,
+        ),
+        textStyle: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 12,
+          color: textOffWhite,
+        ),
+      ),
+
       // Anti-Material: Completely disable ripple and ink splash effects
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -749,15 +802,15 @@ abstract final class AppTheme {
 
       // ── Card Theme ───────────────────────────────────────────────────
       // Pure white, flush, shadow-free, with subtle 1px border.
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         elevation: 0,
         color: pureWhiteSurface,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: pearlBorder, width: 1),
+          borderRadius: BattutaRadius.mdAll,
+          side: BorderSide(color: pearlBorder, width: 1),
         ),
         clipBehavior: Clip.antiAlias,
       ),
@@ -949,7 +1002,9 @@ abstract final class AppTheme {
         backgroundColor: pureWhiteSurface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(BattutaRadius.lg),
+          ),
           side: BorderSide(color: pearlBorder, width: 1),
         ),
         showDragHandle: true,
@@ -962,9 +1017,9 @@ abstract final class AppTheme {
         elevation: 0,
         backgroundColor: pureWhiteSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: pearlBorder, width: 1),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BattutaRadius.lgAll,
+          side: BorderSide(color: pearlBorder, width: 1),
         ),
         titleTextStyle: typography.titleLarge?.copyWith(color: charcoalText),
       ),
@@ -1003,13 +1058,13 @@ abstract final class AppTheme {
           splashFactory: NoSplash.splashFactory,
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return pearlSurfaceLight;
+              return amberMuted;
             }
             return pureWhiteSurface;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return charcoalText;
+              return amberAccentLightText;
             }
             return charcoalMuted;
           }),
@@ -1057,7 +1112,7 @@ abstract final class AppTheme {
       ),
 
       // ── Floating Action Button Theme ─────────────────────────────────
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 0,
         focusElevation: 0,
         hoverElevation: 0,
@@ -1065,7 +1120,13 @@ abstract final class AppTheme {
         backgroundColor: amberAccent,
         foregroundColor: obsidianText,
         splashColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: StadiumBorder(),
+        extendedTextStyle: TextStyle(
+          fontFamily: primaryFontFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
       ),
     );
   }
