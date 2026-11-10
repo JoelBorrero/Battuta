@@ -5,6 +5,7 @@
 /// Exposed as a Riverpod provider via `@riverpod`.
 library;
 
+import 'package:battuta/app/design_system/motion/page_transitions.dart';
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/shell/scaffold_with_nav_bar.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
@@ -43,8 +44,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: AppRoutes.repertoire,
             name: 'repertoire',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: RepertoirePage()),
+            pageBuilder: (context, state) => battutaTabPage(
+              key: state.pageKey,
+              child: const RepertoirePage(),
+            ),
             routes: [
               // New song creation
               GoRoute(
@@ -100,15 +103,17 @@ GoRouter appRouter(Ref ref) {
             path: AppRoutes.team,
             name: 'team',
             pageBuilder: (context, state) =>
-                const NoTransitionPage(child: TeamPage()),
+                battutaTabPage(key: state.pageKey, child: const TeamPage()),
           ),
 
           // Tab 3 — Live session
           GoRoute(
             path: AppRoutes.live,
             name: 'live',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: LiveSessionPage()),
+            pageBuilder: (context, state) => battutaTabPage(
+              key: state.pageKey,
+              child: const LiveSessionPage(),
+            ),
             routes: [
               GoRoute(
                 path: ':sessionId',
@@ -123,7 +128,7 @@ GoRouter appRouter(Ref ref) {
             path: AppRoutes.settings,
             name: 'settings',
             pageBuilder: (context, state) =>
-                const NoTransitionPage(child: SettingsPage()),
+                battutaTabPage(key: state.pageKey, child: const SettingsPage()),
           ),
         ],
       ),

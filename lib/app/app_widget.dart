@@ -6,6 +6,7 @@
 library;
 
 import 'package:battuta/app/config/app_constants.dart';
+import 'package:battuta/app/design_system/brand/brand_intro.dart';
 import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/routes/app_router.dart';
 import 'package:battuta/app/theme/app_theme.dart';
@@ -23,6 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// - Light and dark [ThemeData] from [AppTheme]
 /// - System-default theme mode (respects OS setting)
 /// - Internationalization (English & Spanish, default system language)
+/// - A one-shot brand intro (the "downbeat") over the first frame
 /// - Automated background Supabase connection & synchronization on app launch
 class BattutaApp extends ConsumerStatefulWidget {
   const BattutaApp({super.key});
@@ -74,6 +76,9 @@ class _BattutaAppState extends ConsumerState<BattutaApp> {
 
       // Routing
       routerConfig: router,
+
+      // Brand intro plays once over the first route.
+      builder: (context, child) => BrandIntro(child: child ?? const SizedBox()),
     );
   }
 }
