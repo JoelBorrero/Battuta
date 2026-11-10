@@ -3077,6 +3077,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy Content'**
   String get copySectionContent;
+
+  /// Title of the add song options sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Add Song to Repertoire'**
+  String get addSongToRepertoire;
+
+  /// Option to import a song via web link
+  ///
+  /// In en, this message translates to:
+  /// **'Import by Web URL'**
+  String get importByWebUrl;
+
+  /// Subtitle describing web URL import
+  ///
+  /// In en, this message translates to:
+  /// **'Scrape chords & lyrics from Cifra Club, LaCuerda, or web link'**
+  String get importByWebUrlSubtitle;
+
+  /// Option to scan sheet music with Gemini AI
+  ///
+  /// In en, this message translates to:
+  /// **'Scan with Gemini AI (OMR)'**
+  String get scanWithGemini;
+
+  /// Subtitle describing Gemini OMR scan
+  ///
+  /// In en, this message translates to:
+  /// **'Scan printed sheet music from camera or photos'**
+  String get scanWithGeminiSubtitle;
+
+  /// Option to create a song manually in the editor
+  ///
+  /// In en, this message translates to:
+  /// **'Write in Song Editor'**
+  String get writeInSongEditor;
+
+  /// Subtitle describing manual song editor entry
+  ///
+  /// In en, this message translates to:
+  /// **'Create a blank lead sheet and enter sections manually'**
+  String get writeInSongEditorSubtitle;
+
+  /// Option to import from plain text or JSON backup
+  ///
+  /// In en, this message translates to:
+  /// **'Paste Text / Backup'**
+  String get pasteTextBackup;
+
+  /// Subtitle describing paste text and backup import
+  ///
+  /// In en, this message translates to:
+  /// **'Paste ChordPro text, plain lead sheets, or JSON backups'**
+  String get pasteTextBackupSubtitle;
+
+  /// Tab title for importing song from web URL
+  ///
+  /// In en, this message translates to:
+  /// **'Import by URL'**
+  String get importTabUrl;
+
+  /// Tab title for scanning sheet music
+  ///
+  /// In en, this message translates to:
+  /// **'Scan with Gemini'**
+  String get importTabScan;
+
+  /// Tab title for pasting song text or JSON
+  ///
+  /// In en, this message translates to:
+  /// **'Paste Text / JSON'**
+  String get importTabText;
+
+  /// Label for song URL text input
+  ///
+  /// In en, this message translates to:
+  /// **'Song Web Link / URL'**
+  String get urlInputLabel;
+
+  /// Placeholder for song URL input
+  ///
+  /// In en, this message translates to:
+  /// **'https://acordes.lacuerda.net/... or cifraclub.com/...'**
+  String get urlInputHint;
+
+  /// Action to paste text from clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Paste from Clipboard'**
+  String get pasteFromClipboard;
+
+  /// Button to trigger fetching song from URL
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch Song'**
+  String get fetchSong;
+
+  /// Loading state when fetching song from URL
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching Song...'**
+  String get fetchingSong;
+
+  /// Header for supported import websites
+  ///
+  /// In en, this message translates to:
+  /// **'Supported Websites & Direct TXT'**
+  String get supportedWebsites;
+
+  /// Explains supported sites and automatic chord extraction
+  ///
+  /// In en, this message translates to:
+  /// **'LaCuerda (acordes.lacuerda.net) and Cifra Club (cifraclub.com) are supported. Chords and sections are parsed automatically.'**
+  String get supportedWebsitesHint;
+
+  /// Snackbar shown when song is successfully imported from URL
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully imported \"{title}\" to Repertoire!'**
+  String urlImportSuccess(String title);
+
+  /// Error shown when entered URL is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter or paste a valid song URL'**
+  String get urlImportError;
+
+  /// Button to add imported song to repertoire
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Repertoire'**
+  String get addToRepertoire;
+
+  /// Button to open song in editor
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Editor'**
+  String get openInEditor;
+
+  /// Header for imported song preview
+  ///
+  /// In en, this message translates to:
+  /// **'Chords & Lyrics Preview'**
+  String get chordsAndLyricsPreview;
+
+  /// Count of sections in a song
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sections'**
+  String sectionsCount(int count);
+
+  /// Count of chords used in a song
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chords used'**
+  String chordsUsedCount(int count);
+
+  /// Header for text/JSON import area
+  ///
+  /// In en, this message translates to:
+  /// **'Paste Song Text or JSON Backup'**
+  String get textImportHeader;
+
+  /// Button to load a sample lead sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Load Sample'**
+  String get loadSample;
+
+  /// Generic clear button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// Placeholder for pasting song text
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your song text here (e.g. // Title: Song Name, [G] lyrics...)'**
+  String get textImportPlaceholder;
+
+  /// Button to import parsed songs
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} Song(s)'**
+  String importSongCount(int count);
+
+  /// Action to open camera for Gemini scan
+  ///
+  /// In en, this message translates to:
+  /// **'Capture from Camera'**
+  String get scanCameraAction;
+
+  /// Action to open gallery for Gemini scan
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Photos / Gallery'**
+  String get scanGalleryAction;
+
+  /// Subtitle for camera scan action
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo of physical sheet music or chord chart'**
+  String get scanCameraSubtitle;
+
+  /// Subtitle for gallery scan action
+  ///
+  /// In en, this message translates to:
+  /// **'Select sheet music image or PDF page from device'**
+  String get scanGallerySubtitle;
+
+  /// Notice when Cifra Club blocks automated requests
+  ///
+  /// In en, this message translates to:
+  /// **'Could not access Cifra Club due to anti-bot protection. Please copy and paste the chords into the \'Paste Text\' tab, or import from LaCuerda.'**
+  String get cifraClubBlockedNotice;
 }
 
 class _AppLocalizationsDelegate

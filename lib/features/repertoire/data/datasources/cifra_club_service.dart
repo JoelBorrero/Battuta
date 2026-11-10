@@ -160,25 +160,50 @@ class CifraClubService {
   }
 
   /// Replays the request directly from the mobile device for the given [songIdOrUrl].
+  ///
+  /// Falls back to an open headless reader proxy (`r.jina.ai`) if direct connection
+  /// is blocked by Cloudflare/Akamai bot detection (HTTP 403).
   Future<CifraClubParsedSong> fetchSong(String songIdOrUrl) async {
     final cleanPath = normalizeSongPath(songIdOrUrl);
     final targetUri = Uri.parse('https://www.cifraclub.com/$cleanPath');
 
-    final request = await _client.getUrl(targetUri);
-    for (final entry in defaultBrowserHeaders.entries) {
-      request.headers.set(entry.key, entry.value);
+    try {
+      final request = await _client.getUrl(targetUri);
+      for (final entry in defaultBrowserHeaders.entries) {
+        request.headers.set(entry.key, entry.value);
+      }
+
+      final response = await request.close();
+      if (response.statusCode == HttpStatus.ok) {
+        final htmlContent = await response.transform(utf8.decoder).join();
+        return parseHtml(htmlContent);
+      }
+    } catch (_) {
+      // Fallback to proxy
     }
 
-    final response = await request.close();
-    if (response.statusCode != HttpStatus.ok) {
-      throw HttpException(
-        'Failed to fetch from Cifra Club (${response.statusCode} ${response.reasonPhrase})',
-        uri: targetUri,
+    // Fallback: Use Jina reader proxy if direct access is blocked (e.g. 403 Akamai)
+    try {
+      final jinaUri = Uri.parse(
+        'https://r.jina.ai/https://www.cifraclub.com/$cleanPath',
       );
+      final jinaRequest = await _client.getUrl(jinaUri);
+      jinaRequest.headers.set('x-return-format', 'html');
+      jinaRequest.headers.set('User-Agent', 'Mozilla/5.0');
+      final jinaResponse = await jinaRequest.close();
+
+      if (jinaResponse.statusCode == HttpStatus.ok) {
+        final htmlContent = await jinaResponse.transform(utf8.decoder).join();
+        return parseHtml(htmlContent);
+      }
+    } catch (_) {
+      // Propagate user-friendly error below
     }
 
-    final htmlContent = await response.transform(utf8.decoder).join();
-    return parseHtml(htmlContent);
+    throw HttpException(
+      'Unable to access Cifra Club (anti-bot 403 block). Please copy and paste the chords into the Text Import tab, or import from LaCuerda.',
+      uri: targetUri,
+    );
   }
 
   /// Parses raw Cifra Club HTML content into a [CifraClubParsedSong].
@@ -390,8 +415,10 @@ class CifraClubService {
         id: '${songId}_sec_$i',
         name: s.name,
         chords: chordCells,
-        lyrics: s.lyrics.isEmpty ? null : s.lyrics,
-        rehearsalNotes: s.rawContent,
+        lyrics: s.rawContent.isNotEmpty
+            ? s.rawContent
+            : (s.lyrics.isEmpty ? null : s.lyrics),
+        rehearsalNotes: null,
         orderIndex: i,
       ));
     }

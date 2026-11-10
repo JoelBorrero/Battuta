@@ -101,21 +101,37 @@ class SongTextParser {
         continue;
       }
 
-      // 2. Check for Section Header comment (// Verse 1, // Chorus, [Verse 1], Chorus:)
+      // 2. Check for Section Header comment (// Verse 1, // Chorus, [Verse 1], (Coro), Chorus:, or standalone "VERSO 1")
       final isDoubleSlashComment = trimmed.startsWith('//');
       final isBracketHeader = trimmed.startsWith('[') &&
           trimmed.endsWith(']') &&
           _sectionKeywordRegex.hasMatch(trimmed);
+      final isParenHeader = trimmed.startsWith('(') &&
+          trimmed.endsWith(')') &&
+          _sectionKeywordRegex.hasMatch(trimmed);
       final isColonHeader = trimmed.endsWith(':') && _sectionKeywordRegex.hasMatch(trimmed);
+      final isStandaloneHeader = !trimmed.startsWith('[') &&
+          !trimmed.contains('/') &&
+          trimmed.split(RegExp(r'\s+')).length <= 3 &&
+          RegExp(
+            r'^(?:intro|verse|verso|estrofa|chorus|coro|estribillo|bridge|puente|pre-chorus|prechorus|pre-coro|precoro|interlude|interludio|instrumental|solo|outro|ending|final|tag)\b(?:\s*\d+)?$',
+            caseSensitive: false,
+          ).hasMatch(trimmed);
 
-      if (isDoubleSlashComment || isBracketHeader || isColonHeader) {
+      if (isDoubleSlashComment ||
+          isBracketHeader ||
+          isParenHeader ||
+          isColonHeader ||
+          isStandaloneHeader) {
         String headerContent;
         if (isDoubleSlashComment) {
           headerContent = trimmed.substring(2).trim();
-        } else if (isBracketHeader) {
+        } else if (isBracketHeader || isParenHeader) {
           headerContent = trimmed.substring(1, trimmed.length - 1).trim();
-        } else {
+        } else if (isColonHeader) {
           headerContent = trimmed.substring(0, trimmed.length - 1).trim();
+        } else {
+          headerContent = trimmed;
         }
 
         // If it's a double slash comment but does NOT contain any section keywords,

@@ -94,12 +94,21 @@ void main() {
       expect(find.text('Amazing Grace'), findsOneWidget);
     });
 
-    testWidgets('renders song creation FAB for admin user', (tester) async {
+    testWidgets('renders song creation FAB for admin user and opens add options sheet', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
       expect(find.text('New Song'), findsOneWidget);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Song to Repertoire'), findsOneWidget);
+      expect(find.text('Import by Web URL'), findsOneWidget);
+      expect(find.text('Scan with Gemini AI (OMR)'), findsOneWidget);
+      expect(find.text('Write in Song Editor'), findsOneWidget);
+      expect(find.text('Paste Text / Backup'), findsOneWidget);
     });
 
     testWidgets(

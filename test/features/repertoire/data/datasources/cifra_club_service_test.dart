@@ -117,6 +117,11 @@ Santo por siempre
       expect(introSection.chords.length, greaterThanOrEqualTo(4));
       expect(introSection.chords.first.root, equals('C'));
       expect(introSection.chords.first.quality, equals(ChordQuality.major));
+
+      // Verify lyrics in domain song retain ChordPro bracket notation with chords
+      final verseSection = domainSong.sections[1];
+      expect(verseSection.lyrics, contains('[G]'));
+      expect(verseSection.lyrics, contains('Mil generaciones'));
     });
 
     test('browser headers include necessary sec-fetch and sec-ch-ua headers', () {

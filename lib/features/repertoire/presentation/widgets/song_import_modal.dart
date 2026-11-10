@@ -48,6 +48,7 @@ class SongImportModal extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      showDragHandle: false,
       backgroundColor: Colors.transparent,
       useSafeArea: true,
       builder: (_) => SongImportModal(initialTab: initialTab),
@@ -115,9 +116,10 @@ Unending [D]love amazing [G]grace
   // ═══════════════════════════════════════════════════════════════════════════
 
   Future<void> _fetchFromUrl() async {
+    final l10n = AppLocalizations.of(context);
     final rawUrl = _urlController.text.trim();
     if (rawUrl.isEmpty) {
-      setState(() => _urlError = 'Please enter or paste a valid song URL');
+      setState(() => _urlError = l10n?.urlImportError ?? 'Please enter or paste a valid song URL');
       return;
     }
 
@@ -139,9 +141,14 @@ Unending [D]love amazing [G]grace
       }
     } catch (e) {
       if (mounted) {
+        final errStr = e.toString();
+        final is403 = errStr.contains('403') || errStr.contains('anti-bot');
         setState(() {
           _isFetchingUrl = false;
-          _urlError = 'Failed to fetch song from URL: $e';
+          _urlError = is403
+              ? (l10n?.cifraClubBlockedNotice ??
+                  'Could not access Cifra Club due to anti-bot protection. Please copy the chords and paste into the Text Import tab, or import from LaCuerda.')
+              : 'Failed to fetch song from URL: $e';
         });
       }
     }
@@ -161,6 +168,7 @@ Unending [D]love amazing [G]grace
 
   Future<void> _saveUrlSongToRepertoire() async {
     if (_urlConvertedSong == null) return;
+    final l10n = AppLocalizations.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final song = _urlConvertedSong!;
 
@@ -171,7 +179,10 @@ Unending [D]love amazing [G]grace
         scaffoldMessenger.showSnackBar(
           SnackBar(
             backgroundColor: AppTheme.stageGreen,
-            content: Text('Successfully imported "${song.title}" to Repertoire!'),
+            content: Text(
+              l10n?.urlImportSuccess(song.title) ??
+                  'Successfully imported "${song.title}" to Repertoire!',
+            ),
           ),
         );
       }
@@ -374,7 +385,7 @@ Unending [D]love amazing [G]grace
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Import Song / Lead Sheet',
+                        l10n?.addSongToRepertoire ?? 'Import Song / Lead Sheet',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -383,7 +394,8 @@ Unending [D]love amazing [G]grace
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Import from web URL, Gemini sheet music scan, or paste',
+                        l10n?.importByWebUrlSubtitle ??
+                            'Import from web URL, Gemini sheet music scan, or paste',
                         style: TextStyle(
                           fontSize: 12,
                           color: mutedTextColor,
@@ -405,21 +417,21 @@ Unending [D]love amazing [G]grace
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: SegmentedButton<SongImportTab>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: SongImportTab.url,
-                  icon: Icon(Icons.link, size: 18),
-                  label: Text('By URL'),
+                  icon: const Icon(Icons.link, size: 18),
+                  label: Text(l10n?.importTabUrl ?? 'By URL'),
                 ),
                 ButtonSegment(
                   value: SongImportTab.geminiScan,
-                  icon: Icon(Icons.document_scanner_outlined, size: 18),
-                  label: Text('Gemini Scan'),
+                  icon: const Icon(Icons.document_scanner_outlined, size: 18),
+                  label: Text(l10n?.importTabScan ?? 'Gemini Scan'),
                 ),
                 ButtonSegment(
                   value: SongImportTab.text,
-                  icon: Icon(Icons.content_paste_outlined, size: 18),
-                  label: Text('Text / JSON'),
+                  icon: const Icon(Icons.content_paste_outlined, size: 18),
+                  label: Text(l10n?.importTabText ?? 'Text / JSON'),
                 ),
               ],
               selected: {_currentTab},
@@ -473,6 +485,8 @@ Unending [D]love amazing [G]grace
     Color mutedTextColor,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -492,21 +506,21 @@ Unending [D]love amazing [G]grace
           controller: _urlController,
           style: TextStyle(fontSize: 14, color: primaryTextColor),
           decoration: InputDecoration(
-            labelText: 'Full Song URL or Slug',
-            hintText: 'e.g. cifraclub.com/... or lacuerda.net/...',
+            labelText: l10n?.urlInputLabel ?? 'Full Song URL or Slug',
+            hintText: l10n?.urlInputHint ?? 'e.g. cifraclub.com/... or lacuerda.net/...',
             prefixIcon: const Icon(Icons.link, color: AppTheme.stageAmber),
             suffixIcon: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
                   icon: const Icon(Icons.content_paste, size: 20),
-                  tooltip: 'Paste from clipboard',
+                  tooltip: l10n?.pasteFromClipboard ?? 'Paste from clipboard',
                   onPressed: _pasteUrlFromClipboard,
                 ),
                 if (_urlController.text.isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.clear, size: 20),
-                    tooltip: 'Clear',
+                    tooltip: l10n?.clear ?? 'Clear',
                     onPressed: () {
                       _urlController.clear();
                       setState(() {
@@ -545,7 +559,9 @@ Unending [D]love amazing [G]grace
                 )
               : const Icon(Icons.cloud_download_outlined),
           label: Text(
-            _isFetchingUrl ? 'Fetching Song & Chords...' : 'Fetch & Preview Song',
+            _isFetchingUrl
+                ? (l10n?.fetchingSong ?? 'Fetching Song & Chords...')
+                : (l10n?.fetchSong ?? 'Fetch & Preview Song'),
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
@@ -647,15 +663,19 @@ Unending [D]love amazing [G]grace
                       _buildMetaChip('${_urlParsedSong!.bpm} BPM'),
                     _buildMetaChip('Tuning: ${_urlParsedSong!.tuning}'),
                     if (_urlParsedSong!.capo > 0)
-                      _buildMetaChip('Capo: Fret ${_urlParsedSong!.capo}'),
-                    _buildMetaChip('${_urlParsedSong!.sections.length} Sections'),
+                      _buildMetaChip('Capo: ${_urlParsedSong!.capo}'),
+                    _buildMetaChip(
+                      l10n?.sectionsCount(_urlParsedSong!.sections.length) ??
+                          '${_urlParsedSong!.sections.length} Sections',
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
                 // Chords used list
                 Text(
-                  'Chords used: ${_urlParsedSong!.chordsUsed.join(" • ")}',
+                  l10n?.chordsUsedCount(_urlParsedSong!.chordsUsed.length) ??
+                      'Chords used: ${_urlParsedSong!.chordsUsed.join(" • ")}',
                   style: TextStyle(fontSize: 12, color: mutedTextColor),
                 ),
                 const SizedBox(height: 16),
@@ -671,7 +691,7 @@ Unending [D]love amazing [G]grace
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         icon: const Icon(Icons.edit_note, size: 18),
-                        label: const Text('Edit First'),
+                        label: Text(l10n?.openInEditor ?? 'Edit First'),
                         onPressed: _openUrlSongInEditor,
                       ),
                     ),
@@ -685,9 +705,9 @@ Unending [D]love amazing [G]grace
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         icon: const Icon(Icons.check, size: 18),
-                        label: const Text(
-                          'Save to Repertoire',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        label: Text(
+                          l10n?.addToRepertoire ?? 'Save to Repertoire',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         onPressed: _saveUrlSongToRepertoire,
                       ),
@@ -712,6 +732,8 @@ Unending [D]love amazing [G]grace
     Color primaryTextColor,
     Color mutedTextColor,
   ) {
+    final l10n = AppLocalizations.of(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -735,7 +757,7 @@ Unending [D]love amazing [G]grace
           ),
           const SizedBox(height: 20),
           Text(
-            'Read Sheet Music with Gemini AI',
+            l10n?.scanWithGemini ?? 'Read Sheet Music with Gemini AI',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -745,7 +767,8 @@ Unending [D]love amazing [G]grace
           ),
           const SizedBox(height: 8),
           Text(
-            'Photograph a physical sheet music page or chord chart. Gemini Optical Music Recognition (OMR) transcribes the staves, chords, and lyrics directly into your library.',
+            l10n?.fullSheetDesc ??
+                'Photograph a physical sheet music page or chord chart. Gemini Optical Music Recognition (OMR) transcribes the staves, chords, and lyrics directly into your library.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, height: 1.4, color: mutedTextColor),
           ),
@@ -759,9 +782,9 @@ Unending [D]love amazing [G]grace
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             icon: const Icon(Icons.camera_alt_outlined),
-            label: const Text(
-              'Capture with Camera',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            label: Text(
+              l10n?.scanCameraAction ?? 'Capture with Camera',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             onPressed: () => _launchGeminiScanner(context, isCamera: true),
           ),
@@ -775,9 +798,9 @@ Unending [D]love amazing [G]grace
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             icon: const Icon(Icons.photo_library_outlined),
-            label: const Text(
-              'Select from Photo Library',
-              style: TextStyle(fontSize: 14),
+            label: Text(
+              l10n?.scanGalleryAction ?? 'Select from Photo Library',
+              style: const TextStyle(fontSize: 14),
             ),
             onPressed: () => _launchGeminiScanner(context, isCamera: false),
           ),
@@ -814,7 +837,7 @@ Unending [D]love amazing [G]grace
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   icon: const Icon(Icons.content_paste_rounded, size: 18),
-                  label: const Text('Paste Clipboard'),
+                  label: Text(l10n?.pasteFromClipboard ?? 'Paste Clipboard'),
                   onPressed: _pasteFromClipboard,
                 ),
                 const SizedBox(width: 8),
@@ -825,7 +848,7 @@ Unending [D]love amazing [G]grace
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   icon: const Icon(Icons.description_outlined, size: 18),
-                  label: const Text('Load Sample'),
+                  label: Text(l10n?.loadSample ?? 'Load Sample'),
                   onPressed: _loadSampleTemplate,
                 ),
                 const SizedBox(width: 8),
@@ -833,7 +856,7 @@ Unending [D]love amazing [G]grace
                   TextButton.icon(
                     style: TextButton.styleFrom(foregroundColor: AppTheme.stageRed),
                     icon: const Icon(Icons.clear, size: 18),
-                    label: const Text('Clear'),
+                    label: Text(l10n?.clear ?? 'Clear'),
                     onPressed: _clearText,
                   ),
               ],
@@ -991,7 +1014,7 @@ Unending [D]love amazing [G]grace
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     ),
                     icon: const Icon(Icons.edit_note, size: 18),
-                    label: const Text('Open in Editor'),
+                    label: Text(l10n?.openInEditor ?? 'Open in Editor'),
                   ),
                 const Spacer(),
                 FilledButton.icon(
@@ -1009,9 +1032,10 @@ Unending [D]love amazing [G]grace
                         )
                       : const Icon(Icons.check, size: 18),
                   label: Text(
-                    _parsedSongs.length > 1
-                        ? 'Import All (${_parsedSongs.length})'
-                        : 'Import Song',
+                    l10n?.importSongCount(_parsedSongs.length) ??
+                        (_parsedSongs.length > 1
+                            ? 'Import All (${_parsedSongs.length})'
+                            : 'Import Song'),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -1086,6 +1110,9 @@ Unending [D]love amazing [G]grace
     Color primaryTextColor,
     Color mutedTextColor,
   ) {
+    final l10n = AppLocalizations.of(context);
+    final isEs = l10n?.localeName.startsWith('es') ?? false;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1101,7 +1128,7 @@ Unending [D]love amazing [G]grace
               const Icon(Icons.lightbulb_outline, size: 20, color: AppTheme.stageAmber),
               const SizedBox(width: 8),
               Text(
-                'How to Format Your Lead Sheet',
+                l10n?.textImportHeader ?? 'How to Format Your Lead Sheet',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -1112,22 +1139,28 @@ Unending [D]love amazing [G]grace
           ),
           const SizedBox(height: 10),
           _buildBulletItem(
-            'Section dividers:',
-            'Use // Verse 1, // Chorus, // Bridge to split sections.',
+            isEs ? 'Dividir secciones:' : 'Section dividers:',
+            isEs
+                ? 'Usa // Verso 1, // Coro, // Puente para separar secciones.'
+                : 'Use // Verse 1, // Chorus, // Bridge to split sections.',
             primaryTextColor,
             mutedTextColor,
           ),
           const SizedBox(height: 8),
           _buildBulletItem(
-            'Chords & lyrics:',
-            'ChordPro [G]Amazing [C]grace or standard chord lines.',
+            isEs ? 'Acordes y letra:' : 'Chords & lyrics:',
+            isEs
+                ? 'ChordPro [G]Sublime [C]gracia o acordes sobre la letra.'
+                : 'ChordPro [G]Amazing [C]grace or standard chord lines.',
             primaryTextColor,
             mutedTextColor,
           ),
           const SizedBox(height: 8),
           _buildBulletItem(
-            'JSON backups:',
-            'Paste complete exported JSON repertoire files for instant restore.',
+            isEs ? 'Respaldos JSON:' : 'JSON backups:',
+            isEs
+                ? 'Pega archivos JSON exportados para restaurar repertorios completos al instante.'
+                : 'Paste complete exported JSON repertoire files for instant restore.',
             primaryTextColor,
             mutedTextColor,
           ),

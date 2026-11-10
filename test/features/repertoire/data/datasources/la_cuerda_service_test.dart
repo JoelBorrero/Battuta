@@ -163,6 +163,9 @@ reproducción o retransmisión, así como su uso para fines comerciales.
       expect(domainSong.sections.length, equals(3));
       expect(domainSong.tags, contains('Cosas Poderosas'));
       expect(domainSong.notes, contains('Coalo Zamorano'));
+      // Verify chords are preserved within lyrics in ChordPro bracket format
+      expect(domainSong.sections.first.lyrics, contains('[G]'));
+      expect(domainSong.sections.first.chords.map((c) => c.displayLabel), containsAll(['G', 'Am', 'Bm']));
     });
 
     test('parseTxt handles solfege chord lines and converts to Anglo-Saxon chords', () {
@@ -187,6 +190,39 @@ Tu fidelidad incomparable es
 
       final verse = parsed.sections.first;
       expect(verse.chords, containsAll(['G', 'Em7', 'Asus4', 'A7', 'D']));
+    });
+
+    test('parseTxt recognizes (Coro) and standalone VERSO section headers', () {
+      const variedHeadersTxt = '''
+=====================================================================
+| ARTISTA: Miel San Marcos                                          |
+| CANCION: NO HAY LUGAR MAS ALTO                                    |
+=====================================================================
+
+VERSO 1
+G             D/F#
+A tus pies arde mi corazon
+Em            C
+A tus pies entrego lo que soy
+
+(CORO)
+              G
+No hay lugar más alto
+            D/F#
+Más grande que estar a tus pies
+''';
+
+      final parsed = LaCuerdaService.parseTxt(variedHeadersTxt);
+      expect(parsed.sections.length, equals(2));
+      expect(parsed.sections[0].name, equals('Verse 1'));
+      expect(parsed.sections[0].chords, containsAll(['G', 'D/F#', 'Em', 'C']));
+
+      expect(parsed.sections[1].name, equals('Chorus'));
+      expect(parsed.sections[1].chords, containsAll(['G', 'D/F#']));
+
+      final song = parsed.toSong();
+      expect(song.sections[0].lyrics, contains('[G]'));
+      expect(song.sections[1].lyrics, contains('[G]'));
     });
   });
 }

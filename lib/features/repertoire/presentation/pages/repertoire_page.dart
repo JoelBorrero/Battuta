@@ -172,29 +172,20 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
   void _showAddSongOptions(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       builder: (ctx) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: theme.dividerColor,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
               Text(
-                'Add Song to Repertoire',
+                l10n?.addSongToRepertoire ?? 'Add Song to Repertoire',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -206,9 +197,14 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   backgroundColor: Color(0x22E5A93C),
                   child: Icon(Icons.link, color: AppTheme.stageAmber),
                 ),
-                title: const Text('Import by Web URL',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Scrape chords & lyrics from Cifra Club or web link'),
+                title: Text(
+                  l10n?.importByWebUrl ?? 'Import by Web URL',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n?.importByWebUrlSubtitle ??
+                      'Scrape chords & lyrics from Cifra Club, LaCuerda, or web link',
+                ),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   SongImportModal.show(context, initialTab: SongImportTab.url);
@@ -219,9 +215,14 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   backgroundColor: Color(0x222E86DE),
                   child: Icon(Icons.document_scanner_outlined, color: AppTheme.stageBlue),
                 ),
-                title: const Text('Scan with Gemini AI (OMR)',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Scan printed sheet music from camera or photos'),
+                title: Text(
+                  l10n?.scanWithGemini ?? 'Scan with Gemini AI (OMR)',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n?.scanWithGeminiSubtitle ??
+                      'Scan printed sheet music from camera or photos',
+                ),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _openScannerDirect(context);
@@ -232,9 +233,14 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   backgroundColor: Color(0x2210B981),
                   child: Icon(Icons.edit_note, color: AppTheme.stageGreen),
                 ),
-                title: const Text('Write in Song Editor',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Create a blank lead sheet and enter sections manually'),
+                title: Text(
+                  l10n?.writeInSongEditor ?? 'Write in Song Editor',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n?.writeInSongEditorSubtitle ??
+                      'Create a blank lead sheet and enter sections manually',
+                ),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   context.push('/repertoire/new');
@@ -245,9 +251,14 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   backgroundColor: Color(0x229C27B0),
                   child: Icon(Icons.content_paste, color: Colors.purple),
                 ),
-                title: const Text('Paste Text / Backup',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Paste ChordPro text, plain lead sheets, or JSON backups'),
+                title: Text(
+                  l10n?.pasteTextBackup ?? 'Paste Text / Backup',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  l10n?.pasteTextBackupSubtitle ??
+                      'Paste ChordPro text, plain lead sheets, or JSON backups',
+                ),
                 onTap: () {
                   Navigator.of(ctx).pop();
                   SongImportModal.show(context, initialTab: SongImportTab.text);

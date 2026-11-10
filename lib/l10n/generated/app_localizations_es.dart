@@ -1709,4 +1709,131 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get copySectionContent => 'Copiar Contenido';
+
+  @override
+  String get addSongToRepertoire => 'Agregar Canción al Repertorio';
+
+  @override
+  String get importByWebUrl => 'Importar por Enlace Web';
+
+  @override
+  String get importByWebUrlSubtitle =>
+      'Obtén acordes y letra desde Cifra Club, LaCuerda o enlace web';
+
+  @override
+  String get scanWithGemini => 'Escanear con IA Gemini (OMR)';
+
+  @override
+  String get scanWithGeminiSubtitle =>
+      'Escanea partituras impresas desde la cámara o fotos';
+
+  @override
+  String get writeInSongEditor => 'Escribir en el Editor de Canciones';
+
+  @override
+  String get writeInSongEditorSubtitle =>
+      'Crea una partitura en blanco e introduce secciones a mano';
+
+  @override
+  String get pasteTextBackup => 'Pegar Texto / Respaldo';
+
+  @override
+  String get pasteTextBackupSubtitle =>
+      'Pega texto ChordPro, partituras simples o respaldos JSON';
+
+  @override
+  String get importTabUrl => 'Importar por URL';
+
+  @override
+  String get importTabScan => 'Escanear con Gemini';
+
+  @override
+  String get importTabText => 'Pegar Texto / JSON';
+
+  @override
+  String get urlInputLabel => 'Enlace Web / URL de la canción';
+
+  @override
+  String get urlInputHint =>
+      'https://acordes.lacuerda.net/... o cifraclub.com/...';
+
+  @override
+  String get pasteFromClipboard => 'Pegar del Portapapeles';
+
+  @override
+  String get fetchSong => 'Obtener Canción';
+
+  @override
+  String get fetchingSong => 'Obteniendo Canción...';
+
+  @override
+  String get supportedWebsites => 'Sitios Web Compatibles y TXT Directo';
+
+  @override
+  String get supportedWebsitesHint =>
+      'Compatible con LaCuerda (acordes.lacuerda.net) y Cifra Club (cifraclub.com). Los acordes y secciones se procesan automáticamente.';
+
+  @override
+  String urlImportSuccess(String title) {
+    return '¡Se importó con éxito \"$title\" al Repertorio!';
+  }
+
+  @override
+  String get urlImportError =>
+      'Por favor introduce o pega un enlace de canción válido';
+
+  @override
+  String get addToRepertoire => 'Agregar al Repertorio';
+
+  @override
+  String get openInEditor => 'Abrir en Editor';
+
+  @override
+  String get chordsAndLyricsPreview => 'Vista Previa de Letra y Acordes';
+
+  @override
+  String sectionsCount(int count) {
+    return '$count secciones';
+  }
+
+  @override
+  String chordsUsedCount(int count) {
+    return '$count acordes usados';
+  }
+
+  @override
+  String get textImportHeader => 'Pega Texto de Canción o Respaldo JSON';
+
+  @override
+  String get loadSample => 'Cargar Ejemplo';
+
+  @override
+  String get clear => 'Limpiar';
+
+  @override
+  String get textImportPlaceholder =>
+      'Pega el texto de tu canción aquí (ej. // Título: Canción, [G] letra...)';
+
+  @override
+  String importSongCount(int count) {
+    return 'Importar $count Canción(es)';
+  }
+
+  @override
+  String get scanCameraAction => 'Capturar con la Cámara';
+
+  @override
+  String get scanGalleryAction => 'Elegir de Fotos / Galería';
+
+  @override
+  String get scanCameraSubtitle =>
+      'Toma una foto de una partitura impresa o cifrado';
+
+  @override
+  String get scanGallerySubtitle =>
+      'Selecciona una imagen de partitura o página PDF del dispositivo';
+
+  @override
+  String get cifraClubBlockedNotice =>
+      'No se pudo acceder a Cifra Club por protección anti-bot. Copia los acordes y usa la pestaña Pegar Texto, o importa desde LaCuerda.';
 }

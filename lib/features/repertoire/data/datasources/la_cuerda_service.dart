@@ -304,9 +304,23 @@ class LaCuerdaService {
       }
     }
 
-    // 6. Clean repeat markings like /// or // on lyrics so chords align properly
-    var cleanedBody = processedLines.join('\n');
-    cleanedBody = cleanedBody.replaceAll(RegExp(r'/{2,}'), '');
+    // 6. Clean repeat markings like /// or // from within lyrics (e.g. "///Jehova Jireh" or "eres Tu///")
+    // while preserving standard comment markers (// Metadata or // Section)
+    final cleanedLines = <String>[];
+    for (final line in processedLines) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('//') &&
+          (trimmed.contains(':') ||
+              RegExp(
+                r'//\s*(?:intro|verse|verso|estrofa|chorus|coro|estribillo|bridge|puente|pre|inter|solo|outro|final|coda)',
+                caseSensitive: false,
+              ).hasMatch(trimmed))) {
+        cleanedLines.add(line);
+      } else {
+        cleanedLines.add(line.replaceAll(RegExp(r'/{2,}'), ''));
+      }
+    }
+    final cleanedBody = cleanedLines.join('\n');
 
     // 7. Parse with SongTextParser
     final cleanInput = '// Title: $title\n// Artist: $artist\n${cleanedBody.trim()}';
@@ -410,7 +424,9 @@ class LaCuerdaService {
         id: _uuid.v4(),
         name: sec.name,
         chords: chords,
-        lyrics: sec.lyrics.isNotEmpty ? sec.lyrics : null,
+        lyrics: sec.rawContent.isNotEmpty
+            ? sec.rawContent
+            : (sec.lyrics.isNotEmpty ? sec.lyrics : null),
         repeatCount: sec.repeatCount,
         orderIndex: index,
       );

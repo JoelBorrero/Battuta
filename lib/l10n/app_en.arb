@@ -2419,5 +2419,173 @@
   "copySectionContent": "Copy Content",
   "@copySectionContent": {
     "description": "Dialog title for copying section content"
+  },
+  "addSongToRepertoire": "Add Song to Repertoire",
+  "@addSongToRepertoire": {
+    "description": "Title of the add song options sheet"
+  },
+  "importByWebUrl": "Import by Web URL",
+  "@importByWebUrl": {
+    "description": "Option to import a song via web link"
+  },
+  "importByWebUrlSubtitle": "Scrape chords & lyrics from Cifra Club, LaCuerda, or web link",
+  "@importByWebUrlSubtitle": {
+    "description": "Subtitle describing web URL import"
+  },
+  "scanWithGemini": "Scan with Gemini AI (OMR)",
+  "@scanWithGemini": {
+    "description": "Option to scan sheet music with Gemini AI"
+  },
+  "scanWithGeminiSubtitle": "Scan printed sheet music from camera or photos",
+  "@scanWithGeminiSubtitle": {
+    "description": "Subtitle describing Gemini OMR scan"
+  },
+  "writeInSongEditor": "Write in Song Editor",
+  "@writeInSongEditor": {
+    "description": "Option to create a song manually in the editor"
+  },
+  "writeInSongEditorSubtitle": "Create a blank lead sheet and enter sections manually",
+  "@writeInSongEditorSubtitle": {
+    "description": "Subtitle describing manual song editor entry"
+  },
+  "pasteTextBackup": "Paste Text / Backup",
+  "@pasteTextBackup": {
+    "description": "Option to import from plain text or JSON backup"
+  },
+  "pasteTextBackupSubtitle": "Paste ChordPro text, plain lead sheets, or JSON backups",
+  "@pasteTextBackupSubtitle": {
+    "description": "Subtitle describing paste text and backup import"
+  },
+  "importTabUrl": "Import by URL",
+  "@importTabUrl": {
+    "description": "Tab title for importing song from web URL"
+  },
+  "importTabScan": "Scan with Gemini",
+  "@importTabScan": {
+    "description": "Tab title for scanning sheet music"
+  },
+  "importTabText": "Paste Text / JSON",
+  "@importTabText": {
+    "description": "Tab title for pasting song text or JSON"
+  },
+  "urlInputLabel": "Song Web Link / URL",
+  "@urlInputLabel": {
+    "description": "Label for song URL text input"
+  },
+  "urlInputHint": "https://acordes.lacuerda.net/... or cifraclub.com/...",
+  "@urlInputHint": {
+    "description": "Placeholder for song URL input"
+  },
+  "pasteFromClipboard": "Paste from Clipboard",
+  "@pasteFromClipboard": {
+    "description": "Action to paste text from clipboard"
+  },
+  "fetchSong": "Fetch Song",
+  "@fetchSong": {
+    "description": "Button to trigger fetching song from URL"
+  },
+  "fetchingSong": "Fetching Song...",
+  "@fetchingSong": {
+    "description": "Loading state when fetching song from URL"
+  },
+  "supportedWebsites": "Supported Websites & Direct TXT",
+  "@supportedWebsites": {
+    "description": "Header for supported import websites"
+  },
+  "supportedWebsitesHint": "LaCuerda (acordes.lacuerda.net) and Cifra Club (cifraclub.com) are supported. Chords and sections are parsed automatically.",
+  "@supportedWebsitesHint": {
+    "description": "Explains supported sites and automatic chord extraction"
+  },
+  "urlImportSuccess": "Successfully imported \"{title}\" to Repertoire!",
+  "@urlImportSuccess": {
+    "description": "Snackbar shown when song is successfully imported from URL",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Way Maker"
+      }
+    }
+  },
+  "urlImportError": "Please enter or paste a valid song URL",
+  "@urlImportError": {
+    "description": "Error shown when entered URL is invalid"
+  },
+  "addToRepertoire": "Add to Repertoire",
+  "@addToRepertoire": {
+    "description": "Button to add imported song to repertoire"
+  },
+  "openInEditor": "Open in Editor",
+  "@openInEditor": {
+    "description": "Button to open song in editor"
+  },
+  "chordsAndLyricsPreview": "Chords & Lyrics Preview",
+  "@chordsAndLyricsPreview": {
+    "description": "Header for imported song preview"
+  },
+  "sectionsCount": "{count} sections",
+  "@sectionsCount": {
+    "description": "Count of sections in a song",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "chordsUsedCount": "{count} chords used",
+  "@chordsUsedCount": {
+    "description": "Count of chords used in a song",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "6"
+      }
+    }
+  },
+  "textImportHeader": "Paste Song Text or JSON Backup",
+  "@textImportHeader": {
+    "description": "Header for text/JSON import area"
+  },
+  "loadSample": "Load Sample",
+  "@loadSample": {
+    "description": "Button to load a sample lead sheet"
+  },
+  "clear": "Clear",
+  "@clear": {
+    "description": "Generic clear button"
+  },
+  "textImportPlaceholder": "Paste your song text here (e.g. // Title: Song Name, [G] lyrics...)",
+  "@textImportPlaceholder": {
+    "description": "Placeholder for pasting song text"
+  },
+  "importSongCount": "Import {count} Song(s)",
+  "@importSongCount": {
+    "description": "Button to import parsed songs",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "scanCameraAction": "Capture from Camera",
+  "@scanCameraAction": {
+    "description": "Action to open camera for Gemini scan"
+  },
+  "scanGalleryAction": "Choose from Photos / Gallery",
+  "@scanGalleryAction": {
+    "description": "Action to open gallery for Gemini scan"
+  },
+  "scanCameraSubtitle": "Take a photo of physical sheet music or chord chart",
+  "@scanCameraSubtitle": {
+    "description": "Subtitle for camera scan action"
+  },
+  "scanGallerySubtitle": "Select sheet music image or PDF page from device",
+  "@scanGallerySubtitle": {
+    "description": "Subtitle for gallery scan action"
+  },
+  "cifraClubBlockedNotice": "Could not access Cifra Club due to anti-bot protection. Please copy and paste the chords into the 'Paste Text' tab, or import from LaCuerda.",
+  "@cifraClubBlockedNotice": {
+    "description": "Notice when Cifra Club blocks automated requests"
   }
 }

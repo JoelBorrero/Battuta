@@ -494,9 +494,26 @@ class _SectionChordLyricsCard extends StatelessWidget {
       );
     }
 
+    final hasAnyChordInLyrics = parsedLines.any((l) => l.hasChords);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (!hasAnyChordInLyrics && effectiveChords.isNotEmpty) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final chord in effectiveChords)
+                _ChordBlockCard(
+                  chordLabel: chord.displayLabel,
+                  beats: chord.beats,
+                  isDark: isDark,
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+        ],
         for (var i = 0; i < parsedLines.length; i++) ...[
           if (i > 0) const SizedBox(height: 12),
           _ChordLyricLineRow(line: parsedLines[i]),
