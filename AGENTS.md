@@ -49,4 +49,6 @@ Every task, whether adding a new feature, fixing a bug, resolving a layout overf
   - Always wrap flexible row/column children in `Expanded`, `Flexible`, or `Wrap` with `runSpacing` to avoid RenderFlex overflows across different iPad and desktop window dimensions.
 - **Git Commits**:
   - Use Conventional Commits (`feat(...)`, `fix(...)`, `refactor(...)`, `test(...)`, `style(...)`).
+- **Git Branches**:
+  - Do not create new branches or worktrees. Make all changes on the currently checked-out branch, and do not switch branches unless the user explicitly asks.
 
