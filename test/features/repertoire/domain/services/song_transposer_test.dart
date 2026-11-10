@@ -91,6 +91,157 @@ void main() {
     });
   });
 
+  group('SongTransposer hardening', () {
+    Song songWith({
+      required String key,
+      List<ChordCell> chords = const [],
+      String? lyrics,
+    }) {
+      return Song(
+        id: 's',
+        title: 't',
+        artist: 'a',
+        key: key,
+        tempo: 100,
+        sections: [
+          SongSection(
+            id: 'sec',
+            name: 'Verse',
+            orderIndex: 0,
+            chords: chords,
+            lyrics: lyrics,
+          ),
+        ],
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      );
+    }
+
+    test('custom chord keeps its suffix when transposed', () {
+      expect(SongTransposer.transposeChordString('Cmaj7#11', 2), 'Dmaj7#11');
+    });
+
+    test('custom chord with slash bass transposes root and bass', () {
+      expect(SongTransposer.transposeChordString('C7sus4/G', 2), 'D7sus4/A');
+    });
+
+    test('custom ChordCell label is rebuilt on transposeChord', () {
+      final cell = ChordParser.parseChord('Cmaj7#11')!;
+      final t = SongTransposer.transposeChord(cell, 2, preferSharps: true);
+      expect(t.displayLabel, 'Dmaj7#11');
+      expect(t.root, 'D');
+    });
+
+    test('lowercase custom root is normalised to upper case', () {
+      expect(SongTransposer.transposeChordString('cmaj7#11', 2), 'Dmaj7#11');
+    });
+
+    test('custom label not starting with root is left unchanged', () {
+      for (final label in ['N.C.', 'Riff']) {
+        final cell = ChordCell(
+          root: 'C',
+          quality: ChordQuality.custom,
+          customLabel: label,
+        );
+        final t = SongTransposer.transposeChord(cell, 2, preferSharps: true);
+        expect(t, cell);
+        expect(t.displayLabel, label);
+      }
+    });
+
+    test('slash chord with non-note bass does not throw', () {
+      expect(SongTransposer.transposeChordString('C/9', 2), 'D/9');
+    });
+
+    test('enharmonic roots Fb E# Cb B# follow preferSharps', () {
+      expect(SongTransposer.transposeNote('Fb', 1, preferSharps: true), 'F');
+      expect(SongTransposer.transposeNote('E#', 1, preferSharps: true), 'F#');
+      expect(SongTransposer.transposeNote('E#', 1, preferSharps: false), 'Gb');
+      expect(SongTransposer.transposeNote('Cb', 1, preferSharps: false), 'C');
+      expect(SongTransposer.transposeNote('B#', 1, preferSharps: true), 'C#');
+      expect(SongTransposer.transposeNote('B#', 1, preferSharps: false), 'Db');
+      expect(SongTransposer.transposeNote('Cb', 0, preferSharps: true), 'B');
+    });
+
+    test('negative and large semitones wrap', () {
+      expect(SongTransposer.transposeNote('C', -1), 'B');
+      expect(SongTransposer.transposeNote('C', -13), 'B');
+      expect(SongTransposer.transposeNote('C', 25), 'C#');
+      expect(SongTransposer.transposeChordString('Am7', -13), 'G#m7');
+      expect(SongTransposer.transposeChordString('Am7', 12), 'Am7');
+    });
+
+    test('non-chord bracket tags are untouched, chords transposed', () {
+      const input =
+          '[Intro] [Chorus] [x2] [Verse 1] [Bridge] [Am] [Em] '
+          '[am] [en] word';
+      final out = SongTransposer.transposeChordProText(input, 2);
+      expect(
+        out,
+        '[Intro] [Chorus] [x2] [Verse 1] [Bridge] [Bm] [F#m] [am] [en] word',
+      );
+    });
+
+    test('transposeSong survives unparseable keys', () {
+      for (final key in ['', 'D minor', 'am', 'Dm', 'garbage']) {
+        final t = SongTransposer.transposeSong(
+          songWith(
+            key: key,
+            chords: const [ChordCell(root: 'D', quality: ChordQuality.minor)],
+          ),
+          2,
+        );
+        expect(t.sections.first.chords.first.root, 'E');
+      }
+      expect(SongTransposer.transposeSong(songWith(key: 'Dm'), 2).key, 'Em');
+      expect(SongTransposer.transposeSong(songWith(key: 'am'), 2).key, 'Bm');
+      expect(SongTransposer.transposeSong(songWith(key: ''), 2).key, '');
+      expect(
+        SongTransposer.transposeSong(songWith(key: 'D minor'), 2).key,
+        'E minor',
+      );
+    });
+
+    test('round trip +N then -N restores sharp-only and flat-only songs', () {
+      const sharpChords = [
+        ChordCell(root: 'C'),
+        ChordCell(root: 'F#', quality: ChordQuality.minor7, bass: 'C#'),
+        ChordCell(root: 'G', quality: ChordQuality.dominant7),
+      ];
+      const flatChords = [
+        ChordCell(root: 'Bb'),
+        ChordCell(root: 'Eb', quality: ChordQuality.minor7, bass: 'Ab'),
+        ChordCell(root: 'F', quality: ChordQuality.dominant7),
+      ];
+      for (final n in [1, 2, 5, 7, 11]) {
+        final up = SongTransposer.transposeSong(
+          songWith(key: 'C', chords: sharpChords),
+          n,
+        );
+        final back = SongTransposer.transposeSong(up, -n);
+        expect(back.sections.first.chords.map((c) => c.root).toList(), [
+          'C',
+          'F#',
+          'G',
+        ], reason: 'sharp song +$n/-$n');
+        expect(back.sections.first.chords[1].bass, 'C#');
+      }
+      for (final n in [1, 2, 5, 7, 11]) {
+        final up = SongTransposer.transposeSong(
+          songWith(key: 'F', chords: flatChords),
+          n,
+        );
+        final back = SongTransposer.transposeSong(up, -n);
+        expect(back.sections.first.chords.map((c) => c.root).toList(), [
+          'Bb',
+          'Eb',
+          'F',
+        ], reason: 'flat song +$n/-$n');
+        expect(back.sections.first.chords[1].bass, 'Ab');
+      }
+    });
+  });
+
   group('ChordParser', () {
     test('parses whitespace and bar separated progressions', () {
       final chords = ChordParser.parseProgression('C | G/B | Am7 | Fmaj7');

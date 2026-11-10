@@ -90,6 +90,16 @@ class SongTransposer {
   }) {
     if (semitones == 0) return chord;
 
+    final customLabel = chord.customLabel;
+    if (chord.quality == ChordQuality.custom &&
+        customLabel != null &&
+        !customLabel.trim().toLowerCase().startsWith(
+          chord.root.toLowerCase(),
+        )) {
+      // Label is not derived from the root (e.g. "N.C.", "Riff"): leave as is.
+      return chord;
+    }
+
     final newRoot = transposeNote(
       chord.root,
       semitones,
@@ -99,7 +109,49 @@ class SongTransposer {
         ? transposeNote(chord.bass!, semitones, preferSharps: preferSharps)
         : null;
 
+    final label = chord.customLabel;
+    if (chord.quality == ChordQuality.custom && label != null) {
+      // Rebuild the custom label so its suffix (e.g. "maj7#11") is preserved.
+      final trimmed = label.trim();
+      final rest = trimmed.length >= chord.root.length
+          ? trimmed.substring(chord.root.length)
+          : '';
+      final slash = rest.indexOf('/');
+      final suffix = slash < 0 ? rest : rest.substring(0, slash);
+      final bassPart = newBass != null ? '/$newBass' : '';
+      return chord.copyWith(
+        root: newRoot,
+        bass: newBass,
+        customLabel: '$newRoot$suffix$bassPart',
+      );
+    }
+
     return chord.copyWith(root: newRoot, bass: newBass, customLabel: null);
+  }
+
+  static final RegExp _looseKeyRegex = RegExp(
+    r'^\s*([A-Ga-g][#b]?)\s*(m|min|minor|maj|major)?\s*$',
+    caseSensitive: false,
+  );
+
+  /// Transposes a key string that [MusicalKey.fromString] cannot parse
+  /// (e.g. `"D minor"`), keeping its quality text. Unknown strings are
+  /// returned unchanged.
+  static String _transposeLooseKey(
+    String key,
+    int semitones, {
+    required bool preferSharps,
+  }) {
+    final match = _looseKeyRegex.firstMatch(key);
+    if (match == null) return key;
+    final root = match.group(1)!;
+    final rest = key.trim().substring(root.length);
+    final newRoot = transposeNote(
+      root.substring(0, 1).toUpperCase() + root.substring(1),
+      semitones,
+      preferSharps: preferSharps,
+    );
+    return '$newRoot$rest';
   }
 
   /// Transposes an entire [Song] by [semitones].
@@ -120,7 +172,7 @@ class SongTransposer {
     final preferSharps = targetKey?.useSharps ?? !song.key.contains('b');
     final newKeyName =
         targetKey?.name ??
-        transposeNote(song.key, semitones, preferSharps: preferSharps);
+        _transposeLooseKey(song.key, semitones, preferSharps: preferSharps);
 
     final updatedSections = song.sections.map((section) {
       final updatedChords = section.chords
@@ -201,7 +253,15 @@ class ChordParser {
   );
 
   /// Common lowercase words starting with A-G that should not be parsed as chords.
-  static const _commonNonChordWords = {'es', 'el', 'en', 'al', 'as', 'an', 'am'};
+  static const _commonNonChordWords = {
+    'es',
+    'el',
+    'en',
+    'al',
+    'as',
+    'an',
+    'am',
+  };
 
   /// Parses a space, bar, comma, or newline-separated chord progression.
   ///
