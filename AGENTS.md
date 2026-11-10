@@ -56,5 +56,5 @@ Every task, whether adding a new feature, fixing a bug, resolving a layout overf
 
 ## 3. Plan → Implement → Adversarial Review Pipeline
 
-For non-trivial tasks, follow `.pipeline/README.md`: the main session plans and triages, the `implementer` subagent builds, the `adversary` subagent reviews. Handoffs are files in `.pipeline/<NNN-slug>/`. Max 3 rounds; only blocker/major findings block; the implementer never commits until the review is approved.
+For non-trivial tasks, follow `.pipeline/README.md`: the main session plans and triages, the `implementer` subagent builds, the `adversary` subagent reviews. Handoffs are files in `.pipeline/<NNN-slug>/`. Max 3 rounds; only blocker/major findings block; the implementer never commits until the review is approved. When a task closes, its folder is deleted and only a final-state summary is kept at `.pipeline/summaries/<NNN-slug>.md`.
 
