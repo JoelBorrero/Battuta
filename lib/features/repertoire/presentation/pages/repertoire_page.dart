@@ -5,8 +5,8 @@
 /// and provides floating action buttons to create new songs or setlists.
 library;
 
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/routes/app_routes.dart';
-import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
@@ -51,7 +51,8 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               controller: titleController,
               decoration: InputDecoration(
                 labelText: l10n?.setlistTitleField ?? 'Setlist Title *',
-                hintText: l10n?.setlistTitleHint ?? 'e.g. Sunday Morning - Easter',
+                hintText:
+                    l10n?.setlistTitleHint ?? 'e.g. Sunday Morning - Easter',
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -59,8 +60,11 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
             TextField(
               controller: descController,
               decoration: InputDecoration(
-                labelText: l10n?.notesServiceThemeField ?? 'Notes / Service Theme',
-                hintText: l10n?.notesServiceThemeHint ?? 'e.g. Acoustic setup, communion song in D',
+                labelText:
+                    l10n?.notesServiceThemeField ?? 'Notes / Service Theme',
+                hintText:
+                    l10n?.notesServiceThemeHint ??
+                    'e.g. Acoustic setup, communion song in D',
                 border: const OutlineInputBorder(),
               ),
               maxLines: 2,
@@ -97,7 +101,8 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      l10n?.createdSetlistSuccess(title) ?? 'Created setlist "$title"',
+                      l10n?.createdSetlistSuccess(title) ??
+                          'Created setlist "$title"',
                     ),
                   ),
                 );
@@ -202,8 +207,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
-                  l10n?.importByWebUrlSubtitle ??
-                      'Scrape chords & lyrics from Cifra Club, LaCuerda, or web link',
+                  l10n?.importByWebUrlSubtitle ?? 'Scrape chords & lyrics from Cifra Club, LaCuerda, or web link',
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -213,7 +217,10 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Color(0x222E86DE),
-                  child: Icon(Icons.document_scanner_outlined, color: AppTheme.stageBlue),
+                  child: Icon(
+                    Icons.document_scanner_outlined,
+                    color: AppTheme.stageBlue,
+                  ),
                 ),
                 title: Text(
                   l10n?.scanWithGemini ?? 'Scan with Gemini AI (OMR)',
@@ -284,7 +291,21 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n?.repertoireTitle ?? 'Repertoire'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (MediaQuery.sizeOf(context).width < BattutaBreakpoints.rail) ...[
+              const BattutaMark(size: 22),
+              const SizedBox(width: BattutaSpace.sm),
+            ],
+            Flexible(
+              child: Text(
+                l10n?.repertoireTitle ?? 'Repertoire',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
           const CloudSyncStatusIndicator(compact: true),
           IconButton(
@@ -312,17 +333,23 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 final songs = repertoire.value ?? [];
                 if (songs.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No songs in repertoire to export')),
+                    const SnackBar(
+                      content: Text('No songs in repertoire to export'),
+                    ),
                   );
                   return;
                 }
-                final jsonStr = SongImportExportService.exportRepertoireToJson(songs);
+                final jsonStr = SongImportExportService.exportRepertoireToJson(
+                  songs,
+                );
                 await Clipboard.setData(ClipboardData(text: jsonStr));
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       backgroundColor: AppTheme.stageGreen,
-                      content: Text('Exported ${songs.length} songs to clipboard (JSON)'),
+                      content: Text(
+                        'Exported ${songs.length} songs to clipboard (JSON)',
+                      ),
                     ),
                   );
                 }
@@ -363,12 +390,17 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 ButtonSegment(
                   value: 0,
                   icon: const Icon(Icons.music_note),
-                  label: Text(l10n?.songsTab(songCount) ?? 'Songs ($songCount)'),
+                  label: Text(
+                    l10n?.songsTab(songCount) ?? 'Songs ($songCount)',
+                  ),
                 ),
                 ButtonSegment(
                   value: 1,
                   icon: const Icon(Icons.playlist_play),
-                  label: Text(l10n?.setlistsTab(setlistCount) ?? 'Setlists ($setlistCount)'),
+                  label: Text(
+                    l10n?.setlistsTab(setlistCount) ??
+                        'Setlists ($setlistCount)',
+                  ),
                 ),
               ],
               selected: {_selectedTabIndex},
@@ -380,9 +412,31 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
           // ── Content Area ──
           Expanded(
-            child: _selectedTabIndex == 0
-                ? _buildSongsView(repertoire, theme, isAdmin: isAdmin)
-                : _buildSetlistsView(setlistsAsync, theme, isAdmin: isAdmin),
+            child: AnimatedSwitcher(
+              duration: BattutaMotion.resolve(context, BattutaMotion.beat),
+              switchInCurve: BattutaMotion.downbeat,
+              switchOutCurve: BattutaMotion.upbeat,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.015),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: KeyedSubtree(
+                key: ValueKey(_selectedTabIndex),
+                child: _selectedTabIndex == 0
+                    ? _buildSongsView(repertoire, theme, isAdmin: isAdmin)
+                    : _buildSetlistsView(
+                        setlistsAsync,
+                        theme,
+                        isAdmin: isAdmin,
+                      ),
+              ),
+            ),
           ),
         ],
       ),
@@ -395,10 +449,24 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                   ? () => _showAddSongOptions(context)
                   : _showCreateSetlistDialog,
               icon: const Icon(Icons.add),
-              label: Text(
-                _selectedTabIndex == 0
-                    ? (l10n?.newSong ?? 'New Song')
-                    : (l10n?.newSetlist ?? 'New Setlist'),
+              label: AnimatedSwitcher(
+                duration: BattutaMotion.resolve(context, BattutaMotion.beat),
+                switchInCurve: BattutaMotion.downbeat,
+                switchOutCurve: BattutaMotion.upbeat,
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(
+                    sizeFactor: animation,
+                    axis: Axis.horizontal,
+                    child: child,
+                  ),
+                ),
+                child: Text(
+                  _selectedTabIndex == 0
+                      ? (l10n?.newSong ?? 'New Song')
+                      : (l10n?.newSetlist ?? 'New Setlist'),
+                  key: ValueKey(_selectedTabIndex),
+                ),
               ),
             )
           : null,
@@ -413,112 +481,64 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     final l10n = AppLocalizations.of(context);
     return repertoire.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n?.failedToLoadRepertoire ?? 'Failed to load repertoire',
-                style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () => ref.invalidate(repertoireProvider),
-                icon: const Icon(Icons.refresh),
-                label: Text(l10n?.retry ?? 'Retry'),
-              ),
-            ],
+      error: (error, _) => StageEmptyState(
+        icon: Icons.error_outline,
+        tone: theme.colorScheme.error,
+        title: l10n?.failedToLoadRepertoire ?? 'Failed to load repertoire',
+        message: error.toString(),
+        actions: [
+          FilledButton.icon(
+            onPressed: () => ref.invalidate(repertoireProvider),
+            icon: const Icon(Icons.refresh),
+            label: Text(l10n?.retry ?? 'Retry'),
           ),
-        ),
+        ],
       ),
       data: (songs) {
         if (songs.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.library_music_outlined,
-                    size: 80,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+          return StageEmptyState(
+            icon: Icons.library_music_outlined,
+            title: l10n?.repertoireEmpty ?? 'Your repertoire is empty',
+            message: isAdmin
+                ? (l10n?.repertoireEmptyAdminHint ??
+                      'Tap the + button to add your first song')
+                : (l10n?.repertoireEmptyMemberHint ??
+                      'No songs available yet. Contact an administrator to add songs.'),
+            actions: [
+              if (isAdmin) ...[
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.amberAccent,
+                    foregroundColor: AppTheme.obsidianText,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n?.repertoireEmpty ?? 'Your repertoire is empty',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    isAdmin
-                        ? (l10n?.repertoireEmptyAdminHint ??
-                            'Tap the + button to add your first song')
-                        : (l10n?.repertoireEmptyMemberHint ??
-                            'No songs available yet. Contact an administrator to add songs.'),
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 12,
-                    runSpacing: 10,
-                    children: [
-                      if (isAdmin) ...[
-                        FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.amberAccent,
-                            foregroundColor: AppTheme.obsidianText,
-                          ),
-                          icon: const Icon(Icons.auto_awesome),
-                          label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
-                          onPressed: () async {
-                            await ref
-                                .read(repertoireProvider.notifier)
-                                .seedSampleData();
-                          },
-                        ),
-                        FilledButton.icon(
-                          icon: const Icon(Icons.add),
-                          label: Text(l10n?.addSong ?? 'Add Song'),
-                          onPressed: () => _showAddSongOptions(context),
-                        ),
-                      ],
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.link),
-                        label: const Text('Import by URL'),
-                        onPressed: () => SongImportModal.show(
-                          context,
-                          initialTab: SongImportTab.url,
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.document_scanner_outlined),
-                        label: Text(l10n?.scanScore ?? 'Scan Score'),
-                        onPressed: () => _openScannerDirect(context),
-                      ),
-                    ],
-                  ),
-                ],
+                  icon: const Icon(Icons.auto_awesome),
+                  label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
+                  onPressed: () async {
+                    await ref
+                        .read(repertoireProvider.notifier)
+                        .seedSampleData();
+                  },
+                ),
+                FilledButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n?.addSong ?? 'Add Song'),
+                  onPressed: () => _showAddSongOptions(context),
+                ),
+              ],
+              OutlinedButton.icon(
+                icon: const Icon(Icons.link),
+                label: const Text('Import by URL'),
+                onPressed: () => SongImportModal.show(
+                  context,
+                  initialTab: SongImportTab.url,
+                ),
               ),
-            ),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.document_scanner_outlined),
+                label: Text(l10n?.scanScore ?? 'Scan Score'),
+                onPressed: () => _openScannerDirect(context),
+              ),
+            ],
           );
         }
 
@@ -526,7 +546,10 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           itemCount: songs.length,
           separatorBuilder: (_, _) => const SizedBox(height: 8),
-          itemBuilder: (context, index) => SongCard(song: songs[index]),
+          itemBuilder: (context, index) => BattutaEntrance(
+            index: index,
+            child: SongCard(song: songs[index]),
+          ),
         );
       },
     );
@@ -540,69 +563,43 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     final l10n = AppLocalizations.of(context);
     return setlistsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('${l10n?.failedToLoadRepertoire ?? "Error loading setlists"}: $e')),
+      error: (e, _) => Center(
+        child: Text(
+          '${l10n?.failedToLoadRepertoire ?? "Error loading setlists"}: $e',
+        ),
+      ),
       data: (setlists) {
         if (setlists.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.playlist_play,
-                    size: 72,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+          return StageEmptyState(
+            icon: Icons.playlist_play,
+            title: l10n?.noSetlistsYet ?? 'No Setlists Yet',
+            message: isAdmin
+                ? (l10n?.setlistsEmptyAdminHint ??
+                      'Create an ordered setlist for Sunday services or rehearsals.')
+                : (l10n?.setlistsEmptyMemberHint ??
+                      'No setlists created yet. Setlists will appear here once published by your director.'),
+            actions: [
+              if (isAdmin) ...[
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.amberAccent,
+                    foregroundColor: AppTheme.obsidianText,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n?.noSetlistsYet ?? 'No Setlists Yet',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    isAdmin
-                        ? (l10n?.setlistsEmptyAdminHint ??
-                            'Create an ordered setlist for Sunday services or rehearsals.')
-                        : (l10n?.setlistsEmptyMemberHint ??
-                            'No setlists created yet. Setlists will appear here once published by your director.'),
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  if (isAdmin)
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 12,
-                      runSpacing: 10,
-                      children: [
-                        FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppTheme.amberAccent,
-                            foregroundColor: AppTheme.obsidianText,
-                          ),
-                          icon: const Icon(Icons.auto_awesome),
-                          label: Text(
-                            l10n?.loadSampleSetlist ?? 'Load Sample Setlist',
-                          ),
-                          onPressed: () async {
-                            await ref
-                                .read(repertoireProvider.notifier)
-                                .seedSampleData();
-                          },
-                        ),
-                        FilledButton.icon(
-                          icon: const Icon(Icons.add),
-                          label: Text(l10n?.createSetlist ?? 'Create Setlist'),
-                          onPressed: _showCreateSetlistDialog,
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
+                  icon: const Icon(Icons.auto_awesome),
+                  label: Text(l10n?.loadSampleSetlist ?? 'Load Sample Setlist'),
+                  onPressed: () async {
+                    await ref
+                        .read(repertoireProvider.notifier)
+                        .seedSampleData();
+                  },
+                ),
+                FilledButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n?.createSetlist ?? 'Create Setlist'),
+                  onPressed: _showCreateSetlistDialog,
+                ),
+              ],
+            ],
           );
         }
 
@@ -612,43 +609,17 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           separatorBuilder: (_, _) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final setlist = setlists[index];
-            final isDark = theme.brightness == Brightness.dark;
-
-            return Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: isDark ? AppTheme.slateBorder : AppTheme.pearlBorder,
-                  width: 1,
-                ),
-              ),
-              child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: AppTheme.amberMuted,
-                  child: Icon(Icons.playlist_play, color: AppTheme.amberAccent),
-                ),
-                title: Text(
-                  setlist.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  '${l10n?.setlistSongsCount(setlist.songCount) ?? "${setlist.songCount} songs"} • ${setlist.description ?? (l10n?.upcomingService ?? "Upcoming service")}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: isAdmin
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          size: 20,
-                          color: AppTheme.stageRed,
-                        ),
-                        tooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
-                        onPressed: () => _confirmDeleteSetlist(context, setlist),
-                      )
-                    : null,
+            return BattutaEntrance(
+              index: index,
+              child: _SetlistCard(
+                setlist: setlist,
+                subtitle:
+                    '${l10n?.setlistSongsCount(setlist.songCount) ?? "${setlist.songCount} songs"} • ${setlist.description ?? (l10n?.upcomingService ?? "Upcoming service")}',
                 onTap: () => context.push(AppRoutes.setlistDetail(setlist.id)),
+                onDelete: isAdmin
+                    ? () => _confirmDeleteSetlist(context, setlist)
+                    : null,
+                deleteTooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
               ),
             );
           },
@@ -700,7 +671,9 @@ class _SongSearchDelegate extends SearchDelegate<String> {
   Widget _buildSearchResults(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (query.trim().isEmpty) {
-      return Center(child: Text(l10n?.typeToSearchSongs ?? 'Type to search songs…'));
+      return Center(
+        child: Text(l10n?.typeToSearchSongs ?? 'Type to search songs…'),
+      );
     }
 
     final repertoire = _ref.watch(repertoireProvider);
@@ -724,6 +697,118 @@ class _SongSearchDelegate extends SearchDelegate<String> {
           itemBuilder: (context, index) => SongCard(song: matches[index]),
         );
       },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Setlist card
+// ---------------------------------------------------------------------------
+
+/// Stage card for a [Setlist], matching the [SongCard] visual language.
+class _SetlistCard extends StatelessWidget {
+  const _SetlistCard({
+    required this.setlist,
+    required this.subtitle,
+    required this.onTap,
+    required this.deleteTooltip,
+    this.onDelete,
+  });
+
+  final Setlist setlist;
+  final String subtitle;
+  final VoidCallback onTap;
+  final VoidCallback? onDelete;
+  final String deleteTooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = BattutaBrand.of(context);
+
+    return BattutaPressable(
+      onTap: onTap,
+      builder: (context, pressed) => AnimatedContainer(
+        duration: BattutaMotion.resolve(context, BattutaMotion.tick),
+        curve: BattutaMotion.downbeat,
+        decoration: brand.cardDecoration(pressed: pressed),
+        padding: const EdgeInsets.fromLTRB(
+          BattutaSpace.md,
+          BattutaSpace.md,
+          BattutaSpace.xs,
+          BattutaSpace.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: brand.accentWash,
+                borderRadius: BattutaRadius.smAll,
+                border: Border.all(color: brand.accent.withValues(alpha: 0.35)),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.playlist_play, size: 20, color: brand.accentInk),
+                  Text(
+                    '${setlist.songCount}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: brand.accentInk,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: BattutaSpace.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    setlist.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: brand.ink,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: BattutaSpace.xxs),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: brand.inkMuted,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (onDelete != null)
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 20,
+                  color: AppTheme.stageRed,
+                ),
+                tooltip: deleteTooltip,
+                onPressed: onDelete,
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(right: BattutaSpace.sm),
+                child: Icon(Icons.chevron_right, size: 20, color: brand.inkDim),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
