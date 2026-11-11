@@ -1,0 +1,8 @@
+# Integration tests that need the local Supabase stack are tagged `supabase`
+# and skipped by a plain `flutter test`. Run them with:
+#
+#   supabase db reset
+#   flutter test --tags supabase --run-skipped
+tags:
+  supabase:
+    skip: "Needs the local Supabase stack: flutter test --tags supabase --run-skipped"

@@ -1948,17 +1948,718 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
   }
 }
 
+class $CacheRecordsTable extends CacheRecords
+    with TableInfo<$CacheRecordsTable, CacheRecordEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CacheRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordKindMeta = const VerificationMeta(
+    'recordKind',
+  );
+  @override
+  late final GeneratedColumn<String> recordKind = GeneratedColumn<String>(
+    'record_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordIdMeta = const VerificationMeta(
+    'recordId',
+  );
+  @override
+  late final GeneratedColumn<String> recordId = GeneratedColumn<String>(
+    'record_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeIdMeta = const VerificationMeta(
+    'scopeId',
+  );
+  @override
+  late final GeneratedColumn<String> scopeId = GeneratedColumn<String>(
+    'scope_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    accountId,
+    recordKind,
+    recordId,
+    scopeId,
+    json,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cache_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CacheRecordEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('record_kind')) {
+      context.handle(
+        _recordKindMeta,
+        recordKind.isAcceptableOrUnknown(data['record_kind']!, _recordKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordKindMeta);
+    }
+    if (data.containsKey('record_id')) {
+      context.handle(
+        _recordIdMeta,
+        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordIdMeta);
+    }
+    if (data.containsKey('scope_id')) {
+      context.handle(
+        _scopeIdMeta,
+        scopeId.isAcceptableOrUnknown(data['scope_id']!, _scopeIdMeta),
+      );
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+        _jsonMeta,
+        json.isAcceptableOrUnknown(data['json']!, _jsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {accountId, recordKind, recordId};
+  @override
+  CacheRecordEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CacheRecordEntry(
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      recordKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_kind'],
+      )!,
+      recordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_id'],
+      )!,
+      scopeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_id'],
+      )!,
+      json: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}json'],
+      )!,
+    );
+  }
+
+  @override
+  $CacheRecordsTable createAlias(String alias) {
+    return $CacheRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class CacheRecordEntry extends DataClass
+    implements Insertable<CacheRecordEntry> {
+  final String accountId;
+  final String recordKind;
+  final String recordId;
+  final String scopeId;
+  final String json;
+  const CacheRecordEntry({
+    required this.accountId,
+    required this.recordKind,
+    required this.recordId,
+    required this.scopeId,
+    required this.json,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['account_id'] = Variable<String>(accountId);
+    map['record_kind'] = Variable<String>(recordKind);
+    map['record_id'] = Variable<String>(recordId);
+    map['scope_id'] = Variable<String>(scopeId);
+    map['json'] = Variable<String>(json);
+    return map;
+  }
+
+  CacheRecordsCompanion toCompanion(bool nullToAbsent) {
+    return CacheRecordsCompanion(
+      accountId: Value(accountId),
+      recordKind: Value(recordKind),
+      recordId: Value(recordId),
+      scopeId: Value(scopeId),
+      json: Value(json),
+    );
+  }
+
+  factory CacheRecordEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CacheRecordEntry(
+      accountId: serializer.fromJson<String>(json['accountId']),
+      recordKind: serializer.fromJson<String>(json['recordKind']),
+      recordId: serializer.fromJson<String>(json['recordId']),
+      scopeId: serializer.fromJson<String>(json['scopeId']),
+      json: serializer.fromJson<String>(json['json']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'accountId': serializer.toJson<String>(accountId),
+      'recordKind': serializer.toJson<String>(recordKind),
+      'recordId': serializer.toJson<String>(recordId),
+      'scopeId': serializer.toJson<String>(scopeId),
+      'json': serializer.toJson<String>(json),
+    };
+  }
+
+  CacheRecordEntry copyWith({
+    String? accountId,
+    String? recordKind,
+    String? recordId,
+    String? scopeId,
+    String? json,
+  }) => CacheRecordEntry(
+    accountId: accountId ?? this.accountId,
+    recordKind: recordKind ?? this.recordKind,
+    recordId: recordId ?? this.recordId,
+    scopeId: scopeId ?? this.scopeId,
+    json: json ?? this.json,
+  );
+  CacheRecordEntry copyWithCompanion(CacheRecordsCompanion data) {
+    return CacheRecordEntry(
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      recordKind: data.recordKind.present
+          ? data.recordKind.value
+          : this.recordKind,
+      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      scopeId: data.scopeId.present ? data.scopeId.value : this.scopeId,
+      json: data.json.present ? data.json.value : this.json,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CacheRecordEntry(')
+          ..write('accountId: $accountId, ')
+          ..write('recordKind: $recordKind, ')
+          ..write('recordId: $recordId, ')
+          ..write('scopeId: $scopeId, ')
+          ..write('json: $json')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(accountId, recordKind, recordId, scopeId, json);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CacheRecordEntry &&
+          other.accountId == this.accountId &&
+          other.recordKind == this.recordKind &&
+          other.recordId == this.recordId &&
+          other.scopeId == this.scopeId &&
+          other.json == this.json);
+}
+
+class CacheRecordsCompanion extends UpdateCompanion<CacheRecordEntry> {
+  final Value<String> accountId;
+  final Value<String> recordKind;
+  final Value<String> recordId;
+  final Value<String> scopeId;
+  final Value<String> json;
+  final Value<int> rowid;
+  const CacheRecordsCompanion({
+    this.accountId = const Value.absent(),
+    this.recordKind = const Value.absent(),
+    this.recordId = const Value.absent(),
+    this.scopeId = const Value.absent(),
+    this.json = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CacheRecordsCompanion.insert({
+    required String accountId,
+    required String recordKind,
+    required String recordId,
+    this.scopeId = const Value.absent(),
+    required String json,
+    this.rowid = const Value.absent(),
+  }) : accountId = Value(accountId),
+       recordKind = Value(recordKind),
+       recordId = Value(recordId),
+       json = Value(json);
+  static Insertable<CacheRecordEntry> custom({
+    Expression<String>? accountId,
+    Expression<String>? recordKind,
+    Expression<String>? recordId,
+    Expression<String>? scopeId,
+    Expression<String>? json,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (accountId != null) 'account_id': accountId,
+      if (recordKind != null) 'record_kind': recordKind,
+      if (recordId != null) 'record_id': recordId,
+      if (scopeId != null) 'scope_id': scopeId,
+      if (json != null) 'json': json,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CacheRecordsCompanion copyWith({
+    Value<String>? accountId,
+    Value<String>? recordKind,
+    Value<String>? recordId,
+    Value<String>? scopeId,
+    Value<String>? json,
+    Value<int>? rowid,
+  }) {
+    return CacheRecordsCompanion(
+      accountId: accountId ?? this.accountId,
+      recordKind: recordKind ?? this.recordKind,
+      recordId: recordId ?? this.recordId,
+      scopeId: scopeId ?? this.scopeId,
+      json: json ?? this.json,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (recordKind.present) {
+      map['record_kind'] = Variable<String>(recordKind.value);
+    }
+    if (recordId.present) {
+      map['record_id'] = Variable<String>(recordId.value);
+    }
+    if (scopeId.present) {
+      map['scope_id'] = Variable<String>(scopeId.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CacheRecordsCompanion(')
+          ..write('accountId: $accountId, ')
+          ..write('recordKind: $recordKind, ')
+          ..write('recordId: $recordId, ')
+          ..write('scopeId: $scopeId, ')
+          ..write('json: $json, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CacheRefreshesTable extends CacheRefreshes
+    with TableInfo<$CacheRefreshesTable, CacheRefreshEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CacheRefreshesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordKindMeta = const VerificationMeta(
+    'recordKind',
+  );
+  @override
+  late final GeneratedColumn<String> recordKind = GeneratedColumn<String>(
+    'record_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeIdMeta = const VerificationMeta(
+    'scopeId',
+  );
+  @override
+  late final GeneratedColumn<String> scopeId = GeneratedColumn<String>(
+    'scope_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _refreshedAtMeta = const VerificationMeta(
+    'refreshedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> refreshedAt = GeneratedColumn<DateTime>(
+    'refreshed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    accountId,
+    recordKind,
+    scopeId,
+    refreshedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cache_refreshes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CacheRefreshEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('record_kind')) {
+      context.handle(
+        _recordKindMeta,
+        recordKind.isAcceptableOrUnknown(data['record_kind']!, _recordKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordKindMeta);
+    }
+    if (data.containsKey('scope_id')) {
+      context.handle(
+        _scopeIdMeta,
+        scopeId.isAcceptableOrUnknown(data['scope_id']!, _scopeIdMeta),
+      );
+    }
+    if (data.containsKey('refreshed_at')) {
+      context.handle(
+        _refreshedAtMeta,
+        refreshedAt.isAcceptableOrUnknown(
+          data['refreshed_at']!,
+          _refreshedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_refreshedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {accountId, recordKind, scopeId};
+  @override
+  CacheRefreshEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CacheRefreshEntry(
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      )!,
+      recordKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_kind'],
+      )!,
+      scopeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_id'],
+      )!,
+      refreshedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}refreshed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CacheRefreshesTable createAlias(String alias) {
+    return $CacheRefreshesTable(attachedDatabase, alias);
+  }
+}
+
+class CacheRefreshEntry extends DataClass
+    implements Insertable<CacheRefreshEntry> {
+  final String accountId;
+  final String recordKind;
+  final String scopeId;
+  final DateTime refreshedAt;
+  const CacheRefreshEntry({
+    required this.accountId,
+    required this.recordKind,
+    required this.scopeId,
+    required this.refreshedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['account_id'] = Variable<String>(accountId);
+    map['record_kind'] = Variable<String>(recordKind);
+    map['scope_id'] = Variable<String>(scopeId);
+    map['refreshed_at'] = Variable<DateTime>(refreshedAt);
+    return map;
+  }
+
+  CacheRefreshesCompanion toCompanion(bool nullToAbsent) {
+    return CacheRefreshesCompanion(
+      accountId: Value(accountId),
+      recordKind: Value(recordKind),
+      scopeId: Value(scopeId),
+      refreshedAt: Value(refreshedAt),
+    );
+  }
+
+  factory CacheRefreshEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CacheRefreshEntry(
+      accountId: serializer.fromJson<String>(json['accountId']),
+      recordKind: serializer.fromJson<String>(json['recordKind']),
+      scopeId: serializer.fromJson<String>(json['scopeId']),
+      refreshedAt: serializer.fromJson<DateTime>(json['refreshedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'accountId': serializer.toJson<String>(accountId),
+      'recordKind': serializer.toJson<String>(recordKind),
+      'scopeId': serializer.toJson<String>(scopeId),
+      'refreshedAt': serializer.toJson<DateTime>(refreshedAt),
+    };
+  }
+
+  CacheRefreshEntry copyWith({
+    String? accountId,
+    String? recordKind,
+    String? scopeId,
+    DateTime? refreshedAt,
+  }) => CacheRefreshEntry(
+    accountId: accountId ?? this.accountId,
+    recordKind: recordKind ?? this.recordKind,
+    scopeId: scopeId ?? this.scopeId,
+    refreshedAt: refreshedAt ?? this.refreshedAt,
+  );
+  CacheRefreshEntry copyWithCompanion(CacheRefreshesCompanion data) {
+    return CacheRefreshEntry(
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      recordKind: data.recordKind.present
+          ? data.recordKind.value
+          : this.recordKind,
+      scopeId: data.scopeId.present ? data.scopeId.value : this.scopeId,
+      refreshedAt: data.refreshedAt.present
+          ? data.refreshedAt.value
+          : this.refreshedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CacheRefreshEntry(')
+          ..write('accountId: $accountId, ')
+          ..write('recordKind: $recordKind, ')
+          ..write('scopeId: $scopeId, ')
+          ..write('refreshedAt: $refreshedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(accountId, recordKind, scopeId, refreshedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CacheRefreshEntry &&
+          other.accountId == this.accountId &&
+          other.recordKind == this.recordKind &&
+          other.scopeId == this.scopeId &&
+          other.refreshedAt == this.refreshedAt);
+}
+
+class CacheRefreshesCompanion extends UpdateCompanion<CacheRefreshEntry> {
+  final Value<String> accountId;
+  final Value<String> recordKind;
+  final Value<String> scopeId;
+  final Value<DateTime> refreshedAt;
+  final Value<int> rowid;
+  const CacheRefreshesCompanion({
+    this.accountId = const Value.absent(),
+    this.recordKind = const Value.absent(),
+    this.scopeId = const Value.absent(),
+    this.refreshedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CacheRefreshesCompanion.insert({
+    required String accountId,
+    required String recordKind,
+    this.scopeId = const Value.absent(),
+    required DateTime refreshedAt,
+    this.rowid = const Value.absent(),
+  }) : accountId = Value(accountId),
+       recordKind = Value(recordKind),
+       refreshedAt = Value(refreshedAt);
+  static Insertable<CacheRefreshEntry> custom({
+    Expression<String>? accountId,
+    Expression<String>? recordKind,
+    Expression<String>? scopeId,
+    Expression<DateTime>? refreshedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (accountId != null) 'account_id': accountId,
+      if (recordKind != null) 'record_kind': recordKind,
+      if (scopeId != null) 'scope_id': scopeId,
+      if (refreshedAt != null) 'refreshed_at': refreshedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CacheRefreshesCompanion copyWith({
+    Value<String>? accountId,
+    Value<String>? recordKind,
+    Value<String>? scopeId,
+    Value<DateTime>? refreshedAt,
+    Value<int>? rowid,
+  }) {
+    return CacheRefreshesCompanion(
+      accountId: accountId ?? this.accountId,
+      recordKind: recordKind ?? this.recordKind,
+      scopeId: scopeId ?? this.scopeId,
+      refreshedAt: refreshedAt ?? this.refreshedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (recordKind.present) {
+      map['record_kind'] = Variable<String>(recordKind.value);
+    }
+    if (scopeId.present) {
+      map['scope_id'] = Variable<String>(scopeId.value);
+    }
+    if (refreshedAt.present) {
+      map['refreshed_at'] = Variable<DateTime>(refreshedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CacheRefreshesCompanion(')
+          ..write('accountId: $accountId, ')
+          ..write('recordKind: $recordKind, ')
+          ..write('scopeId: $scopeId, ')
+          ..write('refreshedAt: $refreshedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SongsTable songs = $SongsTable(this);
   late final $SetlistsTable setlists = $SetlistsTable(this);
   late final $ScoresTable scores = $ScoresTable(this);
+  late final $CacheRecordsTable cacheRecords = $CacheRecordsTable(this);
+  late final $CacheRefreshesTable cacheRefreshes = $CacheRefreshesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [songs, setlists, scores];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    songs,
+    setlists,
+    scores,
+    cacheRecords,
+    cacheRefreshes,
+  ];
 }
 
 typedef $$SongsTableCreateCompanionBuilder = SongsCompanion Function({
@@ -2910,6 +3611,417 @@ typedef $$ScoresTableProcessedTableManager =
       ScoreEntry,
       PrefetchHooks Function()
     >;
+typedef $$CacheRecordsTableCreateCompanionBuilder =
+    CacheRecordsCompanion Function({
+      required String accountId,
+      required String recordKind,
+      required String recordId,
+      Value<String> scopeId,
+      required String json,
+      Value<int> rowid,
+    });
+typedef $$CacheRecordsTableUpdateCompanionBuilder =
+    CacheRecordsCompanion Function({
+      Value<String> accountId,
+      Value<String> recordKind,
+      Value<String> recordId,
+      Value<String> scopeId,
+      Value<String> json,
+      Value<int> rowid,
+    });
+
+class $$CacheRecordsTableFilterComposer
+    extends Composer<_$AppDatabase, $CacheRecordsTable> {
+  $$CacheRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordKind => $composableBuilder(
+    column: $table.recordKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeId => $composableBuilder(
+    column: $table.scopeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CacheRecordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CacheRecordsTable> {
+  $$CacheRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordKind => $composableBuilder(
+    column: $table.recordKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeId => $composableBuilder(
+    column: $table.scopeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CacheRecordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CacheRecordsTable> {
+  $$CacheRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<String> get recordKind => $composableBuilder(
+    column: $table.recordKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recordId =>
+      $composableBuilder(column: $table.recordId, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeId =>
+      $composableBuilder(column: $table.scopeId, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+}
+
+class $$CacheRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CacheRecordsTable,
+          CacheRecordEntry,
+          $$CacheRecordsTableFilterComposer,
+          $$CacheRecordsTableOrderingComposer,
+          $$CacheRecordsTableAnnotationComposer,
+          $$CacheRecordsTableCreateCompanionBuilder,
+          $$CacheRecordsTableUpdateCompanionBuilder,
+          (
+            CacheRecordEntry,
+            BaseReferences<_$AppDatabase, $CacheRecordsTable, CacheRecordEntry>,
+          ),
+          CacheRecordEntry,
+          PrefetchHooks Function()
+        > {
+  $$CacheRecordsTableTableManager(_$AppDatabase db, $CacheRecordsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CacheRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CacheRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CacheRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> accountId = const Value.absent(),
+                Value<String> recordKind = const Value.absent(),
+                Value<String> recordId = const Value.absent(),
+                Value<String> scopeId = const Value.absent(),
+                Value<String> json = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CacheRecordsCompanion(
+                accountId: accountId,
+                recordKind: recordKind,
+                recordId: recordId,
+                scopeId: scopeId,
+                json: json,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String accountId,
+                required String recordKind,
+                required String recordId,
+                Value<String> scopeId = const Value.absent(),
+                required String json,
+                Value<int> rowid = const Value.absent(),
+              }) => CacheRecordsCompanion.insert(
+                accountId: accountId,
+                recordKind: recordKind,
+                recordId: recordId,
+                scopeId: scopeId,
+                json: json,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CacheRecordsTable, CacheRecordEntry>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CacheRecordsTable,
+                    CacheRecordEntry
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CacheRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CacheRecordsTable,
+      CacheRecordEntry,
+      $$CacheRecordsTableFilterComposer,
+      $$CacheRecordsTableOrderingComposer,
+      $$CacheRecordsTableAnnotationComposer,
+      $$CacheRecordsTableCreateCompanionBuilder,
+      $$CacheRecordsTableUpdateCompanionBuilder,
+      (
+        CacheRecordEntry,
+        BaseReferences<_$AppDatabase, $CacheRecordsTable, CacheRecordEntry>,
+      ),
+      CacheRecordEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$CacheRefreshesTableCreateCompanionBuilder =
+    CacheRefreshesCompanion Function({
+      required String accountId,
+      required String recordKind,
+      Value<String> scopeId,
+      required DateTime refreshedAt,
+      Value<int> rowid,
+    });
+typedef $$CacheRefreshesTableUpdateCompanionBuilder =
+    CacheRefreshesCompanion Function({
+      Value<String> accountId,
+      Value<String> recordKind,
+      Value<String> scopeId,
+      Value<DateTime> refreshedAt,
+      Value<int> rowid,
+    });
+
+class $$CacheRefreshesTableFilterComposer
+    extends Composer<_$AppDatabase, $CacheRefreshesTable> {
+  $$CacheRefreshesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordKind => $composableBuilder(
+    column: $table.recordKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeId => $composableBuilder(
+    column: $table.scopeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get refreshedAt => $composableBuilder(
+    column: $table.refreshedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CacheRefreshesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CacheRefreshesTable> {
+  $$CacheRefreshesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordKind => $composableBuilder(
+    column: $table.recordKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeId => $composableBuilder(
+    column: $table.scopeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get refreshedAt => $composableBuilder(
+    column: $table.refreshedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CacheRefreshesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CacheRefreshesTable> {
+  $$CacheRefreshesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<String> get recordKind => $composableBuilder(
+    column: $table.recordKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get scopeId =>
+      $composableBuilder(column: $table.scopeId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get refreshedAt => $composableBuilder(
+    column: $table.refreshedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$CacheRefreshesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CacheRefreshesTable,
+          CacheRefreshEntry,
+          $$CacheRefreshesTableFilterComposer,
+          $$CacheRefreshesTableOrderingComposer,
+          $$CacheRefreshesTableAnnotationComposer,
+          $$CacheRefreshesTableCreateCompanionBuilder,
+          $$CacheRefreshesTableUpdateCompanionBuilder,
+          (
+            CacheRefreshEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $CacheRefreshesTable,
+              CacheRefreshEntry
+            >,
+          ),
+          CacheRefreshEntry,
+          PrefetchHooks Function()
+        > {
+  $$CacheRefreshesTableTableManager(
+    _$AppDatabase db,
+    $CacheRefreshesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CacheRefreshesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CacheRefreshesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CacheRefreshesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> accountId = const Value.absent(),
+                Value<String> recordKind = const Value.absent(),
+                Value<String> scopeId = const Value.absent(),
+                Value<DateTime> refreshedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CacheRefreshesCompanion(
+                accountId: accountId,
+                recordKind: recordKind,
+                scopeId: scopeId,
+                refreshedAt: refreshedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String accountId,
+                required String recordKind,
+                Value<String> scopeId = const Value.absent(),
+                required DateTime refreshedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CacheRefreshesCompanion.insert(
+                accountId: accountId,
+                recordKind: recordKind,
+                scopeId: scopeId,
+                refreshedAt: refreshedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CacheRefreshesTable, CacheRefreshEntry>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CacheRefreshesTable,
+                    CacheRefreshEntry
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CacheRefreshesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CacheRefreshesTable,
+      CacheRefreshEntry,
+      $$CacheRefreshesTableFilterComposer,
+      $$CacheRefreshesTableOrderingComposer,
+      $$CacheRefreshesTableAnnotationComposer,
+      $$CacheRefreshesTableCreateCompanionBuilder,
+      $$CacheRefreshesTableUpdateCompanionBuilder,
+      (
+        CacheRefreshEntry,
+        BaseReferences<_$AppDatabase, $CacheRefreshesTable, CacheRefreshEntry>,
+      ),
+      CacheRefreshEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2920,4 +4032,8 @@ class $AppDatabaseManager {
       $$SetlistsTableTableManager(_db, _db.setlists);
   $$ScoresTableTableManager get scores =>
       $$ScoresTableTableManager(_db, _db.scores);
+  $$CacheRecordsTableTableManager get cacheRecords =>
+      $$CacheRecordsTableTableManager(_db, _db.cacheRecords);
+  $$CacheRefreshesTableTableManager get cacheRefreshes =>
+      $$CacheRefreshesTableTableManager(_db, _db.cacheRefreshes);
 }

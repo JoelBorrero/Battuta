@@ -17,15 +17,27 @@
 /// [stackTrace] for diagnostics.
 library;
 
+import 'package:battuta/core/errors/backend_error_code.dart';
+
 /// Base failure type.
 ///
 /// Sealed so that all subtypes are known at compile time, enabling
 /// exhaustive `switch` expressions.
 sealed class Failure {
-  const Failure({required this.message, this.stackTrace});
+  const Failure({
+    required this.message,
+    this.stackTrace,
+    this.errorCode,
+  });
 
   /// A human-readable description of what went wrong.
   final String message;
+
+  /// The typed backend error behind this failure, when one is known.
+  ///
+  /// Set by the Supabase data layer (see [BackendErrorCode]); `null` for
+  /// failures that did not come from the backend.
+  final BackendErrorCode? errorCode;
 
   /// Optional stack trace captured at the point of failure.
   final StackTrace? stackTrace;
@@ -38,10 +50,11 @@ sealed class Failure {
       identical(this, other) ||
       other is Failure &&
           runtimeType == other.runtimeType &&
-          message == other.message;
+          message == other.message &&
+          errorCode == other.errorCode;
 
   @override
-  int get hashCode => Object.hash(runtimeType, message);
+  int get hashCode => Object.hash(runtimeType, message, errorCode);
 }
 
 /// A failure originating from a remote server or network call.
@@ -54,6 +67,7 @@ final class ServerFailure extends Failure {
   const ServerFailure({
     required super.message,
     super.stackTrace,
+    super.errorCode,
     this.statusCode,
   });
 
@@ -75,6 +89,7 @@ final class ValidationFailure extends Failure {
   const ValidationFailure({
     required super.message,
     super.stackTrace,
+    super.errorCode,
     this.fieldErrors = const {},
   });
 
@@ -85,7 +100,11 @@ final class ValidationFailure extends Failure {
 /// A failure caused by insufficient permissions or authentication issues.
 final class PermissionFailure extends Failure {
   /// Creates a [PermissionFailure] with the given [message].
-  const PermissionFailure({required super.message, super.stackTrace});
+  const PermissionFailure({
+    required super.message,
+    super.stackTrace,
+    super.errorCode,
+  });
 }
 
 /// A catch-all failure for truly unexpected errors (e.g. uncaught exceptions).

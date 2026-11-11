@@ -67,11 +67,55 @@ class Scores extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Songs, Setlists, Scores])
+/// Offline cache of backend rows (organizations, members, bands, invites,
+/// notifications, events, assignments, absences, ...), one row per record.
+///
+/// Every row belongs to the signed-in account [accountId], so signing out or
+/// switching account can drop the previous account's data. [recordKind]
+/// names the entity (e.g. `member`), [scopeId] is the organization the row
+/// belongs to (empty for account-level rows) and [json] is the entity JSON.
+@DataClassName('CacheRecordEntry')
+class CacheRecords extends Table {
+  TextColumn get accountId => text()();
+  TextColumn get recordKind => text()();
+  TextColumn get recordId => text()();
+  TextColumn get scopeId => text().withDefault(const Constant(''))();
+  TextColumn get json => text()();
+
+  @override
+  Set<Column> get primaryKey => {accountId, recordKind, recordId};
+}
+
+/// When each cached collection was last refreshed from the backend.
+@DataClassName('CacheRefreshEntry')
+class CacheRefreshes extends Table {
+  TextColumn get accountId => text()();
+  TextColumn get recordKind => text()();
+  TextColumn get scopeId => text().withDefault(const Constant(''))();
+  DateTimeColumn get refreshedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {accountId, recordKind, scopeId};
+}
+
+@DriftDatabase(tables: [Songs, Setlists, Scores, CacheRecords, CacheRefreshes])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'battuta_offline_db'));
 
+  /// v1: songs, setlists, scores.
+  /// v2: adds the account-scoped backend cache ([CacheRecords], [CacheRefreshes]).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(cacheRecords);
+        await m.createTable(cacheRefreshes);
+      }
+    },
+  );
 }

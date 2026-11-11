@@ -2587,5 +2587,37 @@
   "cifraClubBlockedNotice": "Could not access Cifra Club due to anti-bot protection. Please copy and paste the chords into the 'Paste Text' tab, or import from LaCuerda.",
   "@cifraClubBlockedNotice": {
     "description": "Notice when Cifra Club blocks automated requests"
+  },
+  "usernameLabel": "Username",
+  "@usernameLabel": {
+    "description": "Field label for the account username"
+  },
+  "usernameHintHelper": "3-30 characters: letters, numbers, _ or .",
+  "@usernameHintHelper": {
+    "description": "Helper text under the empty username field"
+  },
+  "usernameInvalidHelper": "Use 3-30 characters: letters, numbers, _ or .",
+  "@usernameInvalidHelper": {
+    "description": "Helper text when the username format is invalid"
+  },
+  "usernameCheckingHelper": "Checking...",
+  "@usernameCheckingHelper": {
+    "description": "Helper text while checking username availability"
+  },
+  "usernameAvailableHelper": "Username is available",
+  "@usernameAvailableHelper": {
+    "description": "Helper text when the username is free"
+  },
+  "usernameTakenHelper": "Username is already taken",
+  "@usernameTakenHelper": {
+    "description": "Helper text when the username is taken"
+  },
+  "usernameInvalidError": "Username must be 3-30 characters: letters, numbers, _ or .",
+  "@usernameInvalidError": {
+    "description": "Error when submitting an invalid username"
+  },
+  "usernameTakenError": "That username is already taken.",
+  "@usernameTakenError": {
+    "description": "Error when submitting a taken username"
   }
 }

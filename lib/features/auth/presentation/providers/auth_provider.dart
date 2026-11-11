@@ -64,6 +64,7 @@ class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
   Future<bool> signUpWithEmailPassword({
     required String email,
     required String password,
+    required String username,
     String? displayName,
   }) async {
     state = const AsyncLoading();
@@ -72,6 +73,7 @@ class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
       await repo.signUpWithEmailPassword(
         email: email,
         password: password,
+        username: username,
         displayName: displayName,
       );
       state = const AsyncData(null);
@@ -79,6 +81,17 @@ class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
     } catch (e, st) {
       state = AsyncError(e, st);
       return false;
+    }
+  }
+
+  /// Sign-up pre-check. Returns `null` when it cannot be checked (offline).
+  Future<bool?> isUsernameAvailable(String username) async {
+    try {
+      return await ref
+          .read(authRepositoryProvider)
+          .isUsernameAvailable(username);
+    } catch (_) {
+      return null;
     }
   }
 

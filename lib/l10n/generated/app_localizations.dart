@@ -3293,6 +3293,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not access Cifra Club due to anti-bot protection. Please copy and paste the chords into the \'Paste Text\' tab, or import from LaCuerda.'**
   String get cifraClubBlockedNotice;
+
+  /// Field label for the account username
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameLabel;
+
+  /// Helper text under the empty username field
+  ///
+  /// In en, this message translates to:
+  /// **'3-30 characters: letters, numbers, _ or .'**
+  String get usernameHintHelper;
+
+  /// Helper text when the username format is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Use 3-30 characters: letters, numbers, _ or .'**
+  String get usernameInvalidHelper;
+
+  /// Helper text while checking username availability
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get usernameCheckingHelper;
+
+  /// Helper text when the username is free
+  ///
+  /// In en, this message translates to:
+  /// **'Username is available'**
+  String get usernameAvailableHelper;
+
+  /// Helper text when the username is taken
+  ///
+  /// In en, this message translates to:
+  /// **'Username is already taken'**
+  String get usernameTakenHelper;
+
+  /// Error when submitting an invalid username
+  ///
+  /// In en, this message translates to:
+  /// **'Username must be 3-30 characters: letters, numbers, _ or .'**
+  String get usernameInvalidError;
+
+  /// Error when submitting a taken username
+  ///
+  /// In en, this message translates to:
+  /// **'That username is already taken.'**
+  String get usernameTakenError;
 }
 
 class _AppLocalizationsDelegate

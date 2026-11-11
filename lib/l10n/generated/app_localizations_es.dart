@@ -1836,4 +1836,30 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get cifraClubBlockedNotice =>
       'No se pudo acceder a Cifra Club por protección anti-bot. Copia los acordes y usa la pestaña Pegar Texto, o importa desde LaCuerda.';
+
+  @override
+  String get usernameLabel => 'Nombre de usuario';
+
+  @override
+  String get usernameHintHelper => '3-30 caracteres: letras, números, _ o .';
+
+  @override
+  String get usernameInvalidHelper =>
+      'Usa 3-30 caracteres: letras, números, _ o .';
+
+  @override
+  String get usernameCheckingHelper => 'Comprobando...';
+
+  @override
+  String get usernameAvailableHelper => 'El nombre de usuario está disponible';
+
+  @override
+  String get usernameTakenHelper => 'El nombre de usuario ya está en uso';
+
+  @override
+  String get usernameInvalidError =>
+      'El nombre de usuario debe tener 3-30 caracteres: letras, números, _ o .';
+
+  @override
+  String get usernameTakenError => 'Ese nombre de usuario ya está en uso.';
 }

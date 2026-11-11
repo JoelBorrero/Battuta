@@ -1823,4 +1823,30 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cifraClubBlockedNotice =>
       'Could not access Cifra Club due to anti-bot protection. Please copy and paste the chords into the Paste Text tab, or import from LaCuerda.';
+
+  @override
+  String get usernameLabel => 'Username';
+
+  @override
+  String get usernameHintHelper => '3-30 characters: letters, numbers, _ or .';
+
+  @override
+  String get usernameInvalidHelper =>
+      'Use 3-30 characters: letters, numbers, _ or .';
+
+  @override
+  String get usernameCheckingHelper => 'Checking...';
+
+  @override
+  String get usernameAvailableHelper => 'Username is available';
+
+  @override
+  String get usernameTakenHelper => 'Username is already taken';
+
+  @override
+  String get usernameInvalidError =>
+      'Username must be 3-30 characters: letters, numbers, _ or .';
+
+  @override
+  String get usernameTakenError => 'That username is already taken.';
 }

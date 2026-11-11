@@ -553,5 +553,13 @@
   "scanGalleryAction": "Elegir de Fotos / Galería",
   "scanCameraSubtitle": "Toma una foto de una partitura impresa o cifrado",
   "scanGallerySubtitle": "Selecciona una imagen de partitura o página PDF del dispositivo",
-  "cifraClubBlockedNotice": "No se pudo acceder a Cifra Club por protección anti-bot. Copia los acordes y usa la pestaña 'Pegar Texto', o importa desde LaCuerda."
+  "cifraClubBlockedNotice": "No se pudo acceder a Cifra Club por protección anti-bot. Copia los acordes y usa la pestaña 'Pegar Texto', o importa desde LaCuerda.",
+  "usernameLabel": "Nombre de usuario",
+  "usernameHintHelper": "3-30 caracteres: letras, números, _ o .",
+  "usernameInvalidHelper": "Usa 3-30 caracteres: letras, números, _ o .",
+  "usernameCheckingHelper": "Comprobando...",
+  "usernameAvailableHelper": "El nombre de usuario está disponible",
+  "usernameTakenHelper": "El nombre de usuario ya está en uso",
+  "usernameInvalidError": "El nombre de usuario debe tener 3-30 caracteres: letras, números, _ o .",
+  "usernameTakenError": "Ese nombre de usuario ya está en uso."
 }

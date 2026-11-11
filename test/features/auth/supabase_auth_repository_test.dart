@@ -1,3 +1,4 @@
+import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/features/auth/data/repositories/supabase_auth_repository.dart';
@@ -60,9 +61,47 @@ void main() {
         () => repo.signUpWithEmailPassword(
           email: 'test@battuta.app',
           password: 'password123',
+          username: 'jane_doe',
         ),
         throwsA(isA<ValidationFailure>()),
       );
+    });
+
+    test('rejects a malformed username with invalid_username before any request', () async {
+      final repo = SupabaseAuthRepository(clientManager: SupabaseClientManager());
+      for (final bad in ['', 'ab', 'has space', 'UPPER!', 'x' * 31, 'ñandú']) {
+        await expectLater(
+          repo.signUpWithEmailPassword(
+            email: 'test@battuta.app',
+            password: 'password123',
+            username: bad,
+          ),
+          throwsA(
+            isA<ValidationFailure>().having(
+              (f) => f.errorCode,
+              'errorCode',
+              BackendErrorCode.invalidUsername,
+            ),
+          ),
+          reason: bad,
+        );
+      }
+    });
+
+    test('username availability is false for malformed names and fails offline for valid ones', () async {
+      final repo = SupabaseAuthRepository(clientManager: SupabaseClientManager());
+      expect(await repo.isUsernameAvailable('no'), isFalse);
+      await expectLater(
+        repo.isUsernameAvailable('jane_doe'),
+        throwsA(
+          isA<Failure>().having((f) => f.errorCode, 'errorCode', BackendErrorCode.offline),
+        ),
+      );
+    });
+
+    test('fetchMyProfile is null when signed out', () async {
+      final repo = SupabaseAuthRepository(clientManager: SupabaseClientManager());
+      expect(await repo.fetchMyProfile(), isNull);
     });
 
     test('throws ValidationFailure when attempting sendMagicLink without configured client', () async {

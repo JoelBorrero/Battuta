@@ -4,6 +4,8 @@
 /// and passwordless Magic Link dispatch.
 library;
 
+import 'dart:async';
+
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +29,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
+  Timer? _usernameDebounce;
+  bool? _usernameAvailable;
+  bool _checkingUsername = false;
 
   bool _isSignUp = false;
   bool _useMagicLink = false;
@@ -35,16 +41,66 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
 
   @override
   void dispose() {
+    _usernameDebounce?.cancel();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
+  static final _usernamePattern = RegExp(r'^[a-z0-9_.]{3,30}$');
+
+  bool get _usernameWellFormed =>
+      _usernamePattern.hasMatch(_usernameController.text.trim().toLowerCase());
+
+  void _onUsernameChanged(String _) {
+    _usernameDebounce?.cancel();
+    setState(() => _usernameAvailable = null);
+    if (!_usernameWellFormed) return;
+    _usernameDebounce = Timer(
+      const Duration(milliseconds: 400),
+      _checkUsername,
+    );
+  }
+
+  Future<void> _checkUsername() async {
+    final username = _usernameController.text.trim().toLowerCase();
+    setState(() => _checkingUsername = true);
+    final available = await ref
+        .read(authControllerProvider.notifier)
+        .isUsernameAvailable(username);
+    if (!mounted || username != _usernameController.text.trim().toLowerCase()) {
+      return;
+    }
+    setState(() {
+      _checkingUsername = false;
+      _usernameAvailable = available;
+    });
+  }
+
+  String? _usernameHelper(AppLocalizations? l10n) {
+    if (_usernameController.text.isEmpty) {
+      return l10n?.usernameHintHelper ??
+          '3-30 characters: letters, numbers, _ or .';
+    }
+    if (!_usernameWellFormed) {
+      return l10n?.usernameInvalidHelper ??
+          'Use 3-30 characters: letters, numbers, _ or .';
+    }
+    if (_checkingUsername) return l10n?.usernameCheckingHelper ?? 'Checking...';
+    return switch (_usernameAvailable) {
+      true => l10n?.usernameAvailableHelper ?? 'Username is available',
+      false => l10n?.usernameTakenHelper ?? 'Username is already taken',
+      null => null,
+    };
+  }
+
   Future<void> _handleSubmit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final name = _nameController.text.trim();
+    final l10n = AppLocalizations.of(context);
 
     if (email.isEmpty || !email.contains('@')) {
       setState(() => _errorMessage = 'Please enter a valid email address.');
@@ -54,6 +110,29 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
     if (!_useMagicLink && password.length < 6) {
       setState(() => _errorMessage = 'Password must be at least 6 characters.');
       return;
+    }
+
+    if (_isSignUp && !_useMagicLink) {
+      if (!_usernameWellFormed) {
+        setState(
+          () => _errorMessage =
+              l10n?.usernameInvalidError ??
+              'Username must be 3-30 characters: letters, numbers, _ or .',
+        );
+        return;
+      }
+      final available = await ref
+          .read(authControllerProvider.notifier)
+          .isUsernameAvailable(_usernameController.text.trim().toLowerCase());
+      if (!mounted) return;
+      if (available == false) {
+        setState(() {
+          _usernameAvailable = false;
+          _errorMessage =
+              l10n?.usernameTakenError ?? 'That username is already taken.';
+        });
+        return;
+      }
     }
 
     setState(() {
@@ -72,7 +151,10 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
           });
         } else {
           final err = ref.read(authControllerProvider).error;
-          setState(() => _errorMessage = err?.toString() ?? 'Failed to send magic link.');
+          setState(
+            () =>
+                _errorMessage = err?.toString() ?? 'Failed to send magic link.',
+          );
         }
       }
       return;
@@ -82,6 +164,7 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
       final success = await notifier.signUpWithEmailPassword(
         email: email,
         password: password,
+        username: _usernameController.text.trim().toLowerCase(),
         displayName: name.isNotEmpty ? name : null,
       );
       if (mounted) {
@@ -123,11 +206,13 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
     final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
-      title: Text(_useMagicLink
-          ? (l10n?.magicLinkSignInTitle ?? 'Magic Link Sign In')
-          : _isSignUp
-              ? (l10n?.createAccountTitle ?? 'Create Supabase Account')
-              : (l10n?.signInTitle ?? 'Sign In to Supabase')),
+      title: Text(
+        _useMagicLink
+            ? (l10n?.magicLinkSignInTitle ?? 'Magic Link Sign In')
+            : _isSignUp
+            ? (l10n?.createAccountTitle ?? 'Create Supabase Account')
+            : (l10n?.signInTitle ?? 'Sign In to Supabase'),
+      ),
       content: SingleChildScrollView(
         child: SizedBox(
           width: 380,
@@ -166,6 +251,26 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                   decoration: InputDecoration(
                     labelText: l10n?.fullNameLabel ?? 'Full Name',
                     prefixIcon: const Icon(Icons.person_outline),
+                    border: const OutlineInputBorder(),
+                  ),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (_isSignUp && !_useMagicLink) ...[
+                TextField(
+                  key: const ValueKey('supabase_auth_username_field'),
+                  controller: _usernameController,
+                  onChanged: _onUsernameChanged,
+                  decoration: InputDecoration(
+                    labelText: l10n?.usernameLabel ?? 'Username',
+                    helperText: _usernameHelper(l10n),
+                    helperStyle: TextStyle(
+                      color: _usernameAvailable == false
+                          ? theme.colorScheme.error
+                          : null,
+                    ),
+                    prefixIcon: const Icon(Icons.alternate_email),
                     border: const OutlineInputBorder(),
                   ),
                   textInputAction: TextInputAction.next,
@@ -230,7 +335,7 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                       child: Text(
                         _isSignUp
                             ? (l10n?.haveAccountSignInAction ??
-                                'Have an account? Sign In')
+                                  'Have an account? Sign In')
                             : (l10n?.newRegisterAction ?? 'New? Register'),
                         style: const TextStyle(fontSize: 12),
                       ),
@@ -255,11 +360,13 @@ class _SupabaseAuthDialogState extends ConsumerState<SupabaseAuthDialog> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(_useMagicLink
-                  ? (l10n?.sendLinkAction ?? 'Send Link')
-                  : _isSignUp
+              : Text(
+                  _useMagicLink
+                      ? (l10n?.sendLinkAction ?? 'Send Link')
+                      : _isSignUp
                       ? (l10n?.registerAction ?? 'Register')
-                      : (l10n?.signInAction ?? 'Sign In')),
+                      : (l10n?.signInAction ?? 'Sign In'),
+                ),
         ),
       ],
     );
