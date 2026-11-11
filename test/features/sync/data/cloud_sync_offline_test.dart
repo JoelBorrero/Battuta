@@ -84,18 +84,6 @@ void main() {
     updatedAt: DateTime(2026),
   );
 
-  test('demo mode has nothing to sync and touches no data', () async {
-    final service = SupabaseCloudSyncService(
-      db: db,
-      clientManager: SupabaseClientManager(),
-    );
-    await DriftSongRepository(db).saveSong(song('a'));
-    final result = await service.syncAll(isDemo: true);
-    expect(result.isOffline, isTrue);
-    expect(result.errorMessage, contains('Demo'));
-    expect((await db.select(db.songs).getSingle()).isDirty, isFalse);
-  });
-
   test('signed out: offline result, local data and flags untouched', () async {
     final client = SupabaseClient(
       'http://localhost:54321',
@@ -158,6 +146,12 @@ void main() {
       // A second try after the failure is allowed (the lock was released).
       expect((await service.syncAll()).isOffline, isTrue);
     },
+    // postgrest retries every failed read 3 times with real delays
+    // (1 s + 2 s + 4 s), and supabase 2.16.5's `from()` ignores
+    // `PostgrestClientOptions.retryEnabled`, so two offline syncs take ~14 s.
+    // Under load or macOS timer throttling (App Nap) that exceeded the default
+    // 30 s. See the backlog item on offline detection speed.
+    timeout: const Timeout(Duration(minutes: 3)),
   );
 
   group('SyncContext', () {

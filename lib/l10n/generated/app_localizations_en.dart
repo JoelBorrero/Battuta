@@ -191,16 +191,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noChordsForSection => 'No chords entered for this section.';
 
   @override
-  String get demoModeTitle => 'Demo Mode';
-
-  @override
-  String get demoModeSubtitle =>
-      'Show mock musicians, sample schedules, AI credits, and demo practice audio';
-
-  @override
-  String get demoModeSection => 'Showcase & Demo Mode';
-
-  @override
   String get noAudioAttachedTitle => 'No Reference Audio Attached';
 
   @override
@@ -218,17 +208,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noMembersInRosterSubtitle =>
-      'Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.';
+      'Invite people to your organization to build your team.';
 
   @override
   String get noEventsInCalendar => 'No Services or Rehearsals Scheduled';
 
   @override
-  String get noEventsInCalendarSubtitle =>
-      'Tap + to schedule an event, or enable Demo Mode in Settings to view sample schedules.';
-
-  @override
-  String get enableDemoModeAction => 'Enable Demo Mode';
+  String get noEventsInCalendarSubtitle => 'Tap + to schedule an event.';
 
   @override
   String get localWorkspace => 'Local Workspace';
@@ -1849,4 +1835,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usernameTakenError => 'That username is already taken.';
+
+  @override
+  String get welcomeTitle => 'Welcome to Battuta';
+
+  @override
+  String get welcomeSubtitle =>
+      'Your charts, setlists and band, ready for the stage.';
+
+  @override
+  String get welcomeSignIn => 'Sign in';
+
+  @override
+  String get welcomeCreateAccount => 'Create account';
+
+  @override
+  String get welcomeContinueOffline => 'Continue offline';
+
+  @override
+  String get welcomeOfflineNote =>
+      'Everything works on this device. You can sign in later from Settings.';
+
+  @override
+  String get accountDeactivatedNotice =>
+      'This account was deactivated and signed out. Its history is kept.';
+
+  @override
+  String get signInPageTitle => 'Sign in';
+
+  @override
+  String get createAccountPageTitle => 'Create account';
+
+  @override
+  String get authInvalidEmail => 'Please enter a valid email address.';
+
+  @override
+  String get authPasswordTooShort => 'Password must be at least 6 characters.';
+
+  @override
+  String get authMagicLinkSent =>
+      'Magic link sent! Check your inbox to sign in.';
+
+  @override
+  String get authAccountCreatedCheckEmail =>
+      'Account created! Check your email to confirm it.';
+
+  @override
+  String get authPasswordResetSent => 'Password reset email sent.';
+
+  @override
+  String get forgotPasswordAction => 'Forgot password?';
+
+  @override
+  String get backendErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get backendErrorOffline =>
+      'You\'re offline. Connect to the internet and try again.';
+
+  @override
+  String get backendErrorNotAdmin => 'Only organization admins can do this.';
+
+  @override
+  String get backendErrorNotMember =>
+      'You are not a member of this organization.';
+
+  @override
+  String get backendErrorLastAdmin =>
+      'An organization needs at least one admin. Make someone else an admin first.';
+
+  @override
+  String get backendErrorInvalidName => 'Please enter a valid name.';
+
+  @override
+  String get backendErrorOrganizationArchived =>
+      'This organization is archived.';
+
+  @override
+  String get backendErrorNotSignedIn => 'Sign in to do this.';
+
+  @override
+  String get accountSection => 'Account';
+
+  @override
+  String get accountSignInTile => 'Sign in';
+
+  @override
+  String get accountDeactivateAction => 'Deactivate account';
+
+  @override
+  String get accountDeactivateTitle => 'Deactivate account?';
+
+  @override
+  String get accountDeactivateExplanation =>
+      'You will be signed out and will no longer be able to use this account. Your songs on this device stay, and what you contributed to organizations is kept as history.';
+
+  @override
+  String accountDeactivateTypeToConfirm(String word) {
+    return 'Type $word to confirm.';
+  }
+
+  @override
+  String get organizationsTitle => 'Organizations';
+
+  @override
+  String get noOrganizationsYet => 'No organization yet';
+
+  @override
+  String get createOrganizationAction => 'Create organization';
+
+  @override
+  String get organizationNameLabel => 'Organization name';
+
+  @override
+  String get allBandsLabel => 'All bands';
+
+  @override
+  String get memberRoleLabel => 'Member';
+
+  @override
+  String get bandsLabel => 'Bands';
+
+  @override
+  String get adminsLabel => 'Admins';
+
+  @override
+  String get rolesInstrumentsLabel => 'Roles & Instruments';
+
+  @override
+  String get rosterSignInTitle => 'Sign in to see your team';
+
+  @override
+  String get rosterSignInMessage =>
+      'Organizations, members and bands live in your account. Sign in to create or join one.';
+
+  @override
+  String get noOrganizationInvitesNote =>
+      'Create an organization for your team. Invitations to join one will arrive in a later update.';
+
+  @override
+  String get inviteComingSoon => 'Invite · Coming soon';
+
+  @override
+  String get manageBandsAction => 'Manage bands';
+
+  @override
+  String get leaveOrganizationAction => 'Leave organization';
+
+  @override
+  String get leaveOrganizationConfirm =>
+      'You will lose access to this organization\'s roster and schedule.';
+
+  @override
+  String removeMemberConfirm(String name) {
+    return 'Remove $name from this organization?';
+  }
+
+  @override
+  String removedMemberSuccess(String name) {
+    return 'Removed $name';
+  }
+
+  @override
+  String get youBadge => 'You';
+
+  @override
+  String get editBandAction => 'Edit band';
+
+  @override
+  String get deleteBandAction => 'Delete band';
+
+  @override
+  String deleteBandConfirm(String name) {
+    return 'Delete $name? Its members stay in the organization.';
+  }
+
+  @override
+  String get newBandAction => 'New band';
+
+  @override
+  String get bandNameLabel => 'Band name';
+
+  @override
+  String memberSavePartialRole(String reason) {
+    return 'Some changes were saved, but the role could not be changed. $reason';
+  }
+
+  @override
+  String memberSavePartialBands(String reason) {
+    return 'Some changes were saved, but the bands could not be updated. $reason';
+  }
 }

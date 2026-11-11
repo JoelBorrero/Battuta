@@ -20,16 +20,12 @@ abstract class CloudSyncService {
   /// offline result and leaves local data untouched.
   ///
   /// [teamId] is ignored (organizations are synced by their own data layer).
-  /// When [isDemo] is true there is nothing to sync and the result is offline.
-  Future<CloudSyncResult> syncAll({String? teamId, bool isDemo = false});
+  Future<CloudSyncResult> syncAll({String? teamId});
 
   /// Pushes the account's local changes to Supabase.
-  Future<CloudSyncResult> pushLocalChanges({bool isDemo = false});
+  Future<CloudSyncResult> pushLocalChanges();
 
   /// Pulls updated entities from Supabase and applies them to Drift using
   /// Last-Write-Wins (LWW) conflict resolution.
-  Future<CloudSyncResult> pullRemoteChanges({
-    String? teamId,
-    bool isDemo = false,
-  });
+  Future<CloudSyncResult> pullRemoteChanges({String? teamId});
 }

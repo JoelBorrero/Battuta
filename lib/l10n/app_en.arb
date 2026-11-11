@@ -247,18 +247,6 @@
   "@noChordsForSection": {
     "description": "Notice when a section has no chords"
   },
-  "demoModeTitle": "Demo Mode",
-  "@demoModeTitle": {
-    "description": "Title for Demo / Showcase Mode toggle switch"
-  },
-  "demoModeSubtitle": "Show mock musicians, sample schedules, AI credits, and demo practice audio",
-  "@demoModeSubtitle": {
-    "description": "Subtitle describing Demo / Showcase Mode"
-  },
-  "demoModeSection": "Showcase & Demo Mode",
-  "@demoModeSection": {
-    "description": "Section header for demo mode settings"
-  },
   "noAudioAttachedTitle": "No Reference Audio Attached",
   "@noAudioAttachedTitle": {
     "description": "Title when a song has no audio file attached"
@@ -279,7 +267,7 @@
   "@noMembersInRoster": {
     "description": "Title when team roster is empty"
   },
-  "noMembersInRosterSubtitle": "Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.",
+  "noMembersInRosterSubtitle": "Invite people to your organization to build your team.",
   "@noMembersInRosterSubtitle": {
     "description": "Subtitle when team roster is empty"
   },
@@ -287,13 +275,9 @@
   "@noEventsInCalendar": {
     "description": "Title when band calendar has no events"
   },
-  "noEventsInCalendarSubtitle": "Tap + to schedule an event, or enable Demo Mode in Settings to view sample schedules.",
+  "noEventsInCalendarSubtitle": "Tap + to schedule an event.",
   "@noEventsInCalendarSubtitle": {
     "description": "Subtitle when band calendar has no events"
-  },
-  "enableDemoModeAction": "Enable Demo Mode",
-  "@enableDemoModeAction": {
-    "description": "Button to turn on Demo Mode"
   },
   "localWorkspace": "Local Workspace",
   "@localWorkspace": {
@@ -2619,5 +2603,249 @@
   "usernameTakenError": "That username is already taken.",
   "@usernameTakenError": {
     "description": "Error when submitting a taken username"
+  },
+  "welcomeTitle": "Welcome to Battuta",
+  "@welcomeTitle": {
+    "description": "Welcome screen title"
+  },
+  "welcomeSubtitle": "Your charts, setlists and band, ready for the stage.",
+  "@welcomeSubtitle": {
+    "description": "Welcome screen subtitle"
+  },
+  "welcomeSignIn": "Sign in",
+  "@welcomeSignIn": {
+    "description": "Welcome screen sign in button"
+  },
+  "welcomeCreateAccount": "Create account",
+  "@welcomeCreateAccount": {
+    "description": "Welcome screen create account button"
+  },
+  "welcomeContinueOffline": "Continue offline",
+  "@welcomeContinueOffline": {
+    "description": "Welcome screen continue offline button"
+  },
+  "welcomeOfflineNote": "Everything works on this device. You can sign in later from Settings.",
+  "@welcomeOfflineNote": {
+    "description": "Note under the continue offline button"
+  },
+  "accountDeactivatedNotice": "This account was deactivated and signed out. Its history is kept.",
+  "@accountDeactivatedNotice": {
+    "description": "Message when an account is deactivated"
+  },
+  "signInPageTitle": "Sign in",
+  "@signInPageTitle": {
+    "description": "Sign in page title"
+  },
+  "createAccountPageTitle": "Create account",
+  "@createAccountPageTitle": {
+    "description": "Create account page title and button"
+  },
+  "authInvalidEmail": "Please enter a valid email address.",
+  "@authInvalidEmail": {
+    "description": "Invalid email error"
+  },
+  "authPasswordTooShort": "Password must be at least 6 characters.",
+  "@authPasswordTooShort": {
+    "description": "Short password error"
+  },
+  "authMagicLinkSent": "Magic link sent! Check your inbox to sign in.",
+  "@authMagicLinkSent": {
+    "description": "Magic link sent message"
+  },
+  "authAccountCreatedCheckEmail": "Account created! Check your email to confirm it.",
+  "@authAccountCreatedCheckEmail": {
+    "description": "Account created, confirmation needed"
+  },
+  "authPasswordResetSent": "Password reset email sent.",
+  "@authPasswordResetSent": {
+    "description": "Password reset sent message"
+  },
+  "forgotPasswordAction": "Forgot password?",
+  "@forgotPasswordAction": {
+    "description": "Forgot password button"
+  },
+  "backendErrorGeneric": "Something went wrong. Please try again.",
+  "@backendErrorGeneric": {
+    "description": "Generic backend error"
+  },
+  "backendErrorOffline": "You''re offline. Connect to the internet and try again.",
+  "@backendErrorOffline": {
+    "description": "Offline error"
+  },
+  "backendErrorNotAdmin": "Only organization admins can do this.",
+  "@backendErrorNotAdmin": {
+    "description": "Not admin error"
+  },
+  "backendErrorNotMember": "You are not a member of this organization.",
+  "@backendErrorNotMember": {
+    "description": "Not member error"
+  },
+  "backendErrorLastAdmin": "An organization needs at least one admin. Make someone else an admin first.",
+  "@backendErrorLastAdmin": {
+    "description": "Last admin error"
+  },
+  "backendErrorInvalidName": "Please enter a valid name.",
+  "@backendErrorInvalidName": {
+    "description": "Invalid name error"
+  },
+  "backendErrorOrganizationArchived": "This organization is archived.",
+  "@backendErrorOrganizationArchived": {
+    "description": "Archived organization error"
+  },
+  "backendErrorNotSignedIn": "Sign in to do this.",
+  "@backendErrorNotSignedIn": {
+    "description": "Not signed in error"
+  },
+  "accountSection": "Account",
+  "@accountSection": {
+    "description": "Settings account section header"
+  },
+  "accountSignInTile": "Sign in",
+  "@accountSignInTile": {
+    "description": "Settings sign in row"
+  },
+  "accountDeactivateAction": "Deactivate account",
+  "@accountDeactivateAction": {
+    "description": "Deactivate account button"
+  },
+  "accountDeactivateTitle": "Deactivate account?",
+  "@accountDeactivateTitle": {
+    "description": "Deactivate dialog title"
+  },
+  "accountDeactivateExplanation": "You will be signed out and will no longer be able to use this account. Your songs on this device stay, and what you contributed to organizations is kept as history.",
+  "@accountDeactivateExplanation": {
+    "description": "Deactivate explanation"
+  },
+  "accountDeactivateTypeToConfirm": "Type {word} to confirm.",
+  "@accountDeactivateTypeToConfirm": {
+    "description": "Typed confirmation prompt",
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "organizationsTitle": "Organizations",
+  "@organizationsTitle": {
+    "description": "Switcher title"
+  },
+  "noOrganizationsYet": "No organization yet",
+  "@noOrganizationsYet": {
+    "description": "Empty organization state"
+  },
+  "createOrganizationAction": "Create organization",
+  "@createOrganizationAction": {
+    "description": "Create organization button"
+  },
+  "organizationNameLabel": "Organization name",
+  "@organizationNameLabel": {
+    "description": "Organization name field"
+  },
+  "allBandsLabel": "All bands",
+  "@allBandsLabel": {
+    "description": "All bands filter"
+  },
+  "memberRoleLabel": "Member",
+  "@memberRoleLabel": {
+    "description": "Member role badge"
+  },
+  "bandsLabel": "Bands",
+  "@bandsLabel": {
+    "description": "Bands label"
+  },
+  "adminsLabel": "Admins",
+  "@adminsLabel": {
+    "description": "Admins stat label"
+  },
+  "rolesInstrumentsLabel": "Roles & Instruments",
+  "@rolesInstrumentsLabel": {
+    "description": "Roles label in member dialog"
+  },
+  "rosterSignInTitle": "Sign in to see your team",
+  "@rosterSignInTitle": {
+    "description": "Roster signed out title"
+  },
+  "rosterSignInMessage": "Organizations, members and bands live in your account. Sign in to create or join one.",
+  "@rosterSignInMessage": {
+    "description": "Roster signed out message"
+  },
+  "noOrganizationInvitesNote": "Create an organization for your team. Invitations to join one will arrive in a later update.",
+  "@noOrganizationInvitesNote": {
+    "description": "No organization note"
+  },
+  "inviteComingSoon": "Invite · Coming soon",
+  "@inviteComingSoon": {
+    "description": "Disabled invite button"
+  },
+  "manageBandsAction": "Manage bands",
+  "@manageBandsAction": {
+    "description": "Manage bands button"
+  },
+  "leaveOrganizationAction": "Leave organization",
+  "@leaveOrganizationAction": {
+    "description": "Leave organization"
+  },
+  "leaveOrganizationConfirm": "You will lose access to this organization''s roster and schedule.",
+  "@leaveOrganizationConfirm": {
+    "description": "Leave confirmation"
+  },
+  "removeMemberConfirm": "Remove {name} from this organization?",
+  "@removeMemberConfirm": {
+    "description": "Remove member confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removedMemberSuccess": "Removed {name}",
+  "@removedMemberSuccess": {
+    "description": "Member removed snackbar",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "youBadge": "You",
+  "@youBadge": {
+    "description": "Badge on my own roster card"
+  },
+  "editBandAction": "Edit band",
+  "@editBandAction": {
+    "description": "Edit band"
+  },
+  "deleteBandAction": "Delete band",
+  "@deleteBandAction": {
+    "description": "Delete band"
+  },
+  "deleteBandConfirm": "Delete {name}? Its members stay in the organization.",
+  "@deleteBandConfirm": {
+    "description": "Delete band confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newBandAction": "New band",
+  "@newBandAction": {
+    "description": "New band"
+  },
+  "bandNameLabel": "Band name",
+  "@bandNameLabel": {
+    "description": "Band name field"
+  },
+  "memberSavePartialRole": "Some changes were saved, but the role could not be changed. {reason}",
+  "memberSavePartialBands": "Some changes were saved, but the bands could not be updated. {reason}",
+  "@memberSavePartialRole": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "@memberSavePartialBands": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
   }
 }

@@ -2,8 +2,8 @@
 library;
 
 import 'package:battuta/core/services/api_key_service.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
-import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +65,9 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n?.geminiApiKeySaved ?? 'Gemini API key saved securely.'),
+            content: Text(
+              l10n?.geminiApiKeySaved ?? 'Gemini API key saved securely.',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -113,7 +115,9 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n?.customApiKeyRemoved ?? 'Custom API key removed.'),
+            content: Text(
+              l10n?.customApiKeyRemoved ?? 'Custom API key removed.',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );

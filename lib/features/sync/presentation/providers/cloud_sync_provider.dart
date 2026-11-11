@@ -5,7 +5,6 @@
 library;
 
 import 'package:battuta/core/database/database_providers.dart';
-import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/sync/data/supabase_cloud_sync_service.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
@@ -61,10 +60,9 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
 
   Future<CloudSyncResult> triggerSync({String? teamId}) async {
     final service = ref.read(cloudSyncServiceProvider);
-    final isDemo = ref.read(demoModeProvider);
     state = state.copyWith(status: CloudSyncStatus.syncing, errorMessage: null);
 
-    final result = await service.syncAll(teamId: teamId, isDemo: isDemo);
+    final result = await service.syncAll(teamId: teamId);
 
     if (result.isSuccess) {
       state = state.copyWith(

@@ -5,10 +5,7 @@
 /// projection lookaheads, active toggling, and disabling on/after a specific cutoff date.
 library;
 
-import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
-import 'package:battuta/features/team/domain/entities/service_event.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final recurringSchedulesProvider =
@@ -20,13 +17,7 @@ class RecurringSchedulesNotifier extends Notifier<List<RecurringSchedule>> {
   final List<RecurringSchedule> _userSchedules = [];
 
   @override
-  List<RecurringSchedule> build() {
-    final isDemo = ref.watch(demoModeProvider);
-    if (isDemo) {
-      return [..._userSchedules, ..._initialSampleSchedules()];
-    }
-    return List.unmodifiable(_userSchedules);
-  }
+  List<RecurringSchedule> build() => List.unmodifiable(_userSchedules);
 
   /// Adds a new repetitive schedule pattern.
   void addSchedule(RecurringSchedule schedule) {
@@ -75,32 +66,5 @@ class RecurringSchedulesNotifier extends Notifier<List<RecurringSchedule>> {
   /// Removes a recurring schedule definition.
   void removeSchedule(String id) {
     state = state.where((s) => s.id != id).toList();
-  }
-
-  static List<RecurringSchedule> _initialSampleSchedules() {
-    return const [
-      RecurringSchedule(
-        id: 'series-sunday-morning',
-        title: 'Sunday Morning Worship',
-        type: ServiceType.sundayService,
-        recurrence: EventRecurrence.weekly,
-        time: TimeOfDay(hour: 9, minute: 0),
-        location: 'Main Sanctuary',
-        notes: 'Soundcheck at 7:45 AM. Lead sheet package in Battuta.',
-        isActive: true,
-        lookaheadCount: 4,
-      ),
-      RecurringSchedule(
-        id: 'series-thursday-rehearsal',
-        title: 'Midweek Band Rehearsal',
-        type: ServiceType.rehearsal,
-        recurrence: EventRecurrence.weeklyThursday,
-        time: TimeOfDay(hour: 19, minute: 0),
-        location: 'Music Suite & Rehearsal Room',
-        notes: 'Vocal harmony blend and lead sheet transitions.',
-        isActive: true,
-        lookaheadCount: 4,
-      ),
-    ];
   }
 }

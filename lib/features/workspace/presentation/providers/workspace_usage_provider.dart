@@ -4,7 +4,6 @@
 /// storage at the active workspace level.
 library;
 
-import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/utils/logger.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
@@ -14,54 +13,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Provides reactive access to the active workspace's usage and quota metrics.
 final workspaceUsageProvider =
     AsyncNotifierProvider<WorkspaceUsageNotifier, WorkspaceUsage>(
-  WorkspaceUsageNotifier.new,
-);
+      WorkspaceUsageNotifier.new,
+    );
 
 class WorkspaceUsageNotifier extends AsyncNotifier<WorkspaceUsage> {
-  static const _defaultWorkspaceId = 'ws-grace-church-worship';
-  static const _defaultWorkspaceName = 'Grace Church Worship';
+  static const _defaultWorkspaceId = 'ws-local-offline';
 
   @override
   Future<WorkspaceUsage> build() async {
     final clientManager = ref.watch(supabaseClientManagerProvider);
-    final isDemo = ref.watch(demoModeProvider);
-    return _fetchUsage(clientManager, isDemo: isDemo);
+    return _fetchUsage(clientManager);
   }
 
   Future<WorkspaceUsage> _fetchUsage(
-    SupabaseClientManager clientManager, {
-    required bool isDemo,
-  }) async {
+    SupabaseClientManager clientManager,
+  ) async {
     final client = clientManager.client;
     final now = DateTime.now();
     final period = "${now.year}-${now.month.toString().padLeft(2, '0')}";
 
-    // Base metrics: if demo, return sample credits/storage. If real, return authentic 0 used.
-    final base = isDemo
-        ? WorkspaceUsage(
-            workspaceId: _defaultWorkspaceId,
-            workspaceName: _defaultWorkspaceName,
-            tier: 'Pro',
-            billingPeriod: period,
-            geminiCreditsUsed: 1450,
-            geminiCreditsLimit: 5000,
-            geminiScansCount: 14,
-            storageUsedBytes: 42 * 1024 * 1024, // 42 MB
-            storageLimitBytes: 1024 * 1024 * 1024, // 1 GB
-            filesUploadedCount: 28,
-          )
-        : WorkspaceUsage(
-            workspaceId: 'ws-local-offline',
-            workspaceName: 'Local Workspace',
-            tier: 'Offline',
-            billingPeriod: period,
-            geminiCreditsUsed: 0,
-            geminiCreditsLimit: 5000,
-            geminiScansCount: 0,
-            storageUsedBytes: 0,
-            storageLimitBytes: 1024 * 1024 * 1024,
-            filesUploadedCount: 0,
-          );
+    // Base metrics: authentic zero usage until the backend reports otherwise.
+    final base = WorkspaceUsage(
+      workspaceId: _defaultWorkspaceId,
+      workspaceName: 'Local Workspace',
+      tier: 'Offline',
+      billingPeriod: period,
+      geminiCreditsUsed: 0,
+      geminiCreditsLimit: 5000,
+      geminiScansCount: 0,
+      storageUsedBytes: 0,
+      storageLimitBytes: 1024 * 1024 * 1024,
+      filesUploadedCount: 0,
+    );
 
     if (client == null || client.auth.currentUser == null) {
       return base;
@@ -106,11 +89,14 @@ class WorkspaceUsageNotifier extends AsyncNotifier<WorkspaceUsage> {
     if (client == null || client.auth.currentUser == null) return;
 
     try {
-      await client.rpc('record_gemini_scan_usage', params: {
-        'p_workspace_id': current?.workspaceId ?? _defaultWorkspaceId,
-        'p_tokens': totalTokens,
-        'p_credits': credits,
-      });
+      await client.rpc(
+        'record_gemini_scan_usage',
+        params: {
+          'p_workspace_id': current?.workspaceId ?? _defaultWorkspaceId,
+          'p_tokens': totalTokens,
+          'p_credits': credits,
+        },
+      );
     } catch (e) {
       AppLogger.info('Offline: Scan usage recorded locally.');
     }

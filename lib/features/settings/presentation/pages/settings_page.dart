@@ -7,15 +7,13 @@ library;
 import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
-import 'package:battuta/core/services/demo_mode_provider.dart';
-import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/features/settings/presentation/widgets/account_section.dart';
 import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
-import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
 import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
-import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/features/workspace/presentation/providers/workspace_usage_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +35,6 @@ class SettingsPage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final apiKeyState = ref.watch(apiKeyNotifierProvider);
     final themeMode = ref.watch(themeModeProvider);
-    final currentUser = ref.watch(currentUserProvider);
     final syncState = ref.watch(cloudSyncProvider);
     final languageOption = ref.watch(appLanguageOptionProvider);
     final isAdmin = ref.watch(isCurrentUserAdminProvider);
@@ -52,7 +49,9 @@ class SettingsPage extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.brightness_6),
             title: Text(l10n?.themeLabel ?? 'Theme'),
-            subtitle: Text(l10n?.themeSubtitle ?? 'Choose light, dark, or system mode'),
+            subtitle: Text(
+              l10n?.themeSubtitle ?? 'Choose light, dark, or system mode',
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -94,7 +93,8 @@ class SettingsPage extends ConsumerWidget {
             leading: const Icon(Icons.language),
             title: Text(l10n?.languageLabel ?? 'Language'),
             subtitle: Text(
-              l10n?.languageSubtitle ?? 'Choose English, Spanish, or System Default',
+              l10n?.languageSubtitle ??
+                  'Choose English, Spanish, or System Default',
             ),
           ),
           Padding(
@@ -133,35 +133,24 @@ class SettingsPage extends ConsumerWidget {
 
           const Divider(),
 
+          // ── Account ──
+          _SectionHeader(title: l10n?.accountSection ?? 'Account'),
+          const AccountSection(),
+
+          const Divider(),
+
           // ── Cloud Synchronization (Supabase) ──
           _SectionHeader(
             title: l10n?.cloudSyncSection ?? 'Cloud Synchronization (Supabase)',
           ),
           ListTile(
-            key: const ValueKey('supabase_account_tile'),
-            leading: const Icon(Icons.cloud_sync_outlined),
-            title: Text(l10n?.cloudAccountLabel ?? 'Cloud Account'),
-            subtitle: Text(
-              currentUser != null
-                  ? '${currentUser.email}${currentUser.displayName != null ? ' (${currentUser.displayName})' : ''}'
-                  : (l10n?.notSignedInOffline ?? 'Not signed in — Offline SQLite active'),
-            ),
-            trailing: currentUser != null
-                ? TextButton(
-                    onPressed: () =>
-                        ref.read(authControllerProvider.notifier).signOut(),
-                    child: Text(l10n?.signOut ?? 'Sign Out'),
-                  )
-                : const Icon(Icons.chevron_right),
-            onTap: currentUser == null
-                ? () => SupabaseAuthDialog.show(context)
-                : null,
-          ),
-          ListTile(
             key: const ValueKey('supabase_config_tile'),
             leading: const Icon(Icons.settings_ethernet),
             title: Text(l10n?.supabaseConnectionLabel ?? 'Supabase Connection'),
-            subtitle: Text(l10n?.supabaseConfigSubtitle ?? 'Configure Project URL & Anon Key'),
+            subtitle: Text(
+              l10n?.supabaseConfigSubtitle ??
+                  'Configure Project URL & Anon Key',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => SupabaseConfigDialog.show(context),
           ),
@@ -171,13 +160,16 @@ class SettingsPage extends ConsumerWidget {
             title: Text(l10n?.syncStatusLabel ?? 'Sync Status'),
             subtitle: Text(
               syncState.isSyncing
-                  ? (l10n?.synchronizingDatabase ?? 'Synchronizing local Drift database with cloud…')
+                  ? (l10n?.synchronizingDatabase ??
+                        'Synchronizing local Drift database with cloud…')
                   : syncState.status == CloudSyncStatus.success &&
-                          syncState.lastSyncedAt != null
-                      ? '${l10n?.cloudSyncedTooltip ?? "Last synced"}: ${syncState.lastSyncedAt!.toLocal().hour.toString().padLeft(2, '0')}:${syncState.lastSyncedAt!.toLocal().minute.toString().padLeft(2, '0')}'
-                      : syncState.isOffline
-                          ? (l10n?.offlineCached ?? 'Offline: Local changes safely cached')
-                          : syncState.errorMessage ?? (l10n?.readyToSync ?? 'Ready to sync'),
+                        syncState.lastSyncedAt != null
+                  ? '${l10n?.cloudSyncedTooltip ?? "Last synced"}: ${syncState.lastSyncedAt!.toLocal().hour.toString().padLeft(2, '0')}:${syncState.lastSyncedAt!.toLocal().minute.toString().padLeft(2, '0')}'
+                  : syncState.isOffline
+                  ? (l10n?.offlineCached ??
+                        'Offline: Local changes safely cached')
+                  : syncState.errorMessage ??
+                        (l10n?.readyToSync ?? 'Ready to sync'),
             ),
             trailing: syncState.isSyncing
                 ? const SizedBox(
@@ -197,7 +189,9 @@ class SettingsPage extends ConsumerWidget {
 
           // ── Workspace Resources & Quota ──
           _SectionHeader(
-            title: l10n?.workspaceResourcesSection ?? 'Workspace Resources & Quota',
+            title:
+                l10n?.workspaceResourcesSection ??
+                'Workspace Resources & Quota',
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -211,145 +205,189 @@ class SettingsPage extends ConsumerWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: ref.watch(workspaceUsageProvider).when(
-                  data: (usage) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: ref
+                    .watch(workspaceUsageProvider)
+                    .when(
+                      data: (usage) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              l10n?.activeWorkspacePool ?? 'ACTIVE WORKSPACE POOL',
-                              style: const TextStyle(
-                                color: Color(0xFF8A8F98),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.1,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n?.activeWorkspacePool ??
+                                      'ACTIVE WORKSPACE POOL',
+                                  style: const TextStyle(
+                                    color: Color(0xFF8A8F98),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.1,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.stageAmber.withValues(
+                                      alpha: 0.15,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '${usage.workspaceName} • ${usage.tier}',
+                                    style: const TextStyle(
+                                      color: AppTheme.stageAmber,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppTheme.stageAmber.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
+                          const SizedBox(height: 16),
+
+                          // Gemini AI Credits
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.auto_awesome,
+                                      size: 16,
+                                      color: AppTheme.stageAmber,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        l10n?.geminiAiCredits ??
+                                            'Gemini AI Credits',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              child: Text(
-                                '${usage.workspaceName} • ${usage.tier}',
+                              const SizedBox(width: 8),
+                              Text(
+                                usage.formattedCredits,
                                 style: const TextStyle(
-                                  color: AppTheme.stageAmber,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white70,
+                                  fontSize: 12,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: usage.creditsRatio,
+                              backgroundColor: const Color(0xFF2E323B),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                AppTheme.stageAmber,
+                              ),
+                              minHeight: 6,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Gemini AI Credits
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.auto_awesome, size: 16, color: AppTheme.stageAmber),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    l10n?.geminiAiCredits ?? 'Gemini AI Credits',
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
+                          const SizedBox(height: 4),
                           Text(
-                            usage.formattedCredits,
-                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                            l10n?.billingPeriodScans(usage.geminiScansCount) ??
+                                '${usage.geminiScansCount} full lead-sheet scans this billing period',
+                            style: const TextStyle(
+                              color: Color(0xFF8A8F98),
+                              fontSize: 11,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Cloud Storage
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.cloud_outlined,
+                                      size: 16,
+                                      color: Colors.blueAccent,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        l10n?.cloudStorage ?? 'Cloud Storage',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                usage.formattedStorage,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: usage.storageRatio,
+                              backgroundColor: const Color(0xFF2E323B),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.blueAccent,
+                              ),
+                              minHeight: 6,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n?.storageTracksCount(
+                                  usage.filesUploadedCount,
+                                ) ??
+                                '${usage.filesUploadedCount} scores and audio tracks stored',
+                            style: const TextStyle(
+                              color: Color(0xFF8A8F98),
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: usage.creditsRatio,
-                          backgroundColor: const Color(0xFF2E323B),
-                          valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.stageAmber),
-                          minHeight: 6,
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n?.billingPeriodScans(usage.geminiScansCount) ??
-                            '${usage.geminiScansCount} full lead-sheet scans this billing period',
-                        style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 11),
+                      error: (error, stack) => Text(
+                        l10n?.workspaceMetricsUnavailable ??
+                            'Workspace metrics unavailable',
                       ),
-
-                      const SizedBox(height: 16),
-
-                      // Cloud Storage
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.cloud_outlined, size: 16, color: Colors.blueAccent),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    l10n?.cloudStorage ?? 'Cloud Storage',
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            usage.formattedStorage,
-                            style: const TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: usage.storageRatio,
-                          backgroundColor: const Color(0xFF2E323B),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-                          minHeight: 6,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n?.storageTracksCount(usage.filesUploadedCount) ??
-                            '${usage.filesUploadedCount} scores and audio tracks stored',
-                        style: const TextStyle(color: Color(0xFF8A8F98), fontSize: 11),
-                      ),
-                    ],
-                  ),
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(12),
-                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                  ),
-                  error: (error, stack) => Text(l10n?.workspaceMetricsUnavailable ?? 'Workspace metrics unavailable'),
-                ),
               ),
             ),
           ),
@@ -369,7 +407,8 @@ class SettingsPage extends ConsumerWidget {
                 apiKeyState.when(
                   data: (s) => s.isConfigured
                       ? '${s.maskedKey} (${s.isUserCustom ? (l10n?.customLabel ?? 'Custom') : (l10n?.devEnvLabel ?? 'Dev .env')})'
-                      : (l10n?.geminiKeyNotConfigured ?? 'Not configured — tap to enter key'),
+                      : (l10n?.geminiKeyNotConfigured ??
+                            'Not configured — tap to enter key'),
                   loading: () => l10n?.loadingStatus ?? 'Loading status...',
                   error: (_, _) => l10n?.errorLoadingKey ?? 'Error loading key',
                 ),
@@ -381,35 +420,14 @@ class SettingsPage extends ConsumerWidget {
               key: const ValueKey('omr_debug_logs_tile'),
               leading: const Icon(Icons.receipt_long_outlined),
               title: Text(l10n?.omrDiagnosticLogs ?? 'OMR Diagnostic Logs'),
-              subtitle: Text(l10n?.omrDiagnosticLogsSubtitle ?? 'Inspect Gemini requests, latencies & responses'),
+              subtitle: Text(
+                l10n?.omrDiagnosticLogsSubtitle ??
+                    'Inspect Gemini requests, latencies & responses',
+              ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => OmrLogViewerModal.show(context),
             ),
           ],
-
-          const Divider(),
-
-          // ── Showcase & Demo Mode ──
-          _SectionHeader(title: l10n?.demoModeSection ?? 'Showcase & Demo Mode'),
-          SwitchListTile(
-            key: const ValueKey('demo_mode_switch'),
-            secondary: const Icon(
-              Icons.science_outlined,
-              color: AppTheme.amberAccent,
-            ),
-            title: Text(
-              l10n?.demoModeTitle ?? 'Demo Mode',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              l10n?.demoModeSubtitle ??
-                  'Show mock musicians, sample schedules, AI credits, and demo practice audio',
-            ),
-            value: ref.watch(demoModeProvider),
-            onChanged: (enabled) {
-              ref.read(demoModeProvider.notifier).setDemoMode(enabled);
-            },
-          ),
 
           const Divider(),
 
@@ -419,8 +437,7 @@ class SettingsPage extends ConsumerWidget {
             leading: const Icon(Icons.info_outline),
             title: const Text('Battuta'),
             subtitle: Text(
-              l10n?.appTagline ??
-                  'A music rehearsal & lead-sheet companion\nfor worship teams and bands.',
+              l10n?.appTagline ?? 'A music rehearsal & lead-sheet companion\nfor worship teams and bands.',
             ),
             isThreeLine: true,
           ),

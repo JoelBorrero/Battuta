@@ -20,12 +20,15 @@ class SupabaseAuthRepository implements AuthRepository {
     required this.clientManager,
     this.clientProvider,
     ProfileRemoteDataSource? profileSource,
+    this.onDeactivated,
   }) {
-    _profiles =
-        profileSource ?? SupabaseProfileRemoteDataSource(() => _client);
+    _profiles = profileSource ?? SupabaseProfileRemoteDataSource(() => _client);
     _activeGuard = ActiveAccountGuard(
       fetchProfile: _profiles.fetchMyProfile,
-      signOut: signOut,
+      signOut: () async {
+        onDeactivated?.call();
+        await signOut();
+      },
     );
   }
 
@@ -36,6 +39,9 @@ class SupabaseAuthRepository implements AuthRepository {
   static const String authRedirectUrl = 'battuta://login-callback';
 
   final SupabaseClientManager clientManager;
+
+  /// Called when a deactivated account is signed out by the guard.
+  final void Function()? onDeactivated;
 
   /// Overrides how the client is obtained (integration tests).
   final supa.SupabaseClient? Function()? clientProvider;
@@ -84,7 +90,9 @@ class SupabaseAuthRepository implements AuthRepository {
       );
       final user = response.user;
       if (user == null) {
-        throw const ServerFailure(message: 'Sign in succeeded but returned no user profile.');
+        throw const ServerFailure(
+          message: 'Sign in succeeded but returned no user profile.',
+        );
       }
       if (!await _activeGuard.enforce()) {
         throw BackendErrorCode.accountDeactivated.failure(
@@ -93,7 +101,11 @@ class SupabaseAuthRepository implements AuthRepository {
       }
       return _mapUser(user);
     } on supa.AuthException catch (e, st) {
-      throw ServerFailure(message: e.message, statusCode: int.tryParse(e.statusCode ?? ''), stackTrace: st);
+      throw ServerFailure(
+        message: e.message,
+        statusCode: int.tryParse(e.statusCode ?? ''),
+        stackTrace: st,
+      );
     } catch (e, st) {
       if (e is Failure) rethrow;
       throw ServerFailure(message: 'Sign in failed: $e', stackTrace: st);
@@ -127,7 +139,9 @@ class SupabaseAuthRepository implements AuthRepository {
       );
       final user = response.user;
       if (user == null) {
-        throw const ServerFailure(message: 'Registration succeeded but user profile is pending verification.');
+        throw const ServerFailure(
+          message: 'Registration succeeded but user profile is pending verification.',
+        );
       }
       return _mapUser(user);
     } on supa.AuthException catch (e, st) {
@@ -143,7 +157,11 @@ class SupabaseAuthRepository implements AuthRepository {
           stackTrace: st,
         );
       }
-      throw ServerFailure(message: e.message, statusCode: int.tryParse(e.statusCode ?? ''), stackTrace: st);
+      throw ServerFailure(
+        message: e.message,
+        statusCode: int.tryParse(e.statusCode ?? ''),
+        stackTrace: st,
+      );
     } catch (e, st) {
       if (e is Failure) rethrow;
       throw ServerFailure(message: 'Registration failed: $e', stackTrace: st);
@@ -159,7 +177,11 @@ class SupabaseAuthRepository implements AuthRepository {
         emailRedirectTo: authRedirectUrl,
       );
     } on supa.AuthException catch (e, st) {
-      throw ServerFailure(message: e.message, statusCode: int.tryParse(e.statusCode ?? ''), stackTrace: st);
+      throw ServerFailure(
+        message: e.message,
+        statusCode: int.tryParse(e.statusCode ?? ''),
+        stackTrace: st,
+      );
     } catch (e, st) {
       if (e is Failure) rethrow;
       throw ServerFailure(message: 'Magic link failed: $e', stackTrace: st);
@@ -175,10 +197,17 @@ class SupabaseAuthRepository implements AuthRepository {
         redirectTo: authRedirectUrl,
       );
     } on supa.AuthException catch (e, st) {
-      throw ServerFailure(message: e.message, statusCode: int.tryParse(e.statusCode ?? ''), stackTrace: st);
+      throw ServerFailure(
+        message: e.message,
+        statusCode: int.tryParse(e.statusCode ?? ''),
+        stackTrace: st,
+      );
     } catch (e, st) {
       if (e is Failure) rethrow;
-      throw ServerFailure(message: 'Password reset request failed: $e', stackTrace: st);
+      throw ServerFailure(
+        message: 'Password reset request failed: $e',
+        stackTrace: st,
+      );
     }
   }
 
@@ -237,7 +266,8 @@ class SupabaseAuthRepository implements AuthRepository {
 
   static AuthUser _mapUser(supa.User user) {
     final meta = user.userMetadata ?? {};
-    final displayName = (meta['display_name'] as String?) ??
+    final displayName =
+        (meta['display_name'] as String?) ??
         (meta['name'] as String?) ??
         (meta['full_name'] as String?);
 

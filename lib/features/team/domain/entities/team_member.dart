@@ -1,7 +1,8 @@
 /// Battuta — Team Member Entity & Enums.
 ///
-/// Models worship team and band members, instrument assignments,
-/// vocal tessitura (range), and availability for service scheduling.
+/// Presentation model of an organization member (see
+/// `OrganizationMember` in the organizations feature): instrument roles, vocal
+/// tessitura (stored as a min/max pitch range) and the bands they belong to.
 library;
 
 import 'package:flutter/foundation.dart';
@@ -24,6 +25,15 @@ enum TeamRole {
   const TeamRole(this.displayName, this.shortName);
   final String displayName;
   final String shortName;
+
+  /// The role stored for an instrument string of the backend, or `null` for
+  /// an instrument this app does not know.
+  static TeamRole? fromInstrument(String instrument) {
+    for (final role in values) {
+      if (role.name == instrument) return role;
+    }
+    return null;
+  }
 
   /// Localized full display name (e.g. Spanish vs English).
   String localizedName([BuildContext? context]) {
@@ -80,17 +90,44 @@ enum TeamRole {
 }
 
 /// Standard vocal range / tessitura classification.
+///
+/// The backend stores a free-form `min_pitch` / `max_pitch` pair; each
+/// tessitura maps to one such pair ([minPitch], [maxPitch]).
 enum VocalTessitura {
-  none('Instrumental', '-'),
-  soprano('Soprano', 'S (C4–A5)'),
-  alto('Alto', 'A (F3–D5)'),
-  tenor('Tenor', 'T (B2–G4)'),
-  baritone('Baritone', 'Bar (G2–E4)'),
-  bass('Bass', 'B (E2–C4)');
+  none('Instrumental', '-', null, null),
+  soprano('Soprano', 'S (C4–A5)', 'C4', 'A5'),
+  alto('Alto', 'A (F3–D5)', 'F3', 'D5'),
+  tenor('Tenor', 'T (B2–G4)', 'B2', 'G4'),
+  baritone('Baritone', 'Bar (G2–E4)', 'G2', 'E4'),
+  bass('Bass', 'B (E2–C4)', 'E2', 'C4');
 
-  const VocalTessitura(this.displayName, this.rangeLabel);
+  const VocalTessitura(
+    this.displayName,
+    this.rangeLabel,
+    this.minPitch,
+    this.maxPitch,
+  );
   final String displayName;
   final String rangeLabel;
+
+  /// Lowest pitch of the range as stored by the backend (`null` for none).
+  final String? minPitch;
+
+  /// Highest pitch of the range as stored by the backend (`null` for none).
+  final String? maxPitch;
+
+  /// The tessitura whose range is exactly [minPitch] to [maxPitch]; any other
+  /// pair (including no pitches) is [none].
+  static VocalTessitura fromPitches(String? minPitch, String? maxPitch) {
+    for (final tessitura in values) {
+      if (tessitura != none &&
+          tessitura.minPitch == minPitch &&
+          tessitura.maxPitch == maxPitch) {
+        return tessitura;
+      }
+    }
+    return none;
+  }
 
   /// Localized display name.
   String localizedName([BuildContext? context]) {
@@ -109,61 +146,58 @@ enum VocalTessitura {
   }
 }
 
-/// Scheduling availability state for upcoming services and rehearsals.
-enum AvailabilityStatus {
-  available('Available'),
-  scheduled('Scheduled'),
-  unavailable('Unavailable');
-
-  const AvailabilityStatus(this.displayName);
-  final String displayName;
-
-  /// Localized display name.
-  String localizedName([BuildContext? context]) {
-    final isEs = context != null
-        ? Localizations.localeOf(context).languageCode == 'es'
-        : (Intl.defaultLocale?.startsWith('es') ?? false);
-    if (!isEs) return displayName;
-    return switch (this) {
-      AvailabilityStatus.available => 'Disponible',
-      AvailabilityStatus.scheduled => 'Programado',
-      AvailabilityStatus.unavailable => 'No disponible',
-    };
-  }
-}
-
-/// An immutable team member entity.
+/// An immutable roster entry (one member of the active organization).
 class TeamMember {
   const TeamMember({
     required this.id,
     required this.name,
-    this.roles = const [TeamRole.keys],
-    this.vocalRange = VocalTessitura.none,
-    this.availability = AvailabilityStatus.available,
+    this.userId,
+    this.username,
+    this.instruments = const [],
+    this.minPitch,
+    this.maxPitch,
     this.notes,
-    this.email,
     this.isAdmin = false,
+    this.isMe = false,
     this.groupIds = const [],
   });
 
+  /// The organization member id (not the account id).
   final String id;
-  final String name;
-  final List<TeamRole> roles;
 
-  /// Sub-teams and arrangement groups this member is part of.
+  /// Display name, falling back to the username.
+  final String name;
+
+  /// Account id of the person.
+  final String? userId;
+  final String? username;
+
+  /// Instrument strings exactly as stored by the backend (including ones this
+  /// app does not know, which are kept when roles are edited).
+  final List<String> instruments;
+  final String? minPitch;
+  final String? maxPitch;
+  final String? notes;
+
+  /// Whether this member is an organization admin.
+  final bool isAdmin;
+
+  /// Whether this member is the signed-in user.
+  final bool isMe;
+
+  /// Bands this member belongs to.
   final List<String> groupIds;
+
+  /// The instrument roles this app knows, in stored order.
+  List<TeamRole> get roles => [
+    for (final instrument in instruments) ?TeamRole.fromInstrument(instrument),
+  ];
 
   /// Primary or first role assigned to the member.
   TeamRole get role => roles.isNotEmpty ? roles.first : TeamRole.keys;
 
-  final VocalTessitura vocalRange;
-  final AvailabilityStatus availability;
-  final String? notes;
-  final String? email;
-
-  /// Whether this member holds administrative permissions (creating songs,
-  /// managing master schedules, and assigning replacements).
-  final bool isAdmin;
+  VocalTessitura get vocalRange =>
+      VocalTessitura.fromPitches(minPitch, maxPitch);
 
   /// Whether the member has at least one vocal assignment (Lead Vocal or Backing Vocal).
   bool get hasVocalRole => roles.any((r) => r.isVocal);
@@ -171,30 +205,13 @@ class TeamMember {
   /// Whether the member has at least one musical instrument assignment.
   bool get hasInstrumentRole => roles.any((r) => r.isInstrument);
 
-  TeamMember copyWith({
-    String? id,
-    String? name,
-    List<TeamRole>? roles,
-    TeamRole? role,
-    VocalTessitura? vocalRange,
-    AvailabilityStatus? availability,
-    String? notes,
-    String? email,
-    bool? isAdmin,
-    List<String>? groupIds,
-  }) {
-    return TeamMember(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      roles: roles ?? (role != null ? [role] : this.roles),
-      vocalRange: vocalRange ?? this.vocalRange,
-      availability: availability ?? this.availability,
-      notes: notes ?? this.notes,
-      email: email ?? this.email,
-      isAdmin: isAdmin ?? this.isAdmin,
-      groupIds: groupIds ?? this.groupIds,
-    );
-  }
+  /// The stored instrument list for [newRoles]: the new known roles followed
+  /// by the instruments this app does not know.
+  List<String> instrumentsFor(List<TeamRole> newRoles) => [
+    for (final role in newRoles) role.name,
+    for (final instrument in instruments)
+      if (TeamRole.fromInstrument(instrument) == null) instrument,
+  ];
 
   @override
   bool operator ==(Object other) =>
@@ -203,23 +220,28 @@ class TeamMember {
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
-          listEquals(roles, other.roles) &&
+          userId == other.userId &&
+          username == other.username &&
+          listEquals(instruments, other.instruments) &&
           listEquals(groupIds, other.groupIds) &&
-          vocalRange == other.vocalRange &&
-          availability == other.availability &&
+          minPitch == other.minPitch &&
+          maxPitch == other.maxPitch &&
           notes == other.notes &&
-          email == other.email &&
-          isAdmin == other.isAdmin;
+          isAdmin == other.isAdmin &&
+          isMe == other.isMe;
 
   @override
-  int get hashCode =>
-      id.hashCode ^
-      name.hashCode ^
-      Object.hashAll(roles) ^
-      Object.hashAll(groupIds) ^
-      vocalRange.hashCode ^
-      availability.hashCode ^
-      notes.hashCode ^
-      email.hashCode ^
-      isAdmin.hashCode;
+  int get hashCode => Object.hash(
+    id,
+    name,
+    userId,
+    username,
+    Object.hashAll(instruments),
+    Object.hashAll(groupIds),
+    minPitch,
+    maxPitch,
+    notes,
+    isAdmin,
+    isMe,
+  );
 }

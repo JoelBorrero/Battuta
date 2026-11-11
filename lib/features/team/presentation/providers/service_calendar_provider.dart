@@ -6,8 +6,6 @@
 /// respecting cutoff dates when recurring generation is disabled.
 library;
 
-import 'package:battuta/core/services/demo_mode_provider.dart';
-import 'package:battuta/features/sync/data/demo_cloud_sync_service.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
@@ -25,69 +23,18 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
   @override
   List<ServiceEvent> build() {
     final schedules = ref.watch(recurringSchedulesProvider);
-    final isDemo = ref.watch(demoModeProvider);
-    if (isDemo) {
-      Future.microtask(() => _initDemoCloudSync());
-    }
-    final userEventIds = _userEvents.map((e) => e.id).toSet();
-    final baseEvents = isDemo
-        ? [
-            ..._userEvents,
-            ..._initialSampleEvents().where((s) => !userEventIds.contains(s.id)),
-          ]
-        : _userEvents;
-    return _computeProjectedEvents(baseEvents, schedules);
-  }
-
-  Future<void> _initDemoCloudSync() async {
-    final syncService = ref.read(demoCloudSyncServiceProvider);
-    final remoteEvents = await syncService.pullDemoEvents();
-    if (remoteEvents != null && remoteEvents.isNotEmpty) {
-      final Map<String, ServiceEvent> map = {
-        for (final e in _userEvents) e.id: e,
-      };
-      for (final re in remoteEvents) {
-        map[re.id] = re;
-      }
-      _userEvents
-        ..clear()
-        ..addAll(map.values);
-      _syncState();
-    }
-
-    syncService.subscribeToRealtime(
-      onEventUpdated: (remoteEvent) {
-        final idx = _userEvents.indexWhere((e) => e.id == remoteEvent.id);
-        if (idx != -1) {
-          _userEvents[idx] = remoteEvent;
-        } else {
-          _userEvents.add(remoteEvent);
-        }
-        _syncState();
-      },
-    );
+    return _computeProjectedEvents(_userEvents, schedules);
   }
 
   void _syncState() {
     final schedules = ref.read(recurringSchedulesProvider);
-    final isDemo = ref.read(demoModeProvider);
-    final userEventIds = _userEvents.map((e) => e.id).toSet();
-    final baseEvents = isDemo
-        ? [
-            ..._userEvents,
-            ..._initialSampleEvents().where((s) => !userEventIds.contains(s.id)),
-          ]
-        : _userEvents;
-    state = _computeProjectedEvents(baseEvents, schedules);
+    state = _computeProjectedEvents(_userEvents, schedules);
   }
 
   /// Adds a new calendar service or rehearsal event.
   void addEvent(ServiceEvent event) {
     _userEvents.add(event);
     _syncState();
-    if (ref.read(demoModeProvider)) {
-      ref.read(demoCloudSyncServiceProvider).pushDemoEvent(event);
-    }
   }
 
   /// Updates an existing service event.
@@ -97,9 +44,6 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
       _userEvents[idx] = updated;
     }
     _syncState();
-    if (ref.read(demoModeProvider)) {
-      ref.read(demoCloudSyncServiceProvider).pushDemoEvent(updated);
-    }
   }
 
   /// Deletes a service event by id.
@@ -127,9 +71,6 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     final idx = _userEvents.indexWhere((e) => e.id == eventId);
     if (idx != -1) {
       _userEvents[idx] = updater(_userEvents[idx]);
-      if (ref.read(demoModeProvider)) {
-        ref.read(demoCloudSyncServiceProvider).pushDemoEvent(_userEvents[idx]);
-      }
     }
     _syncState();
   }
@@ -184,7 +125,8 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
           ),
           ServiceAssignment(
             memberId: newMemberId,
-            role: role ??
+            role:
+                role ??
                 event.assignments
                     .firstWhere(
                       (a) => a.memberId == oldMemberId,
@@ -201,7 +143,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     );
   }
 
-  /// Assigns all members of a group to a service event, marking unavailable members as declined.
+  /// Assigns all members of a group to a service event.
   void assignGroup({
     required String eventId,
     required List<TeamMember> groupMembers,
@@ -216,9 +158,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
               ServiceAssignment(
                 memberId: member.id,
                 role: member.role,
-                status: member.availability == AvailabilityStatus.unavailable
-                    ? AssignmentStatus.declined
-                    : AssignmentStatus.confirmed,
+                status: AssignmentStatus.confirmed,
               ),
         ],
       ),
@@ -261,10 +201,7 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         (event) => event.copyWith(
           assignments: <ServiceAssignment>[
             for (final a in event.assignments)
-              if (a.memberId == memberId)
-                a.copyWith(status: nextStatus)
-              else
-                a,
+              if (a.memberId == memberId) a.copyWith(status: nextStatus) else a,
           ],
         ),
       );
@@ -313,10 +250,13 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
     for (final schedule in schedules) {
       if (!schedule.isActive || schedule.lookaheadCount <= 0) continue;
 
-      final projectedDates = schedule.generateOccurrences(fromDateTime: todayStart);
+      final projectedDates = schedule.generateOccurrences(
+        fromDateTime: todayStart,
+      );
 
       final existingForSeries = result.where((e) {
-        final isUpcoming = e.dateTime.isAfter(todayStart) ||
+        final isUpcoming =
+            e.dateTime.isAfter(todayStart) ||
             (e.dateTime.year == todayStart.year &&
                 e.dateTime.month == todayStart.month &&
                 e.dateTime.day == todayStart.day);
@@ -328,7 +268,8 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
         if (existingForSeries.length >= schedule.lookaheadCount) break;
 
         final alreadyCovered = result.any((e) {
-          final isSameDay = e.dateTime.year == dt.year &&
+          final isSameDay =
+              e.dateTime.year == dt.year &&
               e.dateTime.month == dt.month &&
               e.dateTime.day == dt.day;
           return isSameDay &&
@@ -354,7 +295,8 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
       // Enforce lookaheadCount: if upcoming events for this series exceed X, trim the furthest dates
       final upcomingSeriesEvents = result.where((e) {
-        final isUpcoming = e.dateTime.isAfter(todayStart) ||
+        final isUpcoming =
+            e.dateTime.isAfter(todayStart) ||
             (e.dateTime.year == todayStart.year &&
                 e.dateTime.month == todayStart.month &&
                 e.dateTime.day == todayStart.day);
@@ -371,171 +313,5 @@ class ServiceCalendarNotifier extends Notifier<List<ServiceEvent>> {
 
     result.sort((a, b) => a.dateTime.compareTo(b.dateTime));
     return result;
-  }
-
-  static List<ServiceEvent> _initialSampleEvents() {
-    final now = DateTime.now();
-
-    // Upcoming Sunday (9:00 AM)
-    final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
-    final nextSundayDate = now.add(
-      Duration(days: daysUntilSunday == 0 ? 7 : daysUntilSunday),
-    );
-    final nextSunday = DateTime(
-      nextSundayDate.year,
-      nextSundayDate.month,
-      nextSundayDate.day,
-      9,
-      0,
-    );
-
-    // Upcoming Thursday rehearsal (7:00 PM)
-    final daysUntilThursday = (DateTime.thursday - now.weekday) % 7;
-    final nextThursdayDate = now.add(
-      Duration(
-        days: daysUntilThursday <= 0
-            ? daysUntilThursday + 7
-            : daysUntilThursday,
-      ),
-    );
-    final nextThursday = DateTime(
-      nextThursdayDate.year,
-      nextThursdayDate.month,
-      nextThursdayDate.day,
-      19,
-      0,
-    );
-
-    // Following Sunday (Sunday + 7 days)
-    final followingSunday = nextSunday.add(const Duration(days: 7));
-
-    // Third Sunday (Sunday + 14 days)
-    final thirdSunday = nextSunday.add(const Duration(days: 14));
-
-    return [
-      ServiceEvent(
-        id: 'event-next-sunday',
-        title: 'Sunday Morning Worship',
-        dateTime: nextSunday,
-        type: ServiceType.sundayService,
-        recurrence: EventRecurrence.weekly,
-        location: 'Main Sanctuary',
-        notes: 'Soundcheck at 7:45 AM. Lead sheet package in Battuta.',
-        seriesId: 'series-sunday-morning',
-        assignments: const [
-          ServiceAssignment(
-            memberId: 'member-5', // Amparito (Lead Voice)
-            role: TeamRole.leadVocal,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-2', // Raúl (Acoustic Guitar)
-            role: TeamRole.acousticGuitar,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-3', // Pipe (Bass)
-            role: TeamRole.bass,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-1', // Joel (Keys / Piano)
-            role: TeamRole.keys,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-4', // Jose (Drums)
-            role: TeamRole.drums,
-            status: AssignmentStatus.confirmed,
-          ),
-        ],
-      ),
-      ServiceEvent(
-        id: 'event-next-rehearsal',
-        title: 'Midweek Band Rehearsal',
-        dateTime: nextThursday,
-        type: ServiceType.rehearsal,
-        recurrence: EventRecurrence.weeklyThursday,
-        location: 'Rehearsal Hall B',
-        notes: 'Working through new arrangement and vocal harmonies.',
-        seriesId: 'series-thursday-rehearsal',
-        assignments: const [
-          ServiceAssignment(
-            memberId: 'member-5', // Amparito
-            role: TeamRole.leadVocal,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-2', // Raúl
-            role: TeamRole.acousticGuitar,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-1', // Joel
-            role: TeamRole.keys,
-            status: AssignmentStatus.confirmed,
-          ),
-        ],
-      ),
-      ServiceEvent(
-        id: 'event-following-sunday',
-        title: 'Sunday Morning Worship',
-        dateTime: followingSunday,
-        type: ServiceType.sundayService,
-        recurrence: EventRecurrence.weekly,
-        location: 'Main Sanctuary',
-        notes: 'Communion Sunday. Call time 8:00 AM.',
-        seriesId: 'series-sunday-morning',
-        assignments: const [
-          ServiceAssignment(
-            memberId: 'member-5', // Amparito
-            role: TeamRole.leadVocal,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-6', // Andrés
-            role: TeamRole.backingVocal,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-1', // Joel
-            role: TeamRole.keys,
-            status: AssignmentStatus.confirmed,
-          ),
-          ServiceAssignment(
-            memberId: 'member-20', // Nico
-            role: TeamRole.electricGuitar,
-            status: AssignmentStatus.scheduled,
-          ),
-        ],
-      ),
-      ServiceEvent(
-        id: 'event-third-sunday',
-        title: 'Sunday Morning Worship',
-        dateTime: thirdSunday,
-        type: ServiceType.sundayService,
-        recurrence: EventRecurrence.weekly,
-        location: 'Main Sanctuary',
-        notes: 'Regular 2-service schedule (9:00 AM & 11:15 AM).',
-        seriesId: 'series-sunday-morning',
-        assignments: const [
-          ServiceAssignment(
-            memberId: 'member-2', // Raúl
-            role: TeamRole.acousticGuitar,
-            status: AssignmentStatus.scheduled,
-          ),
-          ServiceAssignment(
-            memberId: 'member-3', // Pipe
-            role: TeamRole.bass,
-            status: AssignmentStatus.scheduled,
-          ),
-          ServiceAssignment(
-            memberId: 'member-4', // Jose
-            role: TeamRole.drums,
-            status: AssignmentStatus.scheduled,
-          ),
-        ],
-      ),
-    ];
   }
 }

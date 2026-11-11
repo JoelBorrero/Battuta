@@ -9,6 +9,7 @@ import 'package:battuta/core/services/supabase_config_service.dart';
 import 'package:battuta/features/auth/data/repositories/supabase_auth_repository.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
 import 'package:battuta/features/auth/domain/repositories/auth_repository.dart';
+import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final supabaseConfigServiceProvider = Provider<SupabaseConfigService>((ref) {
@@ -22,7 +23,12 @@ final supabaseClientManagerProvider = Provider<SupabaseClientManager>((ref) {
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final clientManager = ref.watch(supabaseClientManagerProvider);
-  return SupabaseAuthRepository(clientManager: clientManager);
+  return SupabaseAuthRepository(
+    clientManager: clientManager,
+    onDeactivated: () => ref
+        .read(accountNoticeProvider.notifier)
+        .show(AccountNotice.deactivated),
+  );
 });
 
 final authStateChangesProvider = StreamProvider<AuthUser?>((ref) {

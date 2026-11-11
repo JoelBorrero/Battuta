@@ -1,21 +1,14 @@
 import 'dart:io';
 
 import 'package:battuta/app/theme/app_theme.dart';
-import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/audio/data/local_stem_storage_service.dart';
 import 'package:battuta/features/audio/domain/models/ab_loop_region.dart';
+import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-class _FakeDemoModeNotifier extends DemoModeNotifier {
-  _FakeDemoModeNotifier([this._initial = true]);
-  final bool _initial;
-  @override
-  bool build() => _initial;
-}
 
 void main() {
   group('AbLoopRegion Domain Tests', () {
@@ -191,20 +184,24 @@ void main() {
 
     Widget buildSubject() {
       return ProviderScope(
-        overrides: [
-          demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(true)),
-        ],
         child: MaterialApp(
           home: Scaffold(body: PracticePlayerBar(song: sampleSong)),
         ),
       );
     }
 
+    Future<void> pumpWithAudio(WidgetTester tester) async {
+      await tester.pumpWidget(buildSubject());
+      ProviderScope.containerOf(tester.element(find.byType(PracticePlayerBar)))
+          .read(audioPracticeControllerProvider.notifier)
+          .attachAudioSource('guide.mp3', songId: sampleSong.id);
+      await tester.pumpAndSettle();
+    }
+
     testWidgets(
       'toggles Loop A, Loop B, and Clear Loop with amber active styling',
       (tester) async {
-        await tester.pumpWidget(buildSubject());
-        await tester.pumpAndSettle();
+        await pumpWithAudio(tester);
 
         final btnA = find.byKey(const ValueKey('ab_loop_point_a_button'));
         final btnB = find.byKey(const ValueKey('ab_loop_point_b_button'));
@@ -258,8 +255,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(buildSubject());
-        await tester.pumpAndSettle();
+        await pumpWithAudio(tester);
 
         expect(tester.takeException(), isNull);
         expect(

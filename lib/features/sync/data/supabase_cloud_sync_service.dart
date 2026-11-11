@@ -52,35 +52,22 @@ class SupabaseCloudSyncService implements CloudSyncService {
   supa.SupabaseClient? get _client =>
       _clientProvider != null ? _clientProvider() : clientManager.client;
 
-  /// Songs and setlists have no demo data: in demo mode there is nothing to
-  /// sync, so the run reports offline and the local data stays as it is.
-  static const _demoReason =
-      'Demo mode does not sync songs or setlists with the cloud.';
-
   @override
-  Future<CloudSyncResult> syncAll({String? teamId, bool isDemo = false}) {
-    return _run(isDemo: isDemo, push: true, pull: true);
+  Future<CloudSyncResult> syncAll({String? teamId}) {
+    return _run(push: true, pull: true);
   }
 
   @override
-  Future<CloudSyncResult> pushLocalChanges({bool isDemo = false}) {
-    return _run(isDemo: isDemo, push: true, pull: false);
+  Future<CloudSyncResult> pushLocalChanges() {
+    return _run(push: true, pull: false);
   }
 
   @override
-  Future<CloudSyncResult> pullRemoteChanges({
-    String? teamId,
-    bool isDemo = false,
-  }) {
-    return _run(isDemo: isDemo, push: false, pull: true);
+  Future<CloudSyncResult> pullRemoteChanges({String? teamId}) {
+    return _run(push: false, pull: true);
   }
 
-  Future<CloudSyncResult> _run({
-    required bool isDemo,
-    required bool push,
-    required bool pull,
-  }) async {
-    if (isDemo) return CloudSyncResult.offline(reason: _demoReason);
+  Future<CloudSyncResult> _run({required bool push, required bool pull}) async {
     if (_isSyncing) {
       return CloudSyncResult.failure(error: 'A sync cycle is already active.');
     }

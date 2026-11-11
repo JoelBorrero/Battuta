@@ -7,6 +7,7 @@ library;
 
 import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/routes/app_routes.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
@@ -16,7 +17,6 @@ import 'package:battuta/features/repertoire/presentation/widgets/song_import_mod
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
 import 'package:battuta/features/sync/presentation/widgets/cloud_sync_status_indicator.dart';
-import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

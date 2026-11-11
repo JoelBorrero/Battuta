@@ -458,24 +458,6 @@ abstract class AppLocalizations {
   /// **'No chords entered for this section.'**
   String get noChordsForSection;
 
-  /// Title for Demo / Showcase Mode toggle switch
-  ///
-  /// In en, this message translates to:
-  /// **'Demo Mode'**
-  String get demoModeTitle;
-
-  /// Subtitle describing Demo / Showcase Mode
-  ///
-  /// In en, this message translates to:
-  /// **'Show mock musicians, sample schedules, AI credits, and demo practice audio'**
-  String get demoModeSubtitle;
-
-  /// Section header for demo mode settings
-  ///
-  /// In en, this message translates to:
-  /// **'Showcase & Demo Mode'**
-  String get demoModeSection;
-
   /// Title when a song has no audio file attached
   ///
   /// In en, this message translates to:
@@ -509,7 +491,7 @@ abstract class AppLocalizations {
   /// Subtitle when team roster is empty
   ///
   /// In en, this message translates to:
-  /// **'Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.'**
+  /// **'Invite people to your organization to build your team.'**
   String get noMembersInRosterSubtitle;
 
   /// Title when band calendar has no events
@@ -521,14 +503,8 @@ abstract class AppLocalizations {
   /// Subtitle when band calendar has no events
   ///
   /// In en, this message translates to:
-  /// **'Tap + to schedule an event, or enable Demo Mode in Settings to view sample schedules.'**
+  /// **'Tap + to schedule an event.'**
   String get noEventsInCalendarSubtitle;
-
-  /// Button to turn on Demo Mode
-  ///
-  /// In en, this message translates to:
-  /// **'Enable Demo Mode'**
-  String get enableDemoModeAction;
 
   /// Name for offline local workspace pool
   ///
@@ -3341,6 +3317,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That username is already taken.'**
   String get usernameTakenError;
+
+  /// Welcome screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Battuta'**
+  String get welcomeTitle;
+
+  /// Welcome screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Your charts, setlists and band, ready for the stage.'**
+  String get welcomeSubtitle;
+
+  /// Welcome screen sign in button
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get welcomeSignIn;
+
+  /// Welcome screen create account button
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get welcomeCreateAccount;
+
+  /// Welcome screen continue offline button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue offline'**
+  String get welcomeContinueOffline;
+
+  /// Note under the continue offline button
+  ///
+  /// In en, this message translates to:
+  /// **'Everything works on this device. You can sign in later from Settings.'**
+  String get welcomeOfflineNote;
+
+  /// Message when an account is deactivated
+  ///
+  /// In en, this message translates to:
+  /// **'This account was deactivated and signed out. Its history is kept.'**
+  String get accountDeactivatedNotice;
+
+  /// Sign in page title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signInPageTitle;
+
+  /// Create account page title and button
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccountPageTitle;
+
+  /// Invalid email error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get authInvalidEmail;
+
+  /// Short password error
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters.'**
+  String get authPasswordTooShort;
+
+  /// Magic link sent message
+  ///
+  /// In en, this message translates to:
+  /// **'Magic link sent! Check your inbox to sign in.'**
+  String get authMagicLinkSent;
+
+  /// Account created, confirmation needed
+  ///
+  /// In en, this message translates to:
+  /// **'Account created! Check your email to confirm it.'**
+  String get authAccountCreatedCheckEmail;
+
+  /// Password reset sent message
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent.'**
+  String get authPasswordResetSent;
+
+  /// Forgot password button
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPasswordAction;
+
+  /// Generic backend error
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get backendErrorGeneric;
+
+  /// Offline error
+  ///
+  /// In en, this message translates to:
+  /// **'You\'\'re offline. Connect to the internet and try again.'**
+  String get backendErrorOffline;
+
+  /// Not admin error
+  ///
+  /// In en, this message translates to:
+  /// **'Only organization admins can do this.'**
+  String get backendErrorNotAdmin;
+
+  /// Not member error
+  ///
+  /// In en, this message translates to:
+  /// **'You are not a member of this organization.'**
+  String get backendErrorNotMember;
+
+  /// Last admin error
+  ///
+  /// In en, this message translates to:
+  /// **'An organization needs at least one admin. Make someone else an admin first.'**
+  String get backendErrorLastAdmin;
+
+  /// Invalid name error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid name.'**
+  String get backendErrorInvalidName;
+
+  /// Archived organization error
+  ///
+  /// In en, this message translates to:
+  /// **'This organization is archived.'**
+  String get backendErrorOrganizationArchived;
+
+  /// Not signed in error
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to do this.'**
+  String get backendErrorNotSignedIn;
+
+  /// Settings account section header
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountSection;
+
+  /// Settings sign in row
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get accountSignInTile;
+
+  /// Deactivate account button
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate account'**
+  String get accountDeactivateAction;
+
+  /// Deactivate dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate account?'**
+  String get accountDeactivateTitle;
+
+  /// Deactivate explanation
+  ///
+  /// In en, this message translates to:
+  /// **'You will be signed out and will no longer be able to use this account. Your songs on this device stay, and what you contributed to organizations is kept as history.'**
+  String get accountDeactivateExplanation;
+
+  /// Typed confirmation prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Type {word} to confirm.'**
+  String accountDeactivateTypeToConfirm(String word);
+
+  /// Switcher title
+  ///
+  /// In en, this message translates to:
+  /// **'Organizations'**
+  String get organizationsTitle;
+
+  /// Empty organization state
+  ///
+  /// In en, this message translates to:
+  /// **'No organization yet'**
+  String get noOrganizationsYet;
+
+  /// Create organization button
+  ///
+  /// In en, this message translates to:
+  /// **'Create organization'**
+  String get createOrganizationAction;
+
+  /// Organization name field
+  ///
+  /// In en, this message translates to:
+  /// **'Organization name'**
+  String get organizationNameLabel;
+
+  /// All bands filter
+  ///
+  /// In en, this message translates to:
+  /// **'All bands'**
+  String get allBandsLabel;
+
+  /// Member role badge
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get memberRoleLabel;
+
+  /// Bands label
+  ///
+  /// In en, this message translates to:
+  /// **'Bands'**
+  String get bandsLabel;
+
+  /// Admins stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get adminsLabel;
+
+  /// Roles label in member dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Roles & Instruments'**
+  String get rolesInstrumentsLabel;
+
+  /// Roster signed out title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your team'**
+  String get rosterSignInTitle;
+
+  /// Roster signed out message
+  ///
+  /// In en, this message translates to:
+  /// **'Organizations, members and bands live in your account. Sign in to create or join one.'**
+  String get rosterSignInMessage;
+
+  /// No organization note
+  ///
+  /// In en, this message translates to:
+  /// **'Create an organization for your team. Invitations to join one will arrive in a later update.'**
+  String get noOrganizationInvitesNote;
+
+  /// Disabled invite button
+  ///
+  /// In en, this message translates to:
+  /// **'Invite · Coming soon'**
+  String get inviteComingSoon;
+
+  /// Manage bands button
+  ///
+  /// In en, this message translates to:
+  /// **'Manage bands'**
+  String get manageBandsAction;
+
+  /// Leave organization
+  ///
+  /// In en, this message translates to:
+  /// **'Leave organization'**
+  String get leaveOrganizationAction;
+
+  /// Leave confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'You will lose access to this organization\'\'s roster and schedule.'**
+  String get leaveOrganizationConfirm;
+
+  /// Remove member confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this organization?'**
+  String removeMemberConfirm(String name);
+
+  /// Member removed snackbar
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {name}'**
+  String removedMemberSuccess(String name);
+
+  /// Badge on my own roster card
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get youBadge;
+
+  /// Edit band
+  ///
+  /// In en, this message translates to:
+  /// **'Edit band'**
+  String get editBandAction;
+
+  /// Delete band
+  ///
+  /// In en, this message translates to:
+  /// **'Delete band'**
+  String get deleteBandAction;
+
+  /// Delete band confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}? Its members stay in the organization.'**
+  String deleteBandConfirm(String name);
+
+  /// New band
+  ///
+  /// In en, this message translates to:
+  /// **'New band'**
+  String get newBandAction;
+
+  /// Band name field
+  ///
+  /// In en, this message translates to:
+  /// **'Band name'**
+  String get bandNameLabel;
+
+  /// No description provided for @memberSavePartialRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Some changes were saved, but the role could not be changed. {reason}'**
+  String memberSavePartialRole(String reason);
+
+  /// No description provided for @memberSavePartialBands.
+  ///
+  /// In en, this message translates to:
+  /// **'Some changes were saved, but the bands could not be updated. {reason}'**
+  String memberSavePartialBands(String reason);
 }
 
 class _AppLocalizationsDelegate

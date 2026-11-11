@@ -6,18 +6,19 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
-import 'package:battuta/core/services/demo_mode_provider.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
 import 'package:battuta/features/team/domain/entities/recurring_schedule.dart';
 import 'package:battuta/features/team/domain/entities/schedule_alert.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
-import 'package:battuta/features/team/domain/entities/team_group.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/features/team/presentation/providers/recurring_schedules_provider.dart';
 import 'package:battuta/features/team/presentation/providers/schedule_alerts_provider.dart';
 import 'package:battuta/features/team/presentation/providers/service_calendar_provider.dart';
-import 'package:battuta/features/team/presentation/providers/team_group_provider.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/features/team/presentation/widgets/admin_schedule_alerts_banner.dart';
+import 'package:battuta/features/team/presentation/widgets/member_edit_dialog.dart';
+import 'package:battuta/features/team/presentation/widgets/roster_view.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,447 +34,6 @@ class TeamPage extends ConsumerStatefulWidget {
 
 class _TeamPageState extends ConsumerState<TeamPage> {
   int _selectedTabIndex = 0; // 0: Roster, 1: Calendar & Services
-  String _selectedFilter = 'All';
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TEAM MEMBER DIALOG (ADD / EDIT)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  void _showMemberDialog({TeamMember? memberToEdit}) {
-    final isEditing = memberToEdit != null;
-    final nameController = TextEditingController(
-      text: memberToEdit?.name ?? '',
-    );
-    final notesController = TextEditingController(
-      text: memberToEdit?.notes ?? '',
-    );
-
-    // Multi-role selection: defaults to Keys (an instrument) for new members
-    final selectedRoles = <TeamRole>{...?memberToEdit?.roles};
-    if (selectedRoles.isEmpty) {
-      selectedRoles.add(TeamRole.keys);
-    }
-
-    // Arrangement groups multi-membership
-    final availableGroups = ref.read(teamGroupsProvider);
-    final selectedGroups = <String>{...?memberToEdit?.groupIds};
-
-    // Vocal tessitura: if only instruments are selected, discard (none)
-    VocalTessitura selectedRange;
-    if (isEditing) {
-      selectedRange = memberToEdit.vocalRange;
-    } else {
-      final hasVocal = selectedRoles.any((r) => r.isVocal);
-      selectedRange = hasVocal ? VocalTessitura.soprano : VocalTessitura.none;
-    }
-
-    AvailabilityStatus selectedAvailability =
-        memberToEdit?.availability ?? AvailabilityStatus.available;
-    var isAdmin = memberToEdit?.isAdmin ?? false;
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (dialogCtx, setDialogState) {
-            final theme = Theme.of(dialogCtx);
-            final l10n = AppLocalizations.of(dialogCtx);
-            final hasVocalRole = selectedRoles.any((r) => r.isVocal);
-
-            void toggleRole(TeamRole role) {
-              setDialogState(() {
-                if (selectedRoles.contains(role)) {
-                  if (selectedRoles.length > 1) {
-                    selectedRoles.remove(role);
-                  }
-                } else {
-                  selectedRoles.add(role);
-                }
-
-                // Automatic vocal tessitura discard logic:
-                final nowHasVocal = selectedRoles.any((r) => r.isVocal);
-                if (!nowHasVocal) {
-                  selectedRange = VocalTessitura.none;
-                } else if (selectedRange == VocalTessitura.none) {
-                  selectedRange = VocalTessitura.soprano;
-                }
-              });
-            }
-
-            return AlertDialog(
-              title: Text(
-                isEditing
-                    ? (l10n?.editTeamMember ?? 'Edit Team Member')
-                    : (l10n?.addTeamMember ?? 'Add Team Member'),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      autofocus: !isEditing,
-                      decoration: InputDecoration(
-                        labelText: l10n?.fullNameRequired ?? 'Full Name *',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.person),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Multi-role selection
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n?.rolesInstrumentsRequired ?? 'Roles & Instruments *',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          l10n?.rolesSelectedCount(selectedRoles.length) ??
-                              '${selectedRoles.length} selected',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n?.tapToToggleRoles ??
-                          'Tap to toggle roles (e.g. Pianist + Singer + Guitarist):',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: TeamRole.values.map((r) {
-                        final isSelected = selectedRoles.contains(r);
-                        return FilterChip(
-                          key: ValueKey('role_chip_${r.name}'),
-                          avatar: Icon(
-                            _getRoleIcon(r),
-                            size: 16,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                          ),
-                          label: Text(r.localizedName(context)),
-                          selected: isSelected,
-                          onSelected: (_) => toggleRole(r),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Vocal Tessitura Section
-                    if (hasVocalRole) ...[
-                      DropdownButtonFormField<VocalTessitura>(
-                        key: const ValueKey('vocal_tessitura_dropdown'),
-                        isExpanded: true,
-                        initialValue: selectedRange == VocalTessitura.none
-                            ? VocalTessitura.soprano
-                            : selectedRange,
-                        decoration: InputDecoration(
-                          labelText: l10n?.vocalTessituraRange ?? 'Vocal Tessitura (Range)',
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(Icons.record_voice_over_outlined),
-                        ),
-                        items: VocalTessitura.values
-                            .where((v) => v != VocalTessitura.none)
-                            .map((v) {
-                              return DropdownMenuItem(
-                                value: v,
-                                child: Text(
-                                  '${v.displayName} (${v.rangeLabel})',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              );
-                            })
-                            .toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setDialogState(() => selectedRange = val);
-                          }
-                        },
-                      ),
-                    ] else ...[
-                      Container(
-                        key: const ValueKey('vocal_range_discarded_info'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest
-                              .withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: theme.colorScheme.outlineVariant.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.music_off_outlined,
-                              size: 20,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n?.vocalTessituraDiscardedTitle ??
-                                        'Vocal Tessitura: Discarded (Instrumental)',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    l10n?.vocalTessituraDiscardedSubtitle ??
-                                        'Automatically omitted because only instruments or production roles are selected.',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-
-                    // Availability Status
-                    DropdownButtonFormField<AvailabilityStatus>(
-                      isExpanded: true,
-                      initialValue: selectedAvailability,
-                      decoration: InputDecoration(
-                        labelText: l10n?.generalAvailabilityLabel ?? 'General Availability',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.event_available_outlined),
-                      ),
-                      items: AvailabilityStatus.values.map((a) {
-                        return DropdownMenuItem(
-                          value: a,
-                          child: Text(
-                            a.localizedName(context),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setDialogState(() => selectedAvailability = val);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Notes
-                    TextField(
-                      controller: notesController,
-                      decoration: InputDecoration(
-                        labelText: l10n?.notesAssignmentLabel ?? 'Notes / Assignment',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.note_alt_outlined),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Arrangement Groups / Sub-teams (N:M Membership)
-                    if (availableGroups.isNotEmpty) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n?.arrangementGroupsSubteams ?? 'Arrangement Groups / Sub-teams',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            l10n?.groupsAssignedCount(selectedGroups.length) ??
-                                '${selectedGroups.length} assigned',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n?.memberRotatingTeamsSubtitle ??
-                            'Member can belong to multiple rotating teams:',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: availableGroups.map((g) {
-                          final isSelected = selectedGroups.contains(g.id);
-                          return FilterChip(
-                            key: ValueKey('member_dialog_group_chip_${g.id}'),
-                            avatar: CircleAvatar(
-                              radius: 5,
-                              backgroundColor: Color(g.colorValue),
-                            ),
-                            label: Text(g.name),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setDialogState(() {
-                                if (selected) {
-                                  selectedGroups.add(g.id);
-                                } else {
-                                  selectedGroups.remove(g.id);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-
-                    // Administrator permissions toggle
-                    SwitchListTile.adaptive(
-                      key: const ValueKey('member_admin_switch'),
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        l10n?.administratorRole ?? 'Administrator Role',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        l10n?.administratorRoleSubtitle ??
-                            'Grants authority to create songs, schedule services, and assign musician replacements.',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      value: isAdmin,
-                      onChanged: (val) {
-                        setDialogState(() => isAdmin = val);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: Text(l10n?.cancel ?? 'Cancel'),
-                ),
-                FilledButton(
-                  key: ValueKey(
-                    isEditing ? 'save_member_btn' : 'add_member_btn',
-                  ),
-                  onPressed: () {
-                    final name = nameController.text.trim();
-                    if (name.isEmpty) return;
-
-                    final rolesToSave = selectedRoles.isEmpty
-                        ? [TeamRole.keys]
-                        : selectedRoles.toList();
-
-                    final vocalToSave = rolesToSave.any((r) => r.isVocal)
-                        ? (selectedRange == VocalTessitura.none
-                              ? VocalTessitura.soprano
-                              : selectedRange)
-                        : VocalTessitura.none;
-
-                    if (isEditing) {
-                      final updatedMember = memberToEdit.copyWith(
-                        name: name,
-                        roles: rolesToSave,
-                        vocalRange: vocalToSave,
-                        availability: selectedAvailability,
-                        isAdmin: isAdmin,
-                        groupIds: selectedGroups.toList(),
-                        notes: notesController.text.trim().isEmpty
-                            ? null
-                            : notesController.text.trim(),
-                      );
-
-                      ref
-                          .read(teamMembersProvider.notifier)
-                          .updateMember(updatedMember);
-                      Navigator.of(dialogCtx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.updatedMemberSuccess(updatedMember.name) ??
-                                'Updated ${updatedMember.name}',
-                          ),
-                        ),
-                      );
-                    } else {
-                      final newMember = TeamMember(
-                        id: 'member_${DateTime.now().millisecondsSinceEpoch}',
-                        name: name,
-                        roles: rolesToSave,
-                        vocalRange: vocalToSave,
-                        availability: selectedAvailability,
-                        isAdmin: isAdmin,
-                        groupIds: selectedGroups.toList(),
-                        notes: notesController.text.trim().isEmpty
-                            ? null
-                            : notesController.text.trim(),
-                      );
-
-                      ref
-                          .read(teamMembersProvider.notifier)
-                          .addMember(newMember);
-                      Navigator.of(dialogCtx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.addedMemberSuccess(name) ??
-                                'Added $name to the team!',
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  child: Text(
-                    isEditing
-                        ? (l10n?.saveChanges ?? 'Save Changes')
-                        : (l10n?.addMemberAction ?? 'Add Member'),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SERVICE EVENT DIALOG (ADD / EDIT)
@@ -523,7 +83,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     TextField(
                       controller: titleController,
                       decoration: InputDecoration(
-                        labelText: l10n?.serviceTitleRequired ?? 'Service Title *',
+                        labelText:
+                            l10n?.serviceTitleRequired ?? 'Service Title *',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.church_outlined),
                       ),
@@ -565,7 +126,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       isExpanded: true,
                       initialValue: selectedRecurrence,
                       decoration: InputDecoration(
-                        labelText: l10n?.recurrenceScheduleLabel ?? 'Recurrence Schedule',
+                        labelText:
+                            l10n?.recurrenceScheduleLabel ??
+                            'Recurrence Schedule',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.repeat),
                       ),
@@ -592,7 +155,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         isExpanded: true,
                         initialValue: seriesCount,
                         decoration: InputDecoration(
-                          labelText: l10n?.occurrencesToGenerate ?? 'Occurrences to Generate',
+                          labelText:
+                              l10n?.occurrencesToGenerate ??
+                              'Occurrences to Generate',
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.date_range_outlined),
                         ),
@@ -600,7 +165,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 1,
                             child: Text(
-                              l10n?.singleDateOnly ?? '1 service (Single date only)',
+                              l10n?.singleDateOnly ??
+                                  '1 service (Single date only)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -608,7 +174,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 4,
                             child: Text(
-                              l10n?.seriesCountServices(4, 4) ?? '4 occurrences (~1 month)',
+                              l10n?.seriesCountServices(4, 4) ??
+                                  '4 occurrences (~1 month)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -616,7 +183,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 6,
                             child: Text(
-                              l10n?.seriesCountServices(6, 6) ?? '6 occurrences (~1.5 months)',
+                              l10n?.seriesCountServices(6, 6) ??
+                                  '6 occurrences (~1.5 months)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -624,7 +192,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 12,
                             child: Text(
-                              l10n?.seriesCountServices(12, 12) ?? '12 occurrences (~3 months)',
+                              l10n?.seriesCountServices(12, 12) ??
+                                  '12 occurrences (~3 months)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -632,7 +201,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           DropdownMenuItem(
                             value: 24,
                             child: Text(
-                              l10n?.seriesCountServices(24, 24) ?? '24 occurrences (~6 months)',
+                              l10n?.seriesCountServices(24, 24) ??
+                                  '24 occurrences (~6 months)',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -693,7 +263,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     TextField(
                       controller: locationController,
                       decoration: InputDecoration(
-                        labelText: l10n?.locationVenueLabel ?? 'Location / Venue',
+                        labelText:
+                            l10n?.locationVenueLabel ?? 'Location / Venue',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.location_on_outlined),
                       ),
@@ -702,7 +273,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     TextField(
                       controller: notesController,
                       decoration: InputDecoration(
-                        labelText: l10n?.callTimeInstructionsLabel ?? 'Call Time & Instructions',
+                        labelText:
+                            l10n?.callTimeInstructionsLabel ??
+                            'Call Time & Instructions',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.info_outline),
                       ),
@@ -775,7 +348,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            l10n?.recurringScheduleSuccess(title, seriesCount) ??
+                            l10n?.recurringScheduleSuccess(
+                                  title,
+                                  seriesCount,
+                                ) ??
                                 'Configured recurring schedule for $title (showing next $seriesCount events)!',
                           ),
                         ),
@@ -813,7 +389,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                   selectedRecurrence.isRepeating &&
                                   seriesCount > 1
                               ? (l10n?.createSeriesCount(seriesCount) ??
-                                  'Create Series ($seriesCount)')
+                                    'Create Series ($seriesCount)')
                               : (l10n?.createService ?? 'Create Service')),
                   ),
                 ),
@@ -884,7 +460,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       isExpanded: true,
                       initialValue: selectedRole,
                       decoration: InputDecoration(
-                        labelText: l10n?.assignedRoleForService ?? 'Assigned Role for Service',
+                        labelText:
+                            l10n?.assignedRoleForService ??
+                            'Assigned Role for Service',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.music_note),
                       ),
@@ -909,7 +487,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       isExpanded: true,
                       initialValue: selectedStatus,
                       decoration: InputDecoration(
-                        labelText: l10n?.attendanceStatusLabel ?? 'Attendance Status',
+                        labelText:
+                            l10n?.attendanceStatusLabel ?? 'Attendance Status',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.check_circle_outline),
                       ),
@@ -952,7 +531,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          l10n?.assignedMusicianSuccess(selectedMember.name, event.title) ??
+                          l10n?.assignedMusicianSuccess(
+                                selectedMember.name,
+                                event.title,
+                              ) ??
                               'Assigned ${selectedMember.name} to ${event.title}!',
                         ),
                       ),
@@ -1005,15 +587,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 final groupMembers = members
                     .where((m) => m.groupIds.contains(group.id))
                     .toList();
-                final unavailableCount = groupMembers
-                    .where((m) => m.availability == AvailabilityStatus.unavailable)
-                    .length;
 
                 return ListTile(
                   key: ValueKey('assign_group_item_${group.id}'),
                   leading: CircleAvatar(
-                    backgroundColor:
-                        Color(group.colorValue).withValues(alpha: 0.2),
+                    backgroundColor: Color(group.colorValue)
+                        .withValues(alpha: 0.2),
                     child: Icon(Icons.groups, color: Color(group.colorValue)),
                   ),
                   title: Text(
@@ -1021,16 +600,15 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '${l10n?.groupMembersCount(groupMembers.length) ?? "${groupMembers.length} members"}'
-                    '${unavailableCount > 0 ? " • ${l10n?.unavailableCountSubtitle(unavailableCount) ?? "$unavailableCount unavailable"}" : ""}',
-                    style: TextStyle(
-                      color: unavailableCount > 0 ? AppTheme.stageRed : null,
-                    ),
+                    l10n?.groupMembersCount(groupMembers.length) ??
+                        '${groupMembers.length} members',
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 14),
                   onTap: () {
                     Navigator.of(ctx).pop();
-                    ref.read(serviceCalendarProvider.notifier).assignGroup(
+                    ref
+                        .read(serviceCalendarProvider.notifier)
+                        .assignGroup(
                           eventId: event.id,
                           groupMembers: groupMembers,
                         );
@@ -1071,7 +649,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     final event = events.where((e) => e.id == alert.eventId).firstOrNull;
     if (event == null) return;
 
-    final assignment = event.assignments
+    final assignment =
+        event.assignments
             .where((a) => a.memberId == alert.memberId)
             .firstOrNull ??
         ServiceAssignment(
@@ -1096,8 +675,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
             return SafeArea(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1133,8 +714,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: Center(
                           child: Text(
-                            l10n?.noPendingGaps ??
-                                'No pending scheduling gaps. All services are covered!',
+                            l10n?.noPendingGaps ?? 'No pending scheduling gaps. All services are covered!',
                             style: const TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ),
@@ -1173,9 +753,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2,
-                                              ),
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: AppTheme.stageAmber
                                                     .withValues(alpha: 0.15),
@@ -1183,7 +763,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                                     BorderRadius.circular(4),
                                               ),
                                               child: Text(
-                                                alert.role.localizedShortName(context),
+                                                alert.role.localizedShortName(
+                                                  context,
+                                                ),
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.bold,
@@ -1207,7 +789,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: theme
-                                                .colorScheme.onSurfaceVariant,
+                                                .colorScheme
+                                                .onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -1270,8 +853,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     );
 
     final alreadyAssignedIds = event.assignments.map((a) => a.memberId).toSet();
-    final availableCandidates =
-        members.where((m) => m.id != assignment.memberId).toList();
+    final availableCandidates = members
+        .where((m) => m.id != assignment.memberId)
+        .toList();
 
     if (availableCandidates.isEmpty) {
       final l10n = AppLocalizations.of(context);
@@ -1366,9 +950,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     Text(
                       l10n?.selectSubstituteMusician ??
                           'Select Substitute Musician:',
-                      style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(ctx).textTheme.labelMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<TeamMember>(
@@ -1376,7 +959,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       isExpanded: true,
                       initialValue: selectedSubstitute,
                       decoration: InputDecoration(
-                        labelText: l10n?.substituteMusicianLabel ??
+                        labelText:
+                            l10n?.substituteMusicianLabel ??
                             'Substitute Musician',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.person_add),
@@ -1386,12 +970,12 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                         final isInLineup = alreadyAssignedIds.contains(m.id);
                         final roleNote = playsRole
                             ? (l10n?.playsRoleTag(
-                                  assignment.role.localizedShortName(context),
-                                ) ??
-                                '★ Plays ${assignment.role.shortName}')
+                                    assignment.role.localizedShortName(context),
+                                  ) ??
+                                  '★ Plays ${assignment.role.shortName}')
                             : (isInLineup
-                                ? (l10n?.inLineupTag ?? '(In Lineup)')
-                                : m.role.localizedShortName(context));
+                                  ? (l10n?.inLineupTag ?? '(In Lineup)')
+                                  : m.role.localizedShortName(context));
 
                         return DropdownMenuItem(
                           value: m,
@@ -1447,8 +1031,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       isExpanded: true,
                       initialValue: selectedStatus,
                       decoration: InputDecoration(
-                        labelText: l10n?.attendanceStatusLabel ??
-                            'Attendance Status',
+                        labelText:
+                            l10n?.attendanceStatusLabel ?? 'Attendance Status',
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.check_circle_outline),
                       ),
@@ -1479,7 +1063,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 FilledButton(
                   key: const ValueKey('confirm_replacement_btn'),
                   onPressed: () {
-                    ref.read(serviceCalendarProvider.notifier).replaceMember(
+                    ref
+                        .read(serviceCalendarProvider.notifier)
+                        .replaceMember(
                           eventId: event.id,
                           oldMemberId: assignment.memberId,
                           newMemberId: selectedSubstitute.id,
@@ -1491,8 +1077,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                       SnackBar(
                         content: Text(
                           l10n?.replacedMusicianSuccess(
-                                currentAssignedMember?.name ??
-                                    (l10n.musician),
+                                currentAssignedMember?.name ?? (l10n.musician),
                                 selectedSubstitute.name,
                                 event.formattedDate,
                               ) ??
@@ -1521,8 +1106,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   }) {
     final l10n = AppLocalizations.of(context);
     final memberName = member?.name ?? (l10n?.musician ?? 'Musician');
-    final currentMemberId = ref.read(currentMemberIdProvider);
-    final isCurrentMember = currentMemberId == assignment.memberId;
+    final isCurrentMember =
+        ref.read(currentMemberProvider)?.id == assignment.memberId;
 
     showModalBottomSheet<void>(
       context: context,
@@ -1536,9 +1121,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               children: [
                 Text(
                   '$memberName • ${assignment.role.localizedName(context)}',
-                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(ctx).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   '${event.title} (${event.formattedDate})',
@@ -1550,11 +1134,17 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 const SizedBox(height: 16),
                 if (isAdmin || isCurrentMember) ...[
                   ListTile(
-                    leading:
-                        const Icon(Icons.check_circle, color: Colors.green),
-                    title: Text(l10n?.confirmAttendance ?? 'Confirm Attendance'),
+                    leading: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                    ),
+                    title: Text(
+                      l10n?.confirmAttendance ?? 'Confirm Attendance',
+                    ),
                     onTap: () {
-                      ref.read(serviceCalendarProvider.notifier).assignMember(
+                      ref
+                          .read(serviceCalendarProvider.notifier)
+                          .assignMember(
                             eventId: event.id,
                             memberId: assignment.memberId,
                             role: assignment.role,
@@ -1577,7 +1167,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           'Flags date so admin can set a replacement',
                     ),
                     onTap: () {
-                      ref.read(serviceCalendarProvider.notifier).assignMember(
+                      ref
+                          .read(serviceCalendarProvider.notifier)
+                          .assignMember(
                             eventId: event.id,
                             memberId: assignment.memberId,
                             role: assignment.role,
@@ -1635,145 +1227,6 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     );
   }
 
-  void _showActiveUserSwitcherModal(List<TeamMember> members) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        final currentMemberId = ref.watch(currentMemberIdProvider);
-        return SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(ctx).size.height * 0.75,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)?.selectActiveProfileTitle ??
-                          'Select Active User Profile',
-                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(ctx).pop(),
-                    ),
-                  ],
-                ),
-                Text(
-                  AppLocalizations.of(context)?.switchActiveProfileDesc ??
-                      'Switch active user to preview musician permissions vs administrator capabilities.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: members.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final member = members[index];
-                      return ListTile(
-                        key: ValueKey('switch_user_${member.id}'),
-                        leading: CircleAvatar(
-                          backgroundColor: member.isAdmin
-                              ? AppTheme.amberAccent.withValues(alpha: 0.2)
-                              : Theme.of(ctx).colorScheme.primaryContainer,
-                          child: Icon(
-                            member.isAdmin ? Icons.shield : Icons.person,
-                            size: 18,
-                            color: member.isAdmin
-                                ? AppTheme.amberAccent
-                                : Theme.of(ctx).colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        title: Row(
-                          children: [
-                            Text(
-                              member.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            if (member.isAdmin) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.amberAccent
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: AppTheme.amberAccent
-                                        .withValues(alpha: 0.4),
-                                  ),
-                                ),
-                                child: Text(
-                                  AppLocalizations.of(context)?.adminRole ??
-                                      'Admin',
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.amberAccent,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        subtitle: Text(
-                          '${member.roles.map((r) => r.localizedName(context)).join(", ")} • ${member.availability.localizedName(context)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        trailing: currentMemberId == member.id
-                            ? const Icon(Icons.check_circle,
-                                color: Colors.green)
-                            : null,
-                        onTap: () {
-                          ref
-                              .read(currentMemberIdProvider.notifier)
-                              .setMemberId(member.id);
-                          Navigator.of(ctx).pop();
-                          final l10n = AppLocalizations.of(context);
-                          final roleStr = member.isAdmin
-                              ? (l10n?.administrator ?? 'Administrator')
-                              : (l10n?.musician ?? 'Musician');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                l10n?.activeUserChanged(member.name, roleStr) ??
-                                    'Active user: ${member.name} ($roleStr)',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-    );
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // RECURRING EVENT SERIES SINGLE-INSTANCE MANAGEMENT MODAL
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1821,8 +1274,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      l10n?.recurringSchedulesSubtitle ??
-                          'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.',
+                      l10n?.recurringSchedulesSubtitle ?? 'Each repetitive event is a single recurring instance. Adjust the rolling lookahead (X events ahead), or set a cutoff date to stop generating new events.',
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -1849,17 +1301,18 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           margin: const EdgeInsets.only(bottom: 12),
                           color: schedule.isActive
                               ? theme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.3)
+                                    .withValues(alpha: 0.3)
                               : theme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.1),
+                                    .withValues(alpha: 0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                             side: BorderSide(
                               color: schedule.isActive
                                   ? const Color(0xFFE5A93C)
-                                      .withValues(alpha: 0.4)
-                                  : theme.colorScheme.outlineVariant
-                                      .withValues(alpha: 0.3),
+                                        .withValues(alpha: 0.4)
+                                  : theme.colorScheme.outlineVariant.withValues(
+                                      alpha: 0.3,
+                                    ),
                               width: 1,
                             ),
                           ),
@@ -1898,11 +1351,14 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: theme
-                                            .colorScheme.surfaceContainerHighest,
+                                            .colorScheme
+                                            .surfaceContainerHighest,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        schedule.recurrence.localizedShortName(ctx),
+                                        schedule.recurrence.localizedShortName(
+                                          ctx,
+                                        ),
                                         style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
@@ -1918,7 +1374,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       onChanged: (_) {
                                         ref
                                             .read(
-                                              recurringSchedulesProvider.notifier,
+                                              recurringSchedulesProvider
+                                                  .notifier,
                                             )
                                             .toggleActive(schedule.id);
                                       },
@@ -1944,7 +1401,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.withValues(alpha: 0.15),
+                                      color: Colors.grey.withValues(
+                                        alpha: 0.15,
+                                      ),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Row(
@@ -1956,8 +1415,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         ),
                                         const SizedBox(width: 6),
                                         Text(
-                                          l10n?.schedulePausedNotice ??
-                                              'Schedule Paused — no occurrences generated',
+                                          l10n?.schedulePausedNotice ?? 'Schedule Paused — no occurrences generated',
                                           style: const TextStyle(
                                             fontSize: 11,
                                             color: Colors.grey,
@@ -1979,7 +1437,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                         children: [
                                           Text(
                                             l10n?.showLabel ?? 'Show: ',
-                                            style: const TextStyle(fontSize: 12),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
                                           ),
                                           DropdownButton<int>(
                                             key: ValueKey(
@@ -1991,31 +1451,36 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                               DropdownMenuItem(
                                                 value: 2,
                                                 child: Text(
-                                                  l10n?.aheadCount(2) ?? '2 ahead',
+                                                  l10n?.aheadCount(2) ??
+                                                      '2 ahead',
                                                 ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 4,
                                                 child: Text(
-                                                  l10n?.aheadCount(4) ?? '4 ahead',
+                                                  l10n?.aheadCount(4) ??
+                                                      '4 ahead',
                                                 ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 6,
                                                 child: Text(
-                                                  l10n?.aheadCount(6) ?? '6 ahead',
+                                                  l10n?.aheadCount(6) ??
+                                                      '6 ahead',
                                                 ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 8,
                                                 child: Text(
-                                                  l10n?.aheadCount(8) ?? '8 ahead',
+                                                  l10n?.aheadCount(8) ??
+                                                      '8 ahead',
                                                 ),
                                               ),
                                               DropdownMenuItem(
                                                 value: 12,
                                                 child: Text(
-                                                  l10n?.aheadCount(12) ?? '12 ahead',
+                                                  l10n?.aheadCount(12) ??
+                                                      '12 ahead',
                                                 ),
                                               ),
                                             ],
@@ -2056,7 +1521,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                           label: Text(
                                             l10n?.disableSinceDate ??
                                                 'Disable Since Date...',
-                                            style: const TextStyle(fontSize: 12),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
                                           ),
                                           onPressed: () async {
                                             final now = DateTime.now();
@@ -2163,62 +1630,27 @@ class _TeamPageState extends ConsumerState<TeamPage> {
     );
   }
 
-  static IconData _getRoleIcon(TeamRole role) {
-    return switch (role) {
-      TeamRole.director => Icons.menu_book,
-      TeamRole.leadVocal => Icons.mic,
-      TeamRole.backingVocal => Icons.mic_none,
-      TeamRole.acousticGuitar => Icons.music_note,
-      TeamRole.electricGuitar => Icons.bolt,
-      TeamRole.bass => Icons.graphic_eq,
-      TeamRole.keys => Icons.piano,
-      TeamRole.synth => Icons.tune,
-      TeamRole.drums => Icons.album_outlined,
-      TeamRole.sound => Icons.headphones,
-    };
-  }
+  static IconData _getRoleIcon(TeamRole role) => teamRoleIcon(role);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final members = ref.watch(teamMembersProvider);
     final events = ref.watch(serviceCalendarProvider);
-    final currentMember = ref.watch(currentMemberProvider);
     final isAdmin = ref.watch(isCurrentUserAdminProvider);
 
     final upcomingEvents = events.where((e) => e.isUpcoming).toList()
       ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
 
-    final nextEvent = upcomingEvents.isNotEmpty ? upcomingEvents.first : null;
-
-    final scheduledCount = nextEvent != null
-        ? nextEvent.assignments
-              .where((a) => a.status != AssignmentStatus.declined)
-              .length
-        : 0;
-
-    final availableCount = members.length - scheduledCount;
     final l10n = AppLocalizations.of(context);
+    final showCalendar = _selectedTabIndex == 1;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          l10n?.worshipTeamTitle ?? 'Worship Team & Band',
-          overflow: TextOverflow.ellipsis,
+        title: OrganizationSwitcherButton(
+          fallbackTitle: l10n?.worshipTeamTitle ?? 'Worship Team & Band',
         ),
         actions: [
-          IconButton(
-            key: const ValueKey('active_user_switcher_btn'),
-            icon: Icon(
-              isAdmin ? Icons.shield_outlined : Icons.person_outline,
-              color: isAdmin ? AppTheme.amberAccent : theme.colorScheme.primary,
-            ),
-            tooltip: currentMember != null
-                ? (l10n?.activeProfileTooltip(currentMember.name, isAdmin ? 'Admin' : 'Musician') ??
-                    'Active Profile: ${currentMember.name} (${isAdmin ? 'Admin' : 'Musician'})')
-                : (l10n?.switchActiveProfileTooltip ?? 'Switch active user profile'),
-            onPressed: () => _showActiveUserSwitcherModal(members),
-          ),
           if (isAdmin) ...[
             Consumer(
               builder: (context, ref, _) {
@@ -2238,22 +1670,20 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     ),
                     tooltip: alertCount > 0
                         ? (l10n?.coverageAlertsCountTooltip(alertCount) ??
-                            '$alertCount cover alert${alertCount > 1 ? 's' : ''}')
-                        : (l10n?.coverageAlertsTooltip ?? 'Musician Coverage Alerts'),
+                              '$alertCount cover alert${alertCount > 1 ? 's' : ''}')
+                        : (l10n?.coverageAlertsTooltip ??
+                              'Musician Coverage Alerts'),
                     onPressed: () => _showAdminAlertsModal(),
                   ),
                 );
               },
             ),
-            IconButton(
-              icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
-              tooltip: _selectedTabIndex == 0
-                  ? (l10n?.addTeamMemberTooltip ?? 'Add team member')
-                  : (l10n?.addServiceEventTooltip ?? 'Add service event'),
-              onPressed: _selectedTabIndex == 0
-                  ? () => _showMemberDialog()
-                  : () => _showServiceDialog(),
-            ),
+            if (showCalendar)
+              IconButton(
+                icon: const Icon(Icons.event),
+                tooltip: l10n?.addServiceEventTooltip ?? 'Add service event',
+                onPressed: () => _showServiceDialog(),
+              ),
           ],
         ],
       ),
@@ -2269,12 +1699,16 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   ButtonSegment(
                     value: 0,
                     icon: const Icon(Icons.people_outline),
-                    label: Text('${l10n?.teamRosterTab ?? "Team Roster"} (${members.length})'),
+                    label: Text(
+                      '${l10n?.teamRosterTab ?? "Team Roster"} (${members.length})',
+                    ),
                   ),
                   ButtonSegment(
                     value: 1,
                     icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text('${l10n?.bandCalendarTab ?? "Band Calendar"} (${upcomingEvents.length})'),
+                    label: Text(
+                      '${l10n?.bandCalendarTab ?? "Band Calendar"} (${upcomingEvents.length})',
+                    ),
                   ),
                 ],
                 selected: {_selectedTabIndex},
@@ -2287,542 +1721,25 @@ class _TeamPageState extends ConsumerState<TeamPage> {
 
           // ── Active Tab View ──
           Expanded(
-            child: _selectedTabIndex == 0
-                ? _buildRosterView(
-                    theme: theme,
-                    members: members,
-                    events: upcomingEvents,
-                    nextEvent: nextEvent,
-                    scheduledCount: scheduledCount,
-                    availableCount: availableCount < 0 ? 0 : availableCount,
-                  )
-                : _buildCalendarView(
+            child: showCalendar
+                ? _buildCalendarView(
                     theme: theme,
                     members: members,
                     events: upcomingEvents,
                     isAdmin: isAdmin,
-                  ),
+                  )
+                : const RosterView(),
           ),
         ],
       ),
-      floatingActionButton: isAdmin
+      floatingActionButton: isAdmin && showCalendar
           ? FloatingActionButton.extended(
-              tooltip: _selectedTabIndex == 0
-                  ? (l10n?.addTeamMemberTooltip ?? 'Add team member')
-                  : (l10n?.addServiceEventTooltip ?? 'Add service event'),
-              onPressed: _selectedTabIndex == 0
-                  ? () => _showMemberDialog()
-                  : () => _showServiceDialog(),
-              icon: Icon(_selectedTabIndex == 0 ? Icons.person_add : Icons.event),
-              label: Text(_selectedTabIndex == 0
-                  ? (l10n?.addMusician ?? 'Add Member')
-                  : (l10n?.addService ?? 'New Service')),
+              tooltip: l10n?.addServiceEventTooltip ?? 'Add service event',
+              onPressed: () => _showServiceDialog(),
+              icon: const Icon(Icons.event),
+              label: Text(l10n?.addService ?? 'New Service'),
             )
           : null,
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ROSTER VIEW
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  String _getFilterLabel(String filter, AppLocalizations? l10n) {
-    return switch (filter) {
-      'All' => l10n?.filterAll ?? 'All',
-      'Scheduled' => l10n?.filterScheduled ?? 'Scheduled',
-      'Vocals' => l10n?.filterVocals ?? 'Vocals',
-      'Band' => l10n?.filterBand ?? 'Band',
-      _ => filter,
-    };
-  }
-
-  Widget _buildRosterView({
-    required ThemeData theme,
-    required List<TeamMember> members,
-    required List<ServiceEvent> events,
-    required ServiceEvent? nextEvent,
-    required int scheduledCount,
-    required int availableCount,
-  }) {
-    final groups = ref.watch(teamGroupsProvider);
-    final groupMap = {for (final g in groups) g.id: g};
-
-    final filteredMembers = members.where((m) {
-      if (_selectedFilter == 'All') return true;
-      if (_selectedFilter == 'Vocals') {
-        return m.hasVocalRole || m.vocalRange != VocalTessitura.none;
-      }
-      if (_selectedFilter == 'Band') {
-        return m.hasInstrumentRole;
-      }
-      if (_selectedFilter == 'Scheduled') {
-        return events.any(
-          (e) => e.assignments.any(
-            (a) => a.memberId == m.id && a.status != AssignmentStatus.declined,
-          ),
-        );
-      }
-      if (_selectedFilter.startsWith('group:')) {
-        final targetGroupId = _selectedFilter.substring(6);
-        return m.groupIds.contains(targetGroupId);
-      }
-      return true;
-    }).toList();
-
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      children: [
-        // Summary Status Card
-        Card(
-          elevation: 0,
-          margin: const EdgeInsets.only(bottom: 12),
-          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SummaryStat(
-                    count: '${members.length}',
-                    label: AppLocalizations.of(context)?.totalRoster ?? 'Total Roster',
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                Expanded(
-                  child: _SummaryStat(
-                    count: '$scheduledCount',
-                    label: nextEvent != null
-                        ? '${AppLocalizations.of(context)?.nextServicePrefix ?? "Next:"} ${nextEvent.formattedDate}'
-                        : (AppLocalizations.of(context)?.scheduledLabel ?? 'Scheduled'),
-                    color: Colors.green,
-                  ),
-                ),
-                Expanded(
-                  child: _SummaryStat(
-                    count: '$availableCount',
-                    label: AppLocalizations.of(context)?.availableLabel ?? 'Available',
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // Filter Chips (Role Categories & Rotating Arrangement Groups)
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final filter in ['All', 'Scheduled', 'Vocals', 'Band'])
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    key: ValueKey('filter_chip_${filter.toLowerCase()}'),
-                    label: Text(_getFilterLabel(filter, AppLocalizations.of(context))),
-                    selected: _selectedFilter == filter,
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() => _selectedFilter = filter);
-                      }
-                    },
-                  ),
-                ),
-              for (final group in groups)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    key: ValueKey('filter_chip_group_${group.id}'),
-                    avatar: CircleAvatar(
-                      radius: 5,
-                      backgroundColor: Color(group.colorValue),
-                    ),
-                    label: Text(group.name),
-                    selected: _selectedFilter == 'group:${group.id}',
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() => _selectedFilter = 'group:${group.id}');
-                      }
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Member Cards
-        if (members.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.amberAccent.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.groups_outlined,
-                      size: 40,
-                      color: AppTheme.amberAccent,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)?.noMembersInRoster ??
-                        'No Team Members Yet',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context)?.noMembersInRosterSubtitle ??
-                        'Tap + to add band musicians, or enable Demo Mode in Settings to view sample team data.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      FilledButton.icon(
-                        icon: const Icon(Icons.person_add, size: 18),
-                        label: Text(
-                          AppLocalizations.of(context)?.addMusician ?? 'Add Member',
-                        ),
-                        onPressed: () => _showMemberDialog(),
-                      ),
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.science_outlined, size: 18),
-                        label: Text(
-                          AppLocalizations.of(context)?.enableDemoModeAction ??
-                              'Enable Demo Mode',
-                        ),
-                        onPressed: () {
-                          ref.read(demoModeProvider.notifier).setDemoMode(true);
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          )
-        else if (filteredMembers.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(32),
-            child: Center(
-              child: Text(
-                AppLocalizations.of(context)?.noMembersMatchFilter ??
-                    'No team members match this filter.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          )
-        else
-          for (final member in filteredMembers)
-            _buildMemberCard(
-              theme: theme,
-              member: member,
-              events: events,
-              nextEvent: nextEvent,
-              groupMap: groupMap,
-            ),
-
-        const SizedBox(height: 64),
-      ],
-    );
-  }
-
-  Widget _buildMemberCard({
-    required ThemeData theme,
-    required TeamMember member,
-    required List<ServiceEvent> events,
-    required ServiceEvent? nextEvent,
-    required Map<String, TeamGroup> groupMap,
-  }) {
-    // Find next assignment for this member
-    ServiceAssignment? nextAssignment;
-    ServiceEvent? assignedEvent;
-
-    for (final e in events) {
-      final match = e.assignments.where((a) => a.memberId == member.id);
-      if (match.isNotEmpty) {
-        nextAssignment = match.first;
-        assignedEvent = e;
-        break;
-      }
-    }
-
-    final isScheduled = nextAssignment != null;
-    final statusColor = isScheduled ? nextAssignment.status.color : Colors.blue;
-    final statusText = isScheduled
-        ? nextAssignment.status.localizedName(context)
-        : (AppLocalizations.of(context)?.availableStatus ?? 'Available');
-
-    final initials = member.name
-        .split(' ')
-        .map((w) => w.isNotEmpty ? w[0] : '')
-        .take(2)
-        .join()
-        .toUpperCase();
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      child: ListTile(
-        onTap: () => _showMemberDialog(memberToEdit: member),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(
-            initials.isEmpty ? '?' : initials,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onPrimaryContainer,
-            ),
-          ),
-        ),
-        title: Text(
-          member.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            // Assigned roles badges
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (member.isAdmin)
-                  Container(
-                    key: ValueKey('admin_badge_${member.id}'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.amberAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: AppTheme.amberAccent.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.shield_outlined,
-                          size: 11,
-                          color: AppTheme.amberAccent,
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          AppLocalizations.of(context)?.adminRole ?? 'Admin',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.amberAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                for (final role in member.roles)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      role.localizedName(context),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                if (member.vocalRange != VocalTessitura.none)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5A93C).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: const Color(0xFFE5A93C).withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      member.vocalRange.rangeLabel,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFE5A93C),
-                      ),
-                    ),
-                  ),
-                for (final groupId in member.groupIds)
-                  if (groupMap.containsKey(groupId))
-                    Container(
-                      key: ValueKey('member_group_badge_${member.id}_$groupId'),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(groupMap[groupId]!.colorValue)
-                            .withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Color(groupMap[groupId]!.colorValue)
-                              .withValues(alpha: 0.4),
-                        ),
-                      ),
-                      child: Text(
-                        groupMap[groupId]!.name.split(' (').first,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Color(groupMap[groupId]!.colorValue),
-                        ),
-                      ),
-                    ),
-              ],
-            ),
-            // Upcoming date info
-            const SizedBox(height: 4),
-            if (isScheduled && assignedEvent != null)
-              Text(
-                '📅 ${AppLocalizations.of(context)?.nextServicePrefix ?? "Next:"} ${assignedEvent.formattedDate} (${nextAssignment.role.localizedName(context)})',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
-              )
-            else
-              Text(
-                AppLocalizations.of(context)?.notScheduledForServices ??
-                    'Not currently scheduled for upcoming services',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Calendar-driven scheduling badge
-            InkWell(
-              key: ValueKey('member_status_${member.id}'),
-              onTap: () {
-                ref
-                    .read(serviceCalendarProvider.notifier)
-                    .cycleMemberStatusForNextService(member.id, member.role);
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: statusColor),
-                ),
-                child: Text(
-                  statusText,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
-                ),
-              ),
-            ),
-            PopupMenuButton<String>(
-              key: ValueKey('member_menu_${member.id}'),
-              icon: const Icon(Icons.more_vert, size: 20),
-              tooltip: AppLocalizations.of(context)?.memberOptionsTooltip ??
-                  'Member options',
-              onSelected: (val) {
-                if (val == 'edit') {
-                  _showMemberDialog(memberToEdit: member);
-                } else if (val == 'schedule' && nextEvent != null) {
-                  _showAssignMemberDialog(nextEvent);
-                } else if (val == 'delete') {
-                  ref
-                      .read(teamMembersProvider.notifier)
-                      .removeMember(member.id);
-                }
-              },
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      const Icon(Icons.edit_outlined, size: 18),
-                      const SizedBox(width: 8),
-                      Text(AppLocalizations.of(context)?.editMember ?? 'Edit Member'),
-                    ],
-                  ),
-                ),
-                if (nextEvent != null)
-                  PopupMenuItem(
-                    value: 'schedule',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Text(AppLocalizations.of(context)?.scheduleForService ?? 'Schedule for Service'),
-                      ],
-                    ),
-                  ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Text(
-                        AppLocalizations.of(context)?.removeMember ??
-                            'Remove Member',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -2844,9 +1761,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       children: [
         // Admin Coverage Alerts Banner (Attendance Gaps / Missing Musicians)
         if (isAdmin)
-          AdminScheduleAlertsBanner(
-            onFindCover: _handleAlertFindCover,
-          ),
+          AdminScheduleAlertsBanner(onFindCover: _handleAlertFindCover),
 
         // Quick Actions Bar
         Card(
@@ -2872,7 +1787,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   OutlinedButton.icon(
                     key: const ValueKey('recurring_schedules_btn'),
                     icon: const Icon(Icons.repeat, size: 16),
-                    label: Text(AppLocalizations.of(context)?.recurringSchedules ?? 'Recurring Schedules'),
+                    label: Text(
+                      AppLocalizations.of(context)?.recurringSchedules ??
+                          'Recurring Schedules',
+                    ),
                     onPressed: _showRecurringSeriesModal,
                   )
                 else
@@ -2922,12 +1840,18 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 12),
-                  Text(AppLocalizations.of(context)?.noUpcomingServices ?? 'No upcoming services scheduled.'),
+                  Text(
+                    AppLocalizations.of(context)?.noUpcomingServices ??
+                        'No upcoming services scheduled.',
+                  ),
                   const SizedBox(height: 8),
                   if (isAdmin)
                     FilledButton.icon(
                       icon: const Icon(Icons.add),
-                      label: Text(AppLocalizations.of(context)?.scheduleFirstService ?? 'Schedule First Service'),
+                      label: Text(
+                        AppLocalizations.of(context)?.scheduleFirstService ??
+                            'Schedule First Service',
+                      ),
                       onPressed: () => _showServiceDialog(),
                     ),
                 ],
@@ -3095,7 +2019,8 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                AppLocalizations.of(context)?.nextServiceBadge ??
+                                AppLocalizations.of(context)
+                                        ?.nextServiceBadge ??
                                     'NEXT SERVICE',
                                 style: const TextStyle(
                                   fontSize: 9,
@@ -3285,7 +2210,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                         ),
                         icon: const Icon(Icons.group_add_outlined, size: 16),
-                        label: Text(AppLocalizations.of(context)?.assignGroup ?? 'Assign Group'),
+                        label: Text(
+                          AppLocalizations.of(context)?.assignGroup ??
+                              'Assign Group',
+                        ),
                         onPressed: () => _showAssignGroupDialog(event),
                       ),
                       TextButton.icon(
@@ -3295,7 +2223,10 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                         ),
                         icon: const Icon(Icons.person_add_alt_1, size: 16),
-                        label: Text(AppLocalizations.of(context)?.assignMusician ?? 'Assign Musician'),
+                        label: Text(
+                          AppLocalizations.of(context)?.assignMusician ??
+                              'Assign Musician',
+                        ),
                         onPressed: () => _showAssignMemberDialog(event),
                       ),
                     ],
@@ -3308,8 +2239,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  l10n?.noMusiciansAssignedYet ??
-                      'No musicians assigned yet. Tap "Assign Musician" to schedule band members.',
+                  l10n?.noMusiciansAssignedYet ?? 'No musicians assigned yet. Tap "Assign Musician" to schedule band members.',
                   style: TextStyle(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
@@ -3325,8 +2255,11 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                   for (final assignment in event.assignments) ...[
                     () {
                       final member = memberMap[assignment.memberId];
-                      final memberName = member?.name ?? (l10n?.musician ?? 'Musician');
-                      final roleName = assignment.role.localizedShortName(context);
+                      final memberName =
+                          member?.name ?? (l10n?.musician ?? 'Musician');
+                      final roleName = assignment.role.localizedShortName(
+                        context,
+                      );
                       final isDeclined =
                           assignment.status == AssignmentStatus.declined;
 
@@ -3362,8 +2295,9 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                                 : FontWeight.normal,
                           ),
                         ),
-                        deleteIcon:
-                            isAdmin ? const Icon(Icons.close, size: 14) : null,
+                        deleteIcon: isAdmin
+                            ? const Icon(Icons.close, size: 14)
+                            : null,
                         onDeleted: isAdmin
                             ? () {
                                 ref
@@ -3418,43 +2352,6 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SummaryStat extends StatelessWidget {
-  const _SummaryStat({
-    required this.count,
-    required this.label,
-    required this.color,
-  });
-
-  final String count;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          count,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 11),
-        ),
-      ],
     );
   }
 }

@@ -6,13 +6,6 @@ import 'package:battuta/features/team/presentation/providers/team_provider.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MockTeamMembersNotifier extends TeamMembersNotifier {
-  MockTeamMembersNotifier(this._initial);
-  final List<TeamMember> _initial;
-  @override
-  List<TeamMember> build() => _initial;
-}
-
 class MockServiceCalendarNotifier extends ServiceCalendarNotifier {
   MockServiceCalendarNotifier(this._initial);
   final List<ServiceEvent> _initial;
@@ -22,19 +15,16 @@ class MockServiceCalendarNotifier extends ServiceCalendarNotifier {
 
 void main() {
   group('ScheduleAlertsProvider', () {
-    test('empty alerts when all upcoming assignments are confirmed and available', () {
+    test('empty alerts when all upcoming assignments are confirmed', () {
       final container = ProviderContainer(
         overrides: [
-          teamMembersProvider.overrideWith(
-            () => MockTeamMembersNotifier([
-              const TeamMember(
-                id: 'member-1',
-                name: 'Sarah',
-                roles: [TeamRole.leadVocal],
-                availability: AvailabilityStatus.available,
-              ),
-            ]),
-          ),
+          teamMembersProvider.overrideWithValue([
+            const TeamMember(
+              id: 'member-1',
+              name: 'Sarah',
+              instruments: ['leadVocal'],
+            ),
+          ]),
           serviceCalendarProvider.overrideWith(
             () => MockServiceCalendarNotifier([
               ServiceEvent(
@@ -66,16 +56,13 @@ void main() {
       final upcomingDate = DateTime.now().add(const Duration(days: 3));
       final container = ProviderContainer(
         overrides: [
-          teamMembersProvider.overrideWith(
-            () => MockTeamMembersNotifier([
-              const TeamMember(
-                id: 'member-1',
-                name: 'David Chen',
-                roles: [TeamRole.keys],
-                availability: AvailabilityStatus.available,
-              ),
-            ]),
-          ),
+          teamMembersProvider.overrideWithValue([
+            const TeamMember(
+              id: 'member-1',
+              name: 'David Chen',
+              instruments: ['keys'],
+            ),
+          ]),
           serviceCalendarProvider.overrideWith(
             () => MockServiceCalendarNotifier([
               ServiceEvent(
@@ -110,88 +97,49 @@ void main() {
       expect(alert.reason, contains("Can't attend — missing cover for Keys"));
     });
 
-    test('generates alert when member general availability is unavailable', () {
-      final upcomingDate = DateTime.now().add(const Duration(days: 1));
-      final container = ProviderContainer(
-        overrides: [
-          teamMembersProvider.overrideWith(
-            () => MockTeamMembersNotifier([
-              const TeamMember(
-                id: 'member-2',
-                name: 'Marcus Miller',
-                roles: [TeamRole.bass],
-                availability: AvailabilityStatus.unavailable,
-              ),
-            ]),
-          ),
-          serviceCalendarProvider.overrideWith(
-            () => MockServiceCalendarNotifier([
-              ServiceEvent(
-                id: 'event-2',
-                title: 'Midweek Rehearsal',
-                dateTime: upcomingDate,
-                assignments: const [
-                  ServiceAssignment(
-                    memberId: 'member-2',
-                    role: TeamRole.bass,
-                    status: AssignmentStatus.confirmed,
-                  ),
-                ],
-              ),
-            ]),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      final alerts = container.read(adminScheduleAlertsProvider);
-      expect(alerts.length, equals(1));
-      expect(alerts.first.memberName, equals('Marcus Miller'));
-      expect(alerts.first.reason, contains('Unavailable — may need substitute'));
-    });
-
-    test('dismissing an alert excludes it from the reactive alerts provider', () {
-      final upcomingDate = DateTime.now().add(const Duration(days: 2));
-      final container = ProviderContainer(
-        overrides: [
-          teamMembersProvider.overrideWith(
-            () => MockTeamMembersNotifier([
+    test(
+      'dismissing an alert excludes it from the reactive alerts provider',
+      () {
+        final upcomingDate = DateTime.now().add(const Duration(days: 2));
+        final container = ProviderContainer(
+          overrides: [
+            teamMembersProvider.overrideWithValue([
               const TeamMember(
                 id: 'member-1',
                 name: 'Sarah',
-                roles: [TeamRole.leadVocal],
+                instruments: ['leadVocal'],
               ),
             ]),
-          ),
-          serviceCalendarProvider.overrideWith(
-            () => MockServiceCalendarNotifier([
-              ServiceEvent(
-                id: 'event-1',
-                title: 'Sunday Worship',
-                dateTime: upcomingDate,
-                assignments: const [
-                  ServiceAssignment(
-                    memberId: 'member-1',
-                    role: TeamRole.leadVocal,
-                    status: AssignmentStatus.declined,
-                  ),
-                ],
-              ),
-            ]),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
+            serviceCalendarProvider.overrideWith(
+              () => MockServiceCalendarNotifier([
+                ServiceEvent(
+                  id: 'event-1',
+                  title: 'Sunday Worship',
+                  dateTime: upcomingDate,
+                  assignments: const [
+                    ServiceAssignment(
+                      memberId: 'member-1',
+                      role: TeamRole.leadVocal,
+                      status: AssignmentStatus.declined,
+                    ),
+                  ],
+                ),
+              ]),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      expect(container.read(pendingAlertCountProvider), equals(1));
+        expect(container.read(pendingAlertCountProvider), equals(1));
 
-      // Dismiss the alert
-      container
-          .read(dismissedAlertsProvider.notifier)
-          .dismiss('alert_event-1_member-1');
+        // Dismiss the alert
+        container
+            .read(dismissedAlertsProvider.notifier)
+            .dismiss('alert_event-1_member-1');
 
-      expect(container.read(adminScheduleAlertsProvider), isEmpty);
-      expect(container.read(pendingAlertCountProvider), equals(0));
-    });
+        expect(container.read(adminScheduleAlertsProvider), isEmpty);
+        expect(container.read(pendingAlertCountProvider), equals(0));
+      },
+    );
   });
 }

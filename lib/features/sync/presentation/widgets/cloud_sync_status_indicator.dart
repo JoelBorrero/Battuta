@@ -5,15 +5,16 @@
 /// interactive bottom sheet for status review and configuration.
 library;
 
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
-import 'package:battuta/features/settings/presentation/widgets/supabase_auth_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
 import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class CloudSyncStatusIndicator extends ConsumerWidget {
   const CloudSyncStatusIndicator({super.key, this.compact = true});
@@ -37,14 +38,17 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
         Icons.cloud_done_outlined,
         stageAmber,
         syncState.lastSyncedAt != null
-            ? (l10n?.cloudSyncedWithTimeTooltip(_formatTime(syncState.lastSyncedAt!)) ??
-                'Cloud synced (${_formatTime(syncState.lastSyncedAt!)})')
+            ? (l10n?.cloudSyncedWithTimeTooltip(
+                    _formatTime(syncState.lastSyncedAt!),
+                  ) ??
+                  'Cloud synced (${_formatTime(syncState.lastSyncedAt!)})')
             : (l10n?.cloudSyncedTooltip ?? 'Cloud synced'),
       ),
       CloudSyncStatus.offline => (
         Icons.cloud_off_outlined,
         Colors.grey,
-        l10n?.offlineSQLiteTooltip ?? 'Offline — working with local SQLite database',
+        l10n?.offlineSQLiteTooltip ??
+            'Offline — working with local SQLite database',
       ),
       CloudSyncStatus.error => (
         Icons.cloud_sync_outlined,
@@ -79,9 +83,7 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
-      onTap: syncState.isSyncing
-          ? null
-          : () => _handleSyncTap(context, ref),
+      onTap: syncState.isSyncing ? null : () => _handleSyncTap(context, ref),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
@@ -103,10 +105,10 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
               syncState.isSyncing
                   ? (l10n?.syncingStatus ?? 'Syncing…')
                   : syncState.status == CloudSyncStatus.success
-                      ? (l10n?.syncedStatusLabel ?? 'Synced')
-                      : syncState.isOffline
-                          ? (l10n?.offlineStatusLabel ?? 'Offline')
-                          : (l10n?.syncNow ?? 'Sync Now'),
+                  ? (l10n?.syncedStatusLabel ?? 'Synced')
+                  : syncState.isOffline
+                  ? (l10n?.offlineStatusLabel ?? 'Offline')
+                  : (l10n?.syncNow ?? 'Sync Now'),
               style: TextStyle(
                 color: color,
                 fontSize: 13,
@@ -137,7 +139,9 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Text(l10n?.syncingChangesTooltip ?? 'Syncing changes with Supabase…'),
+            Text(
+              l10n?.syncingChangesTooltip ?? 'Syncing changes with Supabase…',
+            ),
           ],
         ),
         duration: const Duration(milliseconds: 1500),
@@ -155,11 +159,18 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.cloud_done_outlined, color: Colors.white, size: 20),
+              const Icon(
+                Icons.cloud_done_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  l10n?.cloudSyncSuccess(result.pushedCount, result.pulledCount) ??
+                  l10n?.cloudSyncSuccess(
+                        result.pushedCount,
+                        result.pulledCount,
+                      ) ??
                       'Cloud synced successfully (${result.pushedCount} pushed, ${result.pulledCount} pulled)',
                 ),
               ),
@@ -225,7 +236,9 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
                       result.isOffline
                           ? Icons.cloud_off_outlined
                           : Icons.cloud_sync_outlined,
-                      color: result.isOffline ? Colors.orange : AppTheme.stageRed,
+                      color: result.isOffline
+                          ? Colors.orange
+                          : AppTheme.stageRed,
                       size: 24,
                     ),
                     const SizedBox(width: 12),
@@ -247,12 +260,14 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: (result.isOffline ? Colors.orange : AppTheme.stageRed)
-                        .withValues(alpha: 0.1),
+                    color:
+                        (result.isOffline ? Colors.orange : AppTheme.stageRed)
+                            .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: (result.isOffline ? Colors.orange : AppTheme.stageRed)
-                          .withValues(alpha: 0.3),
+                      color:
+                          (result.isOffline ? Colors.orange : AppTheme.stageRed)
+                              .withValues(alpha: 0.3),
                       width: 1,
                     ),
                   ),
@@ -272,9 +287,9 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
                       }
                       return result.isOffline
                           ? (l10n?.cloudOfflineMode ??
-                              'Offline mode active. All changes are saved safely to local SQLite.')
+                                'Offline mode active. All changes are saved safely to local SQLite.')
                           : (l10n?.cloudSignInRequired ??
-                              'Please sign in to Supabase to enable cloud sync.');
+                                'Please sign in to Supabase to enable cloud sync.');
                     }(),
                     style: TextStyle(
                       fontSize: 13,
@@ -299,7 +314,7 @@ class CloudSyncStatusIndicator extends ConsumerWidget {
                         ),
                         onPressed: () {
                           Navigator.of(sheetContext).pop();
-                          SupabaseAuthDialog.show(context);
+                          context.push(AppRoutes.signIn);
                         },
                       ),
                     OutlinedButton.icon(

@@ -2,6 +2,7 @@
 library;
 
 import 'package:battuta/core/database/database_providers.dart';
+import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/organizations/data/organization_repository_impl.dart';
 import 'package:battuta/features/organizations/data/organizations_local_cache.dart';
@@ -15,9 +16,35 @@ import 'package:battuta/features/organizations/domain/repositories/organization_
 import 'package:battuta/features/organizations/domain/repositories/schedule_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// The data layer only ends a session for a deactivated account, so the
+/// welcome screen is told why.
+class _NoticingAccountSession implements AccountSession {
+  _NoticingAccountSession(this._inner, this._onDeactivated);
+
+  final AccountSession _inner;
+  final void Function() _onDeactivated;
+
+  @override
+  String? get userId => _inner.userId;
+
+  @override
+  Stream<String?> get userIdChanges => _inner.userIdChanges;
+
+  @override
+  Future<void> signOut() {
+    _onDeactivated();
+    return _inner.signOut();
+  }
+}
+
 final accountSessionProvider = Provider<AccountSession>((ref) {
   final manager = ref.watch(supabaseClientManagerProvider);
-  return SupabaseAccountSession(() => manager.client);
+  return _NoticingAccountSession(
+    SupabaseAccountSession(() => manager.client),
+    () => ref
+        .read(accountNoticeProvider.notifier)
+        .show(AccountNotice.deactivated),
+  );
 });
 
 final organizationsLocalCacheProvider = Provider<OrganizationsLocalCache>((
@@ -60,7 +87,7 @@ final scheduleRepositoryProvider = Provider<ScheduleRepository>(
 );
 
 /// Follows the session: clears the previous account's cache, refreshes and
-/// applies realtime changes. Nothing starts it yet; the app shell does in 005.
+/// applies realtime changes. `accountLifecycleProvider` starts it on sign-in.
 final organizationsSyncCoordinatorProvider =
     Provider<OrganizationsSyncCoordinator>((ref) {
       final coordinator = OrganizationsSyncCoordinator(

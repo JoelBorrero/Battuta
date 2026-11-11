@@ -5,6 +5,7 @@
 /// in the widget tree.
 library;
 
+import 'package:battuta/app/account_lifecycle.dart';
 import 'package:battuta/app/config/app_constants.dart';
 import 'package:battuta/app/design_system/brand/brand_intro.dart';
 import 'package:battuta/app/localization/locale_provider.dart';
@@ -12,7 +13,6 @@ import 'package:battuta/app/routes/app_router.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
-import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +25,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// - System-default theme mode (respects OS setting)
 /// - Internationalization (English & Spanish, default system language)
 /// - A one-shot brand intro (the "downbeat") over the first frame
-/// - Automated background Supabase connection & synchronization on app launch
+/// - Supabase connection on launch; the data layer starts on sign-in
+///   (see `accountLifecycleProvider`)
 class BattutaApp extends ConsumerStatefulWidget {
   const BattutaApp({super.key});
 
@@ -38,17 +39,16 @@ class _BattutaAppState extends ConsumerState<BattutaApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _autoConnectAndSync();
+      _connect();
     });
   }
 
-  Future<void> _autoConnectAndSync() async {
+  Future<void> _connect() async {
     try {
       final clientManager = ref.read(supabaseClientManagerProvider);
       if (!clientManager.isInitialized) {
         await clientManager.initialize();
       }
-      await ref.read(cloudSyncProvider.notifier).triggerSync();
     } catch (_) {
       // Invariant: Offline-first resilience; network/credential issues never crash startup
     }
@@ -56,6 +56,7 @@ class _BattutaAppState extends ConsumerState<BattutaApp> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(accountLifecycleProvider);
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(appLocaleProvider);

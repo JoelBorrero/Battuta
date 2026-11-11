@@ -6,8 +6,14 @@
 library;
 
 import 'package:battuta/app/design_system/motion/page_transitions.dart';
+import 'package:battuta/app/routes/app_redirect.dart';
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/shell/scaffold_with_nav_bar.dart';
+import 'package:battuta/features/auth/presentation/pages/create_account_page.dart';
+import 'package:battuta/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:battuta/features/auth/presentation/pages/welcome_page.dart';
+import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
+import 'package:battuta/features/auth/presentation/providers/app_entry_provider.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
@@ -32,10 +38,39 @@ part 'app_router.g.dart';
 /// [MaterialApp.router].
 @riverpod
 GoRouter appRouter(Ref ref) {
+  // Re-evaluates the redirect whenever the entry state or notice changes.
+  final refresh = ValueNotifier<int>(0);
+  ref
+    ..onDispose(refresh.dispose)
+    ..listen(appEntryProvider, (_, _) => refresh.value++)
+    ..listen(accountNoticeProvider, (_, _) => refresh.value++);
+
   return GoRouter(
     initialLocation: AppRoutes.initial,
     debugLogDiagnostics: false,
+    refreshListenable: refresh,
+    redirect: (context, state) => resolveAppRedirect(
+      entry: ref.read(appEntryProvider),
+      hasNotice: ref.read(accountNoticeProvider) != null,
+      location: state.uri.path,
+    ),
     routes: [
+      GoRoute(
+        path: AppRoutes.welcome,
+        name: 'welcome',
+        builder: (context, state) => const WelcomePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.signIn,
+        name: 'signIn',
+        builder: (context, state) => const SignInPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.createAccount,
+        name: 'createAccount',
+        builder: (context, state) => const CreateAccountPage(),
+      ),
+
       // ── Shell for bottom navigation ────────────────────────────────
       ShellRoute(
         builder: (context, state, child) => ScaffoldWithNavBar(child: child),

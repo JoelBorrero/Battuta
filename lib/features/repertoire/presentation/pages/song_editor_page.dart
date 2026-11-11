@@ -6,6 +6,7 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
 import 'package:battuta/features/repertoire/domain/entities/musical_key.dart';
@@ -13,7 +14,6 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
-import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -268,8 +268,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     final target = _sections[targetIndex];
     setState(() {
       target.chords = source.chords.map((c) => c.copyWith()).toList();
-      target.quickChordsController.text =
-          target.chords.map((c) => c.displayLabel).join(' ');
+      target.quickChordsController.text = target.chords
+          .map((c) => c.displayLabel)
+          .join(' ');
       target.lyricsController.text = source.lyricsController.text;
       target.notesController.text = source.notesController.text;
       target.repeatCount = source.repeatCount;
@@ -382,9 +383,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             content: Text(
               widget.songId != null
                   ? (l10n?.songUpdatedSuccess(song.title) ??
-                      'Song "${song.title}" updated successfully')
+                        'Song "${song.title}" updated successfully')
                   : (l10n?.songCreatedSuccess(song.title) ??
-                      'Song "${song.title}" created successfully'),
+                        'Song "${song.title}" created successfully'),
             ),
           ),
         );
@@ -440,9 +441,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
       await ref.read(repertoireProvider.notifier).deleteSong(widget.songId!);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n?.songDeletedSuccess ?? 'Song deleted'),
-          ),
+          SnackBar(content: Text(l10n?.songDeletedSuccess ?? 'Song deleted')),
         );
         try {
           context.go('/repertoire');
@@ -468,7 +467,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             const Scaffold(body: Center(child: CircularProgressIndicator())),
         error: (err, _) => Scaffold(
           appBar: AppBar(title: Text(l10n?.editSong ?? 'Edit Song')),
-          body: Center(child: Text('${l10n?.failedToLoadRepertoire ?? "Error loading song"}: $err')),
+          body: Center(
+            child: Text(
+              '${l10n?.failedToLoadRepertoire ?? "Error loading song"}: $err',
+            ),
+          ),
         ),
         data: (song) {
           if (song == null) {
@@ -491,7 +494,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? (l10n?.editSong ?? 'Edit Song') : (l10n?.newSong ?? 'New Song')),
+        title: Text(
+          isEditing
+              ? (l10n?.editSong ?? 'Edit Song')
+              : (l10n?.newSong ?? 'New Song'),
+        ),
         actions: [
           if (isEditing && isAdmin)
             IconButton(
@@ -508,7 +515,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.save),
-            label: Text(isAdmin ? (l10n?.save ?? 'Save') : (l10n?.viewOnly ?? 'View Only')),
+            label: Text(
+              isAdmin
+                  ? (l10n?.save ?? 'Save')
+                  : (l10n?.viewOnly ?? 'View Only'),
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -537,8 +548,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        l10n?.readOnlyAdminWarning ??
-                            'Read-only view: Administrator permissions are required to create or modify repertoire songs.',
+                        l10n?.readOnlyAdminWarning ?? 'Read-only view: Administrator permissions are required to create or modify repertoire songs.',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface,
@@ -560,7 +570,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return l10n?.songTitleValidation ?? 'Please enter a song title';
+                  return l10n?.songTitleValidation ??
+                      'Please enter a song title';
                 }
                 return null;
               },
@@ -577,7 +588,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
-                  return l10n?.artistValidation ?? 'Please enter an artist or composer';
+                  return l10n?.artistValidation ??
+                      'Please enter an artist or composer';
                 }
                 return null;
               },
@@ -781,8 +793,12 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               controller: _notesController,
               decoration: InputDecoration(
-                labelText: l10n?.notesInstructionsLabel ?? 'Notes / Performance Instructions',
-                hintText: l10n?.notesInstructionsHint ?? 'e.g. Capo 3rd fret, slow acoustic intro...',
+                labelText:
+                    l10n?.notesInstructionsLabel ??
+                    'Notes / Performance Instructions',
+                hintText:
+                    l10n?.notesInstructionsHint ??
+                    'e.g. Capo 3rd fret, slow acoustic intro...',
                 border: const OutlineInputBorder(),
               ),
               maxLines: 2,
@@ -794,7 +810,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n?.songSectionsCount(_sections.length) ?? 'Song Sections (${_sections.length})',
+                  l10n?.songSectionsCount(_sections.length) ??
+                      'Song Sections (${_sections.length})',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -813,7 +830,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  Text(l10n?.quickAdd ?? 'Quick add: ', style: const TextStyle(fontSize: 12)),
+                  Text(
+                    l10n?.quickAdd ?? 'Quick add: ',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   const SizedBox(width: 4),
                   for (final name in [
                     'Intro',
@@ -1140,7 +1160,7 @@ class _SectionCardState extends State<_SectionCard> {
                               label: Text('$b'),
                               selected: beats == b,
                               onSelected: (_) =>
-                                   setDialogState(() => beats = b),
+                                  setDialogState(() => beats = b),
                             ),
                           ),
                       ],
@@ -1269,7 +1289,8 @@ class _SectionCardState extends State<_SectionCard> {
                 ))
                   PopupMenuButton<_EditableSection>(
                     icon: const Icon(Icons.content_copy, size: 20),
-                    tooltip: l10n?.copyFromExistingSection ??
+                    tooltip:
+                        l10n?.copyFromExistingSection ??
                         'Copy from another section...',
                     onSelected: widget.onCopyFrom,
                     itemBuilder: (context) {
@@ -1280,17 +1301,18 @@ class _SectionCardState extends State<_SectionCard> {
                                 s.lyricsController.text.isNotEmpty,
                           )
                           .map((s) {
-                        final chordPreview = s.chords.isEmpty
-                            ? ''
-                            : ' (${s.chords.take(4).map((c) => c.displayLabel).join(' ')})';
-                        return PopupMenuItem<_EditableSection>(
-                          value: s,
-                          child: Text(
-                            '${s.nameController.text.trim().isEmpty ? "Section" : s.nameController.text.trim()}$chordPreview',
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      }).toList();
+                            final chordPreview = s.chords.isEmpty
+                                ? ''
+                                : ' (${s.chords.take(4).map((c) => c.displayLabel).join(' ')})';
+                            return PopupMenuItem<_EditableSection>(
+                              value: s,
+                              child: Text(
+                                '${s.nameController.text.trim().isEmpty ? "Section" : s.nameController.text.trim()}$chordPreview',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          })
+                          .toList();
                     },
                   ),
 
@@ -1321,16 +1343,20 @@ class _SectionCardState extends State<_SectionCard> {
                     color: AppTheme.amberAccent,
                   ),
                   label: Text(
-                    l10n?.preloadFromPrevious(previousMatch.nameController.text.trim()) ??
+                    l10n?.preloadFromPrevious(
+                          previousMatch.nameController.text.trim(),
+                        ) ??
                         'Pre-load from previous ${previousMatch.nameController.text.trim()}',
                     style: const TextStyle(fontSize: 12),
                   ),
                   onPressed: () {
                     setState(() {
-                      sec.chords =
-                          previousMatch.chords.map((c) => c.copyWith()).toList();
-                      sec.quickChordsController.text =
-                          sec.chords.map((c) => c.displayLabel).join(' ');
+                      sec.chords = previousMatch.chords
+                          .map((c) => c.copyWith())
+                          .toList();
+                      sec.quickChordsController.text = sec.chords
+                          .map((c) => c.displayLabel)
+                          .join(' ');
                       sec.lyricsController.text =
                           previousMatch.lyricsController.text;
                       sec.notesController.text =
@@ -1351,14 +1377,18 @@ class _SectionCardState extends State<_SectionCard> {
                   child: TextField(
                     controller: sec.quickChordsController,
                     decoration: InputDecoration(
-                      labelText: l10n?.chordsFieldLabel ?? 'Chords (e.g. C | G/B | Am | F)',
-                      hintText: l10n?.chordsFieldHint ??
+                      labelText:
+                          l10n?.chordsFieldLabel ??
+                          'Chords (e.g. C | G/B | Am | F)',
+                      hintText:
+                          l10n?.chordsFieldHint ??
                           'Type chord symbols separated by spaces or bars',
                       isDense: true,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.check_circle_outline),
-                        tooltip: l10n?.applyChordsTooltip ?? 'Apply chords text',
+                        tooltip:
+                            l10n?.applyChordsTooltip ?? 'Apply chords text',
                         onPressed: _applyQuickChords,
                       ),
                     ),
@@ -1408,7 +1438,8 @@ class _SectionCardState extends State<_SectionCard> {
               controller: sec.lyricsController,
               decoration: InputDecoration(
                 labelText: l10n?.sectionLyricsLabel ?? 'Section Lyrics',
-                hintText: l10n?.sectionLyricsHint ?? 'Enter lyrics line by line...',
+                hintText:
+                    l10n?.sectionLyricsHint ?? 'Enter lyrics line by line...',
                 border: const OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -1419,8 +1450,11 @@ class _SectionCardState extends State<_SectionCard> {
             TextFormField(
               controller: sec.notesController,
               decoration: InputDecoration(
-                labelText: l10n?.rehearsalNotesLabel ?? 'Rehearsal Notes (optional)',
-                hintText: l10n?.rehearsalNotesHint ?? 'e.g. Guitar solo starts here...',
+                labelText:
+                    l10n?.rehearsalNotesLabel ?? 'Rehearsal Notes (optional)',
+                hintText:
+                    l10n?.rehearsalNotesHint ??
+                    'e.g. Guitar solo starts here...',
                 isDense: true,
                 border: const OutlineInputBorder(),
               ),

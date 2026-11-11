@@ -1,14 +1,19 @@
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/core/services/api_key_storage.dart';
 import 'package:battuta/core/services/supabase_config_service.dart';
+import 'package:battuta/features/auth/presentation/pages/create_account_page.dart';
+import 'package:battuta/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 class _FakeApiKeyStorage extends ApiKeyStorage {
   @override
@@ -43,10 +48,16 @@ void main() {
     return ProviderScope(
       overrides: [
         apiKeyStorageProvider.overrideWithValue(_FakeApiKeyStorage()),
-        supabaseConfigServiceProvider.overrideWithValue(_FakeSupabaseConfigService()),
+        supabaseConfigServiceProvider.overrideWithValue(
+          _FakeSupabaseConfigService(),
+        ),
         appDatabaseProvider.overrideWithValue(db),
       ],
-      child: const MaterialApp(home: SettingsPage()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SettingsPage(),
+      ),
     );
   }
 
@@ -63,8 +74,13 @@ void main() {
 
       // Verify Cloud Synchronization section
       expect(find.text('Cloud Synchronization (Supabase)'), findsOneWidget);
-      expect(find.text('Cloud Account'), findsOneWidget);
-      expect(find.text('Not signed in — Offline SQLite active'), findsOneWidget);
+      expect(find.text('Account'), findsOneWidget);
+      expect(find.text('Sign in'), findsOneWidget);
+      expect(
+        find.text('Not signed in — Offline SQLite active'),
+        findsOneWidget,
+      );
+      await tester.scrollUntilVisible(find.text('Sync Status'), 200);
       expect(find.text('Supabase Connection'), findsOneWidget);
       expect(find.text('Sync Status'), findsOneWidget);
       expect(find.byKey(const ValueKey('sync_now_btn')), findsOneWidget);
@@ -79,69 +95,83 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Tapping Cloud Account opens SupabaseAuthDialog',
-    (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+  testWidgets('Tapping the signed-out account row opens the sign-in page', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildTestApp());
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const SettingsPage()),
+        GoRoute(path: AppRoutes.signIn, builder: (_, _) => const SignInPage()),
+        GoRoute(
+          path: AppRoutes.createAccount,
+          builder: (_, _) => const CreateAccountPage(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(_FakeApiKeyStorage()),
+          supabaseConfigServiceProvider.overrideWithValue(
+            _FakeSupabaseConfigService(),
+          ),
+          appDatabaseProvider.overrideWithValue(db),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      // Scroll to make sure tile is visible
-      await tester.drag(find.byType(ListView), const Offset(0, -100));
-      await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('supabase_account_tile')));
+    await tester.pumpAndSettle();
 
-      // Tap Cloud Account tile
-      await tester.tap(find.byKey(const ValueKey('supabase_account_tile')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('auth_email_field')), findsOneWidget);
+    expect(find.byKey(const ValueKey('auth_password_field')), findsOneWidget);
+  });
 
-      // SupabaseAuthDialog should be open
-      expect(find.text('Sign In to Supabase'), findsOneWidget);
-      expect(find.byKey(const ValueKey('supabase_auth_email_field')), findsOneWidget);
-      expect(find.byKey(const ValueKey('supabase_auth_password_field')), findsOneWidget);
+  testWidgets('Tapping Supabase Connection opens SupabaseConfigDialog', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
 
-      // Dismiss dialog
-      await tester.tap(find.text('Cancel'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Sign In to Supabase'), findsNothing);
-    },
-  );
+    await tester.pumpWidget(buildTestApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-  testWidgets(
-    'Tapping Supabase Connection opens SupabaseConfigDialog',
-    (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
+    // Scroll to make sure tile is visible
+    await tester.drag(find.byType(ListView), const Offset(0, -100));
+    await tester.pump();
 
-      await tester.pumpWidget(buildTestApp());
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+    // Tap Supabase Connection tile
+    await tester.tap(find.byKey(const ValueKey('supabase_config_tile')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-      // Scroll to make sure tile is visible
-      await tester.drag(find.byType(ListView), const Offset(0, -100));
-      await tester.pump();
+    // SupabaseConfigDialog should be open
+    expect(find.text('Supabase Project Setup'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('supabase_config_url_field')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('supabase_config_key_field')),
+      findsOneWidget,
+    );
 
-      // Tap Supabase Connection tile
-      await tester.tap(find.byKey(const ValueKey('supabase_config_tile')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      // SupabaseConfigDialog should be open
-      expect(find.text('Supabase Project Setup'), findsOneWidget);
-      expect(find.byKey(const ValueKey('supabase_config_url_field')), findsOneWidget);
-      expect(find.byKey(const ValueKey('supabase_config_key_field')), findsOneWidget);
-
-      // Dismiss dialog
-      await tester.tap(find.text('Cancel'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Supabase Project Setup'), findsNothing);
-    },
-  );
+    // Dismiss dialog
+    await tester.tap(find.text('Cancel'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Supabase Project Setup'), findsNothing);
+  });
 }

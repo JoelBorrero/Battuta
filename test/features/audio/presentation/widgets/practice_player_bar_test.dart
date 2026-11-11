@@ -1,18 +1,10 @@
-import 'package:battuta/core/services/demo_mode_provider.dart';
+import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-class _FakeDemoModeNotifier extends DemoModeNotifier {
-  _FakeDemoModeNotifier(this._initial);
-  final bool _initial;
-
-  @override
-  bool build() => _initial;
-}
 
 void main() {
   final sampleSong = Song(
@@ -29,22 +21,28 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  Widget buildSubject({bool demoMode = false}) {
+  Widget buildSubject() {
     return ProviderScope(
-      overrides: [
-        demoModeProvider.overrideWith(() => _FakeDemoModeNotifier(demoMode)),
-      ],
       child: MaterialApp(
         home: Scaffold(body: PracticePlayerBar(song: sampleSong)),
       ),
     );
   }
 
-  group('PracticePlayerBar - Empty / Non-Demo State', () {
+  /// Pumps the bar with a guide track attached to [sampleSong].
+  Future<void> pumpWithAudio(WidgetTester tester) async {
+    await tester.pumpWidget(buildSubject());
+    ProviderScope.containerOf(tester.element(find.byType(PracticePlayerBar)))
+        .read(audioPracticeControllerProvider.notifier)
+        .attachAudioSource('Way_Maker_Guide.mp3', songId: sampleSong.id);
+    await tester.pumpAndSettle();
+  }
+
+  group('PracticePlayerBar - Empty State', () {
     testWidgets(
-      'renders No Reference Audio Attached when demo mode is off and no audio attached',
+      'renders No Reference Audio Attached when no audio is attached',
       (tester) async {
-        await tester.pumpWidget(buildSubject(demoMode: false));
+        await tester.pumpWidget(buildSubject());
         await tester.pumpAndSettle();
 
         expect(find.text('No Reference Audio Attached'), findsOneWidget);
@@ -60,7 +58,7 @@ void main() {
     testWidgets(
       'attaches track via dialog and unlocks active rehearsal player',
       (tester) async {
-        await tester.pumpWidget(buildSubject(demoMode: false));
+        await tester.pumpWidget(buildSubject());
         await tester.pumpAndSettle();
 
         expect(find.text('Attach Audio'), findsOneWidget);
@@ -85,7 +83,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(buildSubject(demoMode: false));
+      await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -93,14 +91,13 @@ void main() {
     });
   });
 
-  group('PracticePlayerBar - Active / Demo Mode State', () {
+  group('PracticePlayerBar - Active State', () {
     testWidgets(
-      'renders playback title, scrub slider, and tempo metronome when demo mode is on',
+      'renders playback title, scrub slider, and tempo metronome with an attached track',
       (tester) async {
-        await tester.pumpWidget(buildSubject(demoMode: true));
-        await tester.pumpAndSettle();
+        await pumpWithAudio(tester);
 
-        expect(find.textContaining('Way Maker'), findsOneWidget);
+        expect(find.textContaining('Way_Maker_Guide.mp3'), findsOneWidget);
         expect(find.textContaining('68 BPM'), findsOneWidget);
         expect(find.byType(Slider), findsOneWidget);
         expect(find.byIcon(Icons.play_arrow), findsOneWidget);
@@ -109,8 +106,7 @@ void main() {
     );
 
     testWidgets('toggles play and pause state on button tap', (tester) async {
-      await tester.pumpWidget(buildSubject(demoMode: true));
-      await tester.pumpAndSettle();
+      await pumpWithAudio(tester);
 
       final playBtn = find.byIcon(Icons.play_arrow);
       await tester.tap(playBtn);
@@ -131,8 +127,7 @@ void main() {
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(buildSubject(demoMode: true));
-        await tester.pumpAndSettle();
+        await pumpWithAudio(tester);
 
         expect(tester.takeException(), isNull);
 

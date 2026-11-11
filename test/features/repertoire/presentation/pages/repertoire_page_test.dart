@@ -1,8 +1,8 @@
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
-import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,22 +94,25 @@ void main() {
       expect(find.text('Amazing Grace'), findsOneWidget);
     });
 
-    testWidgets('renders song creation FAB for admin user and opens add options sheet', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders song creation FAB for admin user and opens add options sheet',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.text('New Song'), findsOneWidget);
+        expect(find.byType(FloatingActionButton), findsOneWidget);
+        expect(find.text('New Song'), findsOneWidget);
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Add Song to Repertoire'), findsOneWidget);
-      expect(find.text('Import by Web URL'), findsOneWidget);
-      expect(find.text('Scan with Gemini AI (OMR)'), findsOneWidget);
-      expect(find.text('Write in Song Editor'), findsOneWidget);
-      expect(find.text('Paste Text / Backup'), findsOneWidget);
-    });
+        expect(find.text('Add Song to Repertoire'), findsOneWidget);
+        expect(find.text('Import by Web URL'), findsOneWidget);
+        expect(find.text('Scan with Gemini AI (OMR)'), findsOneWidget);
+        expect(find.text('Write in Song Editor'), findsOneWidget);
+        expect(find.text('Paste Text / Backup'), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'hides song creation FAB and shows guidance for non-admin user',

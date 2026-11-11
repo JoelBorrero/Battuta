@@ -1,8 +1,9 @@
 import 'package:battuta/core/services/api_key_storage.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
 import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
-import 'package:battuta/features/team/presentation/providers/team_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,7 +38,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
-          child: const MaterialApp(home: SettingsPage()),
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: SettingsPage(),
+          ),
         ),
       );
 
@@ -57,7 +62,10 @@ void main() {
 
       // Verify Language section
       expect(find.byKey(const ValueKey('language_tile')), findsOneWidget);
-      expect(find.byKey(const ValueKey('language_segmented_btn')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('language_segmented_btn')),
+        findsOneWidget,
+      );
 
       // Verify API Configuration section
       await tester.scrollUntilVisible(find.text('Gemini API Key'), 100);
@@ -76,7 +84,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
-        child: const MaterialApp(home: SettingsPage()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SettingsPage(),
+        ),
       ),
     );
 
@@ -108,7 +120,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [apiKeyStorageProvider.overrideWithValue(fakeStorage)],
-        child: const MaterialApp(home: SettingsPage()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SettingsPage(),
+        ),
       ),
     );
 
@@ -135,7 +151,11 @@ void main() {
           apiKeyStorageProvider.overrideWithValue(fakeStorage),
           isCurrentUserAdminProvider.overrideWithValue(false),
         ],
-        child: const MaterialApp(home: SettingsPage()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SettingsPage(),
+        ),
       ),
     );
 
@@ -151,48 +171,51 @@ void main() {
     expect(find.byKey(const ValueKey('omr_debug_logs_tile')), findsNothing);
   });
 
-  testWidgets('ApiKeyDialog displays Access Restricted when accessed by non-admin', (
-    WidgetTester tester,
-  ) async {
-    final fakeStorage = FakeApiKeyStorage();
+  testWidgets(
+    'ApiKeyDialog displays Access Restricted when accessed by non-admin',
+    (WidgetTester tester) async {
+      final fakeStorage = FakeApiKeyStorage();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          apiKeyStorageProvider.overrideWithValue(fakeStorage),
-          isCurrentUserAdminProvider.overrideWithValue(false),
-        ],
-        child: MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => ApiKeyDialog.show(context),
-                child: const Text('Open Dialog'),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            apiKeyStorageProvider.overrideWithValue(fakeStorage),
+            isCurrentUserAdminProvider.overrideWithValue(false),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () => ApiKeyDialog.show(context),
+                  child: const Text('Open Dialog'),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    // Tap to open dialog
-    await tester.tap(find.text('Open Dialog'));
-    await tester.pumpAndSettle();
+      // Tap to open dialog
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
 
-    // Verify Access Restricted dialog
-    expect(find.text('Access Restricted'), findsOneWidget);
-    expect(
-      find.text('Gemini API key configuration is restricted to church administrators only.'),
-      findsOneWidget,
-    );
-    expect(find.text('Enter new API Key'), findsNothing);
+      // Verify Access Restricted dialog
+      expect(find.text('Access Restricted'), findsOneWidget);
+      expect(
+        find.text(
+          'Gemini API key configuration is restricted to church administrators only.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Enter new API Key'), findsNothing);
 
-    // Tap OK to close
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
+      // Tap OK to close
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(AlertDialog), findsNothing);
-  });
+      expect(find.byType(AlertDialog), findsNothing);
+    },
+  );
 }

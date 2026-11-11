@@ -6,7 +6,7 @@
 /// - Variable speed control (0.5x to 1.5x)
 /// - Metronome pulse synchronization with song tempo
 /// - Section practice looping (Intro, Verse, Chorus, etc.)
-/// - Song-specific audio attachment management (real vs demo)
+/// - Song-specific audio attachment management
 library;
 
 import 'dart:async';
@@ -91,26 +91,12 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
     return const AudioPracticeState();
   }
 
-  /// Whether the specified song has an attached audio track (or is populated via demo mode).
-  bool hasAudioForSong(String songId, {required bool isDemo}) {
-    if (isDemo) return true;
-    return _attachedAudioBySong.containsKey(songId);
-  }
+  /// Whether the specified song has an attached audio track.
+  bool hasAudioForSong(String songId) =>
+      _attachedAudioBySong.containsKey(songId);
 
   /// Resolves the audio source title for a song.
-  String? getAudioSourceTitle(
-    String songId, {
-    required bool isDemo,
-    String? defaultDemoTitle,
-  }) {
-    if (_attachedAudioBySong.containsKey(songId)) {
-      return _attachedAudioBySong[songId];
-    }
-    if (isDemo) {
-      return defaultDemoTitle ?? 'Acoustic_Guide_Track.mp3';
-    }
-    return null;
-  }
+  String? getAudioSourceTitle(String songId) => _attachedAudioBySong[songId];
 
   void play() {
     if (state.isPlaying) return;
@@ -136,10 +122,7 @@ class AudioPracticeNotifier extends Notifier<AudioPracticeState> {
 
       // Check track duration end
       if (newPosMs >= state.duration.inMilliseconds) {
-        state = state.copyWith(
-          isPlaying: false,
-          position: state.duration,
-        );
+        state = state.copyWith(isPlaying: false, position: state.duration);
         timer.cancel();
         return;
       }

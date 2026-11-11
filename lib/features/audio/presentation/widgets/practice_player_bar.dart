@@ -6,7 +6,6 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
-import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/audio/presentation/providers/audio_practice_controller.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -37,8 +36,7 @@ class PracticePlayerBar extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l10n?.attachAudioInstructions ??
-                  'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):',
+              l10n?.attachAudioInstructions ?? 'Select an audio file or paste a rehearsal reference link (MP3, WAV, M4A):',
             ),
             const SizedBox(height: 12),
             TextField(
@@ -80,16 +78,10 @@ class PracticePlayerBar extends ConsumerWidget {
     final notifier = ref.read(audioPracticeControllerProvider.notifier);
     final isDark = theme.brightness == Brightness.dark;
 
-    final isDemo = ref.watch(demoModeProvider);
-    final hasAudio = notifier.hasAudioForSong(song.id, isDemo: isDemo);
-    final audioTitle = notifier.getAudioSourceTitle(
-      song.id,
-      isDemo: isDemo,
-      defaultDemoTitle:
-          '${song.title} (${l10n?.practiceReference ?? "Practice Reference"})',
-    );
+    final hasAudio = notifier.hasAudioForSong(song.id);
+    final audioTitle = notifier.getAudioSourceTitle(song.id);
 
-    // ── When No Audio is Attached (Non-Demo Mode) ──
+    // ── When No Audio is Attached ──
     if (!hasAudio) {
       return LayoutBuilder(
         builder: (context, constraints) {
@@ -142,8 +134,7 @@ class PracticePlayerBar extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    l10n?.noAudioAttachedSubtitle ??
-                                        'Attach an MP3 or guide track for rehearsal scrubbing & loops',
+                                    l10n?.noAudioAttachedSubtitle ?? 'Attach an MP3 or guide track for rehearsal scrubbing & loops',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
                                       fontSize: 12,
@@ -170,7 +161,8 @@ class PracticePlayerBar extends ConsumerWidget {
                                     ? theme.colorScheme.primary
                                     : null,
                               ),
-                              tooltip: l10n?.metronomeClickTooltip(song.tempo) ??
+                              tooltip:
+                                  l10n?.metronomeClickTooltip(song.tempo) ??
                                   'Metronome Click (${song.tempo} BPM)',
                               onPressed: notifier.toggleMetronome,
                             ),
@@ -184,8 +176,11 @@ class PracticePlayerBar extends ConsumerWidget {
                                 ),
                               ),
                               icon: const Icon(Icons.add_link, size: 16),
-                              label: Text(l10n?.attachAudioAction ?? 'Attach Audio'),
-                              onPressed: () => _showAttachAudioDialog(context, ref),
+                              label: Text(
+                                l10n?.attachAudioAction ?? 'Attach Audio',
+                              ),
+                              onPressed: () =>
+                                  _showAttachAudioDialog(context, ref),
                             ),
                           ],
                         ),
@@ -222,8 +217,7 @@ class PracticePlayerBar extends ConsumerWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                l10n?.noAudioAttachedSubtitle ??
-                                    'Attach an MP3 or guide track for rehearsal scrubbing & loops',
+                                l10n?.noAudioAttachedSubtitle ?? 'Attach an MP3 or guide track for rehearsal scrubbing & loops',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                   fontSize: 12,
@@ -245,7 +239,8 @@ class PracticePlayerBar extends ConsumerWidget {
                                 ? theme.colorScheme.primary
                                 : null,
                           ),
-                          tooltip: l10n?.metronomeClickTooltip(song.tempo) ??
+                          tooltip:
+                              l10n?.metronomeClickTooltip(song.tempo) ??
                               'Metronome Click (${song.tempo} BPM)',
                           onPressed: notifier.toggleMetronome,
                         ),
@@ -259,7 +254,9 @@ class PracticePlayerBar extends ConsumerWidget {
                             ),
                           ),
                           icon: const Icon(Icons.add_link, size: 16),
-                          label: Text(l10n?.attachAudioAction ?? 'Attach Audio'),
+                          label: Text(
+                            l10n?.attachAudioAction ?? 'Attach Audio',
+                          ),
                           onPressed: () => _showAttachAudioDialog(context, ref),
                         ),
                       ],
@@ -333,7 +330,8 @@ class PracticePlayerBar extends ConsumerWidget {
                         ? theme.colorScheme.primary
                         : null,
                   ),
-                  tooltip: l10n?.metronomeClickTooltip(song.tempo) ??
+                  tooltip:
+                      l10n?.metronomeClickTooltip(song.tempo) ??
                       'Metronome Click (${song.tempo} BPM)',
                   onPressed: notifier.toggleMetronome,
                 ),
@@ -342,18 +340,18 @@ class PracticePlayerBar extends ConsumerWidget {
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.add_link),
-                  tooltip: l10n?.attachAudioTrackTooltip ?? 'Attach Audio Track',
+                  tooltip:
+                      l10n?.attachAudioTrackTooltip ?? 'Attach Audio Track',
                   onPressed: () => _showAttachAudioDialog(context, ref),
                 ),
 
-                // Detach audio button (if not demo mode)
-                if (!isDemo)
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.link_off, size: 18),
-                    tooltip: l10n?.detachAudioAction ?? 'Detach Audio',
-                    onPressed: () => notifier.detachAudioSource(song.id),
-                  ),
+                // Detach audio button
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.link_off, size: 18),
+                  tooltip: l10n?.detachAudioAction ?? 'Detach Audio',
+                  onPressed: () => notifier.detachAudioSource(song.id),
+                ),
               ],
             ),
 
@@ -481,8 +479,8 @@ class PracticePlayerBar extends ConsumerWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.replay_10),
-                    tooltip: l10n?.rewindSecondsTooltip(10) ??
-                        'Rewind 10 seconds',
+                    tooltip:
+                        l10n?.rewindSecondsTooltip(10) ?? 'Rewind 10 seconds',
                     onPressed: () =>
                         notifier.seek(position - const Duration(seconds: 10)),
                   ),
@@ -504,8 +502,8 @@ class PracticePlayerBar extends ConsumerWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.forward_10),
-                    tooltip: l10n?.forwardSecondsTooltip(10) ??
-                        'Forward 10 seconds',
+                    tooltip:
+                        l10n?.forwardSecondsTooltip(10) ?? 'Forward 10 seconds',
                     onPressed: () =>
                         notifier.seek(position + const Duration(seconds: 10)),
                   ),

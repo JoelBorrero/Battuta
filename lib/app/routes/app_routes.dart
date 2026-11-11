@@ -23,6 +23,21 @@ final class AppRoutes {
   /// The initial route the app navigates to on cold start.
   static const String initial = repertoire;
 
+  // ── Account entry (outside the shell) ─────────────────────────────────
+
+  /// First-launch screen: sign in, create an account or continue offline.
+  static const String welcome = '/welcome';
+
+  /// Email + password / magic link sign-in.
+  static const String signIn = '/sign-in';
+
+  /// Account creation (email, password, username).
+  static const String createAccount = '/create-account';
+
+  /// Whether [location] belongs to the account entry flow.
+  static bool isAccountEntry(String location) =>
+      location == welcome || location == signIn || location == createAccount;
+
   // ── Bottom-nav tabs (top-level destinations) ──────────────────────────
 
   /// Repertoire / song library — the default landing tab.

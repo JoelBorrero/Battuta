@@ -63,23 +63,8 @@ final adminScheduleAlertsProvider = Provider<List<ScheduleAlert>>((ref) {
             memberId: assignment.memberId,
             memberName: memberName,
             role: assignment.role,
-            reason: "Can't attend — missing cover for ${assignment.role.shortName}",
-            timestamp: event.dateTime,
-          ),
-        );
-      } else if (member != null &&
-          member.availability == AvailabilityStatus.unavailable &&
-          assignment.status != AssignmentStatus.declined) {
-        alerts.add(
-          ScheduleAlert(
-            id: alertId,
-            eventId: event.id,
-            eventTitle: event.title,
-            eventDate: event.dateTime,
-            memberId: assignment.memberId,
-            memberName: memberName,
-            role: assignment.role,
-            reason: 'General status is Unavailable — may need substitute',
+            reason:
+                "Can't attend — missing cover for ${assignment.role.shortName}",
             timestamp: event.dateTime,
           ),
         );
