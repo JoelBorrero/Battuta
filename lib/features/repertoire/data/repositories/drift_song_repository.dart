@@ -112,8 +112,8 @@ class DriftSongRepository implements SongRepository {
 
       final localOnly = song.id.startsWith(localOnlyIdPrefix);
       // Identity and sharing belong to the version, not to what an editor
-      // rebuilt from a form: an existing row keeps them (a dedicated sharing
-      // action is a later slice).
+      // rebuilt from a form: an existing row keeps them (sharing changes go
+      // through [updateSharing]).
       final ownerId = existing != null
           ? existing.ownerId
           : (localOnly ? null : account);
@@ -129,11 +129,21 @@ class DriftSongRepository implements SongRepository {
       final shared =
           existing?.sharedOrganizationIdsJson ??
           jsonEncode(song.sharedOrganizationIds);
+      final creator = existing != null
+          ? existing.songCreatorId
+          : song.songCreatorId;
+      // Title and artist belong to the song, not to this version: only the
+      // creator of the song changes them (a sync would revert anything else).
+      final titleLocked =
+          existing != null &&
+          !songFromRow(existing).canEditTitleBy(account);
+      final title = titleLocked ? existing.title : song.title;
+      final artist = titleLocked ? existing.artist : song.artist;
 
       final companion = SongsCompanion(
         id: Value(song.id),
-        title: Value(song.title),
-        artist: Value(song.artist),
+        title: Value(title),
+        artist: Value(artist),
         key: Value(song.key),
         tempo: Value(song.tempo),
         timeSignatureBeats: Value(song.timeSignature.$1),
@@ -160,11 +170,15 @@ class DriftSongRepository implements SongRepository {
         accountId: Value(accountId),
         editedAtMs: Value(SyncPolicy.nextEditMs(existing?.editedAtMs)),
         sharingDirty: Value(existing?.sharingDirty ?? false),
+        songCreatorId: Value(creator),
       );
 
       await db.into(db.songs).insertOnConflictUpdate(companion);
       return Right(
         song.copyWith(
+          title: title,
+          artist: artist,
+          songCreatorId: creator,
           songWorkId: songWorkId,
           ownerId: ownerId,
           label: label,
@@ -183,12 +197,7 @@ class DriftSongRepository implements SongRepository {
     }
   }
 
-  /// Changes who can see an owned version: its [label], [visibility] and the
-  /// organizations it is shared with. The next sync pushes the change (update
-  /// of label and visibility, then the difference of the shares). Shares only
-  /// apply to [SongVisibility.organizations]; any other visibility clears them.
-  ///
-  /// Fails with `not_owner` for versions of other users.
+  @override
   Future<Either<Failure, Song>> updateSharing(
     String id, {
     String? label,

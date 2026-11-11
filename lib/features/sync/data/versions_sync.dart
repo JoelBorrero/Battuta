@@ -123,12 +123,40 @@ class VersionsSync {
       // A pending edit on a version the backend no longer has (the owner
       // deleted it on another device) creates it again: the edit is kept.
       workId ??= _uuid.v4();
+      // A fork made offline whose parent is no longer visible (it went
+      // private, or was deleted) keeps its content but loses the lineage: the
+      // backend refuses lineage from a version the owner cannot see. If the
+      // song itself became invisible too, the copy starts a song of its own.
+      var keepLineage = row.forkedFromVersionId != null;
+      if (keepLineage) {
+        final parent = await ctx.client
+            .from('song_versions')
+            .select('id')
+            .eq('id', row.forkedFromVersionId!)
+            .maybeSingle();
+        keepLineage = parent != null;
+        if (!keepLineage) {
+          final work = await ctx.client
+              .from('songs')
+              .select('id')
+              .eq('id', workId)
+              .maybeSingle();
+          if (work == null) workId = _uuid.v4();
+        }
+      }
       await _ensureWork(workId, row);
       // No `returning`: the select policy of a version cannot see the row
       // inside the statement that creates it.
       await ctx.client
           .from('song_versions')
-          .insert(versionInsertPayload(row, workId: workId, ownerId: _me));
+          .insert(
+            versionInsertPayload(
+              row,
+              workId: workId,
+              ownerId: _me,
+              keepLineage: keepLineage,
+            ),
+          );
       await _pushShares(row);
       final inserted = await ctx.client
           .from('song_versions')
@@ -399,7 +427,8 @@ class VersionsSync {
       final rows = await ctx.client
           .from('song_versions')
           .select(
-            '*, songs(id, title, artist), version_shares(organization_id)',
+            '*, songs(id, title, artist, created_by), '
+            'version_shares(organization_id)',
           )
           .inFilter('id', chunk);
       ctx.ensureCurrent();
@@ -459,7 +488,7 @@ class VersionsSync {
     )) {
       final works = await ctx.client
           .from('songs')
-          .select('id, title, artist, merged_into_id')
+          .select('id, title, artist, created_by, merged_into_id')
           .inFilter('id', chunk);
       for (final work in works) {
         var survivor = work;
@@ -471,7 +500,7 @@ class VersionsSync {
           if (resolved is String && resolved != work['id']) {
             final target = await ctx.client
                 .from('songs')
-                .select('id, title, artist, merged_into_id')
+                .select('id, title, artist, created_by, merged_into_id')
                 .eq('id', resolved)
                 .maybeSingle();
             if (target != null) survivor = target;
@@ -481,9 +510,11 @@ class VersionsSync {
           final title = survivor['title'] as String;
           final artist = survivor['artist'] as String? ?? '';
           final workId = survivor['id'] as String;
+          final creator = survivor['created_by'] as String?;
           if (row.title == title &&
               row.artist == artist &&
-              row.songWorkId == workId) {
+              row.songWorkId == workId &&
+              row.songCreatorId == creator) {
             continue;
           }
           ctx.ensureCurrent();
@@ -494,6 +525,7 @@ class VersionsSync {
               title: Value(title),
               artist: Value(artist),
               songWorkId: Value(workId),
+              songCreatorId: Value(creator),
             ),
           );
           ctx.pulled++;

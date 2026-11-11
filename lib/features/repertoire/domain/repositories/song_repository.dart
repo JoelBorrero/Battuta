@@ -10,6 +10,7 @@ library;
 
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:fpdart/fpdart.dart';
 
 /// Abstract interface for song CRUD and query operations.
@@ -32,6 +33,19 @@ abstract class SongRepository {
   /// Returns the saved [Song] (which may include server-assigned fields)
   /// on success.
   Future<Either<Failure, Song>> saveSong(Song song);
+
+  /// Changes who can see an owned version: its [label], [visibility] and the
+  /// organizations it is shared with. Works offline: the next sync pushes the
+  /// change. Shares only apply to [SongVisibility.organizations]; any other
+  /// visibility clears them. Arguments left `null` keep their value.
+  ///
+  /// Fails with `not_owner` for versions of other users.
+  Future<Either<Failure, Song>> updateSharing(
+    String id, {
+    String? label,
+    SongVisibility? visibility,
+    List<String>? sharedOrganizationIds,
+  });
 
   /// Permanently deletes the song identified by [id].
   Future<Either<Failure, void>> deleteSong(String id);

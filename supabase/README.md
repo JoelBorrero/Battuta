@@ -260,3 +260,14 @@ The app keeps every song, score and setlist in Drift and syncs them with this sc
   reaches the other device through the reconcile of visible ids.
 - Changing a song's title or artist locally only reaches the backend when the user created the song (`songs`
   is shared by every version of it); on a song created by someone else the sync restores the shared title.
+  The app therefore keeps `songs.created_by` on each cached version (`songCreatorId`) and shows title and
+  artist read-only to everybody else, with "Suggest merge" instead.
+- **Sharing in the app.** The sharing sheet writes label, visibility and shares locally (`updateSharing`, works
+  offline) and the next sync pushes them. "Other versions" lists the cached versions at once and merges the
+  rows `song_versions` returns for the song (RLS decides what is visible). Discover searches
+  `visibility = 'public'` versions by the song's title or artist. Forking calls `fork_song_version` online
+  (which copies the score and notifies the owner) and makes a local copy with `forkedFromVersionId` offline.
+  An offline fork whose parent stopped being visible by the time it is pushed loses its lineage (and gets a
+  song of its own if the song became invisible too). Merges use `request_song_merge` /
+  `respond_to_song_merge`; the app lists the caller's pending requests (`song_merge_requests` is readable by
+  requester and approver) to avoid sending the same request twice.

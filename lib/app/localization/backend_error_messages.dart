@@ -42,6 +42,16 @@ String backendErrorMessage(AppLocalizations l10n, Object error) {
       l10n.backendErrorBandNotInOrganization,
     BackendErrorCode.invalidExpiry => l10n.backendErrorInvalidExpiry,
     BackendErrorCode.invalidMaxUses => l10n.backendErrorInvalidMaxUses,
+    BackendErrorCode.versionNotFound => l10n.backendErrorVersionNotFound,
+    BackendErrorCode.songNotFound => l10n.backendErrorSongNotFound,
+    BackendErrorCode.notSongCreator => l10n.backendErrorMergeNotCreator,
+    BackendErrorCode.mergeSameSong ||
+    BackendErrorCode.mergeCycle => l10n.backendErrorMergeSameSong,
+    BackendErrorCode.mergeAlreadyRequested =>
+      l10n.backendErrorMergeAlreadyRequested,
+    BackendErrorCode.mergeNotPending => l10n.backendErrorMergeNotPending,
+    BackendErrorCode.mergeRequestNotFound =>
+      l10n.backendErrorMergeRequestNotFound,
     BackendErrorCode.notSignedIn ||
     BackendErrorCode.notAuthenticated => l10n.backendErrorNotSignedIn,
     // Auth errors without a typed code (e.g. wrong password) carry GoTrue's

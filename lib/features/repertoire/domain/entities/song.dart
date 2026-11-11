@@ -96,6 +96,10 @@ abstract class Song with _$Song {
 
     /// Organizations this version is shared with (visibility `organizations`).
     @Default([]) List<String> sharedOrganizationIds,
+
+    /// Account that created the work this version belongs to (the only one
+    /// who edits its title and artist); null when unknown (not synced yet).
+    String? songCreatorId,
   }) = _Song;
 
   const Song._();
@@ -114,6 +118,18 @@ abstract class Song with _$Song {
   /// organization's repertoire) are read-only.
   bool isEditableBy(String? accountId) =>
       ownerId == null || ownerId == accountId;
+
+  /// Whether [accountId] may change the title and artist of this version.
+  ///
+  /// They belong to the song (the work), shared by all its versions, and only
+  /// its creator edits them. When the creator is not known yet (never synced)
+  /// the version counts as created by its owner unless it is a fork of
+  /// somebody else's version.
+  bool canEditTitleBy(String? accountId) {
+    if (ownerId == null) return true;
+    if (songCreatorId != null) return songCreatorId == accountId;
+    return ownerId == accountId && forkedFromVersionId == null;
+  }
 
   /// Formatted tempo string for display (e.g., `"120 BPM"`).
   String get tempoLabel => '$tempo BPM';

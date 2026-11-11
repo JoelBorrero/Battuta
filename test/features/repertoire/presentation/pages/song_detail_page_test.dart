@@ -5,6 +5,7 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/presentation/pages/song_detail_page.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,7 +46,11 @@ void main() {
   Widget buildSubject({required String songId}) {
     return ProviderScope(
       overrides: [songRepositoryProvider.overrideWithValue(repository)],
-      child: MaterialApp(home: SongDetailPage(songId: songId)),
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SongDetailPage(songId: songId),
+      ),
     );
   }
 
@@ -140,7 +145,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle();
 
-      expect(find.text('Delete Song'), findsOneWidget);
+      expect(find.text('Delete Song?'), findsOneWidget);
 
       // Tap confirm Delete
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));

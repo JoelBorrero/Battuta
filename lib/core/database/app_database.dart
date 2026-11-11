@@ -63,6 +63,9 @@ class Songs extends Table {
   /// Label, visibility or shares changed locally and are not pushed yet.
   BoolColumn get sharingDirty => boolean().withDefault(const Constant(false))();
 
+  /// v4: account that created the work (`songs.created_by`); null if unknown.
+  TextColumn get songCreatorId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -160,8 +163,9 @@ class AppDatabase extends _$AppDatabase {
   /// v1: songs, setlists, scores.
   /// v2: adds the account-scoped backend cache ([CacheRecords], [CacheRefreshes]).
   /// v3: song versions, personal/organization setlists and sync state columns.
+  /// v4: the creator of a song's work (title/artist rule).
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -201,6 +205,9 @@ class AppDatabase extends _$AppDatabase {
             'UPDATE $table SET edited_at_ms = updated_at * 1000',
           );
         }
+      }
+      if (from < 4) {
+        await m.addColumn(songs, songs.songCreatorId);
       }
     },
   );

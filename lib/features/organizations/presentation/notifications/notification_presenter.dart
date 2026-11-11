@@ -24,6 +24,12 @@ enum NotificationDestination {
   /// A song version of mine.
   song,
 
+  /// A song (the work) with all its versions; [songId] names it.
+  songPage,
+
+  /// A merge request I have to answer; [requestId] names it.
+  mergeRequest,
+
   /// The repertoire (no version is known).
   repertoire,
 
@@ -31,50 +37,77 @@ enum NotificationDestination {
   none,
 }
 
+/// Where a tap leads and the ids needed to get there.
+typedef NotificationTarget = ({
+  NotificationDestination destination,
+  String? versionId,
+  String? songId,
+  String? requestId,
+});
+
+NotificationTarget _target(
+  NotificationDestination destination, {
+  String? versionId,
+  String? songId,
+  String? requestId,
+}) => (
+  destination: destination,
+  versionId: versionId,
+  songId: songId,
+  requestId: requestId,
+);
+
 /// Where [notification] leads, with the ids needed to get there.
-({NotificationDestination destination, String? versionId}) notificationTarget(
-  AppNotification notification,
-) => switch (notification.type) {
-  NotificationType.invitation => (
-    destination: NotificationDestination.invitations,
-    versionId: null,
-  ),
-  NotificationType.roleChanged ||
-  NotificationType.removed ||
-  NotificationType.memberProfileEdited => (
-    destination: NotificationDestination.roster,
-    versionId: null,
-  ),
-  NotificationType.eventAssigned ||
-  NotificationType.eventUnassigned ||
-  NotificationType.assignmentDeclined => (
-    destination: NotificationDestination.calendar,
-    versionId: null,
-  ),
-  NotificationType.archiveRequested ||
-  NotificationType.archiveCancelled ||
-  NotificationType.archiveCompleted => (
-    destination: NotificationDestination.organization,
-    versionId: null,
-  ),
-  NotificationType.songVersionForked =>
-    notification.payload['version_id'] is String
-        ? (
-            destination: NotificationDestination.song,
-            versionId: notification.payload['version_id'] as String,
-          )
-        : (destination: NotificationDestination.repertoire, versionId: null),
-  NotificationType.songMergeRequested ||
-  NotificationType.songMergeAccepted ||
-  NotificationType.songMergeDeclined => (
-    destination: NotificationDestination.repertoire,
-    versionId: null,
-  ),
-  NotificationType.unknown => (
-    destination: NotificationDestination.none,
-    versionId: null,
-  ),
-};
+NotificationTarget notificationTarget(AppNotification notification) {
+  final payload = notification.payload;
+  String? id(String key) =>
+      payload[key] is String ? payload[key] as String : null;
+  return switch (notification.type) {
+    NotificationType.invitation => _target(NotificationDestination.invitations),
+    NotificationType.roleChanged ||
+    NotificationType.removed ||
+    NotificationType.memberProfileEdited => _target(
+      NotificationDestination.roster,
+    ),
+    NotificationType.eventAssigned ||
+    NotificationType.eventUnassigned ||
+    NotificationType.assignmentDeclined => _target(
+      NotificationDestination.calendar,
+    ),
+    NotificationType.archiveRequested ||
+    NotificationType.archiveCancelled ||
+    NotificationType.archiveCompleted => _target(
+      NotificationDestination.organization,
+    ),
+    // Somebody copied my version: the song shows it next to the copy.
+    NotificationType.songVersionForked =>
+      id('song_id') != null
+          ? _target(NotificationDestination.songPage, songId: id('song_id'))
+          : id('version_id') != null
+          ? _target(NotificationDestination.song, versionId: id('version_id'))
+          : _target(NotificationDestination.repertoire),
+    // A merge request to answer.
+    NotificationType.songMergeRequested =>
+      id('request_id') != null
+          ? _target(
+              NotificationDestination.mergeRequest,
+              requestId: id('request_id'),
+            )
+          : _target(NotificationDestination.repertoire),
+    // The result: the surviving song (the target; the page follows merges).
+    NotificationType.songMergeAccepted =>
+      id('target_song_id') != null
+          ? _target(
+              NotificationDestination.songPage,
+              songId: id('target_song_id'),
+            )
+          : _target(NotificationDestination.repertoire),
+    NotificationType.songMergeDeclined => _target(
+      NotificationDestination.repertoire,
+    ),
+    NotificationType.unknown => _target(NotificationDestination.none),
+  };
+}
 
 /// Whether opening [destination] needs the notification's organization to
 /// be one of mine.

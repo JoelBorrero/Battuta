@@ -23,6 +23,8 @@ import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
+import 'package:battuta/features/sharing/presentation/widgets/song_sharing_actions.dart';
+import 'package:battuta/features/sharing/presentation/widgets/song_versions_section.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -477,6 +479,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
               if (!canEdit) _ReadOnlyVersionBanner(songId: song.id),
+              SongSharingActions(song: song),
 
               // ── Header Metadata Card ──
               Card(
@@ -555,6 +558,16 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                 ),
               ),
               const SizedBox(height: 12),
+
+              // ── Other versions of this song ──
+              if (song.songWorkId != null) ...[
+                SongVersionsSection(
+                  songWorkId: song.songWorkId!,
+                  currentVersionId: song.id,
+                  title: l10n?.versionsOtherTitle ?? 'Other versions',
+                ),
+                const SizedBox(height: 12),
+              ],
 
               // ── Practice Audio Player Bar ──
               PracticePlayerBar(song: activeSong),

@@ -2852,4 +2852,275 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repertoireEntryAfterSync => 'Available after the next sync';
+
+  @override
+  String get sharingButton => 'Sharing';
+
+  @override
+  String get sharingSheetTitle => 'Sharing';
+
+  @override
+  String get sharingLabelField => 'Version name';
+
+  @override
+  String get sharingWhoCanSee => 'Who can see this version';
+
+  @override
+  String get sharingPrivateTitle => 'Only me';
+
+  @override
+  String get sharingPrivateHint => 'Only you can see it.';
+
+  @override
+  String get sharingOrganizationsTitle => 'My organizations';
+
+  @override
+  String get sharingOrganizationsHint =>
+      'Members of the organizations you pick can open it and make their own copy.';
+
+  @override
+  String get sharingPublicTitle => 'Public';
+
+  @override
+  String get sharingPublicHint =>
+      'Anyone signed in can find it, open it and make their own copy.';
+
+  @override
+  String get sharingPickOrganizations => 'Share with';
+
+  @override
+  String get sharingNoOrganizations => 'Join an organization to share with it.';
+
+  @override
+  String get sharingPickOne => 'Pick at least one organization.';
+
+  @override
+  String get sharingSyncNote =>
+      'Saved on this device. Other people see the change once you are online.';
+
+  @override
+  String get sharingSave => 'Save';
+
+  @override
+  String get sharingSaved => 'Sharing updated';
+
+  @override
+  String get visibilityPrivate => 'Private';
+
+  @override
+  String get visibilityOrganizations => 'Organizations';
+
+  @override
+  String get visibilityPublic => 'Public';
+
+  @override
+  String get versionsOtherTitle => 'Other versions';
+
+  @override
+  String get versionsAllTitle => 'Versions';
+
+  @override
+  String get versionsLoading => 'Looking for more versions…';
+
+  @override
+  String get versionsEmpty => 'No other versions yet.';
+
+  @override
+  String get versionsOfflineNote =>
+      'Offline: showing the versions saved on this device.';
+
+  @override
+  String get versionYours => 'Yours';
+
+  @override
+  String get versionFork => 'Fork';
+
+  @override
+  String versionForkOf(String label) {
+    return 'Fork of $label';
+  }
+
+  @override
+  String get versionOnDevice => 'On this device';
+
+  @override
+  String get versionNeedsInternet => 'Connect to open this version.';
+
+  @override
+  String versionOpenTooltip(String label) {
+    return 'Open $label';
+  }
+
+  @override
+  String get forkButton => 'Fork to my library';
+
+  @override
+  String forkTooltip(String label) {
+    return 'Fork $label to my library';
+  }
+
+  @override
+  String get forkDialogTitle => 'Fork this version';
+
+  @override
+  String get forkDialogBody =>
+      'You get your own copy to edit. The original stays as it is.';
+
+  @override
+  String get forkLabelField => 'Name of your copy';
+
+  @override
+  String forkDefaultLabel(String label) {
+    return '$label (copy)';
+  }
+
+  @override
+  String get forkConfirm => 'Fork';
+
+  @override
+  String get forkDone => 'Forked to your library';
+
+  @override
+  String get forkDoneOffline =>
+      'Forked on this device. It syncs when you are online.';
+
+  @override
+  String get songTitleLockedHint =>
+      'Title and artist belong to the song. Only the person who created it can change them.';
+
+  @override
+  String get mergeSameSongButton => 'Same song as…';
+
+  @override
+  String get mergeSuggestButton => 'Suggest merge';
+
+  @override
+  String get mergeSheetTitle => 'Merge songs';
+
+  @override
+  String mergeIntroMine(String title) {
+    return 'Pick the song that “$title” duplicates. Its versions will move under the song you pick once the creator of that song agrees.';
+  }
+
+  @override
+  String mergeIntroOther(String title) {
+    return '“$title” was created by someone else. Pick one of your own songs that is the same song: its versions will move under “$title” once its creator agrees.';
+  }
+
+  @override
+  String get mergeSearchLabel => 'Search songs';
+
+  @override
+  String get mergeNoResults => 'No matching songs.';
+
+  @override
+  String get mergePendingBadge => 'Request pending';
+
+  @override
+  String get mergeConfirmTitle => 'Request this merge?';
+
+  @override
+  String mergeConfirmBody(String source, String target) {
+    return 'Versions of “$source” will move under “$target”.';
+  }
+
+  @override
+  String get mergeRequestAction => 'Request merge';
+
+  @override
+  String get mergeSent => 'Merge request sent';
+
+  @override
+  String get mergeDone => 'The songs were merged';
+
+  @override
+  String get mergeNeedsInternet =>
+      'Merging songs needs an internet connection.';
+
+  @override
+  String get mergeSignIn => 'Sign in to merge songs.';
+
+  @override
+  String get mergeRequestTitle => 'Merge request';
+
+  @override
+  String mergeRequestBody(String requester, String source, String target) {
+    return '$requester asks to merge “$source” into “$target”. Every version of “$source” would move under “$target”.';
+  }
+
+  @override
+  String get mergeRequesterUnknown => 'Someone';
+
+  @override
+  String get mergeAccept => 'Accept';
+
+  @override
+  String get mergeDecline => 'Decline';
+
+  @override
+  String get mergeAccepted => 'Songs merged';
+
+  @override
+  String get mergeDeclined => 'Request declined';
+
+  @override
+  String get mergeAlreadyAnswered => 'This request was already answered.';
+
+  @override
+  String get songPageTitle => 'Song';
+
+  @override
+  String get songPageNeedsInternet =>
+      'Connect to see every version of this song.';
+
+  @override
+  String get discoverTitle => 'Discover';
+
+  @override
+  String get discoverTooltip => 'Discover public songs';
+
+  @override
+  String get discoverHint =>
+      'Public versions shared by other musicians. Open one to read it or fork it into your library.';
+
+  @override
+  String get discoverSearchLabel => 'Search public songs';
+
+  @override
+  String get discoverEmpty => 'No public songs match.';
+
+  @override
+  String get discoverNeedsInternet => 'Discover needs an internet connection.';
+
+  @override
+  String get discoverSignIn => 'Sign in to discover public songs.';
+
+  @override
+  String get backendErrorVersionNotFound =>
+      'That version is no longer available.';
+
+  @override
+  String get backendErrorSongNotFound => 'That song is no longer available.';
+
+  @override
+  String get backendErrorMergeNotCreator =>
+      'You can only merge songs when you created one of them.';
+
+  @override
+  String get backendErrorMergeSameSong => 'Those are already the same song.';
+
+  @override
+  String get backendErrorMergeAlreadyRequested =>
+      'A merge request for these songs is already pending.';
+
+  @override
+  String get backendErrorMergeNotPending =>
+      'This request was already answered.';
+
+  @override
+  String get backendErrorMergeRequestNotFound =>
+      'That merge request no longer exists.';
+
+  @override
+  String get discoverLoadMore => 'Load more';
 }

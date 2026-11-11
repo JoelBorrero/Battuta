@@ -5033,6 +5033,486 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available after the next sync'**
   String get repertoireEntryAfterSync;
+
+  /// sharingButton
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing'**
+  String get sharingButton;
+
+  /// sharingSheetTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing'**
+  String get sharingSheetTitle;
+
+  /// sharingLabelField
+  ///
+  /// In en, this message translates to:
+  /// **'Version name'**
+  String get sharingLabelField;
+
+  /// sharingWhoCanSee
+  ///
+  /// In en, this message translates to:
+  /// **'Who can see this version'**
+  String get sharingWhoCanSee;
+
+  /// sharingPrivateTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Only me'**
+  String get sharingPrivateTitle;
+
+  /// sharingPrivateHint
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can see it.'**
+  String get sharingPrivateHint;
+
+  /// sharingOrganizationsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'My organizations'**
+  String get sharingOrganizationsTitle;
+
+  /// sharingOrganizationsHint
+  ///
+  /// In en, this message translates to:
+  /// **'Members of the organizations you pick can open it and make their own copy.'**
+  String get sharingOrganizationsHint;
+
+  /// sharingPublicTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get sharingPublicTitle;
+
+  /// sharingPublicHint
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone signed in can find it, open it and make their own copy.'**
+  String get sharingPublicHint;
+
+  /// sharingPickOrganizations
+  ///
+  /// In en, this message translates to:
+  /// **'Share with'**
+  String get sharingPickOrganizations;
+
+  /// sharingNoOrganizations
+  ///
+  /// In en, this message translates to:
+  /// **'Join an organization to share with it.'**
+  String get sharingNoOrganizations;
+
+  /// sharingPickOne
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one organization.'**
+  String get sharingPickOne;
+
+  /// sharingSyncNote
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device. Other people see the change once you are online.'**
+  String get sharingSyncNote;
+
+  /// sharingSave
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get sharingSave;
+
+  /// sharingSaved
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing updated'**
+  String get sharingSaved;
+
+  /// visibilityPrivate
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get visibilityPrivate;
+
+  /// visibilityOrganizations
+  ///
+  /// In en, this message translates to:
+  /// **'Organizations'**
+  String get visibilityOrganizations;
+
+  /// visibilityPublic
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get visibilityPublic;
+
+  /// versionsOtherTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Other versions'**
+  String get versionsOtherTitle;
+
+  /// versionsAllTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Versions'**
+  String get versionsAllTitle;
+
+  /// versionsLoading
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for more versions…'**
+  String get versionsLoading;
+
+  /// versionsEmpty
+  ///
+  /// In en, this message translates to:
+  /// **'No other versions yet.'**
+  String get versionsEmpty;
+
+  /// versionsOfflineNote
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: showing the versions saved on this device.'**
+  String get versionsOfflineNote;
+
+  /// versionYours
+  ///
+  /// In en, this message translates to:
+  /// **'Yours'**
+  String get versionYours;
+
+  /// versionFork
+  ///
+  /// In en, this message translates to:
+  /// **'Fork'**
+  String get versionFork;
+
+  /// versionForkOf
+  ///
+  /// In en, this message translates to:
+  /// **'Fork of {label}'**
+  String versionForkOf(String label);
+
+  /// versionOnDevice
+  ///
+  /// In en, this message translates to:
+  /// **'On this device'**
+  String get versionOnDevice;
+
+  /// versionNeedsInternet
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to open this version.'**
+  String get versionNeedsInternet;
+
+  /// versionOpenTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Open {label}'**
+  String versionOpenTooltip(String label);
+
+  /// forkButton
+  ///
+  /// In en, this message translates to:
+  /// **'Fork to my library'**
+  String get forkButton;
+
+  /// forkTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Fork {label} to my library'**
+  String forkTooltip(String label);
+
+  /// forkDialogTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Fork this version'**
+  String get forkDialogTitle;
+
+  /// forkDialogBody
+  ///
+  /// In en, this message translates to:
+  /// **'You get your own copy to edit. The original stays as it is.'**
+  String get forkDialogBody;
+
+  /// forkLabelField
+  ///
+  /// In en, this message translates to:
+  /// **'Name of your copy'**
+  String get forkLabelField;
+
+  /// forkDefaultLabel
+  ///
+  /// In en, this message translates to:
+  /// **'{label} (copy)'**
+  String forkDefaultLabel(String label);
+
+  /// forkConfirm
+  ///
+  /// In en, this message translates to:
+  /// **'Fork'**
+  String get forkConfirm;
+
+  /// forkDone
+  ///
+  /// In en, this message translates to:
+  /// **'Forked to your library'**
+  String get forkDone;
+
+  /// forkDoneOffline
+  ///
+  /// In en, this message translates to:
+  /// **'Forked on this device. It syncs when you are online.'**
+  String get forkDoneOffline;
+
+  /// songTitleLockedHint
+  ///
+  /// In en, this message translates to:
+  /// **'Title and artist belong to the song. Only the person who created it can change them.'**
+  String get songTitleLockedHint;
+
+  /// mergeSameSongButton
+  ///
+  /// In en, this message translates to:
+  /// **'Same song as…'**
+  String get mergeSameSongButton;
+
+  /// mergeSuggestButton
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest merge'**
+  String get mergeSuggestButton;
+
+  /// mergeSheetTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Merge songs'**
+  String get mergeSheetTitle;
+
+  /// mergeIntroMine
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the song that “{title}” duplicates. Its versions will move under the song you pick once the creator of that song agrees.'**
+  String mergeIntroMine(String title);
+
+  /// mergeIntroOther
+  ///
+  /// In en, this message translates to:
+  /// **'“{title}” was created by someone else. Pick one of your own songs that is the same song: its versions will move under “{title}” once its creator agrees.'**
+  String mergeIntroOther(String title);
+
+  /// mergeSearchLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Search songs'**
+  String get mergeSearchLabel;
+
+  /// mergeNoResults
+  ///
+  /// In en, this message translates to:
+  /// **'No matching songs.'**
+  String get mergeNoResults;
+
+  /// mergePendingBadge
+  ///
+  /// In en, this message translates to:
+  /// **'Request pending'**
+  String get mergePendingBadge;
+
+  /// mergeConfirmTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Request this merge?'**
+  String get mergeConfirmTitle;
+
+  /// mergeConfirmBody
+  ///
+  /// In en, this message translates to:
+  /// **'Versions of “{source}” will move under “{target}”.'**
+  String mergeConfirmBody(String source, String target);
+
+  /// mergeRequestAction
+  ///
+  /// In en, this message translates to:
+  /// **'Request merge'**
+  String get mergeRequestAction;
+
+  /// mergeSent
+  ///
+  /// In en, this message translates to:
+  /// **'Merge request sent'**
+  String get mergeSent;
+
+  /// mergeDone
+  ///
+  /// In en, this message translates to:
+  /// **'The songs were merged'**
+  String get mergeDone;
+
+  /// mergeNeedsInternet
+  ///
+  /// In en, this message translates to:
+  /// **'Merging songs needs an internet connection.'**
+  String get mergeNeedsInternet;
+
+  /// mergeSignIn
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to merge songs.'**
+  String get mergeSignIn;
+
+  /// mergeRequestTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Merge request'**
+  String get mergeRequestTitle;
+
+  /// mergeRequestBody
+  ///
+  /// In en, this message translates to:
+  /// **'{requester} asks to merge “{source}” into “{target}”. Every version of “{source}” would move under “{target}”.'**
+  String mergeRequestBody(String requester, String source, String target);
+
+  /// mergeRequesterUnknown
+  ///
+  /// In en, this message translates to:
+  /// **'Someone'**
+  String get mergeRequesterUnknown;
+
+  /// mergeAccept
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get mergeAccept;
+
+  /// mergeDecline
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get mergeDecline;
+
+  /// mergeAccepted
+  ///
+  /// In en, this message translates to:
+  /// **'Songs merged'**
+  String get mergeAccepted;
+
+  /// mergeDeclined
+  ///
+  /// In en, this message translates to:
+  /// **'Request declined'**
+  String get mergeDeclined;
+
+  /// mergeAlreadyAnswered
+  ///
+  /// In en, this message translates to:
+  /// **'This request was already answered.'**
+  String get mergeAlreadyAnswered;
+
+  /// songPageTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get songPageTitle;
+
+  /// songPageNeedsInternet
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to see every version of this song.'**
+  String get songPageNeedsInternet;
+
+  /// discoverTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discoverTitle;
+
+  /// discoverTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Discover public songs'**
+  String get discoverTooltip;
+
+  /// discoverHint
+  ///
+  /// In en, this message translates to:
+  /// **'Public versions shared by other musicians. Open one to read it or fork it into your library.'**
+  String get discoverHint;
+
+  /// discoverSearchLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Search public songs'**
+  String get discoverSearchLabel;
+
+  /// discoverEmpty
+  ///
+  /// In en, this message translates to:
+  /// **'No public songs match.'**
+  String get discoverEmpty;
+
+  /// discoverNeedsInternet
+  ///
+  /// In en, this message translates to:
+  /// **'Discover needs an internet connection.'**
+  String get discoverNeedsInternet;
+
+  /// discoverSignIn
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to discover public songs.'**
+  String get discoverSignIn;
+
+  /// backendErrorVersionNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'That version is no longer available.'**
+  String get backendErrorVersionNotFound;
+
+  /// backendErrorSongNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'That song is no longer available.'**
+  String get backendErrorSongNotFound;
+
+  /// backendErrorMergeNotCreator
+  ///
+  /// In en, this message translates to:
+  /// **'You can only merge songs when you created one of them.'**
+  String get backendErrorMergeNotCreator;
+
+  /// backendErrorMergeSameSong
+  ///
+  /// In en, this message translates to:
+  /// **'Those are already the same song.'**
+  String get backendErrorMergeSameSong;
+
+  /// backendErrorMergeAlreadyRequested
+  ///
+  /// In en, this message translates to:
+  /// **'A merge request for these songs is already pending.'**
+  String get backendErrorMergeAlreadyRequested;
+
+  /// backendErrorMergeNotPending
+  ///
+  /// In en, this message translates to:
+  /// **'This request was already answered.'**
+  String get backendErrorMergeNotPending;
+
+  /// backendErrorMergeRequestNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'That merge request no longer exists.'**
+  String get backendErrorMergeRequestNotFound;
+
+  /// discoverLoadMore
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get discoverLoadMore;
 }
 
 class _AppLocalizationsDelegate

@@ -15,6 +15,8 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/sharing/presentation/widgets/merge_request_sheet.dart';
+import 'package:battuta/features/sharing/presentation/widgets/sharing_sheet.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -311,6 +313,11 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   bool _canEdit(String? accountId) =>
       _originalSong == null || _originalSong!.isEditableBy(accountId);
 
+  /// Title and artist belong to the song: only the person who created it
+  /// edits them. Other owners of a version of it see them read-only.
+  bool _canEditTitle(String? accountId) =>
+      _originalSong == null || _originalSong!.canEditTitleBy(accountId);
+
   Future<void> _saveSong() async {
     final l10n = AppLocalizations.of(context);
     if (!_canEdit(ref.read(currentAccountIdProvider))) {
@@ -511,7 +518,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   }
 
   Widget _buildScaffold(ThemeData theme, bool isEditing) {
-    final canEdit = _canEdit(ref.watch(currentAccountIdProvider));
+    final me = ref.watch(currentAccountIdProvider);
+    final canEdit = _canEdit(me);
+    final titleLocked = canEdit && !_canEditTitle(me);
+    final original = _originalSong;
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -583,7 +593,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               key: const Key('song_title_field'),
               controller: _titleController,
+              readOnly: titleLocked,
               decoration: InputDecoration(
+                helperText: titleLocked ? l10n?.songTitleLockedHint : null,
+                helperMaxLines: 3,
                 labelText: l10n?.songTitleLabel ?? 'Song Title *',
                 hintText: l10n?.songTitleHint ?? 'e.g. Amazing Grace',
                 border: const OutlineInputBorder(),
@@ -601,6 +614,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               key: const Key('song_artist_field'),
               controller: _artistController,
+              readOnly: titleLocked,
               decoration: InputDecoration(
                 labelText: l10n?.artistComposerLabel ?? 'Artist / Composer *',
                 hintText: l10n?.artistComposerHint ?? 'e.g. John Newton',
@@ -615,6 +629,46 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                 return null;
               },
             ),
+            if (original != null &&
+                canEdit &&
+                me != null &&
+                original.ownerId == me)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      key: const ValueKey('editor_sharing_btn'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                      ),
+                      icon: const Icon(Icons.share_outlined, size: 18),
+                      label: Text(l10n?.sharingButton ?? 'Sharing'),
+                      onPressed: () =>
+                          showSharingSheet(context, ref, original.id),
+                    ),
+                    if (titleLocked && original.songWorkId != null)
+                      OutlinedButton.icon(
+                        key: const ValueKey('editor_merge_btn'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(44, 44),
+                        ),
+                        icon: const Icon(Icons.merge_type, size: 18),
+                        label: Text(
+                          l10n?.mergeSuggestButton ?? 'Suggest merge',
+                        ),
+                        onPressed: () => showMergeRequestSheet(
+                          context,
+                          songWorkId: original.songWorkId!,
+                          title: original.title,
+                          createdByMe: false,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 16),
 
             // ── Musical Attributes (Key, Tempo, Meter) ──

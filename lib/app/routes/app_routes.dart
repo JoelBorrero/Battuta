@@ -64,6 +64,27 @@ final class AppRoutes {
   static String organizationSettings(String organizationId) =>
       '/organizations/${Uri.encodeComponent(organizationId)}/settings';
 
+  /// A song (the work) with all the versions of it I can see.
+  ///
+  /// Path parameter: `songWorkId`.
+  static const String songPagePath = '/songs/:songWorkId';
+
+  /// Returns the concrete path of the song [songWorkId].
+  static String songPage(String songWorkId) =>
+      '/songs/${Uri.encodeComponent(songWorkId)}';
+
+  /// A request to merge two songs, answered by the creator of the other one.
+  ///
+  /// Path parameter: `requestId`.
+  static const String mergeRequestPath = '/merge-requests/:requestId';
+
+  /// Returns the concrete path of the merge request [requestId].
+  static String mergeRequest(String requestId) =>
+      '/merge-requests/${Uri.encodeComponent(requestId)}';
+
+  /// Public songs shared by other musicians (online only).
+  static const String discover = '/discover';
+
   /// Whether [location] belongs to the account entry flow.
   static bool isAccountEntry(String location) =>
       location == welcome || location == signIn || location == createAccount;

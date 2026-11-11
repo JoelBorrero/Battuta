@@ -11,6 +11,7 @@ import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:battuta/features/repertoire/domain/repositories/song_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -125,6 +126,30 @@ class InMemorySongRepository implements SongRepository {
     _songs[song.id] = song;
     _notify();
     return Right(song);
+  }
+
+  @override
+  Future<Either<Failure, Song>> updateSharing(
+    String id, {
+    String? label,
+    SongVisibility? visibility,
+    List<String>? sharedOrganizationIds,
+  }) async {
+    final song = _songs[id];
+    if (song == null) {
+      return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
+    }
+    final newVisibility = visibility ?? song.visibility;
+    final updated = song.copyWith(
+      label: label?.trim().isNotEmpty ?? false ? label!.trim() : song.label,
+      visibility: newVisibility,
+      sharedOrganizationIds: newVisibility == SongVisibility.organizations
+          ? (sharedOrganizationIds ?? song.sharedOrganizationIds)
+          : const [],
+    );
+    _songs[id] = updated;
+    _notify();
+    return Right(updated);
   }
 
   @override

@@ -15,13 +15,14 @@ Map<String, dynamic> versionInsertPayload(
   SongEntry song, {
   required String workId,
   required String ownerId,
+  bool keepLineage = true,
 }) => {
   'id': song.id,
   'song_id': workId,
   'owner_id': ownerId,
   'label': song.label,
   'visibility': song.visibility,
-  'forked_from_version_id': song.forkedFromVersionId,
+  'forked_from_version_id': keepLineage ? song.forkedFromVersionId : null,
   ..._versionContent(song),
 };
 
@@ -104,6 +105,7 @@ SongsCompanion songCompanionFromRemote(
     accountId: Value(accountId),
     editedAtMs: Value(_editedAtMs(row)),
     sharingDirty: const Value(false),
+    songCreatorId: Value(work['created_by'] as String?),
   );
 }
 

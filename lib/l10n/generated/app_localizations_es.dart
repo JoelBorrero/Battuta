@@ -2876,4 +2876,276 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get repertoireEntryAfterSync =>
       'Disponible tras la próxima sincronización';
+
+  @override
+  String get sharingButton => 'Compartir';
+
+  @override
+  String get sharingSheetTitle => 'Compartir';
+
+  @override
+  String get sharingLabelField => 'Nombre de la versión';
+
+  @override
+  String get sharingWhoCanSee => 'Quién puede ver esta versión';
+
+  @override
+  String get sharingPrivateTitle => 'Solo yo';
+
+  @override
+  String get sharingPrivateHint => 'Solo tú la ves.';
+
+  @override
+  String get sharingOrganizationsTitle => 'Mis organizaciones';
+
+  @override
+  String get sharingOrganizationsHint =>
+      'Los miembros de las organizaciones que elijas pueden abrirla y hacer su propia copia.';
+
+  @override
+  String get sharingPublicTitle => 'Pública';
+
+  @override
+  String get sharingPublicHint =>
+      'Cualquiera con sesión iniciada puede encontrarla, abrirla y hacer su propia copia.';
+
+  @override
+  String get sharingPickOrganizations => 'Compartir con';
+
+  @override
+  String get sharingNoOrganizations =>
+      'Únete a una organización para compartir con ella.';
+
+  @override
+  String get sharingPickOne => 'Elige al menos una organización.';
+
+  @override
+  String get sharingSyncNote =>
+      'Se guarda en este dispositivo. Los demás verán el cambio cuando tengas conexión.';
+
+  @override
+  String get sharingSave => 'Guardar';
+
+  @override
+  String get sharingSaved => 'Se actualizó cómo se comparte';
+
+  @override
+  String get visibilityPrivate => 'Privada';
+
+  @override
+  String get visibilityOrganizations => 'Organizaciones';
+
+  @override
+  String get visibilityPublic => 'Pública';
+
+  @override
+  String get versionsOtherTitle => 'Otras versiones';
+
+  @override
+  String get versionsAllTitle => 'Versiones';
+
+  @override
+  String get versionsLoading => 'Buscando más versiones…';
+
+  @override
+  String get versionsEmpty => 'Aún no hay otras versiones.';
+
+  @override
+  String get versionsOfflineNote =>
+      'Sin conexión: se muestran las versiones guardadas en este dispositivo.';
+
+  @override
+  String get versionYours => 'Tuya';
+
+  @override
+  String get versionFork => 'Bifurcación';
+
+  @override
+  String versionForkOf(String label) {
+    return 'Bifurcación de $label';
+  }
+
+  @override
+  String get versionOnDevice => 'En este dispositivo';
+
+  @override
+  String get versionNeedsInternet => 'Conéctate para abrir esta versión.';
+
+  @override
+  String versionOpenTooltip(String label) {
+    return 'Abrir $label';
+  }
+
+  @override
+  String get forkButton => 'Bifurcar a mi biblioteca';
+
+  @override
+  String forkTooltip(String label) {
+    return 'Bifurcar $label a mi biblioteca';
+  }
+
+  @override
+  String get forkDialogTitle => 'Bifurcar esta versión';
+
+  @override
+  String get forkDialogBody =>
+      'Obtienes tu propia copia para editar. El original no cambia.';
+
+  @override
+  String get forkLabelField => 'Nombre de tu copia';
+
+  @override
+  String forkDefaultLabel(String label) {
+    return '$label (copia)';
+  }
+
+  @override
+  String get forkConfirm => 'Bifurcar';
+
+  @override
+  String get forkDone => 'Se bifurcó a tu biblioteca';
+
+  @override
+  String get forkDoneOffline =>
+      'Bifurcada en este dispositivo. Se sincroniza cuando tengas conexión.';
+
+  @override
+  String get songTitleLockedHint =>
+      'El título y el artista pertenecen a la canción. Solo quien la creó puede cambiarlos.';
+
+  @override
+  String get mergeSameSongButton => 'Es la misma canción que…';
+
+  @override
+  String get mergeSuggestButton => 'Sugerir fusión';
+
+  @override
+  String get mergeSheetTitle => 'Fusionar canciones';
+
+  @override
+  String mergeIntroMine(String title) {
+    return 'Elige la canción que “$title” duplica. Sus versiones pasarán a la canción que elijas cuando su creador acepte.';
+  }
+
+  @override
+  String mergeIntroOther(String title) {
+    return '“$title” la creó otra persona. Elige una de tus canciones que sea la misma: sus versiones pasarán a “$title” cuando su creador acepte.';
+  }
+
+  @override
+  String get mergeSearchLabel => 'Buscar canciones';
+
+  @override
+  String get mergeNoResults => 'No hay canciones que coincidan.';
+
+  @override
+  String get mergePendingBadge => 'Solicitud pendiente';
+
+  @override
+  String get mergeConfirmTitle => '¿Solicitar esta fusión?';
+
+  @override
+  String mergeConfirmBody(String source, String target) {
+    return 'Las versiones de “$source” pasarán a “$target”.';
+  }
+
+  @override
+  String get mergeRequestAction => 'Solicitar fusión';
+
+  @override
+  String get mergeSent => 'Solicitud de fusión enviada';
+
+  @override
+  String get mergeDone => 'Las canciones se fusionaron';
+
+  @override
+  String get mergeNeedsInternet =>
+      'Fusionar canciones requiere conexión a internet.';
+
+  @override
+  String get mergeSignIn => 'Inicia sesión para fusionar canciones.';
+
+  @override
+  String get mergeRequestTitle => 'Solicitud de fusión';
+
+  @override
+  String mergeRequestBody(String requester, String source, String target) {
+    return '$requester pide fusionar “$source” en “$target”. Todas las versiones de “$source” pasarían a “$target”.';
+  }
+
+  @override
+  String get mergeRequesterUnknown => 'Alguien';
+
+  @override
+  String get mergeAccept => 'Aceptar';
+
+  @override
+  String get mergeDecline => 'Rechazar';
+
+  @override
+  String get mergeAccepted => 'Canciones fusionadas';
+
+  @override
+  String get mergeDeclined => 'Solicitud rechazada';
+
+  @override
+  String get mergeAlreadyAnswered => 'Esta solicitud ya se respondió.';
+
+  @override
+  String get songPageTitle => 'Canción';
+
+  @override
+  String get songPageNeedsInternet =>
+      'Conéctate para ver todas las versiones de esta canción.';
+
+  @override
+  String get discoverTitle => 'Descubrir';
+
+  @override
+  String get discoverTooltip => 'Descubrir canciones públicas';
+
+  @override
+  String get discoverHint =>
+      'Versiones públicas compartidas por otros músicos. Ábrelas para leerlas o bifúrcalas a tu biblioteca.';
+
+  @override
+  String get discoverSearchLabel => 'Buscar canciones públicas';
+
+  @override
+  String get discoverEmpty => 'No hay canciones públicas que coincidan.';
+
+  @override
+  String get discoverNeedsInternet => 'Descubrir requiere conexión a internet.';
+
+  @override
+  String get discoverSignIn =>
+      'Inicia sesión para descubrir canciones públicas.';
+
+  @override
+  String get backendErrorVersionNotFound =>
+      'Esa versión ya no está disponible.';
+
+  @override
+  String get backendErrorSongNotFound => 'Esa canción ya no está disponible.';
+
+  @override
+  String get backendErrorMergeNotCreator =>
+      'Solo puedes fusionar canciones si creaste una de ellas.';
+
+  @override
+  String get backendErrorMergeSameSong => 'Ya son la misma canción.';
+
+  @override
+  String get backendErrorMergeAlreadyRequested =>
+      'Ya hay una solicitud de fusión pendiente para estas canciones.';
+
+  @override
+  String get backendErrorMergeNotPending => 'Esta solicitud ya se respondió.';
+
+  @override
+  String get backendErrorMergeRequestNotFound =>
+      'Esa solicitud de fusión ya no existe.';
+
+  @override
+  String get discoverLoadMore => 'Cargar más';
 }

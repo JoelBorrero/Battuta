@@ -124,7 +124,30 @@ void main() {
         NotificationDestination.song,
       );
       expect(
+        of(NotificationType.songVersionForked, {
+          'version_id': 'v1',
+          'song_id': 's1',
+        }),
+        NotificationDestination.songPage,
+      );
+      expect(
         of(NotificationType.songMergeRequested),
+        NotificationDestination.repertoire,
+      );
+      expect(
+        of(NotificationType.songMergeRequested, {'request_id': 'r1'}),
+        NotificationDestination.mergeRequest,
+      );
+      expect(
+        of(NotificationType.songMergeAccepted, {'target_song_id': 's2'}),
+        NotificationDestination.songPage,
+      );
+      expect(
+        of(NotificationType.songMergeAccepted),
+        NotificationDestination.repertoire,
+      );
+      expect(
+        of(NotificationType.songMergeDeclined, {'target_song_id': 's2'}),
         NotificationDestination.repertoire,
       );
       expect(of(NotificationType.unknown), NotificationDestination.none);
@@ -135,6 +158,36 @@ void main() {
         note(NotificationType.songVersionForked, payload: {'version_id': 'v1'}),
       );
       expect(target.versionId, 'v1');
+    });
+
+    test('a copy names the song, a merge names the request or the target', () {
+      expect(
+        notificationTarget(
+          note(
+            NotificationType.songVersionForked,
+            payload: {'version_id': 'v1', 'song_id': 's1'},
+          ),
+        ).songId,
+        's1',
+      );
+      expect(
+        notificationTarget(
+          note(
+            NotificationType.songMergeRequested,
+            payload: {'request_id': 'r1', 'target_song_id': 's2'},
+          ),
+        ).requestId,
+        'r1',
+      );
+      expect(
+        notificationTarget(
+          note(
+            NotificationType.songMergeAccepted,
+            payload: {'source_song_id': 's1', 'target_song_id': 's2'},
+          ),
+        ).songId,
+        's2',
+      );
     });
   });
 

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'v1 -> v3 keeps songs, setlists and scores and adds the cache tables',
+    'v1 -> v4 keeps songs, setlists and scores and adds the cache tables',
     () async {
       final db = AppDatabase(
         NativeDatabase.memory(
@@ -80,11 +80,11 @@ void main() {
           );
       expect(await db.select(db.cacheRecords).get(), hasLength(1));
       final version = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(version.read<int>('user_version'), 3);
+      expect(version.read<int>('user_version'), 4);
     },
   );
 
-  test('a fresh database is created at v3 with every table', () async {
+  test('a fresh database is created at v4 with every table', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     expect(await db.select(db.songs).get(), isEmpty);
@@ -93,7 +93,7 @@ void main() {
   });
 
   test(
-    'v2 -> v3 keeps songs, setlists, scores and the cache, adding sync columns',
+    'v2 -> v4 keeps songs, setlists, scores and the cache, adding sync columns',
     () async {
       final db = AppDatabase(
         NativeDatabase.memory(
@@ -213,7 +213,49 @@ void main() {
       expect(cached.recordId, 'o1');
 
       final version = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(version.read<int>('user_version'), 3);
+      expect(version.read<int>('user_version'), 4);
     },
   );
+
+  test('v3 -> v4 adds the song creator and keeps the rows', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          // The exact v3 songs table (before the creator of a work was kept).
+          raw.execute('''
+            CREATE TABLE songs (
+              id TEXT NOT NULL PRIMARY KEY, title TEXT NOT NULL, artist TEXT NOT NULL,
+              "key" TEXT NOT NULL, tempo INTEGER NOT NULL,
+              time_signature_beats INTEGER NOT NULL DEFAULT 4,
+              time_signature_beat_value INTEGER NOT NULL DEFAULT 4,
+              sections_json TEXT NOT NULL DEFAULT '[]', tags_json TEXT NOT NULL DEFAULT '[]',
+              cover_image_path TEXT NULL, notes TEXT NULL,
+              created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+              song_work_id TEXT NULL, owner_id TEXT NULL,
+              label TEXT NOT NULL DEFAULT 'Original',
+              visibility TEXT NOT NULL DEFAULT 'private',
+              forked_from_version_id TEXT NULL,
+              shared_organization_ids_json TEXT NOT NULL DEFAULT '[]',
+              is_dirty INTEGER NOT NULL DEFAULT 0, deleted_at INTEGER NULL,
+              remote_updated_at TEXT NULL, account_id TEXT NULL,
+              edited_at_ms INTEGER NOT NULL DEFAULT 0,
+              sharing_dirty INTEGER NOT NULL DEFAULT 0)''');
+          raw.execute(
+            'INSERT INTO songs (id, title, artist, "key", tempo, created_at, updated_at, owner_id) '
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            ['v1', 'Amazing Grace', 'Newton', 'G', 80, 1700000000, 1700000000, 'u1'],
+          );
+          raw.execute('PRAGMA user_version = 3');
+        },
+      ),
+    );
+    addTearDown(db.close);
+
+    final song = (await db.select(db.songs).get()).single;
+    expect(song.title, 'Amazing Grace');
+    expect(song.ownerId, 'u1');
+    expect(song.songCreatorId, isNull);
+    final version = await db.customSelect('PRAGMA user_version').getSingle();
+    expect(version.read<int>('user_version'), 4);
+  });
 }

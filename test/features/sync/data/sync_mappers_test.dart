@@ -51,6 +51,31 @@ void main() {
       expect(payload['forked_from_version_id'], isNull);
     });
 
+    test('insert can drop the lineage of a fork whose parent is gone', () async {
+      await insertSong();
+      await (db.update(db.songs)).write(
+        const SongsCompanion(forkedFromVersionId: Value('parent')),
+      );
+      final song = await db.select(db.songs).getSingle();
+      expect(
+        versionInsertPayload(
+          song,
+          workId: 'w1',
+          ownerId: 'u1',
+        )['forked_from_version_id'],
+        'parent',
+      );
+      expect(
+        versionInsertPayload(
+          song,
+          workId: 'w1',
+          ownerId: 'u1',
+          keepLineage: false,
+        )['forked_from_version_id'],
+        isNull,
+      );
+    });
+
     test('insert keeps the parent of a fork and the edit time', () async {
       await insertSong();
       await (db.update(db.songs)).write(
@@ -114,7 +139,12 @@ void main() {
       'forked_from_version_id': 'v0',
       'created_at': '2026-01-01T00:00:00+00:00',
       'updated_at': '2026-11-10T10:00:00.123456+00:00',
-      'songs': {'id': 'w1', 'title': 'Work', 'artist': 'Band'},
+      'songs': {
+        'id': 'w1',
+        'title': 'Work',
+        'artist': 'Band',
+        'created_by': 'creator',
+      },
       'version_shares': [
         {'organization_id': 'o1'},
         {'organization_id': 'o2'},
@@ -126,6 +156,7 @@ void main() {
       expect(c.title.value, 'Work');
       expect(c.artist.value, 'Band');
       expect(c.songWorkId.value, 'w1');
+      expect(c.songCreatorId.value, 'creator');
       expect(c.ownerId.value, 'me');
       expect(c.label.value, 'Live');
       expect(c.visibility.value, 'organizations');

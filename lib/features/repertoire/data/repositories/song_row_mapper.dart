@@ -35,6 +35,7 @@ Song songFromRow(SongEntry row) {
     visibility: SongVisibility.parse(row.visibility),
     forkedFromVersionId: row.forkedFromVersionId,
     sharedOrganizationIds: decodeStringList(row.sharedOrganizationIdsJson),
+    songCreatorId: row.songCreatorId,
   );
 }
 

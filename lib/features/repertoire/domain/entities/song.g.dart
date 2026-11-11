@@ -45,6 +45,7 @@ _Song _$SongFromJson(Map<String, dynamic> json) => _Song(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  songCreatorId: json['songCreatorId'] as String?,
 );
 
 Map<String, dynamic> _$SongToJson(_Song instance) => <String, dynamic>{
@@ -69,6 +70,7 @@ Map<String, dynamic> _$SongToJson(_Song instance) => <String, dynamic>{
   'visibility': _$SongVisibilityEnumMap[instance.visibility]!,
   'forkedFromVersionId': instance.forkedFromVersionId,
   'sharedOrganizationIds': instance.sharedOrganizationIds,
+  'songCreatorId': instance.songCreatorId,
 };
 
 $Rec? _$recordConvertNullable<$Rec>(

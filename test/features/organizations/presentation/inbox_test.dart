@@ -6,6 +6,8 @@ import 'package:battuta/features/organizations/domain/entities/notification.dart
 import 'package:battuta/features/organizations/presentation/pages/inbox_page.dart';
 import 'package:battuta/features/organizations/presentation/pages/organization_settings_page.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/sharing/presentation/pages/merge_request_page.dart';
+import 'package:battuta/features/sharing/presentation/pages/song_work_page.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -267,10 +269,69 @@ void main() {
       expect(location(tester), '/repertoire/ver-7');
     });
 
-    testWidgets('a merge request opens the repertoire', (tester) async {
+    String pushedLocation(WidgetTester tester) => container(tester)
+        .read(appRouterProvider)
+        .routerDelegate
+        .currentConfiguration
+        .last
+        .matchedLocation;
+
+    testWidgets('a copy of my version opens its song', (tester) async {
+      await open(
+        tester,
+        note(
+          'n1',
+          NotificationType.songVersionForked,
+          orgId: null,
+          payload: {'version_id': 'ver-7', 'song_id': 'work-3'},
+        ),
+      );
+      expect(find.byType(SongWorkPage), findsOneWidget);
+      expect(pushedLocation(tester), '/songs/work-3');
+    });
+
+    testWidgets('a merge request opens the request to answer', (tester) async {
+      await open(
+        tester,
+        note(
+          'n1',
+          NotificationType.songMergeRequested,
+          orgId: null,
+          payload: {'request_id': 'req-1'},
+        ),
+      );
+      expect(find.byType(MergeRequestPage), findsOneWidget);
+      expect(pushedLocation(tester), '/merge-requests/req-1');
+    });
+
+    testWidgets('an accepted merge opens the surviving song', (tester) async {
+      await open(
+        tester,
+        note(
+          'n1',
+          NotificationType.songMergeAccepted,
+          orgId: null,
+          payload: {'source_song_id': 'song-a', 'target_song_id': 'song-b'},
+        ),
+      );
+      expect(find.byType(SongWorkPage), findsOneWidget);
+      expect(pushedLocation(tester), '/songs/song-b');
+    });
+
+    testWidgets('a merge request without its id opens the repertoire', (
+      tester,
+    ) async {
       await open(
         tester,
         note('n1', NotificationType.songMergeRequested, orgId: null),
+      );
+      expect(location(tester), '/repertoire');
+    });
+
+    testWidgets('a declined merge opens the repertoire', (tester) async {
+      await open(
+        tester,
+        note('n1', NotificationType.songMergeDeclined, orgId: null),
       );
       expect(location(tester), '/repertoire');
     });

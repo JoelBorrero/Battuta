@@ -31,6 +31,9 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/scanner/presentation/pages/scanner_page.dart';
 import 'package:battuta/features/score/presentation/pages/score_editor_page.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
+import 'package:battuta/features/sharing/presentation/pages/discover_page.dart';
+import 'package:battuta/features/sharing/presentation/pages/merge_request_page.dart';
+import 'package:battuta/features/sharing/presentation/pages/song_work_page.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -140,6 +143,23 @@ GoRouter appRouter(Ref ref) {
         path: AppRoutes.inbox,
         name: 'inbox',
         builder: (context, state) => const InboxPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.songPagePath,
+        name: 'songPage',
+        builder: (context, state) =>
+            SongWorkPage(songWorkId: state.pathParameters['songWorkId']!),
+      ),
+      GoRoute(
+        path: AppRoutes.mergeRequestPath,
+        name: 'mergeRequest',
+        builder: (context, state) =>
+            MergeRequestPage(requestId: state.pathParameters['requestId']!),
+      ),
+      GoRoute(
+        path: AppRoutes.discover,
+        name: 'discover',
+        builder: (context, state) => const DiscoverPage(),
       ),
 
       // ── Shell for bottom navigation ────────────────────────────────

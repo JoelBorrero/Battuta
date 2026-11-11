@@ -3,6 +3,12 @@
 Deferred findings that must not be forgotten. When a task closes, add anything it deferred here; when an
 item is fixed, delete it (the fixing task's summary records it).
 
+## ⚠ Verify first: 009 integration run not confirmed
+Docker hung again while 009 was reviewed (2026-11-11). Restart Docker Desktop, then `supabase start`,
+`supabase db reset`, and `flutter test --tags supabase --run-skipped test/integration` (expect 53). The 009
+remote queries (`or` with `referencedTable`, `songs!inner`, fork RPC) are only covered there. Remove this
+section once it passes.
+
 ## From 001: harden transposer
 - Sharp/flat spelling on free-form keys: `b minor` +2 → `Db minor` instead of `C# minor`.
 - Hand-built custom labels that only look root-prefixed (`Cat` with root `C` → `Dat`).
@@ -40,9 +46,6 @@ Product / ops:
 - One extra profile request per sign-in/session restore.
 
 ## From 004: song sync
-- **009:** title/artist edits on a version whose song was created by someone else are reverted by sync; needs a
-  UI rule (edit only your own song's title, or propose a merge).
-- **009:** `updateSharing` exists only on `DriftSongRepository`, not on the `SongRepository` interface.
 - Sharing changes (label, visibility, shares) have no edit time: the device that syncs last wins.
 - A refused share after a successful visibility update leaves the version `organizations` with only the
   accepted shares (no rollback).
@@ -106,3 +109,17 @@ Product / ops:
   tap runs a futile sync.
 - Candidate search uses `id.in.(...)` with every version shared to the org (~200 shares approach URL limits;
   `version_shares` select capped at 1000 rows) and reads all pages eagerly: move to an RPC or view.
+
+## From 009: song sharing
+- **010:** an open viewer of a cached foreign/public version shows a raw "Error loading song" once a sync removes
+  the row (also after Fork, going back from the editor). Pin rows opened on purpose or show a localized
+  not-found state.
+- **010:** offline fork with an invisible parent and invisible song gets a fresh work id on every retry; a
+  failure after `_ensureWork` leaves empty `songs` rows (`versions_sync.dart:139-159`).
+- **010:** online fork can be duplicated if the RPC succeeds but the follow-up read fails (falls back to a local
+  copy) (`song_sharing_repository_impl.dart:78-98`).
+- `PracticePlayerBar` overflows by 25 px at 320 px (`practice_player_bar.dart:151`, pre-existing).
+- Discover swallows a load-more failure when results already exist.
+- Hard-coded English "(copy)" fallback label in `song_sharing_repository_impl.dart:146` (UI never reaches it).
+- The "Owned by" banner says "another user" for versions opened from Discover (no owner name cached).
+- A public version opened from Discover is removed by the next sync unless it is in reach (repertoire/setlists).

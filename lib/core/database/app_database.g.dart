@@ -283,6 +283,17 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _songCreatorIdMeta = const VerificationMeta(
+    'songCreatorId',
+  );
+  @override
+  late final GeneratedColumn<String> songCreatorId = GeneratedColumn<String>(
+    'song_creator_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -310,6 +321,7 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     accountId,
     editedAtMs,
     sharingDirty,
+    songCreatorId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -514,6 +526,15 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
         ),
       );
     }
+    if (data.containsKey('song_creator_id')) {
+      context.handle(
+        _songCreatorIdMeta,
+        songCreatorId.isAcceptableOrUnknown(
+          data['song_creator_id']!,
+          _songCreatorIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -623,6 +644,10 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
         DriftSqlType.bool,
         data['${effectivePrefix}sharing_dirty'],
       )!,
+      songCreatorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}song_creator_id'],
+      ),
     );
   }
 
@@ -672,6 +697,9 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
 
   /// Label, visibility or shares changed locally and are not pushed yet.
   final bool sharingDirty;
+
+  /// v4: account that created the work (`songs.created_by`); null if unknown.
+  final String? songCreatorId;
   const SongEntry({
     required this.id,
     required this.title,
@@ -698,6 +726,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     this.accountId,
     required this.editedAtMs,
     required this.sharingDirty,
+    this.songCreatorId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -745,6 +774,9 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     }
     map['edited_at_ms'] = Variable<int>(editedAtMs);
     map['sharing_dirty'] = Variable<bool>(sharingDirty);
+    if (!nullToAbsent || songCreatorId != null) {
+      map['song_creator_id'] = Variable<String>(songCreatorId);
+    }
     return map;
   }
 
@@ -791,6 +823,9 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           : Value(accountId),
       editedAtMs: Value(editedAtMs),
       sharingDirty: Value(sharingDirty),
+      songCreatorId: songCreatorId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(songCreatorId),
     );
   }
 
@@ -831,6 +866,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       accountId: serializer.fromJson<String?>(json['accountId']),
       editedAtMs: serializer.fromJson<int>(json['editedAtMs']),
       sharingDirty: serializer.fromJson<bool>(json['sharingDirty']),
+      songCreatorId: serializer.fromJson<String?>(json['songCreatorId']),
     );
   }
   @override
@@ -864,6 +900,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       'accountId': serializer.toJson<String?>(accountId),
       'editedAtMs': serializer.toJson<int>(editedAtMs),
       'sharingDirty': serializer.toJson<bool>(sharingDirty),
+      'songCreatorId': serializer.toJson<String?>(songCreatorId),
     };
   }
 
@@ -893,6 +930,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     Value<String?> accountId = const Value.absent(),
     int? editedAtMs,
     bool? sharingDirty,
+    Value<String?> songCreatorId = const Value.absent(),
   }) => SongEntry(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -927,6 +965,9 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     accountId: accountId.present ? accountId.value : this.accountId,
     editedAtMs: editedAtMs ?? this.editedAtMs,
     sharingDirty: sharingDirty ?? this.sharingDirty,
+    songCreatorId: songCreatorId.present
+        ? songCreatorId.value
+        : this.songCreatorId,
   );
   SongEntry copyWithCompanion(SongsCompanion data) {
     return SongEntry(
@@ -977,6 +1018,9 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       sharingDirty: data.sharingDirty.present
           ? data.sharingDirty.value
           : this.sharingDirty,
+      songCreatorId: data.songCreatorId.present
+          ? data.songCreatorId.value
+          : this.songCreatorId,
     );
   }
 
@@ -1007,7 +1051,8 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
           ..write('accountId: $accountId, ')
           ..write('editedAtMs: $editedAtMs, ')
-          ..write('sharingDirty: $sharingDirty')
+          ..write('sharingDirty: $sharingDirty, ')
+          ..write('songCreatorId: $songCreatorId')
           ..write(')'))
         .toString();
   }
@@ -1039,6 +1084,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     accountId,
     editedAtMs,
     sharingDirty,
+    songCreatorId,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1068,7 +1114,8 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           other.remoteUpdatedAt == this.remoteUpdatedAt &&
           other.accountId == this.accountId &&
           other.editedAtMs == this.editedAtMs &&
-          other.sharingDirty == this.sharingDirty);
+          other.sharingDirty == this.sharingDirty &&
+          other.songCreatorId == this.songCreatorId);
 }
 
 class SongsCompanion extends UpdateCompanion<SongEntry> {
@@ -1097,6 +1144,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
   final Value<String?> accountId;
   final Value<int> editedAtMs;
   final Value<bool> sharingDirty;
+  final Value<String?> songCreatorId;
   final Value<int> rowid;
   const SongsCompanion({
     this.id = const Value.absent(),
@@ -1124,6 +1172,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.accountId = const Value.absent(),
     this.editedAtMs = const Value.absent(),
     this.sharingDirty = const Value.absent(),
+    this.songCreatorId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SongsCompanion.insert({
@@ -1152,6 +1201,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.accountId = const Value.absent(),
     this.editedAtMs = const Value.absent(),
     this.sharingDirty = const Value.absent(),
+    this.songCreatorId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -1186,6 +1236,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Expression<String>? accountId,
     Expression<int>? editedAtMs,
     Expression<bool>? sharingDirty,
+    Expression<String>? songCreatorId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1218,6 +1269,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       if (accountId != null) 'account_id': accountId,
       if (editedAtMs != null) 'edited_at_ms': editedAtMs,
       if (sharingDirty != null) 'sharing_dirty': sharingDirty,
+      if (songCreatorId != null) 'song_creator_id': songCreatorId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1248,6 +1300,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Value<String?>? accountId,
     Value<int>? editedAtMs,
     Value<bool>? sharingDirty,
+    Value<String?>? songCreatorId,
     Value<int>? rowid,
   }) {
     return SongsCompanion(
@@ -1278,6 +1331,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       accountId: accountId ?? this.accountId,
       editedAtMs: editedAtMs ?? this.editedAtMs,
       sharingDirty: sharingDirty ?? this.sharingDirty,
+      songCreatorId: songCreatorId ?? this.songCreatorId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1366,6 +1420,9 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     if (sharingDirty.present) {
       map['sharing_dirty'] = Variable<bool>(sharingDirty.value);
     }
+    if (songCreatorId.present) {
+      map['song_creator_id'] = Variable<String>(songCreatorId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1400,6 +1457,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
           ..write('accountId: $accountId, ')
           ..write('editedAtMs: $editedAtMs, ')
           ..write('sharingDirty: $sharingDirty, ')
+          ..write('songCreatorId: $songCreatorId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3849,6 +3907,7 @@ typedef $$SongsTableCreateCompanionBuilder = SongsCompanion Function({
   Value<String?> accountId,
   Value<int> editedAtMs,
   Value<bool> sharingDirty,
+  Value<String?> songCreatorId,
   Value<int> rowid,
 });
 typedef $$SongsTableUpdateCompanionBuilder = SongsCompanion Function({
@@ -3877,6 +3936,7 @@ typedef $$SongsTableUpdateCompanionBuilder = SongsCompanion Function({
   Value<String?> accountId,
   Value<int> editedAtMs,
   Value<bool> sharingDirty,
+  Value<String?> songCreatorId,
   Value<int> rowid,
 });
 
@@ -4010,6 +4070,11 @@ class $$SongsTableFilterComposer extends Composer<_$AppDatabase, $SongsTable> {
 
   ColumnFilters<bool> get sharingDirty => $composableBuilder(
     column: $table.sharingDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get songCreatorId => $composableBuilder(
+    column: $table.songCreatorId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4147,6 +4212,11 @@ class $$SongsTableOrderingComposer
     column: $table.sharingDirty,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get songCreatorId => $composableBuilder(
+    column: $table.songCreatorId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SongsTableAnnotationComposer
@@ -4254,6 +4324,11 @@ class $$SongsTableAnnotationComposer
     column: $table.sharingDirty,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get songCreatorId => $composableBuilder(
+    column: $table.songCreatorId,
+    builder: (column) => column,
+  );
 }
 
 class $$SongsTableTableManager
@@ -4309,6 +4384,7 @@ class $$SongsTableTableManager
                 Value<String?> accountId = const Value.absent(),
                 Value<int> editedAtMs = const Value.absent(),
                 Value<bool> sharingDirty = const Value.absent(),
+                Value<String?> songCreatorId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion(
                 id: id,
@@ -4336,6 +4412,7 @@ class $$SongsTableTableManager
                 accountId: accountId,
                 editedAtMs: editedAtMs,
                 sharingDirty: sharingDirty,
+                songCreatorId: songCreatorId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4365,6 +4442,7 @@ class $$SongsTableTableManager
                 Value<String?> accountId = const Value.absent(),
                 Value<int> editedAtMs = const Value.absent(),
                 Value<bool> sharingDirty = const Value.absent(),
+                Value<String?> songCreatorId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion.insert(
                 id: id,
@@ -4392,6 +4470,7 @@ class $$SongsTableTableManager
                 accountId: accountId,
                 editedAtMs: editedAtMs,
                 sharingDirty: sharingDirty,
+                songCreatorId: songCreatorId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
