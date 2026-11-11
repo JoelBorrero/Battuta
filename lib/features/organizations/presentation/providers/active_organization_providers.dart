@@ -157,3 +157,15 @@ final isCurrentUserAdminProvider = Provider<bool>((ref) {
   if (organization == null) return true;
   return organization.isAdmin;
 });
+
+/// Whether I administer [organizationId] (active, non-archived memberships).
+/// Used by the data layer for organization content such as setlists; it is
+/// `false` for any organization I am not an admin of, including unknown ones.
+final organizationAdminCheckProvider = Provider<bool Function(String)>((ref) {
+  final organizations = ref.watch(myOrganizationsProvider).value ?? const [];
+  final admin = {
+    for (final organization in organizations)
+      if (organization.isAdmin) organization.id,
+  };
+  return admin.contains;
+});

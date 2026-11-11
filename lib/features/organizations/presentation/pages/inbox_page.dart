@@ -87,10 +87,15 @@ class _InboxPageState extends ConsumerState<InboxPage> {
             curve: BattutaMotion.downbeat,
           );
         }
-      case NotificationDestination.roster ||
-          NotificationDestination.organization:
+      case NotificationDestination.roster:
         ref.read(teamTabRequestProvider.notifier).request(TeamTab.roster);
         router.go(AppRoutes.team);
+      case NotificationDestination.organization:
+        // Archive notifications: the organization's settings, where the
+        // request is answered.
+        if (orgId != null) {
+          await router.push(AppRoutes.organizationSettings(orgId));
+        }
       case NotificationDestination.calendar:
         ref.read(teamTabRequestProvider.notifier).request(TeamTab.calendar);
         router.go(AppRoutes.team);

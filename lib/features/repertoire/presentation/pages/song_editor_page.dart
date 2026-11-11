@@ -5,6 +5,7 @@
 /// with chord chart parsing, reordering, and lyrics.
 library;
 
+import 'package:battuta/app/localization/backend_error_messages.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
@@ -305,15 +306,19 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     });
   }
 
+  /// Editing depends on ownership, never on the organization role: a new song
+  /// or one of mine is editable, a version owned by somebody else is not.
+  bool _canEdit(String? accountId) =>
+      _originalSong == null || _originalSong!.isEditableBy(accountId);
+
   Future<void> _saveSong() async {
     final l10n = AppLocalizations.of(context);
-    final isAdmin = ref.read(isCurrentUserAdminProvider);
-    if (!isAdmin) {
+    if (!_canEdit(ref.read(currentAccountIdProvider))) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n?.adminRequiredWarning ??
-                'Administrator permissions required to create or modify songs.',
+            l10n?.readOnlyVersionEditorNotice ??
+                'Only the owner can edit this version.',
           ),
         ),
       );
@@ -371,10 +376,16 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
       );
 
       final notifier = ref.read(repertoireProvider.notifier);
-      if (widget.songId != null) {
-        await notifier.updateSong(song);
-      } else {
-        await notifier.addSong(song);
+      final failure = widget.songId != null
+          ? await notifier.updateSong(song)
+          : await notifier.addSong(song);
+      if (failure != null) {
+        if (mounted && l10n != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(backendErrorMessage(l10n, failure))),
+          );
+        }
+        return;
       }
 
       if (mounted) {
@@ -438,7 +449,17 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     );
 
     if (confirmed == true && mounted) {
-      await ref.read(repertoireProvider.notifier).deleteSong(widget.songId!);
+      final failure = await ref
+          .read(repertoireProvider.notifier)
+          .deleteSong(widget.songId!);
+      if (failure != null) {
+        if (mounted && l10n != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(backendErrorMessage(l10n, failure))),
+          );
+        }
+        return;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n?.songDeletedSuccess ?? 'Song deleted')),
@@ -490,7 +511,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   }
 
   Widget _buildScaffold(ThemeData theme, bool isEditing) {
-    final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final canEdit = _canEdit(ref.watch(currentAccountIdProvider));
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -500,14 +521,14 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               : (l10n?.newSong ?? 'New Song'),
         ),
         actions: [
-          if (isEditing && isAdmin)
+          if (isEditing && canEdit)
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: l10n?.deleteSong ?? 'Delete Song',
               onPressed: _isSaving ? null : _confirmDelete,
             ),
           FilledButton.icon(
-            onPressed: (_isSaving || !isAdmin) ? null : _saveSong,
+            onPressed: (_isSaving || !canEdit) ? null : _saveSong,
             icon: _isSaving
                 ? const SizedBox(
                     width: 16,
@@ -516,7 +537,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                   )
                 : const Icon(Icons.save),
             label: Text(
-              isAdmin
+              canEdit
                   ? (l10n?.save ?? 'Save')
                   : (l10n?.viewOnly ?? 'View Only'),
             ),
@@ -529,7 +550,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            if (!isAdmin)
+            if (!canEdit)
               Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
@@ -548,7 +569,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        l10n?.readOnlyAdminWarning ?? 'Read-only view: Administrator permissions are required to create or modify repertoire songs.',
+                        l10n?.readOnlyVersionEditorNotice ?? 'Only the owner can edit this version.',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface,

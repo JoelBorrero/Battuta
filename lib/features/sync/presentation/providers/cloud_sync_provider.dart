@@ -6,6 +6,7 @@ library;
 
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/sync/data/supabase_cloud_sync_service.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
 import 'package:battuta/features/sync/domain/services/cloud_sync_service.dart';
@@ -58,13 +59,32 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
   @override
   CloudSyncState build() => const CloudSyncState();
 
-  Future<CloudSyncResult> triggerSync({String? teamId}) async {
+  Future<CloudSyncResult>? _inFlight;
+
+  /// Runs a sync, or joins the one already running: a second trigger (rapid
+  /// taps, a resume while syncing) waits for the same result instead of
+  /// reporting the service's "already active" refusal as an error.
+  Future<CloudSyncResult> triggerSync({String? teamId}) {
+    final running = _inFlight;
+    if (running != null) return running;
+    final run = _sync(teamId: teamId);
+    _inFlight = run;
+    return run.whenComplete(() => _inFlight = null);
+  }
+
+  Future<CloudSyncResult> _sync({String? teamId}) async {
     final service = ref.read(cloudSyncServiceProvider);
     state = state.copyWith(status: CloudSyncStatus.syncing, errorMessage: null);
 
     final result = await service.syncAll(teamId: teamId);
 
     if (result.isSuccess) {
+      // Versions and setlists pulled from the backend appear in the lists.
+      if (result.pulledCount > 0) {
+        ref
+          ..invalidate(repertoireProvider)
+          ..invalidate(setlistsProvider);
+      }
       state = state.copyWith(
         status: CloudSyncStatus.success,
         lastSyncedAt: result.timestamp,

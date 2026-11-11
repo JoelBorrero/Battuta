@@ -35,6 +35,25 @@ void main() {
         expect(message(BackendErrorCode.unknown), l10n.backendErrorGeneric);
       });
 
+      test('the repertoire and archive errors are specific', () {
+        String message(BackendErrorCode c) =>
+            backendErrorMessage(l10n, c.failure());
+        expect(message(BackendErrorCode.notOwner), l10n.backendErrorNotOwner);
+        expect(
+          message(BackendErrorCode.permissionDenied),
+          l10n.backendErrorPermissionDenied,
+        );
+        expect(
+          message(BackendErrorCode.archiveAlreadyRequested),
+          l10n.backendErrorArchiveAlreadyRequested,
+        );
+        expect(
+          message(BackendErrorCode.archiveNotRequested),
+          l10n.backendErrorArchiveNotRequested,
+        );
+        expect(l10n.backendErrorNotOwner, isNot(l10n.backendErrorGeneric));
+      });
+
       test('an untyped server message (e.g. wrong password) is kept', () {
         expect(
           backendErrorMessage(

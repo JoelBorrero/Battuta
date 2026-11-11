@@ -7,6 +7,7 @@ library;
 import 'dart:io';
 
 import 'package:battuta/core/database/app_database.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/organization_data_providers.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_setlist_repository.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_song_repository.dart';
@@ -37,14 +38,26 @@ final driftSongRepositoryProvider = Provider<SongRepository>((ref) {
   return DriftSongRepository(db, session: ref.watch(accountSessionProvider));
 });
 
+/// The Drift setlist repository. Organization setlists are editable only by
+/// the admins of that organization, read from the account's memberships at the
+/// time of each write (so a role change applies without rebuilding it).
+final driftSetlistRepositoryProvider = Provider<SetlistRepository>((ref) {
+  final db = ref.watch(appDatabaseProvider);
+  return DriftSetlistRepository(
+    db,
+    session: ref.watch(accountSessionProvider),
+    canAdministerOrganization: (organizationId) =>
+        ref.read(organizationAdminCheckProvider)(organizationId),
+  );
+});
+
 /// Provides the offline [SetlistRepository] backed by Drift SQLite.
 final setlistRepositoryProvider = Provider<SetlistRepository>((ref) {
   final isTest = Platform.environment.containsKey('FLUTTER_TEST');
   if (isTest) {
     return InMemorySetlistRepository();
   }
-  final db = ref.watch(appDatabaseProvider);
-  return DriftSetlistRepository(db, session: ref.watch(accountSessionProvider));
+  return ref.watch(driftSetlistRepositoryProvider);
 });
 
 /// Provides the offline [ScoreRepository] backed by Drift SQLite.

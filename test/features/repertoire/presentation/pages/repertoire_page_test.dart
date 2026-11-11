@@ -115,7 +115,8 @@ void main() {
     );
 
     testWidgets(
-      'hides song creation FAB and shows guidance for non-admin user',
+      'a plain member still adds songs to their own library (ownership, not '
+      'the organization role, decides)',
       (tester) async {
         repository = InMemorySongRepository(initialSongs: []);
 
@@ -130,10 +131,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // No FAB for non-admin user
-        expect(find.byType(FloatingActionButton), findsNothing);
+        expect(find.byType(FloatingActionButton), findsOneWidget);
         expect(
-          find.textContaining('Contact an administrator to add songs'),
+          find.text('Tap the + button to add your first song'),
           findsOneWidget,
         );
       },

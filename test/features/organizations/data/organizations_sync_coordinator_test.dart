@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/core/errors/backend_error_code.dart';
+import 'package:battuta/features/organizations/data/organization_repertoire_repository_impl.dart';
 import 'package:battuta/features/organizations/data/organization_repository_impl.dart';
 import 'package:battuta/features/organizations/data/organizations_local_cache.dart';
 import 'package:battuta/features/organizations/data/organizations_remote_data_source.dart';
@@ -10,6 +11,7 @@ import 'package:battuta/features/organizations/data/schedule_repository_impl.dar
 import 'package:battuta/features/organizations/domain/entities/invites.dart';
 import 'package:battuta/features/organizations/domain/entities/notification.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
+import 'package:battuta/features/organizations/domain/entities/repertoire.dart';
 import 'package:battuta/features/organizations/domain/entities/schedule.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -372,5 +374,48 @@ void main() {
         );
       },
     );
+  });
+
+  test('each refresh also caches the repertoire of every organization', () async {
+    final repertoireRemote = MockRepertoireRemote();
+    when(() => repertoireRemote.fetchRepertoire(any())).thenAnswer(
+      (invocation) async => [
+        RepertoireEntry(
+          organizationId: invocation.positionalArguments.first as String,
+          versionId: 'v1',
+          title: 'Amazing Grace',
+        ),
+      ],
+    );
+    final withRepertoire = OrganizationsSyncCoordinator(
+      session: session,
+      cache: cache,
+      remote: remote,
+      organizations: OrganizationRepositoryImpl(
+        remote: remote,
+        cache: cache,
+        session: session,
+      ),
+      schedules: ScheduleRepositoryImpl(
+        remote: schedulesRemote,
+        cache: cache,
+        session: session,
+      ),
+      repertoire: OrganizationRepertoireRepositoryImpl(
+        remote: repertoireRemote,
+        cache: cache,
+        session: session,
+      ),
+    );
+
+    await withRepertoire.refreshAll();
+
+    final cached = await cache.read(
+      'a',
+      CacheKind.repertoire,
+      RepertoireEntry.fromJson,
+      scopeId: 'oa',
+    );
+    expect(cached.single.title, 'Amazing Grace');
   });
 }

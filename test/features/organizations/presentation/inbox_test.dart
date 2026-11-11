@@ -4,6 +4,7 @@ import 'package:battuta/features/auth/domain/entities/auth_user.dart';
 import 'package:battuta/features/organizations/domain/entities/invites.dart';
 import 'package:battuta/features/organizations/domain/entities/notification.dart';
 import 'package:battuta/features/organizations/presentation/pages/inbox_page.dart';
+import 'package:battuta/features/organizations/presentation/pages/organization_settings_page.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
 import 'package:flutter/material.dart';
@@ -233,12 +234,23 @@ void main() {
       expect(segmented.selected, {1});
     });
 
-    testWidgets('archive notifications open the organization', (tester) async {
+    testWidgets('archive notifications open the organization settings', (
+      tester,
+    ) async {
       await open(
         tester,
         note('n1', NotificationType.archiveRequested, orgId: 'org-2'),
       );
-      expect(find.byType(TeamPage), findsOneWidget);
+      expect(find.byType(OrganizationSettingsPage), findsOneWidget);
+      expect(
+        container(tester)
+            .read(appRouterProvider)
+            .routerDelegate
+            .currentConfiguration
+            .last
+            .matchedLocation,
+        '/organizations/org-2/settings',
+      );
       expect(container(tester).read(activeOrganizationIdProvider), 'org-2');
     });
 

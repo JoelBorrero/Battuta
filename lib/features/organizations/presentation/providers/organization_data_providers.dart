@@ -4,6 +4,8 @@ library;
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
+import 'package:battuta/features/organizations/data/organization_repertoire_remote_data_source.dart';
+import 'package:battuta/features/organizations/data/organization_repertoire_repository_impl.dart';
 import 'package:battuta/features/organizations/data/organization_repository_impl.dart';
 import 'package:battuta/features/organizations/data/organizations_local_cache.dart';
 import 'package:battuta/features/organizations/data/organizations_remote_data_source.dart';
@@ -12,6 +14,7 @@ import 'package:battuta/features/organizations/data/schedule_repository_impl.dar
 import 'package:battuta/features/organizations/data/schedules_remote_data_source.dart';
 import 'package:battuta/features/organizations/data/supabase_account_session.dart';
 import 'package:battuta/features/organizations/domain/repositories/account_session.dart';
+import 'package:battuta/features/organizations/domain/repositories/organization_repertoire_repository.dart';
 import 'package:battuta/features/organizations/domain/repositories/organization_repository.dart';
 import 'package:battuta/features/organizations/domain/repositories/schedule_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,6 +81,23 @@ final organizationRepositoryProvider = Provider<OrganizationRepository>(
   ),
 );
 
+final organizationRepertoireRemoteDataSourceProvider =
+    Provider<OrganizationRepertoireRemoteDataSource>((ref) {
+      final manager = ref.watch(supabaseClientManagerProvider);
+      return SupabaseOrganizationRepertoireRemoteDataSource(
+        () => manager.client,
+      );
+    });
+
+final organizationRepertoireRepositoryProvider =
+    Provider<OrganizationRepertoireRepository>(
+      (ref) => OrganizationRepertoireRepositoryImpl(
+        remote: ref.watch(organizationRepertoireRemoteDataSourceProvider),
+        cache: ref.watch(organizationsLocalCacheProvider),
+        session: ref.watch(accountSessionProvider),
+      ),
+    );
+
 final scheduleRepositoryProvider = Provider<ScheduleRepository>(
   (ref) => ScheduleRepositoryImpl(
     remote: ref.watch(schedulesRemoteDataSourceProvider),
@@ -96,6 +116,7 @@ final organizationsSyncCoordinatorProvider =
         remote: ref.watch(organizationsRemoteDataSourceProvider),
         organizations: ref.watch(organizationRepositoryProvider),
         schedules: ref.watch(scheduleRepositoryProvider),
+        repertoire: ref.watch(organizationRepertoireRepositoryProvider),
       );
       ref.onDispose(coordinator.stop);
       return coordinator;

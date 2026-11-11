@@ -5,14 +5,20 @@
 /// MIDI generation, and direct navigation to edit or delete.
 library;
 
+import 'package:battuta/app/localization/backend_error_messages.dart';
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/app/theme/battuta_brand.dart';
+import 'package:battuta/app/theme/battuta_tokens.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_scope_providers.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/chord_lyrics_view.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/version_owner_text.dart';
 import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
@@ -47,8 +53,18 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     super.dispose();
   }
 
+  void _showFailure(Object failure) {
+    final l10n = AppLocalizations.of(context);
+    if (!mounted || l10n == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(backendErrorMessage(l10n, failure))),
+    );
+  }
+
   void _showTransposeDialog(Song originalSong) {
     final l10n = AppLocalizations.of(context);
+    // Only the owner may write the new key back; others transpose locally.
+    final canSave = originalSong.isEditableBy(ref.read(currentAccountIdProvider));
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) {
@@ -150,19 +166,23 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: () async {
-                      if (_transpositionSemitones != 0) {
-                        await ref
+                      if (canSave && _transpositionSemitones != 0) {
+                        final failure = await ref
                             .read(repertoireProvider.notifier)
                             .updateSong(transposedSong);
-                        setModalState(() => _transpositionSemitones = 0);
-                        setState(() {});
+                        if (failure != null) {
+                          _showFailure(failure);
+                        } else {
+                          setModalState(() => _transpositionSemitones = 0);
+                          setState(() {});
+                        }
                       }
                       if (modalCtx.mounted) {
                         Navigator.of(modalCtx).pop();
                       }
                     },
                     child: Text(
-                      _transpositionSemitones == 0
+                      _transpositionSemitones == 0 || !canSave
                           ? (l10n?.done ?? 'Done')
                           : (l10n?.saveTransposedKey(transposedSong.key) ??
                               'Save Transposed Key (${transposedSong.key}) to Song'),
@@ -250,7 +270,13 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     );
 
     if (confirmed == true && mounted) {
-      await ref.read(repertoireProvider.notifier).deleteSong(song.id);
+      final failure = await ref
+          .read(repertoireProvider.notifier)
+          .deleteSong(song.id);
+      if (failure != null) {
+        _showFailure(failure);
+        return;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -327,6 +353,9 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
           );
         }
 
+        // Only the owner edits a version; for anybody else this is a viewer.
+        final canEdit = song.isEditableBy(ref.watch(currentAccountIdProvider));
+
         final activeSong = _transpositionSemitones == 0
             ? song
             : SongTransposer.transposeSong(song, _transpositionSemitones);
@@ -340,12 +369,13 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                 tooltip: l10n?.transposeKeyTooltip ?? 'Transpose Key',
                 onPressed: () => _showTransposeDialog(song),
               ),
-              IconButton(
-                icon: const Icon(Icons.queue_music),
-                tooltip: l10n?.notationEditorTooltip ?? 'Notation Editor',
-                onPressed: () =>
-                    context.push('/repertoire/${song.id}/notation'),
-              ),
+              if (canEdit)
+                IconButton(
+                  icon: const Icon(Icons.queue_music),
+                  tooltip: l10n?.notationEditorTooltip ?? 'Notation Editor',
+                  onPressed: () =>
+                      context.push('/repertoire/${song.id}/notation'),
+                ),
               PopupMenuButton<String>(
                 enabled: !_isExporting,
                 icon: _isExporting
@@ -429,21 +459,25 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   ),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: l10n?.editSong ?? 'Edit Song',
-                onPressed: () => context.push('/repertoire/${song.id}/edit'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: l10n?.deleteSong ?? 'Delete Song',
-                onPressed: () => _deleteSong(song),
-              ),
+              if (canEdit) ...[
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: l10n?.editSong ?? 'Edit Song',
+                  onPressed: () => context.push('/repertoire/${song.id}/edit'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: l10n?.deleteSong ?? 'Delete Song',
+                  onPressed: () => _deleteSong(song),
+                ),
+              ],
             ],
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
+              if (!canEdit) _ReadOnlyVersionBanner(songId: song.id),
+
               // ── Header Metadata Card ──
               Card(
                 elevation: 0,
@@ -588,19 +622,20 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            FilledButton.tonalIcon(
-                              style: FilledButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
+                            if (canEdit)
+                              FilledButton.tonalIcon(
+                                style: FilledButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(Icons.edit, size: 16),
+                                label: Text(
+                                  l10n?.editInNotationEditor ??
+                                      'Edit in Notation Editor',
+                                ),
+                                onPressed: () => context.push(
+                                  '/repertoire/${song.id}/notation',
+                                ),
                               ),
-                              icon: const Icon(Icons.edit, size: 16),
-                              label: Text(
-                                l10n?.editInNotationEditor ??
-                                    'Edit in Notation Editor',
-                              ),
-                              onPressed: () => context.push(
-                                '/repertoire/${song.id}/notation',
-                              ),
-                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -621,9 +656,16 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   song: activeSong,
                   transpositionSemitones: _transpositionSemitones,
                   viewMode: _selectedViewMode,
-                  onSongUpdated: (updatedSong) {
-                    ref.read(repertoireProvider.notifier).updateSong(updatedSong);
-                  },
+                  onSongUpdated: canEdit
+                      ? (updatedSong) {
+                          ref
+                              .read(repertoireProvider.notifier)
+                              .updateSong(updatedSong)
+                              .then((failure) {
+                                if (failure != null) _showFailure(failure);
+                              });
+                        }
+                      : null,
                 ),
 
               const SizedBox(height: 32),
@@ -631,6 +673,62 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Tells a viewer that the version belongs to somebody else.
+class _ReadOnlyVersionBanner extends ConsumerWidget {
+  const _ReadOnlyVersionBanner({required this.songId});
+
+  final String songId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final brand = BattutaBrand.of(context);
+    final entry = ref.watch(repertoireEntryOfVersionProvider(songId));
+    final owner = entry == null
+        ? l10n.ownedByName(l10n.ownerUnknown)
+        : ownedByText(l10n, entry);
+    return Container(
+      key: const ValueKey('read_only_version_banner'),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: brand.card,
+        borderRadius: BattutaRadius.smAll,
+        border: Border.all(color: brand.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.lock_outline, size: 18, color: brand.accentInk),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  owner,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: brand.ink,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.readOnlyVersionHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: brand.inkMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

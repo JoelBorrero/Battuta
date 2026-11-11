@@ -79,6 +79,18 @@ void main() {
     );
   });
 
+  testWidgets('the switcher offers the settings of the active organization', (
+    tester,
+  ) async {
+    await pump(tester, twoOrgs());
+
+    await tester.tap(find.byKey(const ValueKey('org_switcher_btn')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('switcher_settings_btn')), findsOneWidget);
+    expect(find.text('Organization settings'), findsOneWidget);
+  });
+
   testWidgets('switching organization changes the roster and is remembered', (
     tester,
   ) async {

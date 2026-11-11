@@ -18,7 +18,7 @@ enum NotificationDestination {
   /// The Calendar of the notification's organization.
   calendar,
 
-  /// The organization itself (its Roster, until the archive UI exists).
+  /// The organization's settings page (where an archive request is answered).
   organization,
 
   /// A song version of mine.

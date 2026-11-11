@@ -538,6 +538,123 @@ class FakeOrganizationRepository extends Fake
     _notify();
     return right(unit);
   }
+
+  // ---- Settings: rename, quota and archiving --------------------------------
+
+  /// What `getQuota` returns.
+  OrganizationQuota quota = const OrganizationQuota(
+    tier: 'free',
+    monthlyGeminiCreditsLimit: 100,
+    maxStorageBytes: 52428800,
+  );
+
+  final Map<String, ArchiveRequest> _archiveRequests = {};
+
+  /// The id of the signed-in user in archive approvals.
+  String meId = 'u-me';
+
+  void setArchiveRequest(String organizationId, ArchiveRequest? request) {
+    if (request == null) {
+      _archiveRequests.remove(organizationId);
+    } else {
+      _archiveRequests[organizationId] = request;
+    }
+    _notify();
+  }
+
+  @override
+  Future<Either<Failure, OrganizationQuota>> getQuota(
+    String organizationId,
+  ) async {
+    calls.add('getQuota:$organizationId');
+    if (offline) return left(_offlineFailure);
+    if (_failed<OrganizationQuota>() case final f?) return f;
+    return right(quota);
+  }
+
+  @override
+  Future<Either<Failure, Organization>> renameOrganization(
+    String organizationId,
+    String name,
+  ) async {
+    calls.add('renameOrganization:$organizationId:$name');
+    if (_failed<Organization>() case final f?) return f;
+    final index = _organizations.indexWhere((o) => o.id == organizationId);
+    final renamed = _organizations[index].copyWith(name: name);
+    _organizations[index] = renamed;
+    _notify();
+    return right(renamed);
+  }
+
+  @override
+  Stream<ArchiveRequest?> watchArchiveRequest(String organizationId) =>
+      _watch<ArchiveRequest?>(
+        () => [_archiveRequests[organizationId]],
+      ).map((rows) => rows.firstOrNull);
+
+  @override
+  Future<Either<Failure, Unit>> refreshArchiveRequest(
+    String organizationId,
+  ) async => right(unit);
+
+  Organization _archiveIfEveryAdminApproved(String organizationId) {
+    final index = _organizations.indexWhere((o) => o.id == organizationId);
+    final request = _archiveRequests[organizationId]!;
+    final admins = _members.where(
+      (m) => m.organizationId == organizationId && m.isAdmin && m.isActive,
+    );
+    if (admins.every((m) => request.isApprovedBy(m.userId))) {
+      _organizations[index] = _organizations[index].copyWith(
+        archivedAt: DateTime(2026, 11, 11),
+      );
+      _archiveRequests.remove(organizationId);
+    }
+    _notify();
+    return _organizations[index];
+  }
+
+  @override
+  Future<Either<Failure, Organization>> requestArchive(
+    String organizationId,
+  ) async {
+    calls.add('requestArchive:$organizationId');
+    if (offline) return left(_offlineFailure);
+    if (_failed<Organization>() case final f?) return f;
+    _archiveRequests[organizationId] = ArchiveRequest(
+      organizationId: organizationId,
+      requestedBy: meId,
+      approvals: [ArchiveApproval(userId: meId)],
+    );
+    return right(_archiveIfEveryAdminApproved(organizationId));
+  }
+
+  @override
+  Future<Either<Failure, Organization>> approveArchive(
+    String organizationId,
+  ) async {
+    calls.add('approveArchive:$organizationId');
+    if (offline) return left(_offlineFailure);
+    if (_failed<Organization>() case final f?) return f;
+    final request = _archiveRequests[organizationId]!;
+    _archiveRequests[organizationId] = ArchiveRequest(
+      organizationId: organizationId,
+      requestedBy: request.requestedBy,
+      requestedAt: request.requestedAt,
+      approvals: [...request.approvals, ArchiveApproval(userId: meId)],
+    );
+    return right(_archiveIfEveryAdminApproved(organizationId));
+  }
+
+  @override
+  Future<Either<Failure, Organization>> cancelArchive(
+    String organizationId,
+  ) async {
+    calls.add('cancelArchive:$organizationId');
+    if (_failed<Organization>() case final f?) return f;
+    _archiveRequests.remove(organizationId);
+    _notify();
+    return right(_organizations.firstWhere((o) => o.id == organizationId));
+  }
 }
 
 /// A backend failure with its typed code, as the repositories return.

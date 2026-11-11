@@ -11,7 +11,6 @@ item is fixed, delete it (the fixing task's summary records it).
 ## From 002: Supabase schema
 Planned into a later slice:
 - Deactivated users' email stays in `auth.users` (needs a server-side scrub job).
-- **008:** archive has no undo; say so in the archive confirmation UI.
 - Removed members can rejoin with a still-valid invite link (the username search now shows "previously declined"; re-inviting declined users is still allowed).
 - **009:** merge-request spam: anyone who can see a song can keep sending its creator merge requests
   (with their own private title).
@@ -41,7 +40,6 @@ Product / ops:
 - One extra profile request per sign-in/session restore.
 
 ## From 004: song sync
-- **008:** wire `canAdministerOrganization` (today even admins get `not_admin` from the setlist repository).
 - **009:** title/artist edits on a version whose song was created by someone else are reverted by sync; needs a
   UI rule (edit only your own song's title, or propose a merge).
 - **009:** `updateSharing` exists only on `DriftSongRepository`, not on the `SongRepository` interface.
@@ -93,3 +91,18 @@ Product / ops:
 - Revoke/expiry: no universal https links (no web domain yet).
 - A token captured in offline mode stays in memory until dismissed, "Continue offline", sign-out or account
   switch (the join still asks for confirmation).
+
+## From 008: org repertoire and admin tools
+- **Product decision:** the Gemini API key (and so scanning) is admin-only via `isCurrentUserAdminProvider`; a
+  plain member cannot scan into their own library.
+- No realtime for `organization_repertoire` (not in the realtime publication; needs a migration). The cache
+  refreshes on first watch, sign-in/resync and after the admin's own add/remove.
+- The repertoire scope (My library / organization) is not persisted across restarts.
+- Failed-write rollback in `Repertoire.addSong/updateSong/deleteSong` restores the whole list snapshot: a newer
+  change made meanwhile disappears from the UI until reload (DB stays correct). Roll back only the affected song.
+- Callers that ignore the returned `Failure?` still show success on a failed local write: import modal
+  (`song_import_modal.dart`), `repertoire_page.dart` add, `scanner_page.dart`, `score_editor_page.dart`.
+- A repertoire version that can never be pulled (made private) keeps "Available after the next sync" and each
+  tap runs a futile sync.
+- Candidate search uses `id.in.(...)` with every version shared to the org (~200 shares approach URL limits;
+  `version_shares` select capped at 1000 rows) and reads all pages eagerly: move to an RPC or view.

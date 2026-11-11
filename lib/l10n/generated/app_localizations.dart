@@ -4643,6 +4643,396 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} d ago'**
   String timeDaysAgo(int count);
+
+  /// repertoireScopeMyLibrary
+  ///
+  /// In en, this message translates to:
+  /// **'My library'**
+  String get repertoireScopeMyLibrary;
+
+  /// repertoireScopeOrganization
+  ///
+  /// In en, this message translates to:
+  /// **'{name} repertoire'**
+  String repertoireScopeOrganization(String name);
+
+  /// repertoireScopeLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Repertoire to show'**
+  String get repertoireScopeLabel;
+
+  /// orgSettingsTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Organization settings'**
+  String get orgSettingsTooltip;
+
+  /// orgRepertoireEmptyTitle
+  ///
+  /// In en, this message translates to:
+  /// **'No songs in this repertoire yet'**
+  String get orgRepertoireEmptyTitle;
+
+  /// orgRepertoireEmptyAdminHint
+  ///
+  /// In en, this message translates to:
+  /// **'Add versions that were shared with this organization, or public ones.'**
+  String get orgRepertoireEmptyAdminHint;
+
+  /// orgRepertoireEmptyMemberHint
+  ///
+  /// In en, this message translates to:
+  /// **'Your admins have not added any songs yet.'**
+  String get orgRepertoireEmptyMemberHint;
+
+  /// addToRepertoireAction
+  ///
+  /// In en, this message translates to:
+  /// **'Add to repertoire'**
+  String get addToRepertoireAction;
+
+  /// removeFromRepertoireAction
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from repertoire'**
+  String get removeFromRepertoireAction;
+
+  /// removeFromRepertoireTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from repertoire?'**
+  String get removeFromRepertoireTitle;
+
+  /// removeFromRepertoireConfirm
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" will leave the repertoire. Setlist entries that use it keep their title but can no longer be opened.'**
+  String removeFromRepertoireConfirm(String title);
+
+  /// removeFromRepertoireDone
+  ///
+  /// In en, this message translates to:
+  /// **'Removed \"{title}\" from the repertoire'**
+  String removeFromRepertoireDone(String title);
+
+  /// addedToRepertoireDone
+  ///
+  /// In en, this message translates to:
+  /// **'Added \"{title}\" to the repertoire'**
+  String addedToRepertoireDone(String title);
+
+  /// repertoirePickerTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Add to repertoire'**
+  String get repertoirePickerTitle;
+
+  /// repertoirePickerSearchLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Search shared and public songs'**
+  String get repertoirePickerSearchLabel;
+
+  /// repertoirePickerEmpty
+  ///
+  /// In en, this message translates to:
+  /// **'No versions found. A version must be shared with this organization or public.'**
+  String get repertoirePickerEmpty;
+
+  /// repertoirePickerAdded
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get repertoirePickerAdded;
+
+  /// repertoirePickerYours
+  ///
+  /// In en, this message translates to:
+  /// **'Yours'**
+  String get repertoirePickerYours;
+
+  /// repertoirePickerAddTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Add {title}'**
+  String repertoirePickerAddTooltip(String title);
+
+  /// ownedByName
+  ///
+  /// In en, this message translates to:
+  /// **'Owned by {name}'**
+  String ownedByName(String name);
+
+  /// ownedByDeactivated
+  ///
+  /// In en, this message translates to:
+  /// **'Owned by {name} (deactivated)'**
+  String ownedByDeactivated(String name);
+
+  /// ownerUnknown
+  ///
+  /// In en, this message translates to:
+  /// **'another user'**
+  String get ownerUnknown;
+
+  /// readOnlyVersionHint
+  ///
+  /// In en, this message translates to:
+  /// **'This version is read-only. You can view and transpose it here, but only its owner can edit it.'**
+  String get readOnlyVersionHint;
+
+  /// readOnlyVersionEditorNotice
+  ///
+  /// In en, this message translates to:
+  /// **'Only the owner can edit this version.'**
+  String get readOnlyVersionEditorNotice;
+
+  /// orgSetlistsEmptyAdminHint
+  ///
+  /// In en, this message translates to:
+  /// **'Create a setlist for this organization from its repertoire.'**
+  String get orgSetlistsEmptyAdminHint;
+
+  /// orgSetlistsEmptyMemberHint
+  ///
+  /// In en, this message translates to:
+  /// **'No setlists yet. Your admins publish them here.'**
+  String get orgSetlistsEmptyMemberHint;
+
+  /// setlistReadOnlyNotice
+  ///
+  /// In en, this message translates to:
+  /// **'Only organization admins can edit this setlist. You can still open the songs and transpose them.'**
+  String get setlistReadOnlyNotice;
+
+  /// setlistCreateFailed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the setlist: {error}'**
+  String setlistCreateFailed(String error);
+
+  /// backendErrorNotOwner
+  ///
+  /// In en, this message translates to:
+  /// **'Only the owner can change this version.'**
+  String get backendErrorNotOwner;
+
+  /// backendErrorPermissionDenied
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission for that, or the song is no longer available to this organization.'**
+  String get backendErrorPermissionDenied;
+
+  /// backendErrorArchiveAlreadyRequested
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving was already requested.'**
+  String get backendErrorArchiveAlreadyRequested;
+
+  /// backendErrorArchiveNotRequested
+  ///
+  /// In en, this message translates to:
+  /// **'There is no archive request to answer.'**
+  String get backendErrorArchiveNotRequested;
+
+  /// orgSettingsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Organization settings'**
+  String get orgSettingsTitle;
+
+  /// orgSettingsNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'This organization is not available.'**
+  String get orgSettingsNotFound;
+
+  /// orgSettingsYourRole
+  ///
+  /// In en, this message translates to:
+  /// **'Your role'**
+  String get orgSettingsYourRole;
+
+  /// orgSettingsRenameAction
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get orgSettingsRenameAction;
+
+  /// orgSettingsRenameTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Rename organization'**
+  String get orgSettingsRenameTitle;
+
+  /// orgSettingsRenamed
+  ///
+  /// In en, this message translates to:
+  /// **'Organization renamed'**
+  String get orgSettingsRenamed;
+
+  /// orgSettingsQuotaTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Plan and quota'**
+  String get orgSettingsQuotaTitle;
+
+  /// orgSettingsQuotaTier
+  ///
+  /// In en, this message translates to:
+  /// **'Plan: {tier}'**
+  String orgSettingsQuotaTier(String tier);
+
+  /// orgSettingsQuotaCredits
+  ///
+  /// In en, this message translates to:
+  /// **'{count} AI credits per month'**
+  String orgSettingsQuotaCredits(int count);
+
+  /// orgSettingsQuotaStorage
+  ///
+  /// In en, this message translates to:
+  /// **'Storage: {size}'**
+  String orgSettingsQuotaStorage(String size);
+
+  /// orgSettingsQuotaUnavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Quota is not available offline.'**
+  String get orgSettingsQuotaUnavailable;
+
+  /// orgSettingsLeaveHint
+  ///
+  /// In en, this message translates to:
+  /// **'If you are the only admin, make another member an admin first.'**
+  String get orgSettingsLeaveHint;
+
+  /// orgSettingsLeaveDone
+  ///
+  /// In en, this message translates to:
+  /// **'You left the organization'**
+  String get orgSettingsLeaveDone;
+
+  /// orgSettingsArchivedNotice
+  ///
+  /// In en, this message translates to:
+  /// **'This organization is archived and read-only.'**
+  String get orgSettingsArchivedNotice;
+
+  /// orgArchiveSection
+  ///
+  /// In en, this message translates to:
+  /// **'Archive organization'**
+  String get orgArchiveSection;
+
+  /// orgArchiveWarning
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving cannot be undone from the app. The organization becomes read-only and disappears from your switcher. Every admin has to approve it.'**
+  String get orgArchiveWarning;
+
+  /// orgArchiveRequestAction
+  ///
+  /// In en, this message translates to:
+  /// **'Request archive'**
+  String get orgArchiveRequestAction;
+
+  /// orgArchiveRequestedBy
+  ///
+  /// In en, this message translates to:
+  /// **'Requested by {name}'**
+  String orgArchiveRequestedBy(String name);
+
+  /// orgArchiveApprovalsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Admin approvals'**
+  String get orgArchiveApprovalsTitle;
+
+  /// orgArchiveApproved
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get orgArchiveApproved;
+
+  /// orgArchivePending
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get orgArchivePending;
+
+  /// orgArchiveApproveAction
+  ///
+  /// In en, this message translates to:
+  /// **'Approve archive'**
+  String get orgArchiveApproveAction;
+
+  /// orgArchiveCancelAction
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get orgArchiveCancelAction;
+
+  /// orgArchiveConfirmTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Archive {name}?'**
+  String orgArchiveConfirmTitle(String name);
+
+  /// orgArchiveConfirmBody
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone from the app. Type the organization name to confirm.'**
+  String get orgArchiveConfirmBody;
+
+  /// orgArchiveTypeToConfirm
+  ///
+  /// In en, this message translates to:
+  /// **'Type \"{name}\"'**
+  String orgArchiveTypeToConfirm(String name);
+
+  /// orgArchiveConfirmAction
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get orgArchiveConfirmAction;
+
+  /// orgArchiveRequestSent
+  ///
+  /// In en, this message translates to:
+  /// **'Archive requested. The other admins have to approve it.'**
+  String get orgArchiveRequestSent;
+
+  /// orgArchiveApprovedDone
+  ///
+  /// In en, this message translates to:
+  /// **'Your approval was recorded'**
+  String get orgArchiveApprovedDone;
+
+  /// orgArchiveCancelledDone
+  ///
+  /// In en, this message translates to:
+  /// **'Archive request cancelled'**
+  String get orgArchiveCancelledDone;
+
+  /// orgArchiveDone
+  ///
+  /// In en, this message translates to:
+  /// **'The organization was archived'**
+  String get orgArchiveDone;
+
+  /// Hint on an organization repertoire entry whose version is being downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get repertoireEntrySyncing;
+
+  /// Hint on an organization repertoire entry whose version is not on this device yet; tapping it syncs
+  ///
+  /// In en, this message translates to:
+  /// **'Available after the next sync'**
+  String get repertoireEntryAfterSync;
 }
 
 class _AppLocalizationsDelegate

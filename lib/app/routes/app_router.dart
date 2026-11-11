@@ -8,6 +8,7 @@ library;
 import 'package:battuta/app/design_system/motion/page_transitions.dart';
 import 'package:battuta/app/routes/app_redirect.dart';
 import 'package:battuta/app/routes/app_routes.dart';
+import 'package:battuta/app/routes/song_edit_guard.dart';
 import 'package:battuta/app/shell/scaffold_with_nav_bar.dart';
 import 'package:battuta/features/auth/presentation/pages/create_account_page.dart';
 import 'package:battuta/features/auth/presentation/pages/sign_in_page.dart';
@@ -18,12 +19,15 @@ import 'package:battuta/features/live_session/presentation/pages/live_session_pa
 import 'package:battuta/features/organizations/domain/services/invite_link_parser.dart';
 import 'package:battuta/features/organizations/presentation/pages/inbox_page.dart';
 import 'package:battuta/features/organizations/presentation/pages/join_page.dart';
+import 'package:battuta/features/organizations/presentation/pages/organization_settings_page.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/pending_invite_provider.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/setlist_detail_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/song_detail_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/song_editor_page.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/scanner/presentation/pages/scanner_page.dart';
 import 'package:battuta/features/score/presentation/pages/score_editor_page.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
@@ -55,6 +59,20 @@ GoRouter appRouter(Ref ref) {
   // location: the token belonged to the account that just left and must not
   // be kept for whoever signs in next.
   AppEntry? previousEntry;
+
+  // Only the owner edits a version: anybody else gets the viewer.
+  Future<String?> guardSongEditing(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final songId = state.pathParameters['songId'];
+    if (songId == null) return null;
+    final result = await ref.read(songRepositoryProvider).getSongById(songId);
+    return songEditRedirect(
+      song: result.fold((_) => null, (song) => song),
+      accountId: ref.read(currentAccountIdProvider),
+    );
+  }
 
   return GoRouter(
     initialLocation: AppRoutes.initial,
@@ -112,6 +130,13 @@ GoRouter appRouter(Ref ref) {
             JoinPage(token: state.pathParameters['token']!),
       ),
       GoRoute(
+        path: AppRoutes.organizationSettingsPath,
+        name: 'organizationSettings',
+        builder: (context, state) => OrganizationSettingsPage(
+          organizationId: state.pathParameters['organizationId']!,
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.inbox,
         name: 'inbox',
         builder: (context, state) => const InboxPage(),
@@ -160,6 +185,7 @@ GoRouter appRouter(Ref ref) {
                   GoRoute(
                     path: 'edit',
                     name: 'songEditor',
+                    redirect: guardSongEditing,
                     builder: (context, state) {
                       final songId = state.pathParameters['songId']!;
                       return SongEditorPage(songId: songId);
@@ -169,6 +195,7 @@ GoRouter appRouter(Ref ref) {
                   GoRoute(
                     path: 'notation',
                     name: 'scoreNotation',
+                    redirect: guardSongEditing,
                     builder: (context, state) {
                       final songId = state.pathParameters['songId']!;
                       return ScoreEditorPage(songId: songId);

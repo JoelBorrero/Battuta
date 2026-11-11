@@ -2613,4 +2613,243 @@ class AppLocalizationsEn extends AppLocalizations {
   String timeDaysAgo(int count) {
     return '$count d ago';
   }
+
+  @override
+  String get repertoireScopeMyLibrary => 'My library';
+
+  @override
+  String repertoireScopeOrganization(String name) {
+    return '$name repertoire';
+  }
+
+  @override
+  String get repertoireScopeLabel => 'Repertoire to show';
+
+  @override
+  String get orgSettingsTooltip => 'Organization settings';
+
+  @override
+  String get orgRepertoireEmptyTitle => 'No songs in this repertoire yet';
+
+  @override
+  String get orgRepertoireEmptyAdminHint =>
+      'Add versions that were shared with this organization, or public ones.';
+
+  @override
+  String get orgRepertoireEmptyMemberHint =>
+      'Your admins have not added any songs yet.';
+
+  @override
+  String get addToRepertoireAction => 'Add to repertoire';
+
+  @override
+  String get removeFromRepertoireAction => 'Remove from repertoire';
+
+  @override
+  String get removeFromRepertoireTitle => 'Remove from repertoire?';
+
+  @override
+  String removeFromRepertoireConfirm(String title) {
+    return '\"$title\" will leave the repertoire. Setlist entries that use it keep their title but can no longer be opened.';
+  }
+
+  @override
+  String removeFromRepertoireDone(String title) {
+    return 'Removed \"$title\" from the repertoire';
+  }
+
+  @override
+  String addedToRepertoireDone(String title) {
+    return 'Added \"$title\" to the repertoire';
+  }
+
+  @override
+  String get repertoirePickerTitle => 'Add to repertoire';
+
+  @override
+  String get repertoirePickerSearchLabel => 'Search shared and public songs';
+
+  @override
+  String get repertoirePickerEmpty =>
+      'No versions found. A version must be shared with this organization or public.';
+
+  @override
+  String get repertoirePickerAdded => 'Added';
+
+  @override
+  String get repertoirePickerYours => 'Yours';
+
+  @override
+  String repertoirePickerAddTooltip(String title) {
+    return 'Add $title';
+  }
+
+  @override
+  String ownedByName(String name) {
+    return 'Owned by $name';
+  }
+
+  @override
+  String ownedByDeactivated(String name) {
+    return 'Owned by $name (deactivated)';
+  }
+
+  @override
+  String get ownerUnknown => 'another user';
+
+  @override
+  String get readOnlyVersionHint =>
+      'This version is read-only. You can view and transpose it here, but only its owner can edit it.';
+
+  @override
+  String get readOnlyVersionEditorNotice =>
+      'Only the owner can edit this version.';
+
+  @override
+  String get orgSetlistsEmptyAdminHint =>
+      'Create a setlist for this organization from its repertoire.';
+
+  @override
+  String get orgSetlistsEmptyMemberHint =>
+      'No setlists yet. Your admins publish them here.';
+
+  @override
+  String get setlistReadOnlyNotice =>
+      'Only organization admins can edit this setlist. You can still open the songs and transpose them.';
+
+  @override
+  String setlistCreateFailed(String error) {
+    return 'Could not save the setlist: $error';
+  }
+
+  @override
+  String get backendErrorNotOwner => 'Only the owner can change this version.';
+
+  @override
+  String get backendErrorPermissionDenied =>
+      'You do not have permission for that, or the song is no longer available to this organization.';
+
+  @override
+  String get backendErrorArchiveAlreadyRequested =>
+      'Archiving was already requested.';
+
+  @override
+  String get backendErrorArchiveNotRequested =>
+      'There is no archive request to answer.';
+
+  @override
+  String get orgSettingsTitle => 'Organization settings';
+
+  @override
+  String get orgSettingsNotFound => 'This organization is not available.';
+
+  @override
+  String get orgSettingsYourRole => 'Your role';
+
+  @override
+  String get orgSettingsRenameAction => 'Rename';
+
+  @override
+  String get orgSettingsRenameTitle => 'Rename organization';
+
+  @override
+  String get orgSettingsRenamed => 'Organization renamed';
+
+  @override
+  String get orgSettingsQuotaTitle => 'Plan and quota';
+
+  @override
+  String orgSettingsQuotaTier(String tier) {
+    return 'Plan: $tier';
+  }
+
+  @override
+  String orgSettingsQuotaCredits(int count) {
+    return '$count AI credits per month';
+  }
+
+  @override
+  String orgSettingsQuotaStorage(String size) {
+    return 'Storage: $size';
+  }
+
+  @override
+  String get orgSettingsQuotaUnavailable => 'Quota is not available offline.';
+
+  @override
+  String get orgSettingsLeaveHint =>
+      'If you are the only admin, make another member an admin first.';
+
+  @override
+  String get orgSettingsLeaveDone => 'You left the organization';
+
+  @override
+  String get orgSettingsArchivedNotice =>
+      'This organization is archived and read-only.';
+
+  @override
+  String get orgArchiveSection => 'Archive organization';
+
+  @override
+  String get orgArchiveWarning =>
+      'Archiving cannot be undone from the app. The organization becomes read-only and disappears from your switcher. Every admin has to approve it.';
+
+  @override
+  String get orgArchiveRequestAction => 'Request archive';
+
+  @override
+  String orgArchiveRequestedBy(String name) {
+    return 'Requested by $name';
+  }
+
+  @override
+  String get orgArchiveApprovalsTitle => 'Admin approvals';
+
+  @override
+  String get orgArchiveApproved => 'Approved';
+
+  @override
+  String get orgArchivePending => 'Pending';
+
+  @override
+  String get orgArchiveApproveAction => 'Approve archive';
+
+  @override
+  String get orgArchiveCancelAction => 'Cancel request';
+
+  @override
+  String orgArchiveConfirmTitle(String name) {
+    return 'Archive $name?';
+  }
+
+  @override
+  String get orgArchiveConfirmBody =>
+      'This cannot be undone from the app. Type the organization name to confirm.';
+
+  @override
+  String orgArchiveTypeToConfirm(String name) {
+    return 'Type \"$name\"';
+  }
+
+  @override
+  String get orgArchiveConfirmAction => 'Archive';
+
+  @override
+  String get orgArchiveRequestSent =>
+      'Archive requested. The other admins have to approve it.';
+
+  @override
+  String get orgArchiveApprovedDone => 'Your approval was recorded';
+
+  @override
+  String get orgArchiveCancelledDone => 'Archive request cancelled';
+
+  @override
+  String get orgArchiveDone => 'The organization was archived';
+
+  @override
+  String get repertoireEntrySyncing => 'Syncing…';
+
+  @override
+  String get repertoireEntryAfterSync => 'Available after the next sync';
 }

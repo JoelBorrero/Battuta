@@ -17,6 +17,7 @@ import 'package:battuta/features/organizations/domain/entities/notification.dart
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/organizations/domain/entities/schedule.dart';
 import 'package:battuta/features/organizations/domain/repositories/account_session.dart';
+import 'package:battuta/features/organizations/domain/repositories/organization_repertoire_repository.dart';
 import 'package:battuta/features/organizations/domain/repositories/organization_repository.dart';
 import 'package:battuta/features/organizations/domain/repositories/schedule_repository.dart';
 
@@ -27,6 +28,7 @@ class OrganizationsSyncCoordinator {
     required this.remote,
     required this.organizations,
     required this.schedules,
+    this.repertoire,
   });
 
   final AccountSession session;
@@ -34,6 +36,9 @@ class OrganizationsSyncCoordinator {
   final OrganizationsRemoteDataSource remote;
   final OrganizationRepository organizations;
   final ScheduleRepository schedules;
+
+  /// Keeps the cached repertoire of each organization fresh (optional).
+  final OrganizationRepertoireRepository? repertoire;
 
   StreamSubscription<String?>? _sessionSub;
   StreamSubscription<BackendChange>? _changesSub;
@@ -83,6 +88,7 @@ class OrganizationsSyncCoordinator {
     );
     for (final org in orgs) {
       await schedules.refreshOrganization(org.id);
+      await repertoire?.refreshRepertoire(org.id);
     }
   }
 

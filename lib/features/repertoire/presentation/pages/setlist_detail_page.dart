@@ -5,12 +5,16 @@
 /// rehearsal notes, and confirmed deletion.
 library;
 
+import 'package:battuta/app/localization/backend_error_messages.dart';
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/features/organizations/domain/entities/repertoire.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist_item.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_scope_providers.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,10 +48,20 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.stageRed),
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               Navigator.of(ctx).pop();
-              await ref
-                  .read(setlistsProvider.notifier)
-                  .deleteSetlist(setlist.id);
+              try {
+                await ref
+                    .read(setlistsProvider.notifier)
+                    .deleteSetlist(setlist.id);
+              } catch (e) {
+                if (l10n != null) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(backendErrorMessage(l10n, e))),
+                  );
+                }
+                return;
+              }
               if (mounted) {
                 context.pop();
               }
@@ -57,6 +71,23 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
         ],
       ),
     );
+  }
+
+  /// Saves [updated]; a refusal (e.g. the role changed while the page was
+  /// open) is shown instead of thrown.
+  Future<void> _update(Setlist updated) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(setlistsProvider.notifier).updateSetlist(updated);
+    } catch (e) {
+      if (l10n != null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(backendErrorMessage(l10n, e))),
+        );
+      }
+    }
+    ref.invalidate(setlistByIdProvider(widget.setlistId));
   }
 
   void _showEditInfoDialog(Setlist setlist) {
@@ -111,11 +142,9 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                   tags: setlist.tags,
                   createdAt: setlist.createdAt,
                   updatedAt: DateTime.now(),
+                  organizationId: setlist.organizationId,
                 );
-                await ref
-                    .read(setlistsProvider.notifier)
-                    .updateSetlist(updated);
-                ref.invalidate(setlistByIdProvider(widget.setlistId));
+                await _update(updated);
               }
             },
             child: Text(l10n?.save ?? 'Save'),
@@ -227,14 +256,10 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                                   tags: setlist.tags,
                                   createdAt: setlist.createdAt,
                                   updatedAt: DateTime.now(),
+                                  organizationId: setlist.organizationId,
                                 );
                                 navigator.pop();
-                                await ref
-                                    .read(setlistsProvider.notifier)
-                                    .updateSetlist(updated);
-                                ref.invalidate(
-                                  setlistByIdProvider(widget.setlistId),
-                                );
+                                await _update(updated);
                               },
                             ),
                           );
@@ -265,9 +290,9 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
       tags: setlist.tags,
       createdAt: setlist.createdAt,
       updatedAt: DateTime.now(),
+      organizationId: setlist.organizationId,
     );
-    await ref.read(setlistsProvider.notifier).updateSetlist(updated);
-    ref.invalidate(setlistByIdProvider(widget.setlistId));
+    await _update(updated);
   }
 
   void _reorderSongs(Setlist setlist, int oldIndex, int newIndex) async {
@@ -287,9 +312,9 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
       tags: setlist.tags,
       createdAt: setlist.createdAt,
       updatedAt: DateTime.now(),
+      organizationId: setlist.organizationId,
     );
-    await ref.read(setlistsProvider.notifier).updateSetlist(updated);
-    ref.invalidate(setlistByIdProvider(widget.setlistId));
+    await _update(updated);
   }
 
   @override
@@ -300,6 +325,28 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
     final l10n = AppLocalizations.of(context);
 
     final songMap = {for (final s in repertoire) s.id: s};
+    final isOrgAdmin = ref.watch(organizationAdminCheckProvider);
+    // Personal setlists are mine; an organization's are edited by its admins.
+    bool canEditSetlist(Setlist s) =>
+        s.organizationId == null || isOrgAdmin(s.organizationId!);
+    // Organization setlists are built from the organization's repertoire.
+    List<Song> pickerSongs(Setlist s) {
+      final organizationId = s.organizationId;
+      // Personal setlists draw from my library, not other owners' versions.
+      if (organizationId == null) {
+        return ref.watch(myLibraryProvider).value ?? const [];
+      }
+      final inRepertoire = {
+        for (final RepertoireEntry e
+            in ref.watch(organizationRepertoireProvider(organizationId)).value ??
+                const <RepertoireEntry>[])
+          e.versionId,
+      };
+      return [
+        for (final song in repertoire)
+          if (inRepertoire.contains(song.id)) song,
+      ];
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -307,7 +354,9 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
         actions: [
           setlistAsync.when(
             data: (setlist) {
-              if (setlist == null) return const SizedBox.shrink();
+              if (setlist == null || !canEditSetlist(setlist)) {
+                return const SizedBox.shrink();
+              }
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -339,6 +388,8 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
           if (setlist == null) {
             return Center(child: Text(l10n?.noSetlistsYet ?? 'Setlist not found.'));
           }
+
+          final pickable = pickerSongs(setlist);
 
           return Column(
             children: [
@@ -462,13 +513,16 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                         ),
                       )
                     : ReorderableListView.builder(
+                        buildDefaultDragHandles: canEditSetlist(setlist),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
                         itemCount: setlist.items.length,
-                        onReorderItem: (oldIndex, newIndex) =>
-                            _reorderSongs(setlist, oldIndex, newIndex),
+                        onReorderItem: (oldIndex, newIndex) {
+                          if (!canEditSetlist(setlist)) return;
+                          _reorderSongs(setlist, oldIndex, newIndex);
+                        },
                         itemBuilder: (context, index) {
                           final item = setlist.items[index];
                           final song = songMap[item.songId];
@@ -527,24 +581,31 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                                     ),
                                 ],
                               ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.remove_circle_outline,
-                                      size: 20,
+                              trailing: !canEditSetlist(setlist)
+                                  ? const Icon(Icons.chevron_right)
+                                  : Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.remove_circle_outline,
+                                            size: 20,
+                                          ),
+                                          tooltip:
+                                              l10n?.removeFromSetlistTooltip ??
+                                              'Remove from setlist',
+                                          onPressed: () =>
+                                              _removeSongFromSetlist(
+                                                setlist,
+                                                index,
+                                              ),
+                                        ),
+                                        const Icon(
+                                          Icons.drag_handle,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
                                     ),
-                                    tooltip: l10n?.removeFromSetlistTooltip ?? 'Remove from setlist',
-                                    onPressed: () =>
-                                        _removeSongFromSetlist(setlist, index),
-                                  ),
-                                  const Icon(
-                                    Icons.drag_handle,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
                               onTap: () {
                                 if (song != null) {
                                   context.push(AppRoutes.songDetail(song.id));
@@ -575,7 +636,22 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                     ),
                   ),
                 ),
-                child: Row(
+                child: !canEditSetlist(setlist)
+                    ? Row(
+                        children: [
+                          const Icon(Icons.lock_outline, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n?.setlistReadOnlyNotice ??
+                                  'Only organization admins can edit this setlist.',
+                              key: const ValueKey('setlist_read_only_notice'),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
                   children: [
                     Expanded(
                       child: FilledButton.icon(
@@ -589,8 +665,7 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
                           l10n?.addSongToSetlist ?? 'Add Song to Setlist',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        onPressed: () =>
-                            _showAddSongDialog(setlist, repertoire),
+                        onPressed: () => _showAddSongDialog(setlist, pickable),
                       ),
                     ),
                   ],

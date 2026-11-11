@@ -150,6 +150,22 @@ class _SwitcherSheet extends ConsumerWidget {
                 ],
               ),
             ],
+            if (active != null) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('switcher_settings_btn'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(44, 48),
+                ),
+                icon: const Icon(Icons.tune),
+                label: Text(l10n.orgSettingsTooltip),
+                onPressed: () {
+                  final router = GoRouter.of(context);
+                  Navigator.of(context).pop();
+                  router.push(AppRoutes.organizationSettings(active.id));
+                },
+              ),
+            ],
             const Divider(),
             OutlinedButton.icon(
               key: const ValueKey('create_org_btn'),

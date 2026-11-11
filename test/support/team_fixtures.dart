@@ -8,6 +8,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/team/presentation/providers/calendar_providers.dart';
 import 'package:flutter_riverpod/misc.dart';
 
+import 'fake_organization_repertoire_repository.dart';
 import 'fake_organization_repository.dart';
 import 'fake_schedule_repository.dart';
 import 'memory_storage.dart';
@@ -57,12 +58,15 @@ class _FixedSetlists extends SetlistsNotifier {
 
 /// Signed in as [meUser] with [repository], [schedules] (an empty calendar
 /// by default), [setlists] and in-memory storage. [now] pins the clock of
-/// the calendar.
+/// the calendar. With [fixedSetlists] false the real setlists notifier runs
+/// (over whatever `setlistRepositoryProvider` is overridden with).
 List<Override> signedInOverrides(
   FakeOrganizationRepository repository, {
   MemoryStorage? storage,
   FakeScheduleRepository? schedules,
+  FakeOrganizationRepertoireRepository? repertoire,
   List<Setlist> setlists = const [],
+  bool fixedSetlists = true,
   DateTime? now,
 }) => [
   currentUserProvider.overrideWithValue(meUser),
@@ -70,7 +74,11 @@ List<Override> signedInOverrides(
   scheduleRepositoryProvider.overrideWithValue(
     schedules ?? FakeScheduleRepository(),
   ),
-  setlistsProvider.overrideWith(() => _FixedSetlists(setlists)),
+  organizationRepertoireRepositoryProvider.overrideWithValue(
+    repertoire ?? FakeOrganizationRepertoireRepository(),
+  ),
+  if (fixedSetlists)
+    setlistsProvider.overrideWith(() => _FixedSetlists(setlists)),
   if (now != null) calendarClockProvider.overrideWithValue(() => now),
   activeOrganizationStorageProvider.overrideWithValue(
     storage ?? MemoryStorage(),

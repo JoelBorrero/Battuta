@@ -7,6 +7,7 @@
 library;
 
 import 'package:battuta/core/database/database_providers.dart';
+import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/repertoire/data/seed/repertoire_seeder.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
@@ -103,10 +104,12 @@ class Repertoire extends _$Repertoire {
 
   /// Adds a new [song] to the repertoire.
   ///
-  /// Optimistically updates the local state and rolls back on failure.
-  Future<void> addSong(Song song) async {
+  /// Optimistically updates the local state and rolls back on failure,
+  /// returning the failure (the list is never replaced by an error).
+  Future<Failure?> addSong(Song song) async {
     final repository = ref.read(songRepositoryProvider);
     final previousState = state;
+    Failure? error;
 
     // Optimistic update
     state = AsyncData([...?state.value, song]);
@@ -114,10 +117,9 @@ class Repertoire extends _$Repertoire {
     final result = await repository.saveSong(song);
     result.fold(
       (failure) {
-        if (ref.mounted) {
-          state = previousState; // rollback
-          state = AsyncError(failure, StackTrace.current);
-        }
+        // Keep the list on screen; the caller shows the failure.
+        if (ref.mounted) state = previousState;
+        error = failure;
       },
       (saved) {
         if (ref.mounted) {
@@ -129,6 +131,7 @@ class Repertoire extends _$Repertoire {
         }
       },
     );
+    return error;
   }
 
   /// Imports multiple [songs] into the database and refreshes state.
@@ -158,9 +161,10 @@ class Repertoire extends _$Repertoire {
   /// Updates an existing [song] in the repertoire.
   ///
   /// Replaces the song with a matching [Song.id] in the local state.
-  Future<void> updateSong(Song song) async {
+  Future<Failure?> updateSong(Song song) async {
     final repository = ref.read(songRepositoryProvider);
     final previousState = state;
+    Failure? error;
 
     // Optimistic update
     state = AsyncData([
@@ -171,10 +175,9 @@ class Repertoire extends _$Repertoire {
     final result = await repository.saveSong(song);
     result.fold(
       (failure) {
-        if (ref.mounted) {
-          state = previousState; // rollback
-          state = AsyncError(failure, StackTrace.current);
-        }
+        // Keep the list on screen; the caller shows the failure.
+        if (ref.mounted) state = previousState;
+        error = failure;
       },
       (saved) {
         if (ref.mounted) {
@@ -185,12 +188,14 @@ class Repertoire extends _$Repertoire {
         }
       },
     );
+    return error;
   }
 
   /// Removes the song with the given [songId] from the repertoire.
-  Future<void> deleteSong(String songId) async {
+  Future<Failure?> deleteSong(String songId) async {
     final repository = ref.read(songRepositoryProvider);
     final previousState = state;
+    Failure? error;
 
     // Optimistic removal
     state = AsyncData([
@@ -201,15 +206,15 @@ class Repertoire extends _$Repertoire {
     final result = await repository.deleteSong(songId);
     result.fold(
       (failure) {
-        if (ref.mounted) {
-          state = previousState; // rollback
-          state = AsyncError(failure, StackTrace.current);
-        }
+        // Keep the list on screen; the caller shows the failure.
+        if (ref.mounted) state = previousState;
+        error = failure;
       },
       (_) {
         /* already removed optimistically */
       },
     );
+    return error;
   }
 
   /// Filters the repertoire by [query], matching title, artist, or tags.

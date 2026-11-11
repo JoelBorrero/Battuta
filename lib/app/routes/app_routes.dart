@@ -54,6 +54,16 @@ final class AppRoutes {
   /// Notifications inbox and invitations addressed to me.
   static const String inbox = '/inbox';
 
+  /// Settings of one organization (name, role, quota, leave, archive).
+  ///
+  /// Path parameter: `organizationId`.
+  static const String organizationSettingsPath =
+      '/organizations/:organizationId/settings';
+
+  /// Returns the concrete path of the settings of [organizationId].
+  static String organizationSettings(String organizationId) =>
+      '/organizations/${Uri.encodeComponent(organizationId)}/settings';
+
   /// Whether [location] belongs to the account entry flow.
   static bool isAccountEntry(String location) =>
       location == welcome || location == signIn || location == createAccount;

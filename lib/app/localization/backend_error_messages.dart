@@ -14,6 +14,12 @@ String backendErrorMessage(AppLocalizations l10n, Object error) {
     BackendErrorCode.notMember ||
     BackendErrorCode.memberNotFound => l10n.backendErrorNotMember,
     BackendErrorCode.lastAdmin => l10n.backendErrorLastAdmin,
+    BackendErrorCode.notOwner => l10n.backendErrorNotOwner,
+    BackendErrorCode.permissionDenied => l10n.backendErrorPermissionDenied,
+    BackendErrorCode.archiveAlreadyRequested =>
+      l10n.backendErrorArchiveAlreadyRequested,
+    BackendErrorCode.archiveNotRequested =>
+      l10n.backendErrorArchiveNotRequested,
     BackendErrorCode.usernameTaken => l10n.usernameTakenError,
     BackendErrorCode.invalidUsername => l10n.usernameInvalidError,
     BackendErrorCode.invalidName => l10n.backendErrorInvalidName,

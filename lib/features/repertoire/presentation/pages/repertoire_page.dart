@@ -6,13 +6,20 @@
 library;
 
 import 'package:battuta/app/design_system/design_system.dart';
+import 'package:battuta/app/localization/backend_error_messages.dart';
 import 'package:battuta/app/routes/app_routes.dart';
-import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/organizations/domain/entities/organization.dart';
+import 'package:battuta/features/organizations/domain/entities/repertoire.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
+import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_scope_providers.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/add_to_repertoire_sheet.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/org_repertoire_view.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/repertoire_scope_bar.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_import_modal.dart';
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
@@ -40,6 +47,8 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     final l10n = AppLocalizations.of(context);
     final titleController = TextEditingController();
     final descController = TextEditingController();
+    // A setlist created while an organization is shown belongs to it.
+    final organizationId = ref.read(scopeOrganizationProvider)?.id;
 
     showDialog<void>(
       context: context,
@@ -92,11 +101,31 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 items: const [],
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
+                organizationId: organizationId,
               );
 
-              await ref.read(setlistsProvider.notifier).createSetlist(setlist);
+              Object? failure;
+              try {
+                await ref
+                    .read(setlistsProvider.notifier)
+                    .createSetlist(setlist);
+              } catch (e) {
+                failure = e;
+              }
               if (ctx.mounted) {
                 Navigator.of(ctx).pop();
+              }
+              if (failure != null && mounted && l10n != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      l10n.setlistCreateFailed(
+                        backendErrorMessage(l10n, failure),
+                      ),
+                    ),
+                  ),
+                );
+                return;
               }
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -136,9 +165,18 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
             onPressed: () async {
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.of(ctx).pop();
-              await ref
-                  .read(setlistsProvider.notifier)
-                  .deleteSetlist(setlist.id);
+              try {
+                await ref
+                    .read(setlistsProvider.notifier)
+                    .deleteSetlist(setlist.id);
+              } catch (e) {
+                if (mounted && l10n != null) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(content: Text(backendErrorMessage(l10n, e))),
+                  );
+                }
+                return;
+              }
               if (mounted) {
                 scaffoldMessenger.showSnackBar(
                   SnackBar(
@@ -282,12 +320,20 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final repertoire = ref.watch(repertoireProvider);
-    final setlistsAsync = ref.watch(setlistsProvider);
-    final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final library = ref.watch(myLibraryProvider);
+    final setlistsAsync = ref.watch(scopedSetlistsProvider);
+    // My library is mine to edit; an organization is curated by its admins.
+    final organization = ref.watch(scopeOrganizationProvider);
+    final canManage = ref.watch(canManageScopeProvider);
     final l10n = AppLocalizations.of(context);
 
-    final songCount = repertoire.value?.length ?? 0;
+    final songCount = organization == null
+        ? (library.value?.length ?? 0)
+        : (ref
+                  .watch(organizationRepertoireProvider(organization.id))
+                  .value
+                  ?.length ??
+              0);
     final setlistCount = setlistsAsync.value?.length ?? 0;
 
     return Scaffold(
@@ -310,80 +356,94 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
         actions: [
           const CloudSyncStatusIndicator(compact: true),
           const InboxButton(),
-          IconButton(
-            icon: const Icon(Icons.file_download_outlined),
-            tooltip: 'Import song or lead sheet',
-            onPressed: () => SongImportModal.show(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.document_scanner_outlined),
-            tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
-            onPressed: () => _openScannerDirect(context),
-          ),
+          if (organization != null)
+            IconButton(
+              key: const ValueKey('org_settings_btn'),
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              icon: const Icon(Icons.tune),
+              tooltip: l10n?.orgSettingsTooltip ?? 'Organization settings',
+              onPressed: () =>
+                  context.push(AppRoutes.organizationSettings(organization.id)),
+            ),
+          if (organization == null) ...[
+            IconButton(
+              icon: const Icon(Icons.file_download_outlined),
+              tooltip: 'Import song or lead sheet',
+              onPressed: () => SongImportModal.show(context),
+            ),
+            IconButton(
+              icon: const Icon(Icons.document_scanner_outlined),
+              tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
+              onPressed: () => _openScannerDirect(context),
+            ),
+          ],
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: l10n?.searchSongsTooltip ?? 'Search songs',
-            onPressed: () => _showSearch(context, ref),
+            onPressed: () => _showSearch(context, ref, organization),
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: 'More options',
-            onSelected: (value) async {
-              if (value == 'import') {
-                SongImportModal.show(context);
-              } else if (value == 'export_all') {
-                final songs = repertoire.value ?? [];
-                if (songs.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('No songs in repertoire to export'),
-                    ),
-                  );
-                  return;
-                }
-                final jsonStr = SongImportExportService.exportRepertoireToJson(
-                  songs,
-                );
-                await Clipboard.setData(ClipboardData(text: jsonStr));
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: AppTheme.stageGreen,
-                      content: Text(
-                        'Exported ${songs.length} songs to clipboard (JSON)',
+          if (organization == null)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'More options',
+              onSelected: (value) async {
+                if (value == 'import') {
+                  SongImportModal.show(context);
+                } else if (value == 'export_all') {
+                  final songs = library.value ?? [];
+                  if (songs.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No songs in repertoire to export'),
                       ),
-                    ),
-                  );
+                    );
+                    return;
+                  }
+                  final jsonStr =
+                      SongImportExportService.exportRepertoireToJson(songs);
+                  await Clipboard.setData(ClipboardData(text: jsonStr));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: AppTheme.stageGreen,
+                        content: Text(
+                          'Exported ${songs.length} songs to clipboard (JSON)',
+                        ),
+                      ),
+                    );
+                  }
                 }
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'import',
-                child: Row(
-                  children: [
-                    Icon(Icons.file_download_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Import Song / Leadsheet'),
-                  ],
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'import',
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_download_outlined, size: 20),
+                      SizedBox(width: 10),
+                      Text('Import Song / Leadsheet'),
+                    ],
+                  ),
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'export_all',
-                child: Row(
-                  children: [
-                    Icon(Icons.file_upload_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Export Repertoire (JSON Backup)'),
-                  ],
+                const PopupMenuItem(
+                  value: 'export_all',
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_upload_outlined, size: 20),
+                      SizedBox(width: 10),
+                      Text('Export Repertoire (JSON Backup)'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
       body: Column(
         children: [
+          // ── Scope: my library or an organization's repertoire ──
+          const RepertoireScopeBar(),
+
           // ── View Mode Switcher: Songs vs Setlists ──
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -431,24 +491,31 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               child: KeyedSubtree(
                 key: ValueKey(_selectedTabIndex),
                 child: _selectedTabIndex == 0
-                    ? _buildSongsView(repertoire, theme, isAdmin: isAdmin)
+                    ? (organization == null
+                          ? _buildSongsView(library, theme)
+                          : OrgRepertoireView(organization: organization))
                     : _buildSetlistsView(
                         setlistsAsync,
                         theme,
-                        isAdmin: isAdmin,
+                        organization: organization,
+                        canManage: canManage,
                       ),
               ),
             ),
           ),
         ],
       ),
-      floatingActionButton: isAdmin
+      floatingActionButton: canManage
           ? FloatingActionButton.extended(
               tooltip: _selectedTabIndex == 0
-                  ? (l10n?.addSong ?? 'Add song')
+                  ? (organization == null
+                        ? (l10n?.addSong ?? 'Add song')
+                        : (l10n?.addToRepertoireAction ?? 'Add to repertoire'))
                   : (l10n?.createSetlist ?? 'Create setlist'),
               onPressed: _selectedTabIndex == 0
-                  ? () => _showAddSongOptions(context)
+                  ? (organization == null
+                        ? () => _showAddSongOptions(context)
+                        : () => showAddToRepertoireSheet(context, organization))
                   : _showCreateSetlistDialog,
               icon: const Icon(Icons.add),
               label: AnimatedSwitcher(
@@ -465,7 +532,10 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 ),
                 child: Text(
                   _selectedTabIndex == 0
-                      ? (l10n?.newSong ?? 'New Song')
+                      ? (organization == null
+                            ? (l10n?.newSong ?? 'New Song')
+                            : (l10n?.addToRepertoireAction ??
+                                  'Add to repertoire'))
                       : (l10n?.newSetlist ?? 'New Setlist'),
                   key: ValueKey(_selectedTabIndex),
                 ),
@@ -475,11 +545,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     );
   }
 
-  Widget _buildSongsView(
-    AsyncValue<List<dynamic>> repertoire,
-    ThemeData theme, {
-    required bool isAdmin,
-  }) {
+  Widget _buildSongsView(AsyncValue<List<Song>> repertoire, ThemeData theme) {
     final l10n = AppLocalizations.of(context);
     return repertoire.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -501,32 +567,26 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           return StageEmptyState(
             icon: Icons.library_music_outlined,
             title: l10n?.repertoireEmpty ?? 'Your repertoire is empty',
-            message: isAdmin
-                ? (l10n?.repertoireEmptyAdminHint ??
-                      'Tap the + button to add your first song')
-                : (l10n?.repertoireEmptyMemberHint ??
-                      'No songs available yet. Contact an administrator to add songs.'),
+            message:
+                l10n?.repertoireEmptyAdminHint ??
+                'Tap the + button to add your first song',
             actions: [
-              if (isAdmin) ...[
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.amberAccent,
-                    foregroundColor: AppTheme.obsidianText,
-                  ),
-                  icon: const Icon(Icons.auto_awesome),
-                  label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
-                  onPressed: () async {
-                    await ref
-                        .read(repertoireProvider.notifier)
-                        .seedSampleData();
-                  },
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.amberAccent,
+                  foregroundColor: AppTheme.obsidianText,
                 ),
-                FilledButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n?.addSong ?? 'Add Song'),
-                  onPressed: () => _showAddSongOptions(context),
-                ),
-              ],
+                icon: const Icon(Icons.auto_awesome),
+                label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
+                onPressed: () async {
+                  await ref.read(repertoireProvider.notifier).seedSampleData();
+                },
+              ),
+              FilledButton.icon(
+                icon: const Icon(Icons.add),
+                label: Text(l10n?.addSong ?? 'Add Song'),
+                onPressed: () => _showAddSongOptions(context),
+              ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.link),
                 label: const Text('Import by URL'),
@@ -560,7 +620,8 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
   Widget _buildSetlistsView(
     AsyncValue<List<Setlist>> setlistsAsync,
     ThemeData theme, {
-    required bool isAdmin,
+    required Organization? organization,
+    required bool canManage,
   }) {
     final l10n = AppLocalizations.of(context);
     return setlistsAsync.when(
@@ -575,26 +636,32 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
           return StageEmptyState(
             icon: Icons.playlist_play,
             title: l10n?.noSetlistsYet ?? 'No Setlists Yet',
-            message: isAdmin
-                ? (l10n?.setlistsEmptyAdminHint ??
-                      'Create an ordered setlist for Sunday services or rehearsals.')
-                : (l10n?.setlistsEmptyMemberHint ??
-                      'No setlists created yet. Setlists will appear here once published by your director.'),
+            message: organization != null
+                ? (canManage
+                      ? (l10n?.orgSetlistsEmptyAdminHint ??
+                            'Create a setlist for this organization.')
+                      : (l10n?.orgSetlistsEmptyMemberHint ??
+                            'No setlists yet. Your admins publish them here.'))
+                : (l10n?.setlistsEmptyAdminHint ??
+                      'Create an ordered setlist for Sunday services or rehearsals.'),
             actions: [
-              if (isAdmin) ...[
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.amberAccent,
-                    foregroundColor: AppTheme.obsidianText,
+              if (canManage) ...[
+                if (organization == null)
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.amberAccent,
+                      foregroundColor: AppTheme.obsidianText,
+                    ),
+                    icon: const Icon(Icons.auto_awesome),
+                    label: Text(
+                      l10n?.loadSampleSetlist ?? 'Load Sample Setlist',
+                    ),
+                    onPressed: () async {
+                      await ref
+                          .read(repertoireProvider.notifier)
+                          .seedSampleData();
+                    },
                   ),
-                  icon: const Icon(Icons.auto_awesome),
-                  label: Text(l10n?.loadSampleSetlist ?? 'Load Sample Setlist'),
-                  onPressed: () async {
-                    await ref
-                        .read(repertoireProvider.notifier)
-                        .seedSampleData();
-                  },
-                ),
                 FilledButton.icon(
                   icon: const Icon(Icons.add),
                   label: Text(l10n?.createSetlist ?? 'Create Setlist'),
@@ -618,7 +685,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 subtitle:
                     '${l10n?.setlistSongsCount(setlist.songCount) ?? "${setlist.songCount} songs"} • ${setlist.description ?? (l10n?.upcomingService ?? "Upcoming service")}',
                 onTap: () => context.push(AppRoutes.setlistDetail(setlist.id)),
-                onDelete: isAdmin
+                onDelete: canManage
                     ? () => _confirmDeleteSetlist(context, setlist)
                     : null,
                 deleteTooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
@@ -631,8 +698,15 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
   }
 
   /// Opens a search delegate to filter songs by query.
-  void _showSearch(BuildContext context, WidgetRef ref) {
-    showSearch(context: context, delegate: _SongSearchDelegate(ref));
+  void _showSearch(
+    BuildContext context,
+    WidgetRef ref,
+    Organization? organization,
+  ) {
+    showSearch(
+      context: context,
+      delegate: _SongSearchDelegate(ref, organization),
+    );
   }
 }
 
@@ -642,9 +716,12 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
 /// A [SearchDelegate] that filters the repertoire as the user types.
 class _SongSearchDelegate extends SearchDelegate<String> {
-  _SongSearchDelegate(this._ref);
+  _SongSearchDelegate(this._ref, this._organization);
 
   final WidgetRef _ref;
+
+  /// The organization whose repertoire is searched; `null` is my library.
+  final Organization? _organization;
 
   @override
   List<Widget>? buildActions(BuildContext context) => [
@@ -678,7 +755,11 @@ class _SongSearchDelegate extends SearchDelegate<String> {
       );
     }
 
-    final repertoire = _ref.watch(repertoireProvider);
+    final organization = _organization;
+    if (organization != null) {
+      return _buildOrganizationResults(context, organization);
+    }
+    final repertoire = _ref.watch(myLibraryProvider);
 
     return repertoire.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -697,6 +778,48 @@ class _SongSearchDelegate extends SearchDelegate<String> {
         return ListView.builder(
           itemCount: matches.length,
           itemBuilder: (context, index) => SongCard(song: matches[index]),
+        );
+      },
+    );
+  }
+
+  Widget _buildOrganizationResults(
+    BuildContext context,
+    Organization organization,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final entries = _ref.watch(organizationRepertoireProvider(organization.id));
+    return entries.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Error: $error')),
+      data: (all) {
+        final q = query.trim().toLowerCase();
+        final matches = [
+          for (final RepertoireEntry entry in all)
+            if (entry.title.toLowerCase().contains(q) ||
+                entry.artist.toLowerCase().contains(q))
+              entry,
+        ];
+        if (matches.isEmpty) {
+          return Center(child: Text(l10n?.noSongsFound ?? 'No songs found'));
+        }
+        return ListView.builder(
+          itemCount: matches.length,
+          itemBuilder: (context, index) {
+            final entry = matches[index];
+            return ListTile(
+              minTileHeight: 56,
+              title: Text(entry.title, maxLines: 1),
+              subtitle: Text(
+                [
+                  if (entry.artist.isNotEmpty) entry.artist,
+                  entry.key,
+                ].join(' · '),
+                maxLines: 1,
+              ),
+              onTap: () => context.push(AppRoutes.songDetail(entry.versionId)),
+            );
+          },
         );
       },
     );

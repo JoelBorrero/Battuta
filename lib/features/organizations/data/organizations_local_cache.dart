@@ -27,6 +27,7 @@ abstract final class CacheKind {
   static const schedule = 'schedule';
   static const assignment = 'assignment';
   static const absence = 'absence';
+  static const repertoire = 'repertoire';
 }
 
 /// A JSON row to cache: [id] is the entity id, [json] its serialization.
