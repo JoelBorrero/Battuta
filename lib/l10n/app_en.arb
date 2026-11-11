@@ -2847,5 +2847,234 @@
     "placeholders": {
       "reason": { "type": "String" }
     }
+  },
+  "calendarSignInTitle": "Sign in to plan services with your organization",
+  "@calendarSignInTitle": {
+    "description": "Calendar: calendarSignInTitle"
+  },
+  "calendarSignInMessage": "Services, lineups and absences are shared with your organization. Sign in to see them.",
+  "@calendarSignInMessage": {
+    "description": "Calendar: calendarSignInMessage"
+  },
+  "myServicesTitle": "My services",
+  "@myServicesTitle": {
+    "description": "Calendar: myServicesTitle"
+  },
+  "acceptAssignmentAction": "Accept",
+  "@acceptAssignmentAction": {
+    "description": "Calendar: acceptAssignmentAction"
+  },
+  "declineAssignmentAction": "Decline",
+  "@declineAssignmentAction": {
+    "description": "Calendar: declineAssignmentAction"
+  },
+  "declineAssignmentTitle": "Decline this service?",
+  "@declineAssignmentTitle": {
+    "description": "Calendar: declineAssignmentTitle"
+  },
+  "declineReasonLabel": "Reason (optional)",
+  "@declineReasonLabel": {
+    "description": "Calendar: declineReasonLabel"
+  },
+  "assignmentStatusAccepted": "Accepted",
+  "@assignmentStatusAccepted": {
+    "description": "Calendar: assignmentStatusAccepted"
+  },
+  "assignmentStatusPending": "Awaiting reply",
+  "@assignmentStatusPending": {
+    "description": "Calendar: assignmentStatusPending"
+  },
+  "assignmentStatusDeclined": "Declined",
+  "@assignmentStatusDeclined": {
+    "description": "Calendar: assignmentStatusDeclined"
+  },
+  "assignmentStatusAway": "Away",
+  "@assignmentStatusAway": {
+    "description": "Calendar: assignmentStatusAway"
+  },
+  "declinedReasonLine": "Reason: {reason}",
+  "@declinedReasonLine": {
+    "description": "Calendar: declinedReasonLine",
+    "placeholders": {"reason": {"type": "String"}}
+  },
+  "myAbsencesTitle": "My absences",
+  "@myAbsencesTitle": {
+    "description": "Calendar: myAbsencesTitle"
+  },
+  "noAbsencesYet": "No absences. Add the days you cannot play.",
+  "@noAbsencesYet": {
+    "description": "Calendar: noAbsencesYet"
+  },
+  "addAbsenceAction": "Add absence",
+  "@addAbsenceAction": {
+    "description": "Calendar: addAbsenceAction"
+  },
+  "editAbsenceAction": "Edit absence",
+  "@editAbsenceAction": {
+    "description": "Calendar: editAbsenceAction"
+  },
+  "deleteAbsenceAction": "Delete absence",
+  "@deleteAbsenceAction": {
+    "description": "Calendar: deleteAbsenceAction"
+  },
+  "absenceFromLabel": "From",
+  "@absenceFromLabel": {
+    "description": "Calendar: absenceFromLabel"
+  },
+  "absenceToLabel": "To",
+  "@absenceToLabel": {
+    "description": "Calendar: absenceToLabel"
+  },
+  "absenceNoteLabel": "Note (optional)",
+  "@absenceNoteLabel": {
+    "description": "Calendar: absenceNoteLabel"
+  },
+  "absenceEndBeforeStart": "The end date cannot be before the start date.",
+  "@absenceEndBeforeStart": {
+    "description": "Calendar: absenceEndBeforeStart"
+  },
+  "absenceRangeLabel": "{start} to {end}",
+  "@absenceRangeLabel": {
+    "description": "Calendar: absenceRangeLabel",
+    "placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}
+  },
+  "repeatsLabel": "Repeats",
+  "@repeatsLabel": {
+    "description": "Calendar: repeatsLabel"
+  },
+  "repeatNever": "Does not repeat",
+  "@repeatNever": {
+    "description": "Calendar: repeatNever"
+  },
+  "lookaheadOption": "Show the next {count} services",
+  "@lookaheadOption": {
+    "description": "Calendar: lookaheadOption",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "setlistLabel": "Setlist",
+  "@setlistLabel": {
+    "description": "Calendar: setlistLabel"
+  },
+  "noSetlistOption": "No setlist",
+  "@noSetlistOption": {
+    "description": "Calendar: noSetlistOption"
+  },
+  "repeatingServiceNote": "This changes only this date. Edit the recurring schedule to change every date.",
+  "@repeatingServiceNote": {
+    "description": "Calendar: repeatingServiceNote"
+  },
+  "deleteServiceConfirm": "Delete {title}? Its lineup is removed too.",
+  "@deleteServiceConfirm": {
+    "description": "Calendar: deleteServiceConfirm",
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "editScheduleTitle": "Edit recurring schedule",
+  "@editScheduleTitle": {
+    "description": "Calendar: editScheduleTitle"
+  },
+  "noSchedulesYet": "No recurring schedules yet.",
+  "@noSchedulesYet": {
+    "description": "Calendar: noSchedulesYet"
+  },
+  "scheduleSummary": "{cadence} at {time}",
+  "@scheduleSummary": {
+    "description": "Calendar: scheduleSummary",
+    "placeholders": {"cadence": {"type": "String"}, "time": {"type": "String"}}
+  },
+  "scheduleActiveLabel": "Active",
+  "@scheduleActiveLabel": {
+    "description": "Calendar: scheduleActiveLabel"
+  },
+  "schedulePausedLabel": "Paused",
+  "@schedulePausedLabel": {
+    "description": "Calendar: schedulePausedLabel"
+  },
+  "scheduleEndsLabel": "Stops on {date}",
+  "@scheduleEndsLabel": {
+    "description": "Calendar: scheduleEndsLabel",
+    "placeholders": {"date": {"type": "String"}}
+  },
+  "pauseScheduleAction": "Pause",
+  "@pauseScheduleAction": {
+    "description": "Calendar: pauseScheduleAction"
+  },
+  "resumeScheduleAction": "Resume",
+  "@resumeScheduleAction": {
+    "description": "Calendar: resumeScheduleAction"
+  },
+  "stopScheduleAction": "Stop from a date",
+  "@stopScheduleAction": {
+    "description": "Calendar: stopScheduleAction"
+  },
+  "deleteScheduleAction": "Delete schedule",
+  "@deleteScheduleAction": {
+    "description": "Calendar: deleteScheduleAction"
+  },
+  "deleteScheduleConfirm": "Delete {title}? Services already created from it stay in the calendar.",
+  "@deleteScheduleConfirm": {
+    "description": "Calendar: deleteScheduleConfirm",
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "assignPickerTitle": "Assign to {title}",
+  "@assignPickerTitle": {
+    "description": "Calendar: assignPickerTitle",
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "assignInstrumentLabel": "Instrument",
+  "@assignInstrumentLabel": {
+    "description": "Calendar: assignInstrumentLabel"
+  },
+  "availableOnlyFilter": "Available",
+  "@availableOnlyFilter": {
+    "description": "Calendar: availableOnlyFilter"
+  },
+  "playsInstrumentFilter": "Plays {instrument}",
+  "@playsInstrumentFilter": {
+    "description": "Calendar: playsInstrumentFilter",
+    "placeholders": {"instrument": {"type": "String"}}
+  },
+  "memberAwayThatDay": "Away that day",
+  "@memberAwayThatDay": {
+    "description": "Calendar: memberAwayThatDay"
+  },
+  "memberAlreadyAssigned": "Already on this service",
+  "@memberAlreadyAssigned": {
+    "description": "Calendar: memberAlreadyAssigned"
+  },
+  "noMembersMatch": "No members match.",
+  "@noMembersMatch": {
+    "description": "Calendar: noMembersMatch"
+  },
+  "memberAssignedSuccess": "{name} added to the lineup",
+  "@memberAssignedSuccess": {
+    "description": "Calendar: memberAssignedSuccess",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "memberReassignedSuccess": "Reassigned to {name}",
+  "@memberReassignedSuccess": {
+    "description": "Calendar: memberReassignedSuccess",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "removeFromLineupAction": "Remove from lineup",
+  "@removeFromLineupAction": {
+    "description": "Calendar: removeFromLineupAction"
+  },
+  "alertAwayCoverNeeded": "Away that day — missing cover for {role}",
+  "@alertAwayCoverNeeded": {
+    "description": "Calendar: alertAwayCoverNeeded",
+    "placeholders": {"role": {"type": "String"}}
+  },
+  "cantAttendCoverNeededFor": "Declined — missing cover for {role}",
+  "@cantAttendCoverNeededFor": {
+    "description": "Calendar: cantAttendCoverNeededFor",
+    "placeholders": {"role": {"type": "String"}}
+  },
+  "noMembersForService": "No members to assign yet.",
+  "@noMembersForService": {
+    "description": "Calendar: noMembersForService"
+  },
+  "lineupMemberUnknown": "Former member",
+  "@lineupMemberUnknown": {
+    "description": "Calendar: lineupMemberUnknown"
   }
 }

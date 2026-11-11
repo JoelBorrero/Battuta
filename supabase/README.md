@@ -32,7 +32,7 @@ others. Inside an organization a musician can play in several bands.
 | `organization_repertoire` | The versions an organization plays (picked by admins among versions visible to it). |
 | `song_merge_requests` | Merge of two separately created copies of the same work. |
 | `setlists`, `setlist_items` | A setlist belongs to **either** an organization (`organization_id`) **or** a user (`owner_id`, a personal setlist): exactly one is set. Items reference a version and keep a title snapshot plus `key_override`, `tempo_override` and `notes`. Organization items reference repertoire versions; personal items reference any version the owner can see. |
-| `calendar_events`, `recurring_schedules` | Belong to an organization, optional `band_id`. |
+| `calendar_events`, `recurring_schedules` | Belong to an organization, optional `band_id`. Both have an `event_type` (`sundayService`, `rehearsal`, `midweek`, `youthService`, `specialEvent`). A schedule adds `time_of_day` and `location`; an event adds an optional `setlist_id` (a setlist of the same organization, unlinked when the setlist is deleted) and `series_id` + `occurrence_date` when it is a materialized occurrence of a schedule (unique per series and day; kept, with `series_id` null, when the schedule is deleted). |
 | `event_assignments` | Who plays what at an event, with `response` (`pending`, `accepted`, `declined`), `responded_at`, `decline_reason`. |
 | `member_absences` | Days a member is away (`starts_on`, `ends_on`, `note`). |
 | `notifications` | `recipient_id`, `organization_id?`, `type`, `payload`, `read_at`. Created only by triggers and RPCs. |
@@ -214,6 +214,7 @@ Each file is self-contained and defines a small `tests` helper schema (`tests.as
 - `06_songs`: visibility (anon/outsider/member/admin), owner-only editing, repertoire, setlist tombstones, forks, merges.
 - `07_availability_notifications`: absences, assignment responses, notifications.
 - `08_personal_setlists`: personal vs organization setlists, privacy, overrides, tombstones, immutability of owner.
+- `09_calendar_details`: event type, same-organization setlist and series links, unique occurrences, admin-only writes.
 
 `supabase/.gitignore` keeps local-only files (`.branches`, `.temp`) out of git.
 

@@ -2040,4 +2040,197 @@ class AppLocalizationsEs extends AppLocalizations {
   String memberSavePartialBands(String reason) {
     return 'Se guardaron algunos cambios, pero no se pudieron actualizar las bandas. $reason';
   }
+
+  @override
+  String get calendarSignInTitle =>
+      'Inicia sesión para planificar servicios con tu organización';
+
+  @override
+  String get calendarSignInMessage =>
+      'Los servicios, los equipos y las ausencias se comparten con tu organización. Inicia sesión para verlos.';
+
+  @override
+  String get myServicesTitle => 'Mis servicios';
+
+  @override
+  String get acceptAssignmentAction => 'Aceptar';
+
+  @override
+  String get declineAssignmentAction => 'Rechazar';
+
+  @override
+  String get declineAssignmentTitle => '¿Rechazar este servicio?';
+
+  @override
+  String get declineReasonLabel => 'Motivo (opcional)';
+
+  @override
+  String get assignmentStatusAccepted => 'Aceptado';
+
+  @override
+  String get assignmentStatusPending => 'Pendiente de respuesta';
+
+  @override
+  String get assignmentStatusDeclined => 'Rechazado';
+
+  @override
+  String get assignmentStatusAway => 'Ausente';
+
+  @override
+  String declinedReasonLine(String reason) {
+    return 'Motivo: $reason';
+  }
+
+  @override
+  String get myAbsencesTitle => 'Mis ausencias';
+
+  @override
+  String get noAbsencesYet =>
+      'Sin ausencias. Añade los días en que no puedes tocar.';
+
+  @override
+  String get addAbsenceAction => 'Añadir ausencia';
+
+  @override
+  String get editAbsenceAction => 'Editar ausencia';
+
+  @override
+  String get deleteAbsenceAction => 'Eliminar ausencia';
+
+  @override
+  String get absenceFromLabel => 'Desde';
+
+  @override
+  String get absenceToLabel => 'Hasta';
+
+  @override
+  String get absenceNoteLabel => 'Nota (opcional)';
+
+  @override
+  String get absenceEndBeforeStart =>
+      'La fecha final no puede ser anterior a la inicial.';
+
+  @override
+  String absenceRangeLabel(String start, String end) {
+    return '$start al $end';
+  }
+
+  @override
+  String get repeatsLabel => 'Se repite';
+
+  @override
+  String get repeatNever => 'No se repite';
+
+  @override
+  String lookaheadOption(int count) {
+    return 'Mostrar los próximos $count servicios';
+  }
+
+  @override
+  String get setlistLabel => 'Lista de canciones';
+
+  @override
+  String get noSetlistOption => 'Sin lista de canciones';
+
+  @override
+  String get repeatingServiceNote =>
+      'Esto cambia solo esta fecha. Edita el horario recurrente para cambiar todas.';
+
+  @override
+  String deleteServiceConfirm(String title) {
+    return '¿Eliminar $title? Su equipo también se elimina.';
+  }
+
+  @override
+  String get editScheduleTitle => 'Editar horario recurrente';
+
+  @override
+  String get noSchedulesYet => 'Aún no hay horarios recurrentes.';
+
+  @override
+  String scheduleSummary(String cadence, String time) {
+    return '$cadence a las $time';
+  }
+
+  @override
+  String get scheduleActiveLabel => 'Activo';
+
+  @override
+  String get schedulePausedLabel => 'En pausa';
+
+  @override
+  String scheduleEndsLabel(String date) {
+    return 'Termina el $date';
+  }
+
+  @override
+  String get pauseScheduleAction => 'Pausar';
+
+  @override
+  String get resumeScheduleAction => 'Reanudar';
+
+  @override
+  String get stopScheduleAction => 'Terminar desde una fecha';
+
+  @override
+  String get deleteScheduleAction => 'Eliminar horario';
+
+  @override
+  String deleteScheduleConfirm(String title) {
+    return '¿Eliminar $title? Los servicios ya creados se quedan en el calendario.';
+  }
+
+  @override
+  String assignPickerTitle(String title) {
+    return 'Asignar a $title';
+  }
+
+  @override
+  String get assignInstrumentLabel => 'Instrumento';
+
+  @override
+  String get availableOnlyFilter => 'Disponibles';
+
+  @override
+  String playsInstrumentFilter(String instrument) {
+    return 'Toca $instrument';
+  }
+
+  @override
+  String get memberAwayThatDay => 'Ausente ese día';
+
+  @override
+  String get memberAlreadyAssigned => 'Ya está en este servicio';
+
+  @override
+  String get noMembersMatch => 'Ningún miembro coincide.';
+
+  @override
+  String memberAssignedSuccess(String name) {
+    return '$name añadido al equipo';
+  }
+
+  @override
+  String memberReassignedSuccess(String name) {
+    return 'Reasignado a $name';
+  }
+
+  @override
+  String get removeFromLineupAction => 'Quitar del equipo';
+
+  @override
+  String alertAwayCoverNeeded(String role) {
+    return 'Ausente ese día — falta cobertura para $role';
+  }
+
+  @override
+  String cantAttendCoverNeededFor(String role) {
+    return 'Rechazó — falta cobertura para $role';
+  }
+
+  @override
+  String get noMembersForService => 'Aún no hay miembros para asignar.';
+
+  @override
+  String get lineupMemberUnknown => 'Antiguo miembro';
 }

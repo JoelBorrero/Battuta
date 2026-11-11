@@ -11,7 +11,7 @@ reviewed without the local Supabase stack. Before relying on them:
 3. `supabase db reset`, then `flutter test --tags supabase --run-skipped test/integration`.
 4. Fix any failure, then remove this section. Tasks affected are listed below as they close.
 
-Affected tasks: 005.
+Affected tasks: 005, 006 (also run `supabase/tests/09_calendar_details.test.sql`).
 
 ## From 001: harden transposer
 - Sharp/flat spelling on free-form keys: `b minor` +2 → `Db minor` instead of `C# minor`.
@@ -79,3 +79,15 @@ Product / ops:
 - Spanish strings added in 005+ are not reviewed by a native speaker.
 - The deferred deactivation-notice clear could, in theory, clear a brand-new notice with a synchronous guard
   (no realistic ordering found).
+
+## From 006: calendar
+- Every 23505 maps to `BackendErrorCode.conflict`: cloud sync then says "Sync failed: conflict", and assigning
+  the same member twice to one instrument shows a generic message. Add a dedicated string and include the
+  server message in the sync description.
+- DST tests depend on the host time zone (a UTC CI would not catch a regression): run the team tests with
+  `TZ=America/New_York` and `TZ=Europe/Madrid` in CI.
+- Bi-weekly and monthly cadences need an anchor date on `recurring_schedules`.
+- A schedule with `pattern = 'none'` would project a daily phantom occurrence.
+- "Find cover" lets you re-pick the member who declined (no-op).
+- Alert dismissal ids repeat if the same member declines the same assignment again.
+- The alerts banner shows for admins of archived organizations.

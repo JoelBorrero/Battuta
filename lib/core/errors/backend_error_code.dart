@@ -66,6 +66,9 @@ enum BackendErrorCode {
   usernameTaken('username_taken', BackendErrorKind.other),
 
   // Client side conditions.
+  /// A unique constraint was violated (`23505` without a documented code),
+  /// e.g. two admins materializing the same schedule occurrence.
+  conflict('conflict', BackendErrorKind.other),
   offline('offline', BackendErrorKind.other),
   notOwner('not_owner', BackendErrorKind.permission),
   notSignedIn('not_signed_in', BackendErrorKind.permission),
@@ -82,7 +85,11 @@ enum BackendErrorCode {
   static List<BackendErrorCode> get documented => values
       .where(
         (c) =>
-            c != offline && c != notOwner && c != notSignedIn && c != unknown,
+            c != offline &&
+            c != conflict &&
+            c != notOwner &&
+            c != notSignedIn &&
+            c != unknown,
       )
       .toList(growable: false);
 
@@ -104,6 +111,7 @@ enum BackendErrorCode {
     }
     if (sqlState == '42501') return permissionDenied;
     if (sqlState == '28000') return notAuthenticated;
+    if (sqlState == '23505') return conflict;
     return unknown;
   }
 

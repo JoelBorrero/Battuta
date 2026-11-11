@@ -5,7 +5,7 @@
 library;
 
 import 'package:battuta/features/team/domain/entities/team_member.dart';
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -18,6 +18,14 @@ enum ServiceType {
   specialEvent('Special Event', 'Special', Icons.star_border_outlined);
 
   const ServiceType(this.displayName, this.shortName, this.icon);
+
+  /// The type stored under [name] (`event_type`); unknown values are a
+  /// Sunday service.
+  static ServiceType parse(String? name) => values.firstWhere(
+    (type) => type.name == name,
+    orElse: () => ServiceType.sundayService,
+  );
+
   final String displayName;
   final String shortName;
   final IconData icon;
@@ -66,6 +74,24 @@ enum EventRecurrence {
   monthly('Monthly on same day', 'Monthly');
 
   const EventRecurrence(this.displayName, this.shortName);
+
+  /// The cadence stored under [name] (`pattern`); unknown values are weekly.
+  static EventRecurrence parse(String? name) => values.firstWhere(
+    (recurrence) => recurrence.name == name,
+    orElse: () => EventRecurrence.weekly,
+  );
+
+  /// Cadences whose dates do not depend on the day they are computed: the
+  /// others (bi-weekly, monthly) have no anchor date in the schedule row.
+  static const List<EventRecurrence> schedulable = [
+    weekly,
+    weeklyThursday,
+    firstSundayOfMonth,
+    secondSundayOfMonth,
+    thirdSundayOfMonth,
+    lastSundayOfMonth,
+  ];
+
   final String displayName;
   final String shortName;
 
@@ -80,7 +106,8 @@ enum EventRecurrence {
       EventRecurrence.weekly => 'Cada Domingo (Semanal)',
       EventRecurrence.weeklyThursday => 'Cada Jueves (Ensayo Semanal)',
       EventRecurrence.biweekly => 'Quincenal (Cada 2 semanas)',
-      EventRecurrence.firstSundayOfMonth => '1.er Domingo del Mes (ej. Santa Cena)',
+      EventRecurrence.firstSundayOfMonth =>
+        '1.er Domingo del Mes (ej. Santa Cena)',
       EventRecurrence.secondSundayOfMonth => '2.º Domingo del Mes',
       EventRecurrence.thirdSundayOfMonth => '3.er Domingo del Mes',
       EventRecurrence.lastSundayOfMonth => 'Último Domingo del Mes',
@@ -144,7 +171,7 @@ extension EventRecurrenceCalculator on EventRecurrence {
               baseTime.minute,
             ),
           );
-          cursor = cursor.add(const Duration(days: 7));
+          cursor = _addDays(cursor, 7);
         }
 
       case EventRecurrence.weeklyThursday:
@@ -159,7 +186,7 @@ extension EventRecurrenceCalculator on EventRecurrence {
               baseTime.minute,
             ),
           );
-          cursor = cursor.add(const Duration(days: 7));
+          cursor = _addDays(cursor, 7);
         }
 
       case EventRecurrence.biweekly:
@@ -174,7 +201,7 @@ extension EventRecurrenceCalculator on EventRecurrence {
               baseTime.minute,
             ),
           );
-          cursor = cursor.add(const Duration(days: 14));
+          cursor = _addDays(cursor, 14);
         }
 
       case EventRecurrence.firstSundayOfMonth:
@@ -244,10 +271,15 @@ extension EventRecurrenceCalculator on EventRecurrence {
     return results;
   }
 
+  /// Calendar-day arithmetic: adding 24 h multiples would land on the wrong
+  /// day around a daylight saving change.
+  static DateTime _addDays(DateTime date, int days) =>
+      DateTime(date.year, date.month, date.day + days);
+
   static DateTime _nextWeekday(DateTime from, int targetWeekday) {
     var cursor = DateTime(from.year, from.month, from.day);
     while (cursor.weekday != targetWeekday) {
-      cursor = cursor.add(const Duration(days: 1));
+      cursor = _addDays(cursor, 1);
     }
     return cursor;
   }
@@ -309,116 +341,114 @@ extension EventRecurrenceCalculator on EventRecurrence {
     if (ordinal > 0) {
       var date = DateTime(year, month, 1);
       while (date.weekday != weekday) {
-        date = date.add(const Duration(days: 1));
+        date = _addDays(date, 1);
       }
-      date = date.add(Duration(days: 7 * (ordinal - 1)));
+      date = _addDays(date, 7 * (ordinal - 1));
       return date;
     } else {
       final lastDay = DateTime(year, month + 1, 0).day;
       var date = DateTime(year, month, lastDay);
       while (date.weekday != weekday) {
-        date = date.subtract(const Duration(days: 1));
+        date = _addDays(date, -1);
       }
       return date;
     }
   }
 }
 
-/// Confirmation and attendance status for a team member on a specific service date.
+/// Where an assignment stands, as the calendar shows it.
 enum AssignmentStatus {
-  confirmed('Confirmed', Colors.green),
-  scheduled('Scheduled', Colors.blue),
-  declined('Unavailable', Colors.grey);
+  /// The member accepted.
+  confirmed,
 
-  const AssignmentStatus(this.displayName, this.color);
-  final String displayName;
-  final Color color;
+  /// Waiting for the member to answer.
+  scheduled,
 
-  /// Localized status name.
-  String localizedName([BuildContext? context]) {
-    final isEs = context != null
-        ? Localizations.localeOf(context).languageCode == 'es'
-        : (Intl.defaultLocale?.startsWith('es') ?? false);
-    if (!isEs) return displayName;
-    return switch (this) {
-      AssignmentStatus.confirmed => 'Confirmado',
-      AssignmentStatus.scheduled => 'Programado',
-      AssignmentStatus.declined => 'No disponible',
-    };
-  }
+  /// The member declined.
+  declined,
+
+  /// The member has an absence on the day of the service.
+  away,
 }
 
-/// A specific role assignment for a team member on a calendar service date.
-class ServiceAssignment {
+/// A role assignment of a member on a service (one `event_assignments` row).
+class ServiceAssignment extends Equatable {
   const ServiceAssignment({
+    required this.id,
     required this.memberId,
-    required this.role,
-    this.status = AssignmentStatus.confirmed,
+    required this.instrument,
+    this.status = AssignmentStatus.scheduled,
+    this.declineReason,
   });
 
+  /// The assignment id.
+  final String id;
+
+  /// The organization member id.
   final String memberId;
-  final TeamRole role;
+
+  /// The stored instrument string (a [TeamRole] name for known roles).
+  final String instrument;
   final AssignmentStatus status;
+  final String? declineReason;
 
-  ServiceAssignment copyWith({
-    String? memberId,
-    TeamRole? role,
-    AssignmentStatus? status,
-  }) {
-    return ServiceAssignment(
-      memberId: memberId ?? this.memberId,
-      role: role ?? this.role,
-      status: status ?? this.status,
-    );
-  }
+  /// The known role of [instrument], `null` for any other instrument.
+  TeamRole? get role => TeamRole.fromInstrument(instrument);
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ServiceAssignment &&
-          runtimeType == other.runtimeType &&
-          memberId == other.memberId &&
-          role == other.role &&
-          status == other.status;
-
-  @override
-  int get hashCode => memberId.hashCode ^ role.hashCode ^ status.hashCode;
+  List<Object?> get props => [id, memberId, instrument, status, declineReason];
 }
 
-/// An immutable calendar event for the band (e.g. Sunday Service, Midweek Rehearsal).
-class ServiceEvent {
+/// A service of the calendar: a real `calendar_events` row, or an occurrence
+/// of a recurring schedule that has not been materialized yet
+/// ([isProjected]).
+class ServiceEvent extends Equatable {
   const ServiceEvent({
     required this.id,
     required this.title,
     required this.dateTime,
     this.type = ServiceType.sundayService,
-    this.recurrence = EventRecurrence.weekly,
-    this.location = 'Main Sanctuary',
+    this.recurrence = EventRecurrence.none,
+    this.location,
     this.assignments = const [],
     this.notes,
     this.setlistId,
     this.seriesId,
+    this.occurrenceDate,
+    this.bandId,
+    this.isProjected = false,
   });
 
+  /// The event id; a synthetic one for projected occurrences.
   final String id;
   final String title;
+
+  /// Local date and time.
   final DateTime dateTime;
   final ServiceType type;
+
+  /// The cadence of the schedule this belongs to (`none` for one-off events).
   final EventRecurrence recurrence;
-  final String location;
+  final String? location;
   final List<ServiceAssignment> assignments;
   final String? notes;
   final String? setlistId;
 
-  /// Identifier of the parent [RecurringSchedule], if generated or projected from a series.
+  /// Identifier of the parent recurring schedule, if any.
   final String? seriesId;
 
-  /// Whether this service event is scheduled for today or a future date.
+  /// Calendar day of the schedule occurrence this service stands for.
+  final DateTime? occurrenceDate;
+  final String? bandId;
+
+  /// True for an occurrence that is not a `calendar_events` row yet.
+  final bool isProjected;
+
+  /// Whether this service is today or later (by calendar day).
   bool get isUpcoming {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-    return dateTime.isAfter(todayStart) ||
-        dateTime.isAtSameMomentAs(todayStart);
+    return !dateTime.isBefore(todayStart);
   }
 
   /// Formatted date string (e.g. "Sun, Nov 8" or "Dom, 8 nov").
@@ -474,58 +504,20 @@ class ServiceEvent {
     return '$hour:$minute $period';
   }
 
-  ServiceEvent copyWith({
-    String? id,
-    String? title,
-    DateTime? dateTime,
-    ServiceType? type,
-    EventRecurrence? recurrence,
-    String? location,
-    List<ServiceAssignment>? assignments,
-    String? notes,
-    String? setlistId,
-    String? seriesId,
-  }) {
-    return ServiceEvent(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      dateTime: dateTime ?? this.dateTime,
-      type: type ?? this.type,
-      recurrence: recurrence ?? this.recurrence,
-      location: location ?? this.location,
-      assignments: assignments ?? this.assignments,
-      notes: notes ?? this.notes,
-      setlistId: setlistId ?? this.setlistId,
-      seriesId: seriesId ?? this.seriesId,
-    );
-  }
-
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ServiceEvent &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          title == other.title &&
-          dateTime == other.dateTime &&
-          type == other.type &&
-          recurrence == other.recurrence &&
-          location == other.location &&
-          listEquals(assignments, other.assignments) &&
-          notes == other.notes &&
-          setlistId == other.setlistId &&
-          seriesId == other.seriesId;
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      title.hashCode ^
-      dateTime.hashCode ^
-      type.hashCode ^
-      recurrence.hashCode ^
-      location.hashCode ^
-      Object.hashAll(assignments) ^
-      notes.hashCode ^
-      setlistId.hashCode ^
-      seriesId.hashCode;
+  List<Object?> get props => [
+    id,
+    title,
+    dateTime,
+    type,
+    recurrence,
+    location,
+    assignments,
+    notes,
+    setlistId,
+    seriesId,
+    occurrenceDate,
+    bandId,
+    isProjected,
+  ];
 }

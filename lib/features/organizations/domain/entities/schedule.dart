@@ -18,6 +18,10 @@ class CalendarEvent extends Equatable {
     this.createdBy,
     this.location,
     this.notes,
+    this.eventType = defaultEventType,
+    this.setlistId,
+    this.seriesId,
+    this.occurrenceDate,
   });
 
   factory CalendarEvent.fromJson(Map<String, dynamic> json) => CalendarEvent(
@@ -29,7 +33,16 @@ class CalendarEvent extends Equatable {
     createdBy: json['created_by'] as String?,
     location: json['location'] as String?,
     notes: json['notes'] as String?,
+    eventType: json['event_type'] as String? ?? defaultEventType,
+    setlistId: json['setlist_id'] as String?,
+    seriesId: json['series_id'] as String?,
+    occurrenceDate: json['occurrence_date'] == null
+        ? null
+        : parseDateOnly(json['occurrence_date']),
   );
+
+  /// The `event_type` of rows that do not say (the first service type).
+  static const defaultEventType = 'sundayService';
 
   final String id;
   final String organizationId;
@@ -41,6 +54,45 @@ class CalendarEvent extends Equatable {
   final String? createdBy;
   final String? location;
   final String? notes;
+
+  /// Kind of service (the app's `ServiceType` name).
+  final String eventType;
+
+  /// A setlist of the same organization, if one is linked.
+  final String? setlistId;
+
+  /// The recurring schedule this event is an occurrence of, if any.
+  final String? seriesId;
+
+  /// The calendar day of the schedule occurrence this event materializes.
+  final DateTime? occurrenceDate;
+
+  CalendarEvent copyWith({
+    String? title,
+    DateTime? dateTime,
+    String? bandId,
+    bool clearBand = false,
+    String? location,
+    String? notes,
+    String? eventType,
+    String? setlistId,
+    bool clearSetlist = false,
+    bool clearLocation = false,
+    bool clearNotes = false,
+  }) => CalendarEvent(
+    id: id,
+    organizationId: organizationId,
+    title: title ?? this.title,
+    dateTime: dateTime ?? this.dateTime,
+    bandId: clearBand ? null : (bandId ?? this.bandId),
+    createdBy: createdBy,
+    location: clearLocation ? null : (location ?? this.location),
+    notes: clearNotes ? null : (notes ?? this.notes),
+    eventType: eventType ?? this.eventType,
+    setlistId: clearSetlist ? null : (setlistId ?? this.setlistId),
+    seriesId: seriesId,
+    occurrenceDate: occurrenceDate,
+  );
 
   /// The calendar day of the event in the device time zone.
   DateTime get localDay {
@@ -57,6 +109,12 @@ class CalendarEvent extends Equatable {
     'date_time': formatTimestamp(dateTime),
     'location': location,
     'notes': notes,
+    'event_type': eventType,
+    'setlist_id': setlistId,
+    'series_id': seriesId,
+    'occurrence_date': occurrenceDate == null
+        ? null
+        : formatDateOnly(occurrenceDate!),
   };
 
   Map<String, dynamic> toJson() => {...toWriteJson(), 'created_by': createdBy};
@@ -71,6 +129,10 @@ class CalendarEvent extends Equatable {
     createdBy,
     location,
     notes,
+    eventType,
+    setlistId,
+    seriesId,
+    occurrenceDate,
   ];
 }
 
@@ -86,6 +148,9 @@ class RecurringSchedule extends Equatable {
     this.lookaheadCount = 4,
     this.isActive = true,
     this.disabledAfter,
+    this.minuteOfDay = defaultMinuteOfDay,
+    this.location,
+    this.eventType = CalendarEvent.defaultEventType,
   });
 
   factory RecurringSchedule.fromJson(Map<String, dynamic> json) =>
@@ -100,7 +165,14 @@ class RecurringSchedule extends Equatable {
         lookaheadCount: (json['lookahead_count'] as num?)?.toInt() ?? 4,
         isActive: json['is_active'] as bool? ?? true,
         disabledAfter: parseTimestamp(json['disabled_after']),
+        minuteOfDay: parseTimeOfDay(json['time_of_day']),
+        location: json['location'] as String?,
+        eventType:
+            json['event_type'] as String? ?? CalendarEvent.defaultEventType,
       );
+
+  /// 09:00, the column default.
+  static const defaultMinuteOfDay = 9 * 60;
 
   final String id;
   final String organizationId;
@@ -115,6 +187,43 @@ class RecurringSchedule extends Equatable {
   final bool isActive;
   final DateTime? disabledAfter;
 
+  /// Local start time as minutes after midnight (0-1439).
+  final int minuteOfDay;
+  final String? location;
+  final String eventType;
+
+  RecurringSchedule copyWith({
+    String? title,
+    String? bandId,
+    bool clearBand = false,
+    int? dayOfWeek,
+    String? pattern,
+    int? lookaheadCount,
+    bool? isActive,
+    DateTime? disabledAfter,
+    bool clearDisabledAfter = false,
+    int? minuteOfDay,
+    String? location,
+    bool clearLocation = false,
+    String? eventType,
+  }) => RecurringSchedule(
+    id: id,
+    organizationId: organizationId,
+    title: title ?? this.title,
+    bandId: clearBand ? null : (bandId ?? this.bandId),
+    createdBy: createdBy,
+    dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+    pattern: pattern ?? this.pattern,
+    lookaheadCount: lookaheadCount ?? this.lookaheadCount,
+    isActive: isActive ?? this.isActive,
+    disabledAfter: clearDisabledAfter
+        ? null
+        : (disabledAfter ?? this.disabledAfter),
+    minuteOfDay: minuteOfDay ?? this.minuteOfDay,
+    location: clearLocation ? null : (location ?? this.location),
+    eventType: eventType ?? this.eventType,
+  );
+
   Map<String, dynamic> toWriteJson() => {
     'id': id,
     'organization_id': organizationId,
@@ -125,6 +234,9 @@ class RecurringSchedule extends Equatable {
     'lookahead_count': lookaheadCount,
     'is_active': isActive,
     'disabled_after': formatTimestamp(disabledAfter),
+    'time_of_day': formatTimeOfDay(minuteOfDay),
+    'location': location,
+    'event_type': eventType,
   };
 
   Map<String, dynamic> toJson() => {...toWriteJson(), 'created_by': createdBy};
@@ -141,6 +253,9 @@ class RecurringSchedule extends Equatable {
     lookaheadCount,
     isActive,
     disabledAfter,
+    minuteOfDay,
+    location,
+    eventType,
   ];
 }
 

@@ -1,23 +1,22 @@
 /// Battuta — Admin Schedule Alerts Banner Widget.
 ///
-/// Prominently displays scheduling gaps and missing musician notifications
-/// to Administrators with a 1-tap "Find Cover" replacement workflow.
+/// Shows the lineup gaps of upcoming services (a member declined or is away)
+/// to administrators, with a one-tap "Find cover" that opens the picker of
+/// available members.
 library;
 
-import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/app/theme/battuta_brand.dart';
 import 'package:battuta/features/team/domain/entities/schedule_alert.dart';
-import 'package:battuta/features/team/presentation/providers/schedule_alerts_provider.dart';
+import 'package:battuta/features/team/presentation/providers/calendar_providers.dart';
+import 'package:battuta/features/team/presentation/widgets/calendar_support.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AdminScheduleAlertsBanner extends ConsumerWidget {
-  const AdminScheduleAlertsBanner({
-    super.key,
-    required this.onFindCover,
-  });
+  const AdminScheduleAlertsBanner({required this.onFindCover, super.key});
 
-  /// Callback when the Admin taps "Find Cover" for a specific alert.
+  /// Called when the admin taps "Find cover" for [ScheduleAlert].
   final void Function(ScheduleAlert alert) onFindCover;
 
   @override
@@ -26,65 +25,56 @@ class AdminScheduleAlertsBanner extends ConsumerWidget {
     if (alerts.isEmpty) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final brand = BattutaBrand.of(context);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      key: const ValueKey('schedule_alerts_banner'),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1711) : const Color(0xFFFFF9F0),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppTheme.stageAmber.withValues(alpha: 0.8),
-          width: 1.5,
-        ),
+        color: brand.accentWash,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: brand.accent, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.warning_amber_rounded,
-                color: AppTheme.stageAmber,
+                color: brand.accentInk,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n?.schedulingAttentionNeeded(alerts.length) ??
-                      'Scheduling Attention Needed (${alerts.length})',
+                  l10n.schedulingAttentionNeeded(alerts.length),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.stageAmber,
+                    color: brand.accentInk,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          for (final alert in alerts) ...[
-            _AlertItemRow(
+          const SizedBox(height: 8),
+          for (final alert in alerts)
+            _AlertRow(
               alert: alert,
               onFindCover: () => onFindCover(alert),
               onDismiss: () =>
                   ref.read(dismissedAlertsProvider.notifier).dismiss(alert.id),
             ),
-            if (alert != alerts.last)
-              Divider(
-                height: 16,
-                color: AppTheme.stageAmber.withValues(alpha: 0.2),
-              ),
-          ],
         ],
       ),
     );
   }
 }
 
-class _AlertItemRow extends StatelessWidget {
-  const _AlertItemRow({
+class _AlertRow extends StatelessWidget {
+  const _AlertRow({
     required this.alert,
     required this.onFindCover,
     required this.onDismiss,
@@ -96,107 +86,54 @@ class _AlertItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
+    final role = instrumentLabel(context, alert.instrument);
+    final materialLocalizations = MaterialLocalizations.of(context);
+    final message = switch (alert.kind) {
+      ScheduleAlertKind.declined => l10n.cantAttendCoverNeededFor(role),
+      ScheduleAlertKind.absent => l10n.alertAwayCoverNeeded(role),
+    };
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6,
-          runSpacing: 4,
-          children: [
-            Text(
-              alert.memberName,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppTheme.stageAmber.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                alert.role.localizedShortName(context),
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.stageAmber,
-                ),
-              ),
-            ),
-            Text(
-              '• ${alert.eventTitle}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          () {
-            if (alert.reason.contains("Can't attend")) {
-              return l10n?.cantAttendCoverNeeded(
-                      alert.role.localizedShortName(context)) ??
-                  alert.reason;
-            }
-            if (alert.reason.contains('Unavailable')) {
-              return l10n?.statusUnavailableNeedsSub ?? alert.reason;
-            }
-            return alert.reason;
-          }(),
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.red.shade400,
-            fontWeight: FontWeight.w500,
+    return Padding(
+      key: ValueKey('alert_${alert.id}'),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${alert.memberName} · ${alert.eventTitle}',
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          alignment: WrapAlignment.end,
-          spacing: 8,
-          runSpacing: 4,
-          children: [
-            TextButton(
-              onPressed: onDismiss,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(60, 36),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              child: Text(
-                l10n?.dismissAction ?? 'Dismiss',
-                style: const TextStyle(fontSize: 12),
-              ),
+          Text(
+            '${materialLocalizations.formatMediumDate(alert.eventDate)} · $message',
+            style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
+          ),
+          if (alert.reason != null)
+            Text(
+              l10n.declinedReasonLine(alert.reason!),
+              style: const TextStyle(fontSize: 12),
             ),
-            FilledButton.tonal(
-              key: ValueKey('find_cover_btn_${alert.id}'),
-              onPressed: onFindCover,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.stageAmber.withValues(alpha: 0.2),
-                foregroundColor: AppTheme.stageAmber,
-                minimumSize: const Size(100, 36),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              TextButton(
+                key: ValueKey('alert_dismiss_${alert.assignmentId}'),
+                style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
+                onPressed: onDismiss,
+                child: Text(l10n.dismissAction),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.person_search_outlined, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n?.findCover ?? 'Find Cover',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              FilledButton(
+                key: ValueKey('alert_cover_${alert.assignmentId}'),
+                style: FilledButton.styleFrom(minimumSize: const Size(44, 44)),
+                onPressed: onFindCover,
+                child: Text(l10n.findCover),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

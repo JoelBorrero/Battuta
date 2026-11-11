@@ -1,94 +1,64 @@
 /// Battuta — Admin Schedule Alert Entity.
 ///
-/// Models notifications delivered to the Administrator when a musician
-/// cannot attend a scheduled service, allowing the director to assign
-/// a substitute musician to cover the missing role.
+/// A gap in the lineup of an upcoming service that an administrator should
+/// cover: an assigned member declined, or has an absence on the day.
 library;
 
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:equatable/equatable.dart';
 
+/// Why a lineup slot needs cover.
+enum ScheduleAlertKind { declined, absent }
+
 class ScheduleAlert extends Equatable {
   const ScheduleAlert({
-    required this.id,
+    required this.kind,
     required this.eventId,
     required this.eventTitle,
     required this.eventDate,
+    required this.assignmentId,
     required this.memberId,
     required this.memberName,
-    required this.role,
-    this.reason = "Can't attend — role needs cover",
-    required this.timestamp,
-    this.isDismissed = false,
+    required this.instrument,
+    this.reason,
   });
 
-  /// Unique alert ID.
-  final String id;
-
-  /// ID of the service event with the scheduling gap.
+  final ScheduleAlertKind kind;
   final String eventId;
-
-  /// Title of the event (e.g. "Sunday Morning Worship").
   final String eventTitle;
 
-  /// Date and time of the event.
+  /// Local date and time of the service.
   final DateTime eventDate;
 
-  /// ID of the member who is unavailable.
-  final String memberId;
+  /// The assignment that needs cover.
+  final String assignmentId;
 
-  /// Name of the unavailable member.
+  /// The organization member who declined or is away.
+  final String memberId;
   final String memberName;
 
-  /// The musical or vocal role needing coverage.
-  final TeamRole role;
+  /// The stored instrument string of the slot.
+  final String instrument;
 
-  /// Explanation (e.g. "Can't attend", "General availability is unavailable").
-  final String reason;
+  /// The reason the member gave when declining.
+  final String? reason;
 
-  /// Timestamp when the alert occurred.
-  final DateTime timestamp;
+  /// Stable id (kind, assignment and member): a different member declining
+  /// the same slot later is a new alert.
+  String get id => '${kind.name}_${assignmentId}_$memberId';
 
-  /// Whether the admin has dismissed this notification without replacing.
-  final bool isDismissed;
-
-  ScheduleAlert copyWith({
-    String? id,
-    String? eventId,
-    String? eventTitle,
-    DateTime? eventDate,
-    String? memberId,
-    String? memberName,
-    TeamRole? role,
-    String? reason,
-    DateTime? timestamp,
-    bool? isDismissed,
-  }) {
-    return ScheduleAlert(
-      id: id ?? this.id,
-      eventId: eventId ?? this.eventId,
-      eventTitle: eventTitle ?? this.eventTitle,
-      eventDate: eventDate ?? this.eventDate,
-      memberId: memberId ?? this.memberId,
-      memberName: memberName ?? this.memberName,
-      role: role ?? this.role,
-      reason: reason ?? this.reason,
-      timestamp: timestamp ?? this.timestamp,
-      isDismissed: isDismissed ?? this.isDismissed,
-    );
-  }
+  TeamRole? get role => TeamRole.fromInstrument(instrument);
 
   @override
   List<Object?> get props => [
-    id,
+    kind,
     eventId,
     eventTitle,
     eventDate,
+    assignmentId,
     memberId,
     memberName,
-    role,
+    instrument,
     reason,
-    timestamp,
-    isDismissed,
   ];
 }

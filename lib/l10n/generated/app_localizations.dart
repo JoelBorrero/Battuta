@@ -3647,6 +3647,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some changes were saved, but the bands could not be updated. {reason}'**
   String memberSavePartialBands(String reason);
+
+  /// Calendar: calendarSignInTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to plan services with your organization'**
+  String get calendarSignInTitle;
+
+  /// Calendar: calendarSignInMessage
+  ///
+  /// In en, this message translates to:
+  /// **'Services, lineups and absences are shared with your organization. Sign in to see them.'**
+  String get calendarSignInMessage;
+
+  /// Calendar: myServicesTitle
+  ///
+  /// In en, this message translates to:
+  /// **'My services'**
+  String get myServicesTitle;
+
+  /// Calendar: acceptAssignmentAction
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptAssignmentAction;
+
+  /// Calendar: declineAssignmentAction
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineAssignmentAction;
+
+  /// Calendar: declineAssignmentTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Decline this service?'**
+  String get declineAssignmentTitle;
+
+  /// Calendar: declineReasonLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get declineReasonLabel;
+
+  /// Calendar: assignmentStatusAccepted
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get assignmentStatusAccepted;
+
+  /// Calendar: assignmentStatusPending
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting reply'**
+  String get assignmentStatusPending;
+
+  /// Calendar: assignmentStatusDeclined
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get assignmentStatusDeclined;
+
+  /// Calendar: assignmentStatusAway
+  ///
+  /// In en, this message translates to:
+  /// **'Away'**
+  String get assignmentStatusAway;
+
+  /// Calendar: declinedReasonLine
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String declinedReasonLine(String reason);
+
+  /// Calendar: myAbsencesTitle
+  ///
+  /// In en, this message translates to:
+  /// **'My absences'**
+  String get myAbsencesTitle;
+
+  /// Calendar: noAbsencesYet
+  ///
+  /// In en, this message translates to:
+  /// **'No absences. Add the days you cannot play.'**
+  String get noAbsencesYet;
+
+  /// Calendar: addAbsenceAction
+  ///
+  /// In en, this message translates to:
+  /// **'Add absence'**
+  String get addAbsenceAction;
+
+  /// Calendar: editAbsenceAction
+  ///
+  /// In en, this message translates to:
+  /// **'Edit absence'**
+  String get editAbsenceAction;
+
+  /// Calendar: deleteAbsenceAction
+  ///
+  /// In en, this message translates to:
+  /// **'Delete absence'**
+  String get deleteAbsenceAction;
+
+  /// Calendar: absenceFromLabel
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get absenceFromLabel;
+
+  /// Calendar: absenceToLabel
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get absenceToLabel;
+
+  /// Calendar: absenceNoteLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get absenceNoteLabel;
+
+  /// Calendar: absenceEndBeforeStart
+  ///
+  /// In en, this message translates to:
+  /// **'The end date cannot be before the start date.'**
+  String get absenceEndBeforeStart;
+
+  /// Calendar: absenceRangeLabel
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String absenceRangeLabel(String start, String end);
+
+  /// Calendar: repeatsLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get repeatsLabel;
+
+  /// Calendar: repeatNever
+  ///
+  /// In en, this message translates to:
+  /// **'Does not repeat'**
+  String get repeatNever;
+
+  /// Calendar: lookaheadOption
+  ///
+  /// In en, this message translates to:
+  /// **'Show the next {count} services'**
+  String lookaheadOption(int count);
+
+  /// Calendar: setlistLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist'**
+  String get setlistLabel;
+
+  /// Calendar: noSetlistOption
+  ///
+  /// In en, this message translates to:
+  /// **'No setlist'**
+  String get noSetlistOption;
+
+  /// Calendar: repeatingServiceNote
+  ///
+  /// In en, this message translates to:
+  /// **'This changes only this date. Edit the recurring schedule to change every date.'**
+  String get repeatingServiceNote;
+
+  /// Calendar: deleteServiceConfirm
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {title}? Its lineup is removed too.'**
+  String deleteServiceConfirm(String title);
+
+  /// Calendar: editScheduleTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recurring schedule'**
+  String get editScheduleTitle;
+
+  /// Calendar: noSchedulesYet
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring schedules yet.'**
+  String get noSchedulesYet;
+
+  /// Calendar: scheduleSummary
+  ///
+  /// In en, this message translates to:
+  /// **'{cadence} at {time}'**
+  String scheduleSummary(String cadence, String time);
+
+  /// Calendar: scheduleActiveLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get scheduleActiveLabel;
+
+  /// Calendar: schedulePausedLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get schedulePausedLabel;
+
+  /// Calendar: scheduleEndsLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Stops on {date}'**
+  String scheduleEndsLabel(String date);
+
+  /// Calendar: pauseScheduleAction
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseScheduleAction;
+
+  /// Calendar: resumeScheduleAction
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resumeScheduleAction;
+
+  /// Calendar: stopScheduleAction
+  ///
+  /// In en, this message translates to:
+  /// **'Stop from a date'**
+  String get stopScheduleAction;
+
+  /// Calendar: deleteScheduleAction
+  ///
+  /// In en, this message translates to:
+  /// **'Delete schedule'**
+  String get deleteScheduleAction;
+
+  /// Calendar: deleteScheduleConfirm
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {title}? Services already created from it stay in the calendar.'**
+  String deleteScheduleConfirm(String title);
+
+  /// Calendar: assignPickerTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to {title}'**
+  String assignPickerTitle(String title);
+
+  /// Calendar: assignInstrumentLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Instrument'**
+  String get assignInstrumentLabel;
+
+  /// Calendar: availableOnlyFilter
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get availableOnlyFilter;
+
+  /// Calendar: playsInstrumentFilter
+  ///
+  /// In en, this message translates to:
+  /// **'Plays {instrument}'**
+  String playsInstrumentFilter(String instrument);
+
+  /// Calendar: memberAwayThatDay
+  ///
+  /// In en, this message translates to:
+  /// **'Away that day'**
+  String get memberAwayThatDay;
+
+  /// Calendar: memberAlreadyAssigned
+  ///
+  /// In en, this message translates to:
+  /// **'Already on this service'**
+  String get memberAlreadyAssigned;
+
+  /// Calendar: noMembersMatch
+  ///
+  /// In en, this message translates to:
+  /// **'No members match.'**
+  String get noMembersMatch;
+
+  /// Calendar: memberAssignedSuccess
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added to the lineup'**
+  String memberAssignedSuccess(String name);
+
+  /// Calendar: memberReassignedSuccess
+  ///
+  /// In en, this message translates to:
+  /// **'Reassigned to {name}'**
+  String memberReassignedSuccess(String name);
+
+  /// Calendar: removeFromLineupAction
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from lineup'**
+  String get removeFromLineupAction;
+
+  /// Calendar: alertAwayCoverNeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Away that day — missing cover for {role}'**
+  String alertAwayCoverNeeded(String role);
+
+  /// Calendar: cantAttendCoverNeededFor
+  ///
+  /// In en, this message translates to:
+  /// **'Declined — missing cover for {role}'**
+  String cantAttendCoverNeededFor(String role);
+
+  /// Calendar: noMembersForService
+  ///
+  /// In en, this message translates to:
+  /// **'No members to assign yet.'**
+  String get noMembersForService;
+
+  /// Calendar: lineupMemberUnknown
+  ///
+  /// In en, this message translates to:
+  /// **'Former member'**
+  String get lineupMemberUnknown;
 }
 
 class _AppLocalizationsDelegate

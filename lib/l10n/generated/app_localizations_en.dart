@@ -2025,4 +2025,196 @@ class AppLocalizationsEn extends AppLocalizations {
   String memberSavePartialBands(String reason) {
     return 'Some changes were saved, but the bands could not be updated. $reason';
   }
+
+  @override
+  String get calendarSignInTitle =>
+      'Sign in to plan services with your organization';
+
+  @override
+  String get calendarSignInMessage =>
+      'Services, lineups and absences are shared with your organization. Sign in to see them.';
+
+  @override
+  String get myServicesTitle => 'My services';
+
+  @override
+  String get acceptAssignmentAction => 'Accept';
+
+  @override
+  String get declineAssignmentAction => 'Decline';
+
+  @override
+  String get declineAssignmentTitle => 'Decline this service?';
+
+  @override
+  String get declineReasonLabel => 'Reason (optional)';
+
+  @override
+  String get assignmentStatusAccepted => 'Accepted';
+
+  @override
+  String get assignmentStatusPending => 'Awaiting reply';
+
+  @override
+  String get assignmentStatusDeclined => 'Declined';
+
+  @override
+  String get assignmentStatusAway => 'Away';
+
+  @override
+  String declinedReasonLine(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get myAbsencesTitle => 'My absences';
+
+  @override
+  String get noAbsencesYet => 'No absences. Add the days you cannot play.';
+
+  @override
+  String get addAbsenceAction => 'Add absence';
+
+  @override
+  String get editAbsenceAction => 'Edit absence';
+
+  @override
+  String get deleteAbsenceAction => 'Delete absence';
+
+  @override
+  String get absenceFromLabel => 'From';
+
+  @override
+  String get absenceToLabel => 'To';
+
+  @override
+  String get absenceNoteLabel => 'Note (optional)';
+
+  @override
+  String get absenceEndBeforeStart =>
+      'The end date cannot be before the start date.';
+
+  @override
+  String absenceRangeLabel(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String get repeatsLabel => 'Repeats';
+
+  @override
+  String get repeatNever => 'Does not repeat';
+
+  @override
+  String lookaheadOption(int count) {
+    return 'Show the next $count services';
+  }
+
+  @override
+  String get setlistLabel => 'Setlist';
+
+  @override
+  String get noSetlistOption => 'No setlist';
+
+  @override
+  String get repeatingServiceNote =>
+      'This changes only this date. Edit the recurring schedule to change every date.';
+
+  @override
+  String deleteServiceConfirm(String title) {
+    return 'Delete $title? Its lineup is removed too.';
+  }
+
+  @override
+  String get editScheduleTitle => 'Edit recurring schedule';
+
+  @override
+  String get noSchedulesYet => 'No recurring schedules yet.';
+
+  @override
+  String scheduleSummary(String cadence, String time) {
+    return '$cadence at $time';
+  }
+
+  @override
+  String get scheduleActiveLabel => 'Active';
+
+  @override
+  String get schedulePausedLabel => 'Paused';
+
+  @override
+  String scheduleEndsLabel(String date) {
+    return 'Stops on $date';
+  }
+
+  @override
+  String get pauseScheduleAction => 'Pause';
+
+  @override
+  String get resumeScheduleAction => 'Resume';
+
+  @override
+  String get stopScheduleAction => 'Stop from a date';
+
+  @override
+  String get deleteScheduleAction => 'Delete schedule';
+
+  @override
+  String deleteScheduleConfirm(String title) {
+    return 'Delete $title? Services already created from it stay in the calendar.';
+  }
+
+  @override
+  String assignPickerTitle(String title) {
+    return 'Assign to $title';
+  }
+
+  @override
+  String get assignInstrumentLabel => 'Instrument';
+
+  @override
+  String get availableOnlyFilter => 'Available';
+
+  @override
+  String playsInstrumentFilter(String instrument) {
+    return 'Plays $instrument';
+  }
+
+  @override
+  String get memberAwayThatDay => 'Away that day';
+
+  @override
+  String get memberAlreadyAssigned => 'Already on this service';
+
+  @override
+  String get noMembersMatch => 'No members match.';
+
+  @override
+  String memberAssignedSuccess(String name) {
+    return '$name added to the lineup';
+  }
+
+  @override
+  String memberReassignedSuccess(String name) {
+    return 'Reassigned to $name';
+  }
+
+  @override
+  String get removeFromLineupAction => 'Remove from lineup';
+
+  @override
+  String alertAwayCoverNeeded(String role) {
+    return 'Away that day — missing cover for $role';
+  }
+
+  @override
+  String cantAttendCoverNeededFor(String role) {
+    return 'Declined — missing cover for $role';
+  }
+
+  @override
+  String get noMembersForService => 'No members to assign yet.';
+
+  @override
+  String get lineupMemberUnknown => 'Former member';
 }

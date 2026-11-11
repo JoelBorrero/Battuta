@@ -32,6 +32,24 @@ String formatDateOnly(DateTime value) {
   return '${value.year.toString().padLeft(4, '0')}-${two(value.month)}-${two(value.day)}';
 }
 
+/// Parses a Postgres `time` (`HH:mm` or `HH:mm:ss`) into minutes after
+/// midnight; anything unreadable is 09:00 (the column default).
+int parseTimeOfDay(Object? value) {
+  final parts = value?.toString().split(':');
+  final hour = int.tryParse(parts != null && parts.isNotEmpty ? parts[0] : '');
+  final minute = int.tryParse(
+    parts != null && parts.length > 1 ? parts[1] : '',
+  );
+  if (hour == null || minute == null) return 9 * 60;
+  return (hour * 60 + minute).clamp(0, 24 * 60 - 1);
+}
+
+/// Serializes minutes after midnight as a Postgres `time` (`HH:mm:00`).
+String formatTimeOfDay(int minuteOfDay) {
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${two(minuteOfDay ~/ 60)}:${two(minuteOfDay % 60)}:00';
+}
+
 List<String> parseStringList(Object? value) {
   if (value is List) return value.map((e) => e.toString()).toList();
   return const [];
