@@ -3572,5 +3572,45 @@
   "backendErrorNotVersionOwner": "Only the owner of a version can move it.",
   "@backendErrorNotVersionOwner": {"description": "backendErrorNotVersionOwner"},
   "backendErrorSongExists": "A song with that title and artist already exists. Move your version to it instead.",
-  "@backendErrorSongExists": {"description": "backendErrorSongExists"}
+  "@backendErrorSongExists": {"description": "backendErrorSongExists"},
+  "supabasePresetRemote": "Remote",
+  "@supabasePresetRemote": {
+    "description": "Supabase preset: the hosted project from .env"
+  },
+  "supabasePresetLocal": "Local",
+  "@supabasePresetLocal": {
+    "description": "Supabase preset: the local development stack from .env"
+  },
+  "supabaseUrlInvalid": "The URL must begin with https:// or http://",
+  "@supabaseUrlInvalid": {},
+  "supabaseKeyEmpty": "Enter the project’s public key",
+  "@supabaseKeyEmpty": {},
+  "supabaseUnreachable": "Couldn’t reach {host}. Check the URL, the key and your network.",
+  "@supabaseUnreachable": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "supabaseConnectedTo": "Connected to {host}",
+  "@supabaseConnectedTo": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "supabaseSavedRestart": "Saved. Close and reopen Battuta to connect to {host}.",
+  "@supabaseSavedRestart": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "authAccountCreatedConfirmThenSignIn": "Account created! Confirm it from the email we sent you, then sign in here.",
+  "@authAccountCreatedConfirmThenSignIn": {
+    "description": "Shown on the sign-in page right after creating an account that needs email confirmation"
+  }
 }

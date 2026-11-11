@@ -117,7 +117,11 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: AppRoutes.signIn,
         name: 'signIn',
-        builder: (context, state) => const SignInPage(),
+        builder: (context, state) => SignInPage(
+          prefill: state.extra is SignInPrefill
+              ? state.extra! as SignInPrefill
+              : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.createAccount,

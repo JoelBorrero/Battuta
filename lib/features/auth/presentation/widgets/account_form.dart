@@ -7,6 +7,7 @@ library;
 import 'dart:async';
 
 import 'package:battuta/app/localization/backend_error_messages.dart';
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
@@ -14,13 +15,30 @@ import 'package:battuta/features/auth/presentation/providers/auth_provider.dart'
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 enum AccountFormMode { signIn, createAccount }
 
 class AccountForm extends ConsumerStatefulWidget {
-  const AccountForm({required this.mode, super.key});
+  const AccountForm({
+    required this.mode,
+    this.initialEmail,
+    this.initialStatus,
+    this.onCreatedPendingConfirmation,
+    super.key,
+  });
 
   final AccountFormMode mode;
+
+  /// Pre-fills the email field (e.g. right after creating the account).
+  final String? initialEmail;
+
+  /// A status message shown above the fields when the form opens.
+  final String? initialStatus;
+
+  /// Called with the email when an account was created but needs its email
+  /// confirmed before signing in. Without it the form shows a message.
+  final ValueChanged<String>? onCreatedPendingConfirmation;
 
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
@@ -29,7 +47,7 @@ class AccountForm extends ConsumerStatefulWidget {
 class _AccountFormState extends ConsumerState<AccountForm> {
   static final _usernamePattern = RegExp(r'^[a-z0-9_.]{3,30}$');
 
-  final _email = TextEditingController();
+  late final _email = TextEditingController(text: widget.initialEmail);
   final _password = TextEditingController();
   final _name = TextEditingController();
   final _username = TextEditingController();
@@ -38,7 +56,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   bool _checkingUsername = false;
   bool _useMagicLink = false;
   String? _error;
-  String? _status;
+  late String? _status = widget.initialStatus;
 
   bool get _isCreate => widget.mode == AccountFormMode.createAccount;
 
@@ -150,10 +168,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       if (!mounted) return;
       if (!created) {
         _showFailure(l10n);
-      } else if (ref.read(currentUserProvider) == null) {
-        setState(() => _status = l10n.authAccountCreatedCheckEmail);
+      } else if (ref.read(authRepositoryProvider).currentUser == null) {
+        // No session: the server wants the email confirmed first.
+        final onPending = widget.onCreatedPendingConfirmation;
+        if (onPending != null) {
+          onPending(email);
+        } else {
+          setState(() => _status = l10n.authAccountCreatedCheckEmail);
+        }
       } else {
-        ref.read(accountNoticeProvider.notifier).clear();
+        _enterApp();
       }
       return;
     }
@@ -164,10 +188,21 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     );
     if (!mounted) return;
     if (signedIn) {
-      ref.read(accountNoticeProvider.notifier).clear();
+      _enterApp();
     } else {
       _showFailure(l10n);
     }
+  }
+
+  /// Signed in: leave the account pages for the app. The cached user is
+  /// refreshed first (the auth stream may not have emitted yet), and `go`
+  /// replaces the whole stack, so a sign-in opened from Settings does not
+  /// stay on top or leave a back arrow behind. The router redirect still
+  /// sends a pending invite to its join page.
+  void _enterApp() {
+    ref.read(accountNoticeProvider.notifier).clear();
+    ref.invalidate(currentUserProvider);
+    GoRouter.maybeOf(context)?.go(AppRoutes.initial);
   }
 
   /// Shows the failure of the last auth call; a taken username (race between

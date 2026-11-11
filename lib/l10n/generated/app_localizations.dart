@@ -5465,6 +5465,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A song with that title and artist already exists. Move your version to it instead.'**
   String get backendErrorSongExists;
+
+  /// Supabase preset: the hosted project from .env
+  ///
+  /// In en, this message translates to:
+  /// **'Remote'**
+  String get supabasePresetRemote;
+
+  /// Supabase preset: the local development stack from .env
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get supabasePresetLocal;
+
+  /// No description provided for @supabaseUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The URL must begin with https:// or http://'**
+  String get supabaseUrlInvalid;
+
+  /// No description provided for @supabaseKeyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the project’s public key'**
+  String get supabaseKeyEmpty;
+
+  /// No description provided for @supabaseUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t reach {host}. Check the URL, the key and your network.'**
+  String supabaseUnreachable(String host);
+
+  /// No description provided for @supabaseConnectedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {host}'**
+  String supabaseConnectedTo(String host);
+
+  /// No description provided for @supabaseSavedRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Close and reopen Battuta to connect to {host}.'**
+  String supabaseSavedRestart(String host);
+
+  /// Shown on the sign-in page right after creating an account that needs email confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Account created! Confirm it from the email we sent you, then sign in here.'**
+  String get authAccountCreatedConfirmThenSignIn;
 }
 
 class _AppLocalizationsDelegate

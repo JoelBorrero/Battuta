@@ -3108,4 +3108,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backendErrorSongExists =>
       'A song with that title and artist already exists. Move your version to it instead.';
+
+  @override
+  String get supabasePresetRemote => 'Remote';
+
+  @override
+  String get supabasePresetLocal => 'Local';
+
+  @override
+  String get supabaseUrlInvalid =>
+      'The URL must begin with https:// or http://';
+
+  @override
+  String get supabaseKeyEmpty => 'Enter the project’s public key';
+
+  @override
+  String supabaseUnreachable(String host) {
+    return 'Couldn’t reach $host. Check the URL, the key and your network.';
+  }
+
+  @override
+  String supabaseConnectedTo(String host) {
+    return 'Connected to $host';
+  }
+
+  @override
+  String supabaseSavedRestart(String host) {
+    return 'Saved. Close and reopen Battuta to connect to $host.';
+  }
+
+  @override
+  String get authAccountCreatedConfirmThenSignIn =>
+      'Account created! Confirm it from the email we sent you, then sign in here.';
 }

@@ -10,17 +10,25 @@ import 'package:battuta/core/utils/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseClientManager {
-  SupabaseClientManager({
-    SupabaseConfigService? configService,
-  }) : _configService = configService ?? SupabaseConfigService();
+  SupabaseClientManager({SupabaseConfigService? configService})
+    : _configService = configService ?? SupabaseConfigService();
 
   final SupabaseConfigService _configService;
   bool _initialized = false;
   static bool _globalInitialized = false;
+  static String? _activeUrl;
+
+  /// The server the running client talks to (set by the first successful
+  /// [initialize]; the SDK cannot switch servers until the app restarts).
+  static String? get activeUrl => _activeUrl;
+
+  /// Visible for testing: pretends the running client uses [url].
+  static void setActiveUrlForTesting(String? url) => _activeUrl = url;
 
   /// Visible for testing: resets static initialization tracker.
   static void resetForTesting() {
     _globalInitialized = false;
+    _activeUrl = null;
   }
 
   /// Whether the Supabase SDK has been successfully initialized.
@@ -71,13 +79,12 @@ class SupabaseClientManager {
         url: url,
         // ignore: deprecated_member_use
         anonKey: anonKey,
-        authOptions: const FlutterAuthClientOptions(
-          autoRefreshToken: true,
-        ),
+        authOptions: const FlutterAuthClientOptions(autoRefreshToken: true),
       );
 
       _initialized = true;
       _globalInitialized = true;
+      _activeUrl ??= url;
       AppLogger.info('Supabase client initialized successfully.');
       return true;
     } catch (e, stack) {

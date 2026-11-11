@@ -1,7 +1,9 @@
 /// Create an account: name, username (checked live), email and password.
 library;
 
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/routes/app_routes.dart';
+import 'package:battuta/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:battuta/features/auth/presentation/widgets/account_form.dart';
 import 'package:battuta/features/auth/presentation/widgets/pending_invite_note.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -26,8 +28,22 @@ class CreateAccountPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Center(child: BattutaWordmark(height: 36)),
+                  const SizedBox(height: 24),
                   const PendingInviteNote(),
-                  const AccountForm(mode: AccountFormMode.createAccount),
+                  AccountForm(
+                    mode: AccountFormMode.createAccount,
+                    // Email confirmation pending: continue on the sign-in
+                    // page with the email filled in.
+                    onCreatedPendingConfirmation: (email) =>
+                        context.pushReplacement(
+                          AppRoutes.signIn,
+                          extra: SignInPrefill(
+                            email: email,
+                            accountCreated: true,
+                          ),
+                        ),
+                  ),
                   const SizedBox(height: 8),
                   TextButton(
                     key: const ValueKey('auth_switch_to_sign_in_btn'),

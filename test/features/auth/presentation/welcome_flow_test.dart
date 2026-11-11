@@ -1,5 +1,10 @@
+import 'package:battuta/app/design_system/design_system.dart';
+import 'package:battuta/app/routes/app_router.dart';
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
+import 'package:battuta/features/auth/presentation/pages/create_account_page.dart';
+import 'package:battuta/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/app_entry_provider.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
@@ -53,6 +58,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('welcome_sign_in_btn')));
     await tester.pumpAndSettle();
+    expect(find.byType(BattutaWordmark), findsOneWidget);
     await tester.enterText(
       find.byKey(const ValueKey('auth_email_field')),
       'me@example.com',
@@ -173,6 +179,7 @@ void main() {
         find.byKey(const ValueKey('welcome_create_account_btn')),
       );
       await tester.pumpAndSettle();
+      expect(find.byType(BattutaWordmark), findsOneWidget);
     }
 
     Future<void> typeUsername(WidgetTester tester, String value) async {
@@ -266,36 +273,112 @@ void main() {
       expect(find.byType(RepertoirePage), findsNothing);
     });
 
-    testWidgets(
-      'sign up that needs email confirmation says to check the inbox',
-      (tester) async {
-        final auth = _PendingConfirmationAuth();
-        final h = AppHarness(auth: auth);
-        addTearDown(h.dispose);
-        await pumpApp(tester, h);
-        await tester.tap(
-          find.byKey(const ValueKey('welcome_create_account_btn')),
-        );
-        await tester.pumpAndSettle();
-        await typeUsername(tester, 'maria_l');
-        await tester.enterText(
-          find.byKey(const ValueKey('auth_email_field')),
-          'maria@example.com',
-        );
-        await tester.enterText(
-          find.byKey(const ValueKey('auth_password_field')),
-          'secret123',
-        );
-        await tester.tap(find.byKey(const ValueKey('auth_submit_btn')));
-        await tester.pumpAndSettle();
+    testWidgets('sign up that needs email confirmation returns to sign in', (
+      tester,
+    ) async {
+      final auth = _PendingConfirmationAuth();
+      final h = AppHarness(auth: auth);
+      addTearDown(h.dispose);
+      await pumpApp(tester, h);
+      await tester.tap(
+        find.byKey(const ValueKey('welcome_create_account_btn')),
+      );
+      await tester.pumpAndSettle();
+      await typeUsername(tester, 'maria_l');
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_email_field')),
+        'maria@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_password_field')),
+        'secret123',
+      );
+      await tester.tap(find.byKey(const ValueKey('auth_submit_btn')));
+      await tester.pumpAndSettle();
 
-        expect(
-          find.text('Account created! Check your email to confirm it.'),
-          findsOneWidget,
-        );
-      },
-    );
+      // Back on the sign-in page, email filled in, with the next step.
+      expect(find.byType(SignInPage), findsOneWidget);
+      expect(find.byType(CreateAccountPage), findsNothing);
+      expect(
+        find.text(
+          'Account created! Confirm it from the email we sent you, then '
+          'sign in here.',
+        ),
+        findsOneWidget,
+      );
+      final email = tester.widget<TextField>(
+        find.byKey(const ValueKey('auth_email_field')),
+      );
+      expect(email.controller!.text, 'maria@example.com');
+      expect(find.byType(BattutaWordmark), findsOneWidget);
+    });
   });
+
+  testWidgets(
+    'signing in from Settings while offline enters the app without a back arrow',
+    (tester) async {
+      final h = AppHarness(
+        entryStorage: MemoryStorage({
+          AppEntryStorageKeys.continueOffline: 'true',
+        }),
+      );
+      addTearDown(h.dispose);
+      await pumpApp(tester, h);
+      container(tester).read(appRouterProvider).go(AppRoutes.settings);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sign in'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SignInPage), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_email_field')),
+        'me@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_password_field')),
+        'secret123',
+      );
+      await tester.tap(find.byKey(const ValueKey('auth_submit_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SignInPage), findsNothing);
+      expect(find.byType(RepertoirePage), findsOneWidget);
+      expect(find.byType(BackButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'sign up enters the app even before the auth stream reports the session',
+    (tester) async {
+      final auth = _LaggingStreamAuth();
+      final h = AppHarness(auth: auth);
+      addTearDown(h.dispose);
+      await pumpApp(tester, h);
+      await tester.tap(
+        find.byKey(const ValueKey('welcome_create_account_btn')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_username_field')),
+        'maria_l',
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_email_field')),
+        'maria@example.com',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('auth_password_field')),
+        'secret123',
+      );
+      await tester.tap(find.byKey(const ValueKey('auth_submit_btn')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RepertoirePage), findsOneWidget);
+      expect(find.byType(SignInPage), findsNothing);
+      expect(find.byType(CreateAccountPage), findsNothing);
+    },
+  );
 
   testWidgets('continue offline enters the app and is remembered', (
     tester,
@@ -420,4 +503,20 @@ class _PendingConfirmationAuth extends FakeAuthRepository {
     required String username,
     String? displayName,
   }) async => AuthUser(id: 'pending', email: email);
+}
+
+/// Signs up with a session, but the auth stream never reports it (as when
+/// the stream emits after the form reads the user).
+class _LaggingStreamAuth extends FakeAuthRepository {
+  @override
+  Future<AuthUser> signUpWithEmailPassword({
+    required String email,
+    required String password,
+    required String username,
+    String? displayName,
+  }) async {
+    final created = AuthUser(id: 'user-1', email: email);
+    user = created;
+    return created;
+  }
 }

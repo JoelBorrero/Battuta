@@ -915,5 +915,13 @@
   "versionUnavailableTitle": "Esta versión ya no está disponible",
   "versionUnavailableBody": "Se eliminó, se hizo privada o ya no se comparte contigo.",
   "backendErrorNotVersionOwner": "Solo el dueño de una versión puede moverla.",
-  "backendErrorSongExists": "Ya existe una canción con ese título y artista. Mueve tu versión a ella."
+  "backendErrorSongExists": "Ya existe una canción con ese título y artista. Mueve tu versión a ella.",
+  "supabasePresetRemote": "Remoto",
+  "supabasePresetLocal": "Local",
+  "supabaseUrlInvalid": "La URL debe empezar con https:// o http://",
+  "supabaseKeyEmpty": "Introduce la clave pública del proyecto",
+  "supabaseUnreachable": "No se pudo conectar con {host}. Revisa la URL, la clave y tu red.",
+  "supabaseConnectedTo": "Conectado a {host}",
+  "supabaseSavedRestart": "Guardado. Cierra y vuelve a abrir Battuta para conectarte a {host}.",
+  "authAccountCreatedConfirmThenSignIn": "¡Cuenta creada! Confírmala desde el correo que te enviamos y luego inicia sesión aquí."
 }

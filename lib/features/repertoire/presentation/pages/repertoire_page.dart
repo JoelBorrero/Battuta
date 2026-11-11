@@ -345,6 +345,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
     return Scaffold(
       appBar: AppBar(
+        // A tab's root page: never a back arrow (it would also squeeze the
+        // logo and title).
+        automaticallyImplyLeading: false,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
