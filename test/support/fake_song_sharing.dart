@@ -3,6 +3,7 @@ import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/sharing/data/song_sharing_remote_data_source.dart';
 import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
+import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
 import 'package:battuta/features/sharing/domain/repositories/song_sharing_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -15,7 +16,7 @@ class FakeSongSharingRemote implements SongSharingRemoteDataSource {
   List<SongVersionListing> versions = [];
   List<SongVersionListing> publicVersions = [];
   List<SongWork> songs = [];
-  List<SongMergeRequest> pending = [];
+  List<SongSuggestion> suggestions = [];
 
   /// `song_versions` rows by id (with `songs` embedded) for fetch and fork.
   final Map<String, Map<String, dynamic>> rows = {};
@@ -26,8 +27,8 @@ class FakeSongSharingRemote implements SongSharingRemoteDataSource {
   /// When set, every call fails with it.
   Failure? failure;
 
-  /// The status the next `requestMerge` answers with.
-  MergeRequestStatus mergeStatus = MergeRequestStatus.pending;
+  /// When set, `forkVersion` makes the fork and then fails to read it back.
+  bool forkReadFails = false;
 
   final List<String> calls = [];
 
@@ -69,20 +70,14 @@ class FakeSongSharingRemote implements SongSharingRemoteDataSource {
   });
 
   @override
-  Future<List<SongWork>> searchSongs(
+  Future<List<SongSuggestion>> searchSongs(
     String query, {
-    bool onlyMine = false,
-    int limit = 20,
-  }) async => _run('songs:$query:mine=$onlyMine', () {
+    int limit = 8,
+  }) async => _run('songs:$query', () {
     final q = query.toLowerCase();
     return [
-      for (final s in songs)
-        if (s.mergedIntoId == null &&
-            (!onlyMine || s.createdBy == 'u-me') &&
-            (q.isEmpty ||
-                s.title.toLowerCase().contains(q) ||
-                s.artist.toLowerCase().contains(q)))
-          s,
+      for (final s in suggestions)
+        if (q.isEmpty || s.title.toLowerCase().contains(q)) s,
     ];
   });
 
@@ -105,55 +100,10 @@ class FakeSongSharingRemote implements SongSharingRemoteDataSource {
     if (row == null) {
       throw BackendErrorCode.versionNotFound.failure(message: 'none');
     }
-    return {...row, 'label': ?label};
+    final made = {...row, 'label': ?label};
+    if (forkReadFails) throw ForkReadFailed(row: made, cause: offlineFailure());
+    return made;
   });
-
-  @override
-  Future<SongMergeRequest> requestMerge(
-    String sourceSongId,
-    String targetSongId,
-  ) async => _run(
-    'merge:$sourceSongId>$targetSongId',
-    () => SongMergeRequest(
-      id: 'req-new',
-      sourceSongId: sourceSongId,
-      targetSongId: targetSongId,
-      sourceTitle: 'Source',
-      targetTitle: 'Target',
-      status: mergeStatus,
-    ),
-  );
-
-  @override
-  Future<SongMergeRequest> respondToMerge(
-    String requestId, {
-    required bool accept,
-  }) async => _run(
-    'respond:$requestId:$accept',
-    () => SongMergeRequest(
-      id: requestId,
-      sourceSongId: 'song-a',
-      targetSongId: 'song-b',
-      sourceTitle: 'A',
-      targetTitle: 'B',
-      status: accept
-          ? MergeRequestStatus.accepted
-          : MergeRequestStatus.declined,
-    ),
-  );
-
-  @override
-  Future<SongMergeRequest> fetchMergeRequest(String requestId) async =>
-      _run('request:$requestId', () {
-        for (final r in pending) {
-          if (r.id == requestId) return r;
-        }
-        throw BackendErrorCode.mergeRequestNotFound.failure(message: 'none');
-      });
-
-  @override
-  Future<List<SongMergeRequest>> pendingMergeRequests() async =>
-      _run('pending', () => pending);
 }
 
 /// A scripted [SongSharingRepository] for widget tests.
@@ -161,8 +111,7 @@ class FakeSongSharingRepository implements SongSharingRepository {
   List<SongVersionListing> versions = [];
   List<SongVersionListing> publicVersions = [];
   List<SongWork> songs = [];
-  List<SongMergeRequest> pending = [];
-  final Map<String, SongMergeRequest> requests = {};
+  List<SongSuggestion> suggestions = [];
 
   /// When set, every call fails with it.
   Failure? failure;
@@ -172,8 +121,6 @@ class FakeSongSharingRepository implements SongSharingRepository {
 
   /// What `openVersion` returns.
   Song? opened;
-
-  MergeRequestStatus mergeStatus = MergeRequestStatus.pending;
 
   final List<String> calls = [];
 
@@ -226,18 +173,14 @@ class FakeSongSharingRepository implements SongSharingRepository {
   }
 
   @override
-  Future<Either<Failure, List<SongWork>>> searchSongs(
+  Future<Either<Failure, List<SongSuggestion>>> searchSongs(
     String query, {
-    bool onlyMine = false,
-    int limit = 20,
+    int limit = 8,
   }) async {
     final q = query.toLowerCase();
-    return _answer('songs:$query:mine=$onlyMine', [
-      for (final s in songs)
-        if (s.mergedIntoId == null &&
-            (!onlyMine || s.createdBy == 'u-me') &&
-            (q.isEmpty || s.title.toLowerCase().contains(q)))
-          s,
+    return _answer('songs:$query', [
+      for (final s in suggestions)
+        if (q.isEmpty || s.title.toLowerCase().contains(q)) s,
     ]);
   }
 
@@ -262,56 +205,4 @@ class FakeSongSharingRepository implements SongSharingRepository {
     }
     return _answerOr('fork:$versionId:$label', result);
   }
-
-  @override
-  Future<Either<Failure, SongMergeRequest>> requestMerge({
-    required String sourceSongId,
-    required String targetSongId,
-  }) async => _answer(
-    'merge:$sourceSongId>$targetSongId',
-    SongMergeRequest(
-      id: 'req-new',
-      sourceSongId: sourceSongId,
-      targetSongId: targetSongId,
-      sourceTitle: 'Source',
-      targetTitle: 'Target',
-      status: mergeStatus,
-    ),
-  );
-
-  @override
-  Future<Either<Failure, SongMergeRequest>> respondToMerge(
-    String requestId, {
-    required bool accept,
-  }) async {
-    final request = requests[requestId];
-    final answered = SongMergeRequest(
-      id: requestId,
-      sourceSongId: request?.sourceSongId ?? 'song-a',
-      targetSongId: request?.targetSongId ?? 'song-b',
-      sourceTitle: request?.sourceTitle ?? 'A',
-      targetTitle: request?.targetTitle ?? 'B',
-      status: accept
-          ? MergeRequestStatus.accepted
-          : MergeRequestStatus.declined,
-    );
-    return _answer('respond:$requestId:$accept', answered);
-  }
-
-  @override
-  Future<Either<Failure, SongMergeRequest>> fetchMergeRequest(
-    String requestId,
-  ) async {
-    final request = requests[requestId];
-    if (request == null && failure == null) {
-      return Left(
-        BackendErrorCode.mergeRequestNotFound.failure(message: 'none'),
-      );
-    }
-    return _answerOr('request:$requestId', request);
-  }
-
-  @override
-  Future<Either<Failure, List<SongMergeRequest>>>
-  pendingMergeRequests() async => _answer('pending', pending);
 }

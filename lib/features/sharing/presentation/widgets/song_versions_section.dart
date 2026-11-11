@@ -14,6 +14,7 @@ import 'package:battuta/features/sharing/domain/entities/song_version_row.dart';
 import 'package:battuta/features/sharing/presentation/providers/sharing_providers.dart';
 import 'package:battuta/features/sharing/presentation/widgets/fork_version_flow.dart';
 import 'package:battuta/features/sharing/presentation/widgets/visibility_text.dart';
+import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +64,12 @@ class SongVersionsSection extends ConsumerWidget {
       }
       ref.invalidate(repertoireProvider);
     }
-    await router.push(AppRoutes.songDetail(row.versionId));
+    final pins = ref.read(pinnedVersionsProvider)..pin(row.versionId);
+    try {
+      await router.push(AppRoutes.songDetail(row.versionId));
+    } finally {
+      pins.release(row.versionId);
+    }
   }
 
   Song? _cached(WidgetRef ref, String versionId) {

@@ -15,6 +15,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/scanner/presentation/providers/scan_controller.dart';
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/features/sharing/presentation/widgets/song_link_sheet.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -170,7 +171,9 @@ Unending [D]love amazing [G]grace
     if (_urlConvertedSong == null) return;
     final l10n = AppLocalizations.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final song = _urlConvertedSong!;
+    final linked = await linkSongBeforeSave(context, ref, _urlConvertedSong!);
+    if (linked == null || !mounted) return;
+    final song = linked;
 
     try {
       await ref.read(repertoireProvider.notifier).addSong(song);
@@ -215,7 +218,13 @@ Unending [D]love amazing [G]grace
     ScanFlowModal.show(
       context,
       onScoreExtracted: (Score score) async {
-        final song = score.toSong();
+        final linked = await linkSongBeforeSave(
+          context,
+          ref,
+          score.toSong(),
+        );
+        if (linked == null) return;
+        final song = linked;
         await ref.read(repertoireProvider.notifier).addSong(song);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

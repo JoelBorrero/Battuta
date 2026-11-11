@@ -7,6 +7,7 @@
 library;
 
 import 'package:battuta/core/database/database_providers.dart';
+import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/repertoire/data/seed/repertoire_seeder.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
@@ -78,7 +79,13 @@ final songByIdProvider = FutureProvider.family<Song?, String>((ref, id) async {
   }
   final repository = ref.watch(songRepositoryProvider);
   final result = await repository.getSongById(id);
-  return result.fold((failure) => throw failure, (song) => song);
+  // A version that is gone (a sync removed it) is "no song", not an error.
+  return result.fold(
+    (failure) => failure.errorCode == BackendErrorCode.versionNotFound
+        ? null
+        : throw failure,
+    (song) => song,
+  );
 });
 
 /// Provides the current repertoire list and exposes mutation methods.

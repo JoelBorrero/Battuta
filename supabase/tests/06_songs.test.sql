@@ -82,7 +82,7 @@ language sql stable security definer set search_path = '' as $$
       and type = p_type $$;
 
 -- ============================================================================
--- Songs, versions, visibility, scores, repertoire, setlists, forks and merges
+-- Songs, versions, visibility, scores, repertoire, setlists, forks (linking: 10_song_linking)
 -- Org A: alice admin, bob member (song owner). Org B: dave admin.
 -- carol is an outsider, zed a deactivated author.
 -- ============================================================================
@@ -103,9 +103,9 @@ select lives_ok(format($$ insert into public.songs (id, title, artist, created_b
     values ('00000000-0000-0000-0000-000000000001', 'Song One', 'Band', %L) $$, tests.uid('bob')), 'user creates a song');
 select throws_ok(format($$ insert into public.songs (title, artist, created_by) values ('Fake', 'x', %L) $$, tests.uid('alice')),
     '42501', null, 'cannot create a song as someone else');
-select throws_ok($$ insert into public.songs (title, artist, created_by, merged_into_id)
-    values ('Sneaky', 'x', auth.uid(), '00000000-0000-0000-0000-000000000001') $$,
-    '42501', null, 'merged_into_id is not client-writable');
+select throws_ok($$ insert into public.songs (title, artist, created_by, normalized_key)
+    values ('Sneaky', 'x', auth.uid(), 'sneaky|x') $$,
+    '42501', null, 'normalized_key is not client-writable');
 select lives_ok(format($$ insert into public.song_versions (id, song_id, owner_id, label, visibility) values
     ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-000000000001', %1$L, 'V-private', 'private'),
     ('00000000-0000-0000-0000-0000000000a2', '00000000-0000-0000-0000-000000000001', %1$L, 'V-org', 'organizations'),
@@ -205,7 +205,7 @@ select lives_ok($$ update public.song_versions set label = 'V-org', tempo = 90 w
 select throws_ok(format($$ update public.song_versions set owner_id = %L where label = 'V-org' $$, tests.uid('alice')),
     '42501', null, 'ownership cannot be transferred');
 select throws_ok($$ update public.song_versions set song_id = '00000000-0000-0000-0000-000000000002' where label = 'V-org' $$,
-    '42501', null, 'versions move between songs only through a merge');
+    '42501', null, 'versions move between songs only through move_version_to_song');
 
 -- Repertoire ------------------------------------------------------------------------------------------------
 select tests.as_user('alice');
@@ -348,125 +348,6 @@ select lives_ok($$ select public.fork_song_version(tests.version('Zed V')) $$, '
 select tests.reset();
 select is(tests.notifs('zed', 'song_version_forked'), 0, 'deactivated owners are not notified');
 select is((select visibility from public.song_versions where label = 'Zed V'), 'public', 'their version keeps its visibility');
-
--- Merge ----------------------------------------------------------------------------------------------------------
-select tests.as_user('alice');
-select lives_ok(format($$ insert into public.songs (id, title, artist, created_by)
-    values ('00000000-0000-0000-0000-000000000010', 'Song Two', 'Band', %L) $$, tests.uid('alice')), 'alice creates the same work separately');
-select lives_ok(format($$ insert into public.song_versions (id, song_id, owner_id, label, visibility) values
-    ('00000000-0000-0000-0000-0000000001a1', '00000000-0000-0000-0000-000000000010', %1$L, 'Alice pub', 'public'),
-    ('00000000-0000-0000-0000-0000000001a2', '00000000-0000-0000-0000-000000000010', %1$L, 'Alice priv', 'private') $$,
-    tests.uid('alice')), 'with a public and a private version');
-select lives_ok(format($$ insert into public.organization_repertoire (organization_id, version_id, added_by)
-    values (%L, tests.version('Alice pub'), %L) $$, tests.org('Org A'), tests.uid('alice')), 'and plays the public one');
-
-select throws_ok($$ select public.request_song_merge(tests.song('Song Two'), tests.song('Song Two')) $$,
-    'P0001', 'merge_same_song', 'a song cannot merge into itself');
-select throws_ok($$ select public.request_song_merge(tests.song('Song Two'), tests.song('Secret Song')) $$,
-    'P0002', 'song_not_found', 'cannot merge with a song you cannot see');
-select throws_ok($$ select public.request_song_merge(gen_random_uuid(), tests.song('Song Two')) $$,
-    'P0002', 'song_not_found', 'unknown song');
-select tests.as_user('carol');
-select throws_ok($$ select public.request_song_merge(tests.song('Song Two'), tests.song('Song One')) $$,
-    '42501', 'not_song_creator', 'the requester must have created one of the two songs');
-select tests.as_anon();
-select throws_ok($$ select public.request_song_merge(tests.song('Song Two'), tests.song('Song One')) $$, '42501', null, 'anon cannot request');
-
-select tests.as_user('alice');
-select tests.save('merge_id', (public.request_song_merge(tests.song('Song Two'), tests.song('Song One'))).id::text);
-select is((select status from public.song_merge_requests where id = tests.get('merge_id')::uuid), 'pending',
-    'merge waits for the creator of the other song');
-select is((select count(*)::int from public.song_versions where song_id = tests.song('Song Two')), 2, 'nothing moved yet');
-select throws_ok($$ select public.request_song_merge(tests.song('Song Two'), tests.song('Song One')) $$,
-    'P0001', 'merge_already_requested', 'one pending request per pair');
-select throws_ok(format($$ select public.respond_to_song_merge(%L, true) $$, tests.get('merge_id')),
-    'P0002', 'merge_request_not_found', 'the requester cannot approve their own request');
-select tests.reset();
-select is(tests.notifs('bob', 'song_merge_requested'), 1, 'the other creator is notified');
-select is((select source_title || '/' || target_title from public.song_merge_requests where id = tests.get('merge_id')::uuid),
-    'Song Two/Song One', 'the request stores both title snapshots');
-select is((select payload->>'source_title' || '/' || (payload->>'target_title') from public.notifications
-           where recipient_id = tests.uid('bob') and type = 'song_merge_requested'),
-    'Song Two/Song One', 'and the notification payload carries them');
-select tests.as_user('carol');
-select is((select count(*)::int from public.song_merge_requests), 0, 'others cannot see the request');
-select throws_ok(format($$ select public.respond_to_song_merge(%L, true) $$, tests.get('merge_id')),
-    'P0002', 'merge_request_not_found', 'others cannot approve it');
-
--- decline, then request again
-select tests.as_user('bob');
-select is((select status from public.respond_to_song_merge(tests.get('merge_id')::uuid, false)), 'declined', 'bob declines');
-select throws_ok(format($$ select public.respond_to_song_merge(%L, true) $$, tests.get('merge_id')),
-    'P0001', 'merge_not_pending', 'cannot answer twice');
-select tests.reset();
-select is(tests.notifs('alice', 'song_merge_declined'), 1, 'the requester is told');
-select is((select count(*)::int from public.song_versions where song_id = tests.song('Song Two')), 2, 'declining moves nothing');
-
-select tests.as_user('alice');
-select tests.save('merge2_id', (public.request_song_merge(tests.song('Song Two'), tests.song('Song One'))).id::text);
-select tests.as_user('bob');
-select is((select count(*)::int from public.profiles where username = 'alice'), 1, 'the approver can see the requester profile');
-select is((select status from public.respond_to_song_merge(tests.get('merge2_id')::uuid, true)), 'accepted', 'bob accepts');
-select tests.reset();
-select is(tests.notifs('alice', 'song_merge_accepted'), 1, 'the requester is told');
-select is((select count(*)::int from public.song_versions where song_id = tests.song('Song One')
-           and label in ('Alice pub', 'Alice priv')), 2, 'every version of the source moved under the target');
-select is((select count(*)::int from public.song_versions where song_id = tests.song('Song Two')), 0, 'none left under the source');
-select is((select merged_into_id from public.songs where title = 'Song Two'), tests.song('Song One'), 'the source redirects to the target');
-select is((select owner_id from public.song_versions where label = 'Alice priv'), tests.uid('alice'), 'versions keep their owner');
-select is((select visibility from public.song_versions where label = 'Alice priv'), 'private', 'and visibility');
-select is((select visibility from public.song_versions where label = 'Alice pub'), 'public', 'public stays public');
-select is((select count(*)::int from public.organization_repertoire where version_id = tests.version('Alice pub')), 1,
-    'repertoire keeps working across the merge');
-select is(public.resolve_song(tests.song('Song Two')), tests.song('Song One'), 'resolve_song follows the redirect');
-select is(public.resolve_song(tests.song('Song One')), tests.song('Song One'), 'and is stable on the survivor');
-select tests.as_user('carol');
-select is((select count(*)::int from public.songs where title = 'Song Two'), 1, 'the old song is still visible through the redirect');
-select tests.as_user('bob');
-select is((select count(*)::int from public.song_versions where label = 'Alice priv'), 0, 'merging does not expose private versions');
-
--- Cycles and chains
-select throws_ok($$ select public.request_song_merge(tests.song('Song One'), tests.song('Song Two')) $$,
-    'P0001', 'merge_cycle', 'cannot merge a song into one that was merged into it');
-select tests.as_user('alice');
-select lives_ok(format($$ insert into public.songs (id, title, artist, created_by)
-    values ('00000000-0000-0000-0000-000000000011', 'Song Three', 'Band', %L) $$, tests.uid('alice')), 'a third copy of the work');
-select lives_ok(format($$ insert into public.song_versions (song_id, owner_id, label, visibility)
-    values ('00000000-0000-0000-0000-000000000011', %L, 'Three V', 'public') $$, tests.uid('alice')), 'with a version');
-select tests.save('merge3_id', (public.request_song_merge(tests.song('Song Three'), tests.song('Song Two'))).id::text);
-select is((select target_song_id from public.song_merge_requests where id = tests.get('merge3_id')::uuid),
-    tests.song('Song One'), 'merging into an already-merged song targets the final song');
-select tests.as_user('bob');
-select lives_ok(format($$ select public.respond_to_song_merge(%L, true) $$, tests.get('merge3_id')), 'approved');
-select tests.reset();
-select is((select merged_into_id from public.songs where title = 'Song Three'), tests.song('Song One'), 'chain resolves to the final song');
-select is((select song_id from public.song_versions where label = 'Three V'), tests.song('Song One'), 'versions land under the final song');
-
--- Versions inserted under a merged-away song land on the surviving song
-select tests.as_user('bob');
-select lives_ok(format($$ insert into public.song_versions (song_id, owner_id, label)
-    values (%L, %L, 'Late V') $$, tests.song('Song Three'), tests.uid('bob')), 'bob inserts a version under a merged-away song');
-select tests.reset();
-select is((select song_id from public.song_versions where label = 'Late V'), tests.song('Song One'),
-    'it is attached to the final song of the chain');
-
--- Auto-approval: requester created both, or the other creator is deactivated
-select tests.as_user('alice');
-select lives_ok(format($$ insert into public.songs (id, title, artist, created_by) values
-    ('00000000-0000-0000-0000-000000000012', 'Song Four', 'x', %1$L),
-    ('00000000-0000-0000-0000-000000000013', 'Song Five', 'x', %1$L) $$, tests.uid('alice')), 'two songs by alice');
-select is((select status from public.request_song_merge(tests.song('Song Four'), tests.song('Song Five'))), 'accepted',
-    'a requester who created both merges at once');
-select is((select merged_into_id from public.songs where title = 'Song Four'), tests.song('Song Five'), 'and it redirects');
-select lives_ok(format($$ insert into public.songs (id, title, artist, created_by)
-    values ('00000000-0000-0000-0000-000000000014', 'Song Six', 'x', %L) $$, tests.uid('alice')), 'another song');
-select lives_ok(format($$ insert into public.song_versions (song_id, owner_id, label)
-    values ('00000000-0000-0000-0000-000000000014', %L, 'Six V') $$, tests.uid('alice')), 'with a version');
-select is((select status from public.request_song_merge(tests.song('Song Six'), tests.song('Zed Song'))), 'accepted',
-    'a deactivated creator''s approval is automatic');
-select is((select song_id from public.song_versions where label = 'Six V'), tests.song('Zed Song'), 'versions moved');
-select tests.reset();
-select is(tests.notifs('zed', 'song_merge_requested'), 0, 'deactivated creators get no notification');
 
 select * from finish();
 rollback;

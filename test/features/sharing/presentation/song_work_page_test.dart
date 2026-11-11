@@ -50,27 +50,6 @@ void main() {
     expect(find.byKey(const ValueKey('song_page_title')), findsOneWidget);
   });
 
-  testWidgets('a song that was merged away shows the surviving one', (
-    tester,
-  ) async {
-    final h = SharingHarness();
-    h.sharing.songs = const [
-      SongWork(id: 'work-b', title: 'Amazing Grace', artist: 'Newton'),
-    ];
-    h.sharing.versions = const [
-      SongVersionListing(
-        versionId: 'v-merged',
-        songWorkId: 'work-b',
-        title: 'Amazing Grace',
-        label: 'Moved here',
-        ownerId: 'u-x',
-      ),
-    ];
-    await h.pump(tester, const SongWorkPage(songWorkId: 'work-b'));
-    expect(find.byKey(const ValueKey('version_row_v-merged')), findsOneWidget);
-    expect(h.sharing.calls, contains('versions:work-b'));
-  });
-
   testWidgets('an unknown song says it is not available', (tester) async {
     final h = SharingHarness();
     h.sharing.failure = BackendErrorCode.songNotFound.failure(message: 'x');

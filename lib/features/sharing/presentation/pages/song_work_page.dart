@@ -1,5 +1,5 @@
 /// A song (the work) and every version of it I can see. Opened from the inbox
-/// (a copy of my version, an accepted merge) and from the merge screens.
+/// (a copy of my version).
 library;
 
 import 'package:battuta/app/design_system/design_system.dart';
@@ -22,11 +22,10 @@ class SongWorkPage extends ConsumerWidget {
     final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
     final work = ref.watch(songWorkProvider(songWorkId));
-    // A merged-away song shows the surviving one.
-    final workId = work.value?.id ?? songWorkId;
+    final workId = songWorkId;
     final cached = <Song>[
       for (final song in ref.watch(repertoireProvider).value ?? const <Song>[])
-        if (song.songWorkId == workId || song.songWorkId == songWorkId) song,
+        if (song.songWorkId == workId) song,
     ];
     final title =
         work.value?.title ?? (cached.isEmpty ? null : cached.first.title);

@@ -78,7 +78,11 @@ final class ServerFailure extends Failure {
 /// A failure reading from or writing to a local cache / database.
 final class CacheFailure extends Failure {
   /// Creates a [CacheFailure] with the given [message].
-  const CacheFailure({required super.message, super.stackTrace});
+  const CacheFailure({
+    required super.message,
+    super.stackTrace,
+    super.errorCode,
+  });
 }
 
 /// A failure caused by invalid user input or business-rule violation.

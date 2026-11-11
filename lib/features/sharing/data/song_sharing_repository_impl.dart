@@ -18,6 +18,7 @@ import 'package:battuta/features/repertoire/domain/repositories/song_repository.
 import 'package:battuta/features/score/domain/repositories/score_repository.dart';
 import 'package:battuta/features/sharing/data/song_sharing_remote_data_source.dart';
 import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
+import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
 import 'package:battuta/features/sharing/domain/repositories/song_sharing_repository.dart';
 import 'package:battuta/features/sync/data/sync_mappers.dart';
 import 'package:fpdart/fpdart.dart';
@@ -67,13 +68,10 @@ class SongSharingRepositoryImpl implements SongSharingRepository {
       _guard(() => _remote.fetchSong(songId));
 
   @override
-  Future<Either<Failure, List<SongWork>>> searchSongs(
+  Future<Either<Failure, List<SongSuggestion>>> searchSongs(
     String query, {
-    bool onlyMine = false,
-    int limit = 20,
-  }) => _guard(
-    () => _remote.searchSongs(query, onlyMine: onlyMine, limit: limit),
-  );
+    int limit = 8,
+  }) => _guard(() => _remote.searchSongs(query, limit: limit));
 
   @override
   Future<Either<Failure, Song>> openVersion(String versionId) =>
@@ -98,6 +96,17 @@ class SongSharingRepositoryImpl implements SongSharingRepository {
           label: cleanLabel == null || cleanLabel.isEmpty ? null : cleanLabel,
         );
         return Right(ForkedVersion(await _cache(row, me)));
+      } on ForkReadFailed catch (e) {
+        // The backend made the fork: never make another one. Keep what the
+        // RPC returned (it only lacks the song) and let the next sync fill
+        // in the rest.
+        try {
+          return Right(
+            ForkedVersion(await _cache(_withSong(e.row, cachedSource), me)),
+          );
+        } catch (_) {
+          return Left(mapBackendError(e.cause));
+        }
       } catch (e, st) {
         final failure = mapBackendError(e, st);
         if (cachedSource == null || !_isOfflineLike(failure)) {
@@ -114,6 +123,17 @@ class SongSharingRepositoryImpl implements SongSharingRepository {
     }
     return _forkLocally(cachedSource, cleanLabel, me);
   }
+
+  /// [row] as the RPC returned it, with the song of [source] embedded.
+  Map<String, dynamic> _withSong(Map<String, dynamic> row, Song? source) => {
+    ...row,
+    'songs': {
+      'id': row['song_id'],
+      'title': ?source?.title,
+      'artist': ?source?.artist,
+      'created_by': ?source?.songCreatorId,
+    },
+  };
 
   /// No connection, no session, or a source the backend does not know (yet).
   bool _isOfflineLike(Failure failure) => switch (failure.errorCode) {
@@ -158,27 +178,6 @@ class SongSharingRepositoryImpl implements SongSharingRepository {
     }
     return Right(ForkedVersion(song, madeOffline: true));
   }
-
-  @override
-  Future<Either<Failure, SongMergeRequest>> requestMerge({
-    required String sourceSongId,
-    required String targetSongId,
-  }) => _guard(() => _remote.requestMerge(sourceSongId, targetSongId));
-
-  @override
-  Future<Either<Failure, SongMergeRequest>> respondToMerge(
-    String requestId, {
-    required bool accept,
-  }) => _guard(() => _remote.respondToMerge(requestId, accept: accept));
-
-  @override
-  Future<Either<Failure, SongMergeRequest>> fetchMergeRequest(
-    String requestId,
-  ) => _guard(() => _remote.fetchMergeRequest(requestId));
-
-  @override
-  Future<Either<Failure, List<SongMergeRequest>>> pendingMergeRequests() =>
-      _guard(_remote.pendingMergeRequests);
 
   String _requireAccount() {
     final me = _session.userId;

@@ -4554,24 +4554,6 @@ abstract class AppLocalizations {
   /// **'Someone made a copy of one of your arrangements'**
   String get notifSongVersionForked;
 
-  /// notifSongMergeRequested
-  ///
-  /// In en, this message translates to:
-  /// **'Merge request: {source} into {target}'**
-  String notifSongMergeRequested(String source, String target);
-
-  /// notifSongMergeAccepted
-  ///
-  /// In en, this message translates to:
-  /// **'Your merge request was accepted'**
-  String get notifSongMergeAccepted;
-
-  /// notifSongMergeDeclined
-  ///
-  /// In en, this message translates to:
-  /// **'Your merge request was declined'**
-  String get notifSongMergeDeclined;
-
   /// notifUnknown
   ///
   /// In en, this message translates to:
@@ -5274,144 +5256,6 @@ abstract class AppLocalizations {
   /// **'Title and artist belong to the song. Only the person who created it can change them.'**
   String get songTitleLockedHint;
 
-  /// mergeSameSongButton
-  ///
-  /// In en, this message translates to:
-  /// **'Same song as…'**
-  String get mergeSameSongButton;
-
-  /// mergeSuggestButton
-  ///
-  /// In en, this message translates to:
-  /// **'Suggest merge'**
-  String get mergeSuggestButton;
-
-  /// mergeSheetTitle
-  ///
-  /// In en, this message translates to:
-  /// **'Merge songs'**
-  String get mergeSheetTitle;
-
-  /// mergeIntroMine
-  ///
-  /// In en, this message translates to:
-  /// **'Pick the song that “{title}” duplicates. Its versions will move under the song you pick once the creator of that song agrees.'**
-  String mergeIntroMine(String title);
-
-  /// mergeIntroOther
-  ///
-  /// In en, this message translates to:
-  /// **'“{title}” was created by someone else. Pick one of your own songs that is the same song: its versions will move under “{title}” once its creator agrees.'**
-  String mergeIntroOther(String title);
-
-  /// mergeSearchLabel
-  ///
-  /// In en, this message translates to:
-  /// **'Search songs'**
-  String get mergeSearchLabel;
-
-  /// mergeNoResults
-  ///
-  /// In en, this message translates to:
-  /// **'No matching songs.'**
-  String get mergeNoResults;
-
-  /// mergePendingBadge
-  ///
-  /// In en, this message translates to:
-  /// **'Request pending'**
-  String get mergePendingBadge;
-
-  /// mergeConfirmTitle
-  ///
-  /// In en, this message translates to:
-  /// **'Request this merge?'**
-  String get mergeConfirmTitle;
-
-  /// mergeConfirmBody
-  ///
-  /// In en, this message translates to:
-  /// **'Versions of “{source}” will move under “{target}”.'**
-  String mergeConfirmBody(String source, String target);
-
-  /// mergeRequestAction
-  ///
-  /// In en, this message translates to:
-  /// **'Request merge'**
-  String get mergeRequestAction;
-
-  /// mergeSent
-  ///
-  /// In en, this message translates to:
-  /// **'Merge request sent'**
-  String get mergeSent;
-
-  /// mergeDone
-  ///
-  /// In en, this message translates to:
-  /// **'The songs were merged'**
-  String get mergeDone;
-
-  /// mergeNeedsInternet
-  ///
-  /// In en, this message translates to:
-  /// **'Merging songs needs an internet connection.'**
-  String get mergeNeedsInternet;
-
-  /// mergeSignIn
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to merge songs.'**
-  String get mergeSignIn;
-
-  /// mergeRequestTitle
-  ///
-  /// In en, this message translates to:
-  /// **'Merge request'**
-  String get mergeRequestTitle;
-
-  /// mergeRequestBody
-  ///
-  /// In en, this message translates to:
-  /// **'{requester} asks to merge “{source}” into “{target}”. Every version of “{source}” would move under “{target}”.'**
-  String mergeRequestBody(String requester, String source, String target);
-
-  /// mergeRequesterUnknown
-  ///
-  /// In en, this message translates to:
-  /// **'Someone'**
-  String get mergeRequesterUnknown;
-
-  /// mergeAccept
-  ///
-  /// In en, this message translates to:
-  /// **'Accept'**
-  String get mergeAccept;
-
-  /// mergeDecline
-  ///
-  /// In en, this message translates to:
-  /// **'Decline'**
-  String get mergeDecline;
-
-  /// mergeAccepted
-  ///
-  /// In en, this message translates to:
-  /// **'Songs merged'**
-  String get mergeAccepted;
-
-  /// mergeDeclined
-  ///
-  /// In en, this message translates to:
-  /// **'Request declined'**
-  String get mergeDeclined;
-
-  /// mergeAlreadyAnswered
-  ///
-  /// In en, this message translates to:
-  /// **'This request was already answered.'**
-  String get mergeAlreadyAnswered;
-
   /// songPageTitle
   ///
   /// In en, this message translates to:
@@ -5478,41 +5322,149 @@ abstract class AppLocalizations {
   /// **'That song is no longer available.'**
   String get backendErrorSongNotFound;
 
-  /// backendErrorMergeNotCreator
-  ///
-  /// In en, this message translates to:
-  /// **'You can only merge songs when you created one of them.'**
-  String get backendErrorMergeNotCreator;
-
-  /// backendErrorMergeSameSong
-  ///
-  /// In en, this message translates to:
-  /// **'Those are already the same song.'**
-  String get backendErrorMergeSameSong;
-
-  /// backendErrorMergeAlreadyRequested
-  ///
-  /// In en, this message translates to:
-  /// **'A merge request for these songs is already pending.'**
-  String get backendErrorMergeAlreadyRequested;
-
-  /// backendErrorMergeNotPending
-  ///
-  /// In en, this message translates to:
-  /// **'This request was already answered.'**
-  String get backendErrorMergeNotPending;
-
-  /// backendErrorMergeRequestNotFound
-  ///
-  /// In en, this message translates to:
-  /// **'That merge request no longer exists.'**
-  String get backendErrorMergeRequestNotFound;
-
   /// discoverLoadMore
   ///
   /// In en, this message translates to:
   /// **'Load more'**
   String get discoverLoadMore;
+
+  /// songLinkSuggestionsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Is it one of these songs?'**
+  String get songLinkSuggestionsTitle;
+
+  /// songLinkSuggestionsHint
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a song to add your version to it. Otherwise a new song is created.'**
+  String get songLinkSuggestionsHint;
+
+  /// songLinkVersionCount
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 version} other{{count} versions}}'**
+  String songLinkVersionCount(int count);
+
+  /// songLinkNewSong
+  ///
+  /// In en, this message translates to:
+  /// **'New song'**
+  String get songLinkNewSong;
+
+  /// songLinkNewSongSubtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Create “{title}”'**
+  String songLinkNewSongSubtitle(String title);
+
+  /// songLinkLinkedTo
+  ///
+  /// In en, this message translates to:
+  /// **'Version of “{title}”'**
+  String songLinkLinkedTo(String title);
+
+  /// songLinkChange
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get songLinkChange;
+
+  /// songLinkOfflineNote
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the songs saved on this device.'**
+  String get songLinkOfflineNote;
+
+  /// songLinkSheetTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Which song is this?'**
+  String get songLinkSheetTitle;
+
+  /// songLinkSheetBody
+  ///
+  /// In en, this message translates to:
+  /// **'“{title}” looks like a song that already exists. Add your version to it, or create a new song.'**
+  String songLinkSheetBody(String title);
+
+  /// moveToSongButton
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another song'**
+  String get moveToSongButton;
+
+  /// moveToSongTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another song'**
+  String get moveToSongTitle;
+
+  /// moveToSongIntro
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the song that “{title}” belongs to. Your version moves there and shows that song’s title and artist.'**
+  String moveToSongIntro(String title);
+
+  /// moveToSongSearchLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Search songs'**
+  String get moveToSongSearchLabel;
+
+  /// moveToSongNoResults
+  ///
+  /// In en, this message translates to:
+  /// **'No matching songs.'**
+  String get moveToSongNoResults;
+
+  /// moveToSongAction
+  ///
+  /// In en, this message translates to:
+  /// **'Move here'**
+  String get moveToSongAction;
+
+  /// moveToSongConfirmTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Move this version?'**
+  String get moveToSongConfirmTitle;
+
+  /// moveToSongConfirmBody
+  ///
+  /// In en, this message translates to:
+  /// **'This version will move to “{song}”. Setlists and repertoires keep using it.'**
+  String moveToSongConfirmBody(String song);
+
+  /// moveToSongDone
+  ///
+  /// In en, this message translates to:
+  /// **'Version moved to “{song}”'**
+  String moveToSongDone(String song);
+
+  /// versionUnavailableTitle
+  ///
+  /// In en, this message translates to:
+  /// **'This version is no longer available'**
+  String get versionUnavailableTitle;
+
+  /// versionUnavailableBody
+  ///
+  /// In en, this message translates to:
+  /// **'It was deleted, made private or is no longer shared with you.'**
+  String get versionUnavailableBody;
+
+  /// backendErrorNotVersionOwner
+  ///
+  /// In en, this message translates to:
+  /// **'Only the owner of a version can move it.'**
+  String get backendErrorNotVersionOwner;
+
+  /// backendErrorSongExists
+  ///
+  /// In en, this message translates to:
+  /// **'A song with that title and artist already exists. Move your version to it instead.'**
+  String get backendErrorSongExists;
 }
 
 class _AppLocalizationsDelegate

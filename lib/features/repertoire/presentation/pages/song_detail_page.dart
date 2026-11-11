@@ -58,15 +58,17 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   void _showFailure(Object failure) {
     final l10n = AppLocalizations.of(context);
     if (!mounted || l10n == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(backendErrorMessage(l10n, failure))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(backendErrorMessage(l10n, failure))));
   }
 
   void _showTransposeDialog(Song originalSong) {
     final l10n = AppLocalizations.of(context);
     // Only the owner may write the new key back; others transpose locally.
-    final canSave = originalSong.isEditableBy(ref.read(currentAccountIdProvider));
+    final canSave = originalSong.isEditableBy(
+      ref.read(currentAccountIdProvider),
+    );
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) {
@@ -132,10 +134,10 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                             _transpositionSemitones == 0
                                 ? (l10n?.originalKey ?? 'Original Key')
                                 : (l10n?.semitonesCount(
-                                      _transpositionSemitones > 0 ? '+' : '',
-                                      _transpositionSemitones,
-                                    ) ??
-                                    '${_transpositionSemitones > 0 ? '+' : ''}$_transpositionSemitones semitones'),
+                                        _transpositionSemitones > 0 ? '+' : '',
+                                        _transpositionSemitones,
+                                      ) ??
+                                      '${_transpositionSemitones > 0 ? '+' : ''}$_transpositionSemitones semitones'),
                             style: Theme.of(modalCtx).textTheme.bodyMedium,
                           ),
                         ],
@@ -187,7 +189,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                       _transpositionSemitones == 0 || !canSave
                           ? (l10n?.done ?? 'Done')
                           : (l10n?.saveTransposedKey(transposedSong.key) ??
-                              'Save Transposed Key (${transposedSong.key}) to Song'),
+                                'Save Transposed Key (${transposedSong.key}) to Song'),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -212,7 +214,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              l10n?.failedToExportPdf(e.toString()) ?? 'Failed to export PDF: $e',
+              l10n?.failedToExportPdf(e.toString()) ??
+                  'Failed to export PDF: $e',
             ),
           ),
         );
@@ -321,7 +324,10 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   color: theme.colorScheme.error,
                 ),
                 const SizedBox(height: 12),
-                Text('${l10n?.failedToLoadRepertoire ?? "Error loading song"}: $err', textAlign: TextAlign.center),
+                Text(
+                  '${l10n?.failedToLoadRepertoire ?? "Error loading song"}: $err',
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () =>
@@ -338,18 +344,34 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
           return Scaffold(
             appBar: AppBar(title: Text(l10n?.songDetail ?? 'Song Detail')),
             body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.music_off, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(l10n?.songNotFound ?? 'Song not found in repertoire'),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () => context.go('/repertoire'),
-                    child: Text(l10n?.backToRepertoire ?? 'Back to Repertoire'),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.music_off, size: 64, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n?.versionUnavailableTitle ??
+                          'This version is no longer available',
+                      key: const ValueKey('version_unavailable'),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n?.versionUnavailableBody ?? 'It was deleted, made private or is no longer shared with you.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => context.go('/repertoire'),
+                      child: Text(
+                        l10n?.backToRepertoire ?? 'Back to Repertoire',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -390,18 +412,25 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                 tooltip: 'Export & Share',
                 onSelected: (val) async {
                   if (val == 'text') {
-                    final textStr = SongImportExportService.exportSongToPlainText(activeSong);
+                    final textStr =
+                        SongImportExportService.exportSongToPlainText(
+                          activeSong,
+                        );
                     await Clipboard.setData(ClipboardData(text: textStr));
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           backgroundColor: AppTheme.stageGreen,
-                          content: Text('Song lead sheet copied to clipboard (ChordPro)'),
+                          content: Text(
+                            'Song lead sheet copied to clipboard (ChordPro)',
+                          ),
                         ),
                       );
                     }
                   } else if (val == 'json') {
-                    final jsonStr = SongImportExportService.exportSongToJson(activeSong);
+                    final jsonStr = SongImportExportService.exportSongToJson(
+                      activeSong,
+                    );
                     await Clipboard.setData(ClipboardData(text: jsonStr));
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -512,7 +541,9 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                         children: [
                           _MetaBadge(
                             icon: Icons.music_note,
-                            label: l10n?.songKeyBadge(activeSong.key) ?? 'Key: ${activeSong.key}',
+                            label:
+                                l10n?.songKeyBadge(activeSong.key) ??
+                                'Key: ${activeSong.key}',
                             highlight: _transpositionSemitones != 0,
                           ),
                           _MetaBadge(
@@ -792,4 +823,3 @@ class _MetaBadge extends StatelessWidget {
     );
   }
 }
-

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'v1 -> v4 keeps songs, setlists and scores and adds the cache tables',
+    'v1 -> v5 keeps songs, setlists and scores and adds the cache tables',
     () async {
       final db = AppDatabase(
         NativeDatabase.memory(
@@ -80,11 +80,11 @@ void main() {
           );
       expect(await db.select(db.cacheRecords).get(), hasLength(1));
       final version = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(version.read<int>('user_version'), 4);
+      expect(version.read<int>('user_version'), 5);
     },
   );
 
-  test('a fresh database is created at v4 with every table', () async {
+  test('a fresh database is created at v5 with every table', () async {
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     expect(await db.select(db.songs).get(), isEmpty);
@@ -93,7 +93,7 @@ void main() {
   });
 
   test(
-    'v2 -> v4 keeps songs, setlists, scores and the cache, adding sync columns',
+    'v2 -> v5 keeps songs, setlists, scores and the cache, adding sync columns',
     () async {
       final db = AppDatabase(
         NativeDatabase.memory(
@@ -213,7 +213,7 @@ void main() {
       expect(cached.recordId, 'o1');
 
       final version = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(version.read<int>('user_version'), 4);
+      expect(version.read<int>('user_version'), 5);
     },
   );
 
@@ -255,7 +255,8 @@ void main() {
     expect(song.title, 'Amazing Grace');
     expect(song.ownerId, 'u1');
     expect(song.songCreatorId, isNull);
+    expect(song.moveDirty, isFalse, reason: 'v5 adds the queued move flag');
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.read<int>('user_version'), 4);
+    expect(version.read<int>('user_version'), 5);
   });
 }

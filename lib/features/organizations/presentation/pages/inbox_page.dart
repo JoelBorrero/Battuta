@@ -103,8 +103,6 @@ class _InboxPageState extends ConsumerState<InboxPage> {
         router.go(AppRoutes.songDetail(target.versionId!));
       case NotificationDestination.songPage:
         await router.push(AppRoutes.songPage(target.songId!));
-      case NotificationDestination.mergeRequest:
-        await router.push(AppRoutes.mergeRequest(target.requestId!));
       case NotificationDestination.repertoire:
         router.go(AppRoutes.repertoire);
       case NotificationDestination.none:

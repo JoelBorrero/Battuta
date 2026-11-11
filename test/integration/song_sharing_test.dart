@@ -2,21 +2,20 @@
 /// with an organization, a member sees it in "Other versions" and forks it
 /// (the owner is told), the owner makes it public and a third user finds it
 /// in Discover, an offline fork is pushed later (with or without lineage),
-/// and two creators merge duplicates.
+/// two users typing the same song land on one song, and a version moves
+/// to another song.
 ///
 ///   supabase db reset
 ///   flutter test --tags supabase --run-skipped test/integration
 @Tags(['supabase'])
 library;
 
-import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:battuta/features/sharing/data/song_sharing_remote_data_source.dart';
 import 'package:battuta/features/sharing/data/song_sharing_repository_impl.dart';
-import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:uuid/uuid.dart';
 
@@ -289,162 +288,122 @@ void main() {
     expect(remote, isNotNull, reason: 'the copy still reaches the backend');
     expect(remote!['forked_from_version_id'], isNull);
     expect(remote['label'], 'Orphan');
-    // The song is private to Alice again, so the copy starts one of its own.
-    expect(remote['song_id'], isNot(work));
-    expect((remote['songs'] as Map)['created_by'], bob.id);
+    // The song is private to Alice again, but the copy still joins it (the
+    // backend matches by title and artist), so no empty song is left behind.
+    expect(remote['song_id'], work);
   });
 
   itest(
-    'two creators merge duplicates and the member\'s fork follows the survivor',
+    'two users create the same song independently and share one song',
     () async {
-      final org = await aliceAndBobOrg();
+      final stamp = DateTime.now().microsecondsSinceEpoch;
       final aliceDevice = track(SongDevice.of(alice));
       final bobDevice = track(SongDevice.of(bob));
+      final mine = newSong('Tú Fidelidad $stamp')
+          .copyWith(artist: 'Marcos Witt');
+      final theirs = newSong('tu  FIDELIDAD $stamp')
+          .copyWith(artist: 'marcos witt');
+      final workA = await publish(aliceDevice, mine);
+      final workB = await publish(bobDevice, theirs);
+      expect(workB, workA, reason: 'accents and case do not split a song');
 
-      // Alice's song A (shared), Bob's fork of it, and Bob's own duplicate B.
-      final a = newSong('Dup Hymn A ${DateTime.now().microsecondsSinceEpoch}');
-      final workA = await publish(aliceDevice, a);
-      await share(
-        aliceDevice,
-        a.id,
-        SongVisibility.organizations,
-        orgs: [org.id],
+      await share(aliceDevice, mine.id, SongVisibility.public);
+      await share(bobDevice, theirs.id, SongVisibility.public);
+      final versions = ok(
+        await sharingOf(bobDevice).fetchVersionsOfSong(workA),
       );
-      final bobSharing = sharingOf(bobDevice);
-      final fork = ok(await bobSharing.forkVersion(a.id, label: 'Bob on A'));
+      expect({for (final v in versions) v.versionId}, {mine.id, theirs.id});
 
-      final b = newSong('Dup Hymn B ${DateTime.now().microsecondsSinceEpoch}');
-      final workB = await publish(bobDevice, b);
-      await share(
-        bobDevice,
-        b.id,
-        SongVisibility.organizations,
-        orgs: [org.id],
-      );
-
-      // Alice finds Bob's song when she searches, and asks to merge A into B.
-      final aliceSharing = sharingOf(aliceDevice);
-      final candidates = ok(await aliceSharing.searchSongs(b.title));
-      expect(candidates.map((s) => s.id), contains(workB));
-      final request = ok(
-        await aliceSharing.requestMerge(
-          sourceSongId: workA,
-          targetSongId: workB,
-        ),
-      );
-      expect(request.isPending, isTrue);
-      expect(request.sourceTitle, a.title);
-      expect(request.targetTitle, b.title);
-
-      // The same pair cannot be requested twice, and both sides see it pending.
-      expect(
-        failed(
-          await aliceSharing.requestMerge(
-            sourceSongId: workA,
-            targetSongId: workB,
-          ),
-        ),
-        BackendErrorCode.mergeAlreadyRequested,
-      );
-      final bobPending = ok(await bobSharing.pendingMergeRequests());
-      expect(bobPending.any((r) => r.id == request.id), isTrue);
-      expect(
-        ok(await aliceSharing.pendingMergeRequests())
-            .any((r) => r.connects(workA, workB)),
-        isTrue,
-      );
-
-      // Bob (the approver) reads the request with both titles and accepts.
-      final seen = ok(await bobSharing.fetchMergeRequest(request.id));
-      expect(seen.sourceTitle, a.title);
-      expect(seen.requesterName, alice.displayName);
-      expect(seen.approverId, bob.id);
-      // Alice cannot answer her own request.
-      expect(
-        failed(await aliceSharing.respondToMerge(request.id, accept: true)),
-        BackendErrorCode.mergeRequestNotFound,
-      );
-      final answered = ok(
-        await bobSharing.respondToMerge(request.id, accept: true),
-      );
-      expect(answered.status, MergeRequestStatus.accepted);
-      expect(
-        failed(await bobSharing.respondToMerge(request.id, accept: true)),
-        BackendErrorCode.mergeNotPending,
-      );
-
-      // Alice is told, and the surviving song is Bob's.
-      await eventually(() async {
-        final notes = await alice.client
-            .from('notifications')
-            .select('payload')
-            .eq('type', 'song_merge_accepted');
-        return notes.any(
-          (n) => (n['payload'] as Map)['target_song_id'] == workB,
-        );
-      }, reason: 'the merge result notification');
-      final survivor = ok(await aliceSharing.fetchSong(workA));
-      expect(survivor.id, workB);
-      expect(survivor.title, b.title);
-
-      // Bob's fork (and Alice's version) now live under the surviving song.
+      // Bob joined Alice's song: its title is hers to change.
       await bobDevice.syncOk();
-      await aliceDevice.syncOk();
-      final bobFork = ok(await bobDevice.songs.getSongById(fork.song.id));
-      expect(bobFork.songWorkId, workB);
-      expect(bobFork.title, b.title);
-      final aliceVersion = ok(await aliceDevice.songs.getSongById(a.id));
-      expect(aliceVersion.songWorkId, workB);
-      // The title now belongs to Bob's song: Alice can no longer rename it.
-      expect(aliceVersion.canEditTitleBy(alice.id), isFalse);
-      final versions = ok(await bobSharing.fetchVersionsOfSong(workB));
-      expect({
-        for (final v in versions) v.versionId,
-      }, containsAll([a.id, fork.song.id, b.id]));
+      final bobVersion = ok(await bobDevice.songs.getSongById(theirs.id));
+      expect(bobVersion.title, mine.title);
+      expect(bobVersion.songCreatorId, alice.id);
+      expect(bobVersion.canEditTitleBy(bob.id), isFalse);
     },
   );
 
-  itest('a merge between two songs of the same creator is immediate', () async {
-    final device = track(SongDevice.of(carol));
-    final one = newSong(
-      'Same Creator One ${DateTime.now().microsecondsSinceEpoch}',
-    );
-    final two = newSong(
-      'Same Creator Two ${DateTime.now().microsecondsSinceEpoch}',
-    );
-    final workOne = await publish(device, one);
-    final workTwo = await publish(device, two);
-
-    final sharing = sharingOf(device);
-    final merged = ok(
-      await sharing.requestMerge(sourceSongId: workOne, targetSongId: workTwo),
-    );
-    expect(merged.status, MergeRequestStatus.accepted);
-    expect(ok(await sharing.fetchSong(workOne)).id, workTwo);
-    // Searching leaves merged-away songs out.
-    final found = ok(await sharing.searchSongs('Same Creator One'));
-    expect(found.map((s) => s.id), isNot(contains(workOne)));
-  });
-
-  itest('declining a merge leaves both songs alone', () async {
-    final org = await aliceAndBobOrg();
+  itest('a song typed while its only version is private still joins', () async {
+    final stamp = DateTime.now().microsecondsSinceEpoch;
     final aliceDevice = track(SongDevice.of(alice));
     final bobDevice = track(SongDevice.of(bob));
-    final a = newSong('Keep Apart A ${DateTime.now().microsecondsSinceEpoch}');
-    final b = newSong('Keep Apart B ${DateTime.now().microsecondsSinceEpoch}');
-    final workA = await publish(aliceDevice, a);
-    final workB = await publish(bobDevice, b);
-    await share(bobDevice, b.id, SongVisibility.organizations, orgs: [org.id]);
+    final mine = newSong('Private Only $stamp');
+    final workA = await publish(aliceDevice, mine);
+    final theirs = newSong('private only $stamp');
+    final workB = await publish(bobDevice, theirs);
+    expect(workB, workA);
+    // Bob never saw Alice's version.
+    expect(
+      ok(await sharingOf(bobDevice).fetchVersionsOfSong(workA))
+          .map((v) => v.versionId),
+      [theirs.id],
+    );
+  });
 
-    final aliceSharing = sharingOf(aliceDevice);
-    final request = ok(
-      await aliceSharing.requestMerge(sourceSongId: workA, targetSongId: workB),
+  itest(
+    'a version moves to another song and the empty song disappears',
+    () async {
+      final stamp = DateTime.now().microsecondsSinceEpoch;
+      final device = track(SongDevice.of(carol));
+      final wrong = newSong('Wrong Song $stamp');
+      final right = newSong('Right Song $stamp');
+      final workWrong = await publish(device, wrong);
+      final workRight = await publish(device, right);
+      expect(workWrong, isNot(workRight));
+
+      ok(
+        await device.songs.moveToSong(
+          wrong.id,
+          songWorkId: workRight,
+          title: right.title,
+          artist: right.artist,
+          songCreatorId: carol.id,
+        ),
+      );
+      await device.syncOk();
+
+      final moved = ok(await device.songs.getSongById(wrong.id));
+      expect(moved.songWorkId, workRight);
+      expect(moved.title, right.title);
+      final remote = await remoteVersion(carol, wrong.id);
+      expect(remote!['song_id'], workRight);
+      final gone = await carol.client
+          .from('songs')
+          .select('id')
+          .eq('id', workWrong);
+      expect(
+        gone,
+        isEmpty,
+        reason: 'the song left without versions is removed',
+      );
+    },
+  );
+
+  itest('renaming a song onto another one is refused', () async {
+    final stamp = DateTime.now().microsecondsSinceEpoch;
+    final device = track(SongDevice.of(carol));
+    final one = newSong('Rename One $stamp');
+    final two = newSong('Rename Two $stamp');
+    await publish(device, one);
+    final workTwo = await publish(device, two);
+    await expectLater(
+      carol.client
+          .from('songs')
+          .update({'title': one.title, 'artist': one.artist})
+          .eq('id', workTwo),
+      throwsA(
+        isA<Object>().having((e) => '$e', 'message', contains('song_exists')),
+      ),
     );
-    final declined = ok(
-      await sharingOf(bobDevice).respondToMerge(request.id, accept: false),
-    );
-    expect(declined.status, MergeRequestStatus.declined);
-    expect(ok(await aliceSharing.fetchSong(workA)).id, workA);
-    expect(ok(await aliceSharing.fetchSong(workB)).id, workB);
+  });
+
+  itest('song search finds visible songs with their version count', () async {
+    final stamp = DateTime.now().microsecondsSinceEpoch;
+    final device = track(SongDevice.of(carol));
+    final song = newSong('Searchable Ñandú $stamp');
+    final work = await publish(device, song);
+    final found = ok(await sharingOf(device).searchSongs('nandu $stamp'));
+    expect(found.map((s) => s.songWorkId), contains(work));
+    expect(found.firstWhere((s) => s.songWorkId == work).versionCount, 1);
   });
 }

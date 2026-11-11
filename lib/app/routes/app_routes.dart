@@ -73,15 +73,6 @@ final class AppRoutes {
   static String songPage(String songWorkId) =>
       '/songs/${Uri.encodeComponent(songWorkId)}';
 
-  /// A request to merge two songs, answered by the creator of the other one.
-  ///
-  /// Path parameter: `requestId`.
-  static const String mergeRequestPath = '/merge-requests/:requestId';
-
-  /// Returns the concrete path of the merge request [requestId].
-  static String mergeRequest(String requestId) =>
-      '/merge-requests/${Uri.encodeComponent(requestId)}';
-
   /// Public songs shared by other musicians (online only).
   static const String discover = '/discover';
 

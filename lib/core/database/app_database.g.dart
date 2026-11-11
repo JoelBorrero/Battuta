@@ -294,6 +294,21 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _moveDirtyMeta = const VerificationMeta(
+    'moveDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> moveDirty = GeneratedColumn<bool>(
+    'move_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("move_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -322,6 +337,7 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     editedAtMs,
     sharingDirty,
     songCreatorId,
+    moveDirty,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -535,6 +551,12 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
         ),
       );
     }
+    if (data.containsKey('move_dirty')) {
+      context.handle(
+        _moveDirtyMeta,
+        moveDirty.isAcceptableOrUnknown(data['move_dirty']!, _moveDirtyMeta),
+      );
+    }
     return context;
   }
 
@@ -648,6 +670,10 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
         DriftSqlType.string,
         data['${effectivePrefix}song_creator_id'],
       ),
+      moveDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}move_dirty'],
+      )!,
     );
   }
 
@@ -700,6 +726,10 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
 
   /// v4: account that created the work (`songs.created_by`); null if unknown.
   final String? songCreatorId;
+
+  /// v5: the version was moved to another song ([songWorkId]) locally and the
+  /// move is not pushed yet.
+  final bool moveDirty;
   const SongEntry({
     required this.id,
     required this.title,
@@ -727,6 +757,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     required this.editedAtMs,
     required this.sharingDirty,
     this.songCreatorId,
+    required this.moveDirty,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -777,6 +808,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     if (!nullToAbsent || songCreatorId != null) {
       map['song_creator_id'] = Variable<String>(songCreatorId);
     }
+    map['move_dirty'] = Variable<bool>(moveDirty);
     return map;
   }
 
@@ -826,6 +858,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       songCreatorId: songCreatorId == null && nullToAbsent
           ? const Value.absent()
           : Value(songCreatorId),
+      moveDirty: Value(moveDirty),
     );
   }
 
@@ -867,6 +900,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       editedAtMs: serializer.fromJson<int>(json['editedAtMs']),
       sharingDirty: serializer.fromJson<bool>(json['sharingDirty']),
       songCreatorId: serializer.fromJson<String?>(json['songCreatorId']),
+      moveDirty: serializer.fromJson<bool>(json['moveDirty']),
     );
   }
   @override
@@ -901,6 +935,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       'editedAtMs': serializer.toJson<int>(editedAtMs),
       'sharingDirty': serializer.toJson<bool>(sharingDirty),
       'songCreatorId': serializer.toJson<String?>(songCreatorId),
+      'moveDirty': serializer.toJson<bool>(moveDirty),
     };
   }
 
@@ -931,6 +966,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     int? editedAtMs,
     bool? sharingDirty,
     Value<String?> songCreatorId = const Value.absent(),
+    bool? moveDirty,
   }) => SongEntry(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -968,6 +1004,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     songCreatorId: songCreatorId.present
         ? songCreatorId.value
         : this.songCreatorId,
+    moveDirty: moveDirty ?? this.moveDirty,
   );
   SongEntry copyWithCompanion(SongsCompanion data) {
     return SongEntry(
@@ -1021,6 +1058,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       songCreatorId: data.songCreatorId.present
           ? data.songCreatorId.value
           : this.songCreatorId,
+      moveDirty: data.moveDirty.present ? data.moveDirty.value : this.moveDirty,
     );
   }
 
@@ -1052,7 +1090,8 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           ..write('accountId: $accountId, ')
           ..write('editedAtMs: $editedAtMs, ')
           ..write('sharingDirty: $sharingDirty, ')
-          ..write('songCreatorId: $songCreatorId')
+          ..write('songCreatorId: $songCreatorId, ')
+          ..write('moveDirty: $moveDirty')
           ..write(')'))
         .toString();
   }
@@ -1085,6 +1124,7 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     editedAtMs,
     sharingDirty,
     songCreatorId,
+    moveDirty,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1115,7 +1155,8 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           other.accountId == this.accountId &&
           other.editedAtMs == this.editedAtMs &&
           other.sharingDirty == this.sharingDirty &&
-          other.songCreatorId == this.songCreatorId);
+          other.songCreatorId == this.songCreatorId &&
+          other.moveDirty == this.moveDirty);
 }
 
 class SongsCompanion extends UpdateCompanion<SongEntry> {
@@ -1145,6 +1186,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
   final Value<int> editedAtMs;
   final Value<bool> sharingDirty;
   final Value<String?> songCreatorId;
+  final Value<bool> moveDirty;
   final Value<int> rowid;
   const SongsCompanion({
     this.id = const Value.absent(),
@@ -1173,6 +1215,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.editedAtMs = const Value.absent(),
     this.sharingDirty = const Value.absent(),
     this.songCreatorId = const Value.absent(),
+    this.moveDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SongsCompanion.insert({
@@ -1202,6 +1245,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.editedAtMs = const Value.absent(),
     this.sharingDirty = const Value.absent(),
     this.songCreatorId = const Value.absent(),
+    this.moveDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -1237,6 +1281,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Expression<int>? editedAtMs,
     Expression<bool>? sharingDirty,
     Expression<String>? songCreatorId,
+    Expression<bool>? moveDirty,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1270,6 +1315,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       if (editedAtMs != null) 'edited_at_ms': editedAtMs,
       if (sharingDirty != null) 'sharing_dirty': sharingDirty,
       if (songCreatorId != null) 'song_creator_id': songCreatorId,
+      if (moveDirty != null) 'move_dirty': moveDirty,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1301,6 +1347,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Value<int>? editedAtMs,
     Value<bool>? sharingDirty,
     Value<String?>? songCreatorId,
+    Value<bool>? moveDirty,
     Value<int>? rowid,
   }) {
     return SongsCompanion(
@@ -1332,6 +1379,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       editedAtMs: editedAtMs ?? this.editedAtMs,
       sharingDirty: sharingDirty ?? this.sharingDirty,
       songCreatorId: songCreatorId ?? this.songCreatorId,
+      moveDirty: moveDirty ?? this.moveDirty,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1423,6 +1471,9 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     if (songCreatorId.present) {
       map['song_creator_id'] = Variable<String>(songCreatorId.value);
     }
+    if (moveDirty.present) {
+      map['move_dirty'] = Variable<bool>(moveDirty.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1458,6 +1509,7 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
           ..write('editedAtMs: $editedAtMs, ')
           ..write('sharingDirty: $sharingDirty, ')
           ..write('songCreatorId: $songCreatorId, ')
+          ..write('moveDirty: $moveDirty, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3908,6 +3960,7 @@ typedef $$SongsTableCreateCompanionBuilder = SongsCompanion Function({
   Value<int> editedAtMs,
   Value<bool> sharingDirty,
   Value<String?> songCreatorId,
+  Value<bool> moveDirty,
   Value<int> rowid,
 });
 typedef $$SongsTableUpdateCompanionBuilder = SongsCompanion Function({
@@ -3937,6 +3990,7 @@ typedef $$SongsTableUpdateCompanionBuilder = SongsCompanion Function({
   Value<int> editedAtMs,
   Value<bool> sharingDirty,
   Value<String?> songCreatorId,
+  Value<bool> moveDirty,
   Value<int> rowid,
 });
 
@@ -4075,6 +4129,11 @@ class $$SongsTableFilterComposer extends Composer<_$AppDatabase, $SongsTable> {
 
   ColumnFilters<String> get songCreatorId => $composableBuilder(
     column: $table.songCreatorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get moveDirty => $composableBuilder(
+    column: $table.moveDirty,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4217,6 +4276,11 @@ class $$SongsTableOrderingComposer
     column: $table.songCreatorId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get moveDirty => $composableBuilder(
+    column: $table.moveDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SongsTableAnnotationComposer
@@ -4329,6 +4393,9 @@ class $$SongsTableAnnotationComposer
     column: $table.songCreatorId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get moveDirty =>
+      $composableBuilder(column: $table.moveDirty, builder: (column) => column);
 }
 
 class $$SongsTableTableManager
@@ -4385,6 +4452,7 @@ class $$SongsTableTableManager
                 Value<int> editedAtMs = const Value.absent(),
                 Value<bool> sharingDirty = const Value.absent(),
                 Value<String?> songCreatorId = const Value.absent(),
+                Value<bool> moveDirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion(
                 id: id,
@@ -4413,6 +4481,7 @@ class $$SongsTableTableManager
                 editedAtMs: editedAtMs,
                 sharingDirty: sharingDirty,
                 songCreatorId: songCreatorId,
+                moveDirty: moveDirty,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4443,6 +4512,7 @@ class $$SongsTableTableManager
                 Value<int> editedAtMs = const Value.absent(),
                 Value<bool> sharingDirty = const Value.absent(),
                 Value<String?> songCreatorId = const Value.absent(),
+                Value<bool> moveDirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion.insert(
                 id: id,
@@ -4471,6 +4541,7 @@ class $$SongsTableTableManager
                 editedAtMs: editedAtMs,
                 sharingDirty: sharingDirty,
                 songCreatorId: songCreatorId,
+                moveDirty: moveDirty,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

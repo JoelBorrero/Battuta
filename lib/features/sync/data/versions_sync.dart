@@ -16,7 +16,6 @@ import 'package:battuta/features/sync/data/sync_mappers.dart';
 import 'package:battuta/features/sync/domain/services/sync_policy.dart';
 import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
-import 'package:uuid/uuid.dart';
 
 /// Whether the backend refused a share for good (row-level security or a
 /// constraint), as opposed to a transient failure worth retrying.
@@ -26,10 +25,9 @@ bool isRefusedShare(PostgrestException e) {
 }
 
 class VersionsSync {
-  VersionsSync(this.ctx, {this._uuid = const Uuid()});
+  VersionsSync(this.ctx);
 
   final SyncContext ctx;
-  final Uuid _uuid;
 
   AppDatabase get _db => ctx.db;
   String get _me => ctx.accountId;
@@ -90,6 +88,11 @@ class VersionsSync {
     String? stamp;
     var workId = row.songWorkId ?? remote?['song_id'] as String?;
     if (remote != null) {
+      // Moving the version to another song is its own decision, like a
+      // sharing change: it goes out whichever side wins the content.
+      if (row.moveDirty && row.songWorkId != null) {
+        workId = await _pushMove(row);
+      }
       final decision = SyncPolicy.decidePush(
         localEditedMs: row.editedAtMs,
         knownRemoteUpdatedAt: row.remoteUpdatedAt,
@@ -105,7 +108,7 @@ class VersionsSync {
           await _pushSharing(row);
         }
       } else {
-        await _ensureWork(workId!, row);
+        await _renameWork(workId ?? remote['song_id'] as String, row);
         await ctx.client
             .from('song_versions')
             .update(versionUpdatePayload(row, withSharing: row.sharingDirty))
@@ -122,11 +125,12 @@ class VersionsSync {
     } else {
       // A pending edit on a version the backend no longer has (the owner
       // deleted it on another device) creates it again: the edit is kept.
-      workId ??= _uuid.v4();
+      // The song is the one the version was linked to, or the one with this
+      // title and artist (the backend joins exact duplicates).
+      final songId = await _songForNewVersion(row);
       // A fork made offline whose parent is no longer visible (it went
       // private, or was deleted) keeps its content but loses the lineage: the
-      // backend refuses lineage from a version the owner cannot see. If the
-      // song itself became invisible too, the copy starts a song of its own.
+      // backend refuses lineage from a version the owner cannot see.
       var keepLineage = row.forkedFromVersionId != null;
       if (keepLineage) {
         final parent = await ctx.client
@@ -135,16 +139,7 @@ class VersionsSync {
             .eq('id', row.forkedFromVersionId!)
             .maybeSingle();
         keepLineage = parent != null;
-        if (!keepLineage) {
-          final work = await ctx.client
-              .from('songs')
-              .select('id')
-              .eq('id', workId)
-              .maybeSingle();
-          if (work == null) workId = _uuid.v4();
-        }
       }
-      await _ensureWork(workId, row);
       // No `returning`: the select policy of a version cannot see the row
       // inside the statement that creates it.
       await ctx.client
@@ -152,7 +147,7 @@ class VersionsSync {
           .insert(
             versionInsertPayload(
               row,
-              workId: workId,
+              workId: songId,
               ownerId: _me,
               keepLineage: keepLineage,
             ),
@@ -170,12 +165,31 @@ class VersionsSync {
     ctx.ensureCurrent();
     await _db.transaction(() async {
       if (row.sharingDirty) await _clearSharingDirty(row);
+      // The song the backend put the version under becomes the local one,
+      // unless the user moved it again while the request was in flight (that
+      // newer move stays queued).
+      Future<int> unmoved(SongsCompanion changes) =>
+          (_db.update(_db.songs)..where(
+                (t) =>
+                    t.id.equals(row.id) &
+                    (row.songWorkId == null
+                        ? t.songWorkId.isNull()
+                        : t.songWorkId.equals(row.songWorkId!)),
+              ))
+              .write(changes);
+      if (workId != null) {
+        await unmoved(
+          SongsCompanion(
+            songWorkId: Value(workId),
+            moveDirty: const Value(false),
+          ),
+        );
+      } else if (row.moveDirty) {
+        await unmoved(const SongsCompanion(moveDirty: Value(false)));
+      }
       if (stamp != null) {
         await (_db.update(_db.songs)..where((t) => t.id.equals(row.id))).write(
-          SongsCompanion(
-            remoteUpdatedAt: Value(stamp),
-            songWorkId: Value(workId),
-          ),
+          SongsCompanion(remoteUpdatedAt: Value(stamp)),
         );
       }
       // The user may have edited the song while the request was in flight (its
@@ -292,26 +306,81 @@ class VersionsSync {
         .write(const SongsCompanion(sharingDirty: Value(false)));
   }
 
-  /// Creates the work on first push; its creator keeps title and artist in sync.
-  Future<void> _ensureWork(String workId, SongEntry row) async {
+  /// The song a version that does not exist on the backend yet goes under:
+  /// the one it was linked to when that still exists, otherwise the song with
+  /// its title and artist (created if missing). Songs are never created with a
+  /// client-made id, so two devices typing the same song land on one song.
+  Future<String> _songForNewVersion(SongEntry row) async {
+    final linked = row.songWorkId;
+    if (linked != null) {
+      final work = await ctx.client
+          .from('songs')
+          .select('id')
+          .eq('id', linked)
+          .maybeSingle();
+      if (work != null) return linked;
+    }
+    return _findOrCreateSong(row);
+  }
+
+  Future<String> _findOrCreateSong(SongEntry row) async {
+    final id = await ctx.client.rpc(
+      'find_or_create_song',
+      params: {'p_title': row.title, 'p_artist': row.artist},
+    );
+    return id as String;
+  }
+
+  /// Applies a queued "move to another song" and returns the song the version
+  /// is under now. A target that no longer exists is replaced by the song with
+  /// the title and artist the version shows.
+  Future<String> _pushMove(SongEntry row) async {
+    Future<void> move(String songId) => ctx.client.rpc(
+      'move_version_to_song',
+      params: {'p_version_id': row.id, 'p_song_id': songId},
+    );
+    final target = row.songWorkId!;
+    try {
+      await move(target);
+      return target;
+    } on PostgrestException catch (e) {
+      if (!e.message.contains('song_not_found')) rethrow;
+      final replacement = await _findOrCreateSong(row);
+      await move(replacement);
+      return replacement;
+    }
+  }
+
+  /// The creator of a song keeps its title and artist in step with the
+  /// version they edit. A name another song already has is refused by the
+  /// backend (`song_exists`): the local copy then takes the song's real name
+  /// instead of retrying on every sync.
+  Future<void> _renameWork(String workId, SongEntry row) async {
     final work = await ctx.client
         .from('songs')
         .select('id, created_by, title, artist')
         .eq('id', workId)
         .maybeSingle();
-    if (work == null) {
-      await ctx.client.from('songs').insert({
-        'id': workId,
-        'title': row.title,
-        'artist': row.artist,
-        'created_by': _me,
-      });
-    } else if (work['created_by'] == _me &&
-        (work['title'] != row.title || work['artist'] != row.artist)) {
+    if (work == null ||
+        work['created_by'] != _me ||
+        (work['title'] == row.title && work['artist'] == row.artist)) {
+      return;
+    }
+    try {
       await ctx.client
           .from('songs')
           .update({'title': row.title, 'artist': row.artist})
           .eq('id', workId);
+    } on PostgrestException catch (e, st) {
+      if (!e.message.contains('song_exists')) rethrow;
+      ctx.report('renaming "${row.title}"', e, st);
+      ctx.ensureCurrent();
+      await (_db.update(_db.songs)..where((t) => t.id.equals(row.id))).write(
+        SongsCompanion(
+          title: Value(work['title'] as String),
+          artist: Value(work['artist'] as String? ?? ''),
+        ),
+      );
     }
   }
 
@@ -449,13 +518,19 @@ class VersionsSync {
       });
     }
 
-    final stale = SyncPolicy.staleIds(
-      local: [
-        for (final row in local.values)
-          if (row.accountId == _me) _syncRow(row),
-      ],
-      visibleIds: stamps.keys.toSet(),
-    );
+    // A version the user opened on purpose (Discover) stays while its viewer
+    // is open, even though it is not in reach of the account.
+    final pinned = ctx.pinnedIds();
+    final stale = [
+      for (final id in SyncPolicy.staleIds(
+        local: [
+          for (final row in local.values)
+            if (row.accountId == _me) _syncRow(row),
+        ],
+        visibleIds: stamps.keys.toSet(),
+      ))
+        if (!pinned.contains(id)) id,
+    ];
     if (stale.isNotEmpty) {
       ctx.ensureCurrent();
       await removeLocal(stale);
@@ -466,8 +541,8 @@ class VersionsSync {
     return stamps.keys.toSet();
   }
 
-  /// Keeps title and artist of cached versions in step with their work, and
-  /// follows works that were merged into another one.
+  /// Keeps title and artist (and the creator) of cached versions in step with
+  /// their song.
   Future<void> _refreshWorks() async {
     final rows =
         await (_db.select(_db.songs)..where(
@@ -488,32 +563,15 @@ class VersionsSync {
     )) {
       final works = await ctx.client
           .from('songs')
-          .select('id, title, artist, created_by, merged_into_id')
+          .select('id, title, artist, created_by')
           .inFilter('id', chunk);
       for (final work in works) {
-        var survivor = work;
-        if (work['merged_into_id'] != null) {
-          final resolved = await ctx.client.rpc(
-            'resolve_song',
-            params: {'p_song': work['id']},
-          );
-          if (resolved is String && resolved != work['id']) {
-            final target = await ctx.client
-                .from('songs')
-                .select('id, title, artist, created_by, merged_into_id')
-                .eq('id', resolved)
-                .maybeSingle();
-            if (target != null) survivor = target;
-          }
-        }
         for (final row in byWork[work['id']] ?? const <SongEntry>[]) {
-          final title = survivor['title'] as String;
-          final artist = survivor['artist'] as String? ?? '';
-          final workId = survivor['id'] as String;
-          final creator = survivor['created_by'] as String?;
+          final title = work['title'] as String;
+          final artist = work['artist'] as String? ?? '';
+          final creator = work['created_by'] as String?;
           if (row.title == title &&
               row.artist == artist &&
-              row.songWorkId == workId &&
               row.songCreatorId == creator) {
             continue;
           }
@@ -524,7 +582,6 @@ class VersionsSync {
             SongsCompanion(
               title: Value(title),
               artist: Value(artist),
-              songWorkId: Value(workId),
               songCreatorId: Value(creator),
             ),
           );

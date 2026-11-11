@@ -11,6 +11,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/sharing/data/song_sharing_remote_data_source.dart';
 import 'package:battuta/features/sharing/data/song_sharing_repository_impl.dart';
 import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
+import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
 import 'package:battuta/features/sharing/domain/entities/song_version_row.dart';
 import 'package:battuta/features/sharing/domain/repositories/song_sharing_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,26 +82,56 @@ final songVersionsProvider = Provider.autoDispose
       );
     });
 
-/// The pending merge requests I sent or have to answer (online only).
-final pendingMergeRequestsProvider =
-    FutureProvider.autoDispose<List<SongMergeRequest>>((ref) async {
-      if (ref.watch(currentAccountIdProvider) == null) return const [];
+/// What the song suggestions for one query show right now.
+class SongSuggestionsState {
+  const SongSuggestionsState({
+    this.items = const [],
+    this.loading = false,
+    this.failure,
+  });
+
+  final List<SongSuggestion> items;
+
+  /// The backend answer is still pending (the cached matches are shown).
+  final bool loading;
+
+  /// Why the backend could not be asked (typically: offline).
+  final Failure? failure;
+}
+
+/// Songs the backend lists for [query] (fails offline, empty when signed out
+/// or the text is too short).
+final remoteSongSuggestionsProvider = FutureProvider.autoDispose
+    .family<List<SongSuggestion>, String>((ref, query) async {
+      if (ref.watch(currentAccountIdProvider) == null ||
+          !isSearchableSongQuery(query)) {
+        return const [];
+      }
       final result = await ref
           .watch(songSharingRepositoryProvider)
-          .pendingMergeRequests();
+          .searchSongs(query);
       return result.fold((failure) => throw failure, (rows) => rows);
     });
 
-/// One merge request I am a party of.
-final mergeRequestProvider = FutureProvider.autoDispose
-    .family<SongMergeRequest, String>((ref, requestId) async {
-      final result = await ref
-          .watch(songSharingRepositoryProvider)
-          .fetchMergeRequest(requestId);
-      return result.fold((failure) => throw failure, (request) => request);
+/// Songs matching [query]: the ones on this device at once, then the
+/// backend's when it answers. Without a connection the cache is all there is.
+final songSuggestionsProvider = Provider.autoDispose
+    .family<SongSuggestionsState, String>((ref, query) {
+      final cached = suggestionsFromCache(
+        ref.watch(repertoireProvider).value ?? const <Song>[],
+        query,
+      );
+      final remote = ref.watch(remoteSongSuggestionsProvider(query));
+      return SongSuggestionsState(
+        items: mergeSuggestions(cached, remote.value ?? const [], query),
+        loading: remote.isLoading,
+        failure: remote.hasError && remote.error is Failure
+            ? remote.error! as Failure
+            : null,
+      );
     });
 
-/// The surviving song of [songId] (following merges); fails offline.
+/// The song [songId]; fails offline.
 final songWorkProvider = FutureProvider.autoDispose.family<SongWork, String>((
   ref,
   songId,

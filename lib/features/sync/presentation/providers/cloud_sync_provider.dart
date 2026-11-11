@@ -10,6 +10,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:battuta/features/sync/data/supabase_cloud_sync_service.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
 import 'package:battuta/features/sync/domain/services/cloud_sync_service.dart';
+import 'package:battuta/features/sync/domain/services/pinned_versions.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -49,10 +50,19 @@ class CloudSyncState extends Equatable {
   List<Object?> get props => [status, lastSyncedAt, errorMessage, lastResult];
 }
 
+/// Versions opened on purpose whose viewer is open; the sync keeps them.
+final pinnedVersionsProvider = Provider<PinnedVersions>(
+  (ref) => PinnedVersions(),
+);
+
 final cloudSyncServiceProvider = Provider<CloudSyncService>((ref) {
   final db = ref.watch(appDatabaseProvider);
   final clientManager = ref.watch(supabaseClientManagerProvider);
-  return SupabaseCloudSyncService(db: db, clientManager: clientManager);
+  return SupabaseCloudSyncService(
+    db: db,
+    clientManager: clientManager,
+    pinned: ref.watch(pinnedVersionsProvider),
+  );
 });
 
 class CloudSyncNotifier extends Notifier<CloudSyncState> {

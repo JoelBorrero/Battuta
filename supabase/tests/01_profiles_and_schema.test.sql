@@ -88,7 +88,7 @@ language sql stable security definer set search_path = '' as $$
 select has_table('public', t, t || ' exists')
 from unnest(array['profiles','organizations','organization_members','bands','band_members',
     'invite_links','invitations','songs','song_versions','version_shares','scores','sections',
-    'measures','note_events','chord_symbols','organization_repertoire','song_merge_requests',
+    'measures','note_events','chord_symbols','organization_repertoire',
     'setlists','setlist_items','calendar_events','recurring_schedules','event_assignments',
     'member_absences','notifications','organization_archive_requests',
     'organization_archive_approvals','workspace_quotas','workspace_usage']) as t;

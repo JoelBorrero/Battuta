@@ -25,6 +25,7 @@ import 'package:battuta/features/sync/data/sync_context.dart';
 import 'package:battuta/features/sync/data/versions_sync.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
 import 'package:battuta/features/sync/domain/services/cloud_sync_service.dart';
+import 'package:battuta/features/sync/domain/services/pinned_versions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 class SupabaseCloudSyncService implements CloudSyncService {
@@ -34,11 +35,15 @@ class SupabaseCloudSyncService implements CloudSyncService {
     required this.db,
     required this.clientManager,
     this._clientProvider,
+    this.pinned,
   });
 
   final AppDatabase db;
   final SupabaseClientManager clientManager;
   final SupabaseClientProvider? _clientProvider;
+
+  /// Versions the sync must keep while their viewer is open.
+  final PinnedVersions? pinned;
 
   bool _isSyncing = false;
   DateTime? _lastSyncedAt;
@@ -90,6 +95,7 @@ class SupabaseCloudSyncService implements CloudSyncService {
       client: client,
       accountId: accountId,
       currentAccount: () => _client?.auth.currentUser?.id,
+      pinnedIds: () => pinned?.ids ?? const {},
     );
     try {
       if (push) {

@@ -16,9 +16,6 @@ enum NotificationType {
   archiveCancelled('archive_cancelled'),
   archiveCompleted('archive_completed'),
   songVersionForked('song_version_forked'),
-  songMergeRequested('song_merge_requested'),
-  songMergeAccepted('song_merge_accepted'),
-  songMergeDeclined('song_merge_declined'),
 
   /// A type this app version does not know yet.
   unknown('unknown');

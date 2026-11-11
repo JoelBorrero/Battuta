@@ -1,11 +1,11 @@
 /// The sharing actions of a song version shown in the viewer: change who sees
-/// it (owner), fork it, and propose a merge with another copy of the song.
+/// it (owner), fork it, and move it to another song (owner).
 library;
 
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/sharing/presentation/widgets/fork_version_flow.dart';
-import 'package:battuta/features/sharing/presentation/widgets/merge_request_sheet.dart';
+import 'package:battuta/features/sharing/presentation/widgets/move_to_song_sheet.dart';
 import 'package:battuta/features/sharing/presentation/widgets/sharing_sheet.dart';
 import 'package:battuta/features/sharing/presentation/widgets/visibility_text.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -24,9 +24,7 @@ class SongSharingActions extends ConsumerWidget {
     final signedIn = me != null;
     // Local-mode songs have no owner yet: nothing to share until sign-in.
     final owned = signedIn && song.ownerId == me;
-    final canMerge =
-        signedIn && song.ownerId != null && song.songWorkId != null;
-    final createdByMe = song.canEditTitleBy(me);
+    final canMove = owned && song.songWorkId != null;
 
     ButtonStyle style() =>
         OutlinedButton.styleFrom(minimumSize: const Size(44, 44));
@@ -62,22 +60,13 @@ class SongSharingActions extends ConsumerWidget {
               cachedSource: song,
             ),
           ),
-          if (canMerge)
+          if (canMove)
             OutlinedButton.icon(
-              key: const ValueKey('merge_btn'),
+              key: const ValueKey('move_song_btn'),
               style: style(),
-              icon: const Icon(Icons.merge_type, size: 18),
-              label: Text(
-                createdByMe
-                    ? l10n.mergeSameSongButton
-                    : l10n.mergeSuggestButton,
-              ),
-              onPressed: () => showMergeRequestSheet(
-                context,
-                songWorkId: song.songWorkId!,
-                title: song.title,
-                createdByMe: createdByMe,
-              ),
+              icon: const Icon(Icons.drive_file_move_outline, size: 18),
+              label: Text(l10n.moveToSongButton),
+              onPressed: () => showMoveToSongSheet(context, song),
             ),
         ],
       ),

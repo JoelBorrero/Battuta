@@ -99,7 +99,7 @@ abstract final class SyncPolicy {
   /// Last-write-wins for a dirty row about to be pushed.
   ///
   /// `updated_at` only says that the backend row changed ([remoteUpdatedAt]
-  /// differs from [knownRemoteUpdatedAt]; a song merge changes it without
+  /// differs from [knownRemoteUpdatedAt]; moving a version to another song changes it without
   /// anyone editing). The edit times decide: the backend copy wins only if its
   /// `edited_at` ([remoteEditedMs]) is later than the local edit
   /// ([localEditedMs]), whenever each of them was synced.

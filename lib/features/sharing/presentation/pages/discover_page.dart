@@ -16,6 +16,7 @@ import 'package:battuta/features/repertoire/presentation/widgets/version_owner_t
 import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
 import 'package:battuta/features/sharing/presentation/providers/sharing_providers.dart';
 import 'package:battuta/features/sharing/presentation/widgets/fork_version_flow.dart';
+import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -137,7 +138,14 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       (failure) => setState(() => _openError = _message(l10n, failure)),
       (_) {
         ref.invalidate(repertoireProvider);
-        unawaited(router.push(AppRoutes.songDetail(listing.versionId)));
+        // Kept on the device while the viewer is open, even though a sync
+        // would otherwise drop a public version that is not in reach.
+        final pins = ref.read(pinnedVersionsProvider)..pin(listing.versionId);
+        unawaited(
+          router
+              .push(AppRoutes.songDetail(listing.versionId))
+              .whenComplete(() => pins.release(listing.versionId)),
+        );
       },
     );
   }

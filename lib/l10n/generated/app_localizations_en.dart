@@ -2562,17 +2562,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Someone made a copy of one of your arrangements';
 
   @override
-  String notifSongMergeRequested(String source, String target) {
-    return 'Merge request: $source into $target';
-  }
-
-  @override
-  String get notifSongMergeAccepted => 'Your merge request was accepted';
-
-  @override
-  String get notifSongMergeDeclined => 'Your merge request was declined';
-
-  @override
   String get notifUnknown => 'You have a new notification';
 
   @override
@@ -2989,84 +2978,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Title and artist belong to the song. Only the person who created it can change them.';
 
   @override
-  String get mergeSameSongButton => 'Same song as…';
-
-  @override
-  String get mergeSuggestButton => 'Suggest merge';
-
-  @override
-  String get mergeSheetTitle => 'Merge songs';
-
-  @override
-  String mergeIntroMine(String title) {
-    return 'Pick the song that “$title” duplicates. Its versions will move under the song you pick once the creator of that song agrees.';
-  }
-
-  @override
-  String mergeIntroOther(String title) {
-    return '“$title” was created by someone else. Pick one of your own songs that is the same song: its versions will move under “$title” once its creator agrees.';
-  }
-
-  @override
-  String get mergeSearchLabel => 'Search songs';
-
-  @override
-  String get mergeNoResults => 'No matching songs.';
-
-  @override
-  String get mergePendingBadge => 'Request pending';
-
-  @override
-  String get mergeConfirmTitle => 'Request this merge?';
-
-  @override
-  String mergeConfirmBody(String source, String target) {
-    return 'Versions of “$source” will move under “$target”.';
-  }
-
-  @override
-  String get mergeRequestAction => 'Request merge';
-
-  @override
-  String get mergeSent => 'Merge request sent';
-
-  @override
-  String get mergeDone => 'The songs were merged';
-
-  @override
-  String get mergeNeedsInternet =>
-      'Merging songs needs an internet connection.';
-
-  @override
-  String get mergeSignIn => 'Sign in to merge songs.';
-
-  @override
-  String get mergeRequestTitle => 'Merge request';
-
-  @override
-  String mergeRequestBody(String requester, String source, String target) {
-    return '$requester asks to merge “$source” into “$target”. Every version of “$source” would move under “$target”.';
-  }
-
-  @override
-  String get mergeRequesterUnknown => 'Someone';
-
-  @override
-  String get mergeAccept => 'Accept';
-
-  @override
-  String get mergeDecline => 'Decline';
-
-  @override
-  String get mergeAccepted => 'Songs merged';
-
-  @override
-  String get mergeDeclined => 'Request declined';
-
-  @override
-  String get mergeAlreadyAnswered => 'This request was already answered.';
-
-  @override
   String get songPageTitle => 'Song';
 
   @override
@@ -3103,24 +3014,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backendErrorSongNotFound => 'That song is no longer available.';
 
   @override
-  String get backendErrorMergeNotCreator =>
-      'You can only merge songs when you created one of them.';
-
-  @override
-  String get backendErrorMergeSameSong => 'Those are already the same song.';
-
-  @override
-  String get backendErrorMergeAlreadyRequested =>
-      'A merge request for these songs is already pending.';
-
-  @override
-  String get backendErrorMergeNotPending =>
-      'This request was already answered.';
-
-  @override
-  String get backendErrorMergeRequestNotFound =>
-      'That merge request no longer exists.';
-
-  @override
   String get discoverLoadMore => 'Load more';
+
+  @override
+  String get songLinkSuggestionsTitle => 'Is it one of these songs?';
+
+  @override
+  String get songLinkSuggestionsHint =>
+      'Pick a song to add your version to it. Otherwise a new song is created.';
+
+  @override
+  String songLinkVersionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versions',
+      one: '1 version',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get songLinkNewSong => 'New song';
+
+  @override
+  String songLinkNewSongSubtitle(String title) {
+    return 'Create “$title”';
+  }
+
+  @override
+  String songLinkLinkedTo(String title) {
+    return 'Version of “$title”';
+  }
+
+  @override
+  String get songLinkChange => 'Change';
+
+  @override
+  String get songLinkOfflineNote => 'Showing the songs saved on this device.';
+
+  @override
+  String get songLinkSheetTitle => 'Which song is this?';
+
+  @override
+  String songLinkSheetBody(String title) {
+    return '“$title” looks like a song that already exists. Add your version to it, or create a new song.';
+  }
+
+  @override
+  String get moveToSongButton => 'Move to another song';
+
+  @override
+  String get moveToSongTitle => 'Move to another song';
+
+  @override
+  String moveToSongIntro(String title) {
+    return 'Pick the song that “$title” belongs to. Your version moves there and shows that song’s title and artist.';
+  }
+
+  @override
+  String get moveToSongSearchLabel => 'Search songs';
+
+  @override
+  String get moveToSongNoResults => 'No matching songs.';
+
+  @override
+  String get moveToSongAction => 'Move here';
+
+  @override
+  String get moveToSongConfirmTitle => 'Move this version?';
+
+  @override
+  String moveToSongConfirmBody(String song) {
+    return 'This version will move to “$song”. Setlists and repertoires keep using it.';
+  }
+
+  @override
+  String moveToSongDone(String song) {
+    return 'Version moved to “$song”';
+  }
+
+  @override
+  String get versionUnavailableTitle => 'This version is no longer available';
+
+  @override
+  String get versionUnavailableBody =>
+      'It was deleted, made private or is no longer shared with you.';
+
+  @override
+  String get backendErrorNotVersionOwner =>
+      'Only the owner of a version can move it.';
+
+  @override
+  String get backendErrorSongExists =>
+      'A song with that title and artist already exists. Move your version to it instead.';
 }

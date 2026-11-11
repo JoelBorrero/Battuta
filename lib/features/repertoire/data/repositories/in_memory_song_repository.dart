@@ -6,6 +6,7 @@ library;
 
 import 'dart:async';
 
+import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
@@ -118,7 +119,12 @@ class InMemorySongRepository implements SongRepository {
     if (song != null) {
       return Right(song);
     }
-    return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
+    return Left(
+      CacheFailure(
+        message: 'Song with ID "$id" not found.',
+        errorCode: BackendErrorCode.versionNotFound,
+      ),
+    );
   }
 
   @override
@@ -150,6 +156,29 @@ class InMemorySongRepository implements SongRepository {
     _songs[id] = updated;
     _notify();
     return Right(updated);
+  }
+
+  @override
+  Future<Either<Failure, Song>> moveToSong(
+    String id, {
+    required String songWorkId,
+    required String title,
+    required String artist,
+    String? songCreatorId,
+  }) async {
+    final song = _songs[id];
+    if (song == null) {
+      return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
+    }
+    final moved = song.copyWith(
+      songWorkId: songWorkId,
+      title: title,
+      artist: artist,
+      songCreatorId: songCreatorId,
+    );
+    _songs[id] = moved;
+    _notify();
+    return Right(moved);
   }
 
   @override

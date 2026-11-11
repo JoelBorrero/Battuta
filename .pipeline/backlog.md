@@ -3,11 +3,15 @@
 Deferred findings that must not be forgotten. When a task closes, add anything it deferred here; when an
 item is fixed, delete it (the fixing task's summary records it).
 
-## ⚠ Verify first: 009 integration run not confirmed
-Docker hung again while 009 was reviewed (2026-11-11). Restart Docker Desktop, then `supabase start`,
-`supabase db reset`, and `flutter test --tags supabase --run-skipped test/integration` (expect 53). The 009
-remote queries (`or` with `referencedTable`, `songs!inner`, fork RPC) are only covered there. Remove this
-section once it passes.
+## ⚠ Verify first: 009 and 010 never ran against Supabase
+Docker hung during the 009 review and stayed down for 010 (2026-11-11). Restart Docker Desktop, then:
+1. `supabase start`, `supabase db reset` twice: the 010 migration
+   (`20261111000100_song_linking.sql`) has never been applied. Likely spots if it fails: `extensions.similarity`,
+   the `unique_violation or sqlstate 'P0001'` handler, the GIN expression index, the dedupe step.
+2. `supabase test db`: new `10_song_linking.test.sql` and the edited `01`, `06`, `08` files.
+3. `supabase db reset`, then `flutter test --tags supabase --run-skipped test/integration` (009 + 010 remote
+   queries: `or` with `referencedTable`, `songs!inner`, `find_or_create_song`, `search_songs`, move).
+Remove this section once all pass.
 
 ## From 001: harden transposer
 - Sharp/flat spelling on free-form keys: `b minor` +2 → `Db minor` instead of `C# minor`.
@@ -18,8 +22,6 @@ section once it passes.
 Planned into a later slice:
 - Deactivated users' email stays in `auth.users` (needs a server-side scrub job).
 - Removed members can rejoin with a still-valid invite link (the username search now shows "previously declined"; re-inviting declined users is still allowed).
-- **009:** merge-request spam: anyone who can see a song can keep sending its creator merge requests
-  (with their own private title).
 
 Small fixes, no slice yet:
 - Old notifications stay after you're removed from an organization or demoted.
@@ -111,15 +113,18 @@ Product / ops:
   `version_shares` select capped at 1000 rows) and reads all pages eagerly: move to an RPC or view.
 
 ## From 009: song sharing
-- **010:** an open viewer of a cached foreign/public version shows a raw "Error loading song" once a sync removes
-  the row (also after Fork, going back from the editor). Pin rows opened on purpose or show a localized
-  not-found state.
-- **010:** offline fork with an invisible parent and invisible song gets a fresh work id on every retry; a
-  failure after `_ensureWork` leaves empty `songs` rows (`versions_sync.dart:139-159`).
-- **010:** online fork can be duplicated if the RPC succeeds but the follow-up read fails (falls back to a local
-  copy) (`song_sharing_repository_impl.dart:78-98`).
 - `PracticePlayerBar` overflows by 25 px at 320 px (`practice_player_bar.dart:151`, pre-existing).
 - Discover swallows a load-more failure when results already exist.
 - Hard-coded English "(copy)" fallback label in `song_sharing_repository_impl.dart:146` (UI never reaches it).
 - The "Owned by" banner says "another user" for versions opened from Discover (no owner name cached).
 - A public version opened from Discover is removed by the next sync unless it is in reach (repertoire/setlists).
+
+## From 010: song linking
+- Attaching a version to a song id reveals that song's title/artist/creator (relaxed `song_versions` insert
+  policy), and `move_version_to_song` tells whether a song id exists. Safe only while song ids stay unguessable
+  and reach only people who can already see the song; revisit if ids are ever exposed more widely.
+- Songs created by `find_or_create_song` whose first version push then fails stay as empty songs (reused on
+  retry by the same key; no cleanup job).
+- The song editor overflows below ~480 px (claimed pre-existing, not re-checked at base).
+- Version pushes through `find_or_create_song`, move and rename collision are covered only by the integration
+  suite.

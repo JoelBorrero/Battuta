@@ -27,9 +27,6 @@ enum NotificationDestination {
   /// A song (the work) with all its versions; [songId] names it.
   songPage,
 
-  /// A merge request I have to answer; [requestId] names it.
-  mergeRequest,
-
   /// The repertoire (no version is known).
   repertoire,
 
@@ -42,20 +39,13 @@ typedef NotificationTarget = ({
   NotificationDestination destination,
   String? versionId,
   String? songId,
-  String? requestId,
 });
 
 NotificationTarget _target(
   NotificationDestination destination, {
   String? versionId,
   String? songId,
-  String? requestId,
-}) => (
-  destination: destination,
-  versionId: versionId,
-  songId: songId,
-  requestId: requestId,
-);
+}) => (destination: destination, versionId: versionId, songId: songId);
 
 /// Where [notification] leads, with the ids needed to get there.
 NotificationTarget notificationTarget(AppNotification notification) {
@@ -86,25 +76,6 @@ NotificationTarget notificationTarget(AppNotification notification) {
           : id('version_id') != null
           ? _target(NotificationDestination.song, versionId: id('version_id'))
           : _target(NotificationDestination.repertoire),
-    // A merge request to answer.
-    NotificationType.songMergeRequested =>
-      id('request_id') != null
-          ? _target(
-              NotificationDestination.mergeRequest,
-              requestId: id('request_id'),
-            )
-          : _target(NotificationDestination.repertoire),
-    // The result: the surviving song (the target; the page follows merges).
-    NotificationType.songMergeAccepted =>
-      id('target_song_id') != null
-          ? _target(
-              NotificationDestination.songPage,
-              songId: id('target_song_id'),
-            )
-          : _target(NotificationDestination.repertoire),
-    NotificationType.songMergeDeclined => _target(
-      NotificationDestination.repertoire,
-    ),
     NotificationType.unknown => _target(NotificationDestination.none),
   };
 }
@@ -166,12 +137,6 @@ String notificationSentence(
       organization,
     ),
     NotificationType.songVersionForked => l10n.notifSongVersionForked,
-    NotificationType.songMergeRequested => l10n.notifSongMergeRequested(
-      _text(payload['source_title']) ?? '?',
-      _text(payload['target_title']) ?? '?',
-    ),
-    NotificationType.songMergeAccepted => l10n.notifSongMergeAccepted,
-    NotificationType.songMergeDeclined => l10n.notifSongMergeDeclined,
     NotificationType.unknown => l10n.notifUnknown,
   };
   // A fallback name ("your organization") can start the sentence.

@@ -16,12 +16,15 @@ class StaleAccountException implements Exception {
   String toString() => 'The signed-in account changed during the sync.';
 }
 
+Set<String> _noPins() => const {};
+
 class SyncContext {
   SyncContext({
     required this.db,
     required this.client,
     required this.accountId,
     required this._currentAccount,
+    this.pinnedIds = _noPins,
   });
 
   /// Rows per request when asking the backend for a list of ids.
@@ -39,6 +42,10 @@ class SyncContext {
   /// The account this run belongs to.
   final String accountId;
   final String? Function() _currentAccount;
+
+  /// Versions the user is looking at after opening them on purpose (Discover):
+  /// the pull does not remove them while they are pinned.
+  final Set<String> Function() pinnedIds;
 
   int pushed = 0;
   int pulled = 0;

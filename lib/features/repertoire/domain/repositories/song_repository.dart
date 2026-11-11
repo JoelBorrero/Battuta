@@ -47,6 +47,20 @@ abstract class SongRepository {
     List<String>? sharedOrganizationIds,
   });
 
+  /// Attaches my version [id] to another song (the work), whose id, title,
+  /// artist and creator are given. The version then shows the song's title and
+  /// artist. Works offline: the next sync applies the move on the backend
+  /// (which drops the old song when it is left without versions).
+  ///
+  /// Fails with `not_owner` for versions of other users.
+  Future<Either<Failure, Song>> moveToSong(
+    String id, {
+    required String songWorkId,
+    required String title,
+    required String artist,
+    String? songCreatorId,
+  });
+
   /// Permanently deletes the song identified by [id].
   Future<Either<Failure, void>> deleteSong(String id);
 

@@ -1,7 +1,9 @@
 import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
 import 'package:battuta/features/sharing/presentation/pages/discover_page.dart';
+import 'package:battuta/features/sync/presentation/providers/cloud_sync_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/fake_song_sharing.dart';
@@ -95,6 +97,27 @@ void main() {
     expect(h.sharing.calls, contains('open:p1'));
     expect(h.location, 'viewer:p1');
   });
+
+  testWidgets(
+    'a version opened from Discover is pinned while the viewer is open',
+    (tester) async {
+      final h = harness();
+      h.sharing.opened = versionOf('p1', owner: 'u-x');
+      await open(tester, h);
+
+      await tester.tap(find.text('Amazing Grace'));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(Scaffold).last),
+      );
+      expect(container.read(pinnedVersionsProvider).isPinned('p1'), isTrue);
+
+      h.router.pop();
+      await tester.pumpAndSettle();
+      expect(container.read(pinnedVersionsProvider).isPinned('p1'), isFalse);
+    },
+  );
 
   testWidgets('a version that cannot be opened says why', (tester) async {
     final h = harness();

@@ -22,7 +22,7 @@ enum BackendErrorCode {
   notAdmin('not_admin', BackendErrorKind.permission),
   notMember('not_member', BackendErrorKind.permission),
   notAssignee('not_assignee', BackendErrorKind.permission),
-  notSongCreator('not_song_creator', BackendErrorKind.permission),
+  notVersionOwner('not_version_owner', BackendErrorKind.permission),
   permissionDenied('permission_denied', BackendErrorKind.permission),
 
   // 22023
@@ -40,7 +40,6 @@ enum BackendErrorCode {
   memberNotFound('member_not_found', BackendErrorKind.other),
   versionNotFound('version_not_found', BackendErrorKind.other),
   songNotFound('song_not_found', BackendErrorKind.other),
-  mergeRequestNotFound('merge_request_not_found', BackendErrorKind.other),
 
   // P0001
   inviteRevoked('invite_revoked', BackendErrorKind.other),
@@ -57,10 +56,7 @@ enum BackendErrorCode {
   archiveNotRequested('archive_not_requested', BackendErrorKind.other),
   accountDeactivated('account_deactivated', BackendErrorKind.other),
   memberDeactivated('member_deactivated', BackendErrorKind.other),
-  mergeSameSong('merge_same_song', BackendErrorKind.other),
-  mergeCycle('merge_cycle', BackendErrorKind.other),
-  mergeAlreadyRequested('merge_already_requested', BackendErrorKind.other),
-  mergeNotPending('merge_not_pending', BackendErrorKind.other),
+  songExists('song_exists', BackendErrorKind.other),
 
   // 23505
   usernameTaken('username_taken', BackendErrorKind.other),

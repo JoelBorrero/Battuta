@@ -198,9 +198,6 @@ void main() {
         'archive_cancelled',
         'archive_completed',
         'song_version_forked',
-        'song_merge_requested',
-        'song_merge_accepted',
-        'song_merge_declined',
       ];
       for (final type in documented) {
         expect(

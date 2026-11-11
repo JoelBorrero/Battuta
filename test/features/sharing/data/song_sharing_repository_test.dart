@@ -6,7 +6,7 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:battuta/features/score/data/repositories/drift_score_repository.dart';
 import 'package:battuta/features/sharing/data/song_sharing_repository_impl.dart';
-import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
+import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -296,40 +296,37 @@ void main() {
     });
   });
 
-  group('merge requests', () {
-    test('pass through and map failures', () async {
-      remote.mergeStatus = MergeRequestStatus.pending;
-      final sent = (await repository.requestMerge(
-        sourceSongId: 'a',
-        targetSongId: 'b',
+  group('fork that was made but could not be read back', () {
+    test('keeps the backend fork and never makes a local copy', () async {
+      remote.forkRow = remoteRow('v-fork', owner: 'u-me');
+      remote.forkReadFails = true;
+      final forked = (await repository.forkVersion(
+        'v-src',
+        label: 'Mine',
+        cachedSource: localVersion(owner: 'u-x'),
       )).getOrElse((_) => throw 'x');
-      expect(sent.isPending, isTrue);
-      expect(remote.calls, ['merge:a>b']);
-
-      remote.failure = BackendErrorCode.mergeAlreadyRequested.failure(
-        message: 'dup',
-      );
-      final again = await repository.requestMerge(
-        sourceSongId: 'a',
-        targetSongId: 'b',
-      );
-      expect(
-        failureOf(again).errorCode,
-        BackendErrorCode.mergeAlreadyRequested,
-      );
-
-      remote.failure = null;
-      final answered = (await repository.respondToMerge(
-        'r1',
-        accept: true,
-      )).getOrElse((_) => throw 'x');
-      expect(answered.status, MergeRequestStatus.accepted);
+      expect(forked.madeOffline, isFalse);
+      expect(forked.song.id, 'v-fork');
+      expect(forked.song.title, 'Amazing Grace');
+      // Exactly one row: the fork the backend made, no local duplicate.
+      expect((await db.select(db.songs).get()).map((r) => r.id), ['v-fork']);
     });
+  });
 
-    test('an unexpected error becomes a failure', () async {
+  group('song search', () {
+    test('passes the backend suggestions through and maps failures', () async {
+      remote.suggestions = const [
+        SongSuggestion(songWorkId: 'w1', title: 'Way Maker', versionCount: 2),
+      ];
+      final found = (await repository.searchSongs(
+        'way',
+      )).getOrElse((_) => throw 'x');
+      expect(found.single.songWorkId, 'w1');
       remote.failure = offlineFailure();
-      final result = await repository.pendingMergeRequests();
-      expect(failureOf(result).errorCode, BackendErrorCode.offline);
+      expect(
+        failureOf(await repository.searchSongs('way')).errorCode,
+        BackendErrorCode.offline,
+      );
     });
   });
 }

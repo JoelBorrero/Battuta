@@ -73,23 +73,6 @@ void main() {
       expect(parsed.ownerDeactivated, isTrue);
       expect(parsed.forkedFromVersionId, 'v0');
     });
-
-    test('a merge request reads its status and requester', () {
-      final parsed = SongMergeRequest.fromJson({
-        'id': 'r1',
-        'source_song_id': 'a',
-        'target_song_id': 'b',
-        'source_title': 'A',
-        'target_title': 'B',
-        'status': 'accepted',
-        'requester': {'username': 'jane', 'display_name': ' '},
-      });
-      expect(parsed.status, MergeRequestStatus.accepted);
-      expect(parsed.isPending, isFalse);
-      expect(parsed.requesterName, 'jane');
-      expect(parsed.connects('b', 'a'), isTrue);
-      expect(parsed.connects('a', 'c'), isFalse);
-    });
   });
 
   group('mergeVersionRows', () {

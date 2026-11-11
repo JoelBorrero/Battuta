@@ -25,12 +25,11 @@ others. Inside an organization a musician can play in several bands.
 | `bands` / `band_members` | Bands of an organization; a member can be in several. Composite foreign keys make it impossible to link a band and a member of different organizations. |
 | `invite_links` | Join token (64 hex chars) + optional `band_id`, `expires_at`, `max_uses`, `use_count`, `revoked_at`. |
 | `invitations` | Invite by username: `pending`, `accepted`, `declined`, `cancelled`. One pending invitation per user and organization. |
-| `songs` | The work: `title`, `artist`, `created_by`, `merged_into_id` (redirect after a merge). No chord content. |
+| `songs` | The work: `title`, `artist`, `created_by` and `normalized_key` (unique, set by a trigger). No chord content. |
 | `song_versions` | Arrangements of a song: `owner_id`, `label`, `forked_from_version_id`, `visibility` (`private`, `organizations`, `public`) and the content (key, tempo, sections, lyrics, ...). |
 | `version_shares` | Organizations a version with visibility `organizations` is shared with. |
 | `scores` (+ `sections`, `measures`, `note_events`, `chord_symbols`) | Notation of a version. |
 | `organization_repertoire` | The versions an organization plays (picked by admins among versions visible to it). |
-| `song_merge_requests` | Merge of two separately created copies of the same work. |
 | `setlists`, `setlist_items` | A setlist belongs to **either** an organization (`organization_id`) **or** a user (`owner_id`, a personal setlist): exactly one is set. Items reference a version and keep a title snapshot plus `key_override`, `tempo_override` and `notes`. Organization items reference repertoire versions; personal items reference any version the owner can see. |
 | `calendar_events`, `recurring_schedules` | Belong to an organization, optional `band_id`. Both have an `event_type` (`sundayService`, `rehearsal`, `midweek`, `youthService`, `specialEvent`). A schedule adds `time_of_day` and `location`; an event adds an optional `setlist_id` (a setlist of the same organization, unlinked when the setlist is deleted) and `series_id` + `occurrence_date` when it is a materialized occurrence of a schedule (unique per series and day; kept, with `series_id` null, when the schedule is deleted). |
 | `event_assignments` | Who plays what at an event, with `response` (`pending`, `accepted`, `declined`), `responded_at`, `decline_reason`. |
@@ -94,26 +93,37 @@ or content (no cascade from `auth.users`). Deactivated users cannot call RPCs (`
 be invited or searched, cannot join, see no organization data and cannot edit their versions. Their
 usernames stay reserved. Sign-in itself is not blocked at the auth layer (see doubts in the task report).
 
-### Songs, versions, visibility, forks, merges
+### Songs, versions, visibility, forks, song linking
 
 One song (the work) has many versions by different owners, like LaCuerda.
 
 - `visibility` is per version: `private` (owner only), `organizations` (members of the orgs in
   `version_shares`; the owner can share only to organizations they actively belong to and that are not
   archived), `public` (anyone, including `anon`).
-- A song is visible if you created it or can see one of its versions (or the surviving song after a
-  merge): a private version never leaks its title.
+- A song is visible if you created it or can see one of its versions: a private version never leaks its
+  title.
 - Only the version owner edits or deletes a version and its score tree. Admins cannot. The song title/artist
   is edited by the song's creator.
 - `fork_song_version(version, label?)`: anyone who can see a version copies it (content and score tree)
   under the same song as a private version they own. The original owner is notified (`song_version_forked`).
-- `request_song_merge(source, target)`: the requester must have created one of the songs; the creator of
-  the other approves with `respond_to_song_merge(request, accept)`. On approval every version of the source
-  moves under the target, the source gets `merged_into_id`, versions keep owner and visibility. The request stores `source_title` / `target_title` snapshots (also in
-  the `song_merge_requested` notification) so the approver sees both titles without read access. Both creators
-  the same, or the other creator deactivated: approved automatically. Both ids are resolved through earlier
-  merges first (`resolve_song`); a merge that would end in the same song is `merge_cycle`.
-- A version inserted under a merged-away song is attached to the surviving song (trigger).
+- **Every version belongs to a song, matched at creation.** `songs.normalized_key` is the lower-case,
+  accent-free (`unaccent`), punctuation-stripped (apostrophes vanish, other punctuation is a space), whitespace
+  collapsed `title|artist`, and it is unique: "Way Maker (Live)" is a different song from "Way Maker", "Tú
+  Fidelidad" and "tu  fidelidad" are the same. A direct insert or rename onto an existing key fails with
+  `song_exists`. The migration joined the existing exact duplicates (versions moved to the oldest song) and
+  removed songs without versions. There is no merge: `song_merge_requests`, `request_song_merge`,
+  `respond_to_song_merge`, `songs.merged_into_id`, `resolve_song` and the `song_merge_*` notifications are gone.
+- `find_or_create_song(title, artist)`: returns the id of the song with that normalized key, creating it if
+  missing. It works across all songs, including ones whose only versions are private to someone else, and
+  reveals only that a song with exactly the title and artist the caller typed exists. Clients create every
+  version through it (so two people typing the same song land on one song); `song_versions` inserts therefore
+  no longer require seeing the song (attaching a version of your own is what makes it visible).
+- `move_version_to_song(version, song)`: owner only (`not_version_owner`; a version the caller cannot see is
+  `version_not_found`, an unknown target `song_not_found`). Setlists and repertoire reference the version, so
+  they keep working; `edited_at` is untouched.
+- A song left without versions (after a delete or a move) is deleted by a trigger.
+- `search_songs(query, limit?)`: songs the caller can see matching the text (contains, or `pg_trgm`
+  similarity for typos) with the number of versions the caller can see. Runs with the caller's rights.
 - Org repertoire: admins pick a **version** among versions visible to the organization (shared to it or
   public). Setlist items reference repertoire versions. When a version stops being visible to an organization
   (unshared, or made private/public, which also deletes its `version_shares` rows) it leaves that repertoire and setlist items
@@ -132,7 +142,7 @@ Rows are created by triggers/RPCs only; recipients read their own and set `read_
 `mark_notifications_read(ids?)`). Types: `invitation`, `role_changed`, `removed`, `member_profile_edited`,
 `event_assigned`, `event_unassigned`, `assignment_declined` (to admins), `archive_requested` /
 `archive_cancelled` (to the other admins), `archive_completed` (to all members), `song_version_forked`,
-`song_merge_requested`, `song_merge_accepted`, `song_merge_declined`. Deactivated users are never notified.
+(older `song_merge_*` rows were deleted). Deactivated users are never notified.
 Clean-up caused by removal, deactivation or deleting an event does not produce unassignment notifications.
 
 ## 3. RPCs
@@ -158,7 +168,9 @@ readable message, e.g. `invite_expired`.
 | `leave_organization(org)` | member | |
 | `members_available_on(org, date)` | member | |
 | `fork_song_version(version, label?)` | signed in | |
-| `request_song_merge(source, target)` / `respond_to_song_merge(request, accept)` | song creators | |
+| `find_or_create_song(title, artist?)` | signed in | Returns the song id; exact normalized match or new. |
+| `move_version_to_song(version, song)` | version owner | |
+| `search_songs(query, limit?)` | signed in | Visible songs with their visible version count. |
 | `search_profiles(query)` | signed in | 3+ characters, max 20 rows, excludes the caller and deactivated accounts. |
 | `is_username_available(username)` | anyone | Sign-up pre-check; the unique index is the real guard. |
 | `mark_notifications_read(ids?)` | signed in | Returns how many were marked. |
@@ -169,10 +181,10 @@ Error codes:
 | SQLSTATE | Messages |
 | --- | --- |
 | `28000` | `not_authenticated` |
-| `42501` | `not_admin`, `not_member`, `not_assignee`, `not_song_creator` (and `permission denied` / RLS violations for direct table access) |
+| `42501` | `not_admin`, `not_member`, `not_assignee`, `not_version_owner` (and `permission denied` / RLS violations for direct table access) |
 | `22023` | `invalid_name`, `invalid_username`, `invalid_role`, `invalid_expiry`, `invalid_max_uses`, `invalid_amount` |
-| `P0002` | `invite_not_found`, `user_not_found`, `invitation_not_found`, `member_not_found`, `version_not_found`, `song_not_found`, `merge_request_not_found` |
-| `P0001` | `invite_revoked`, `invite_expired`, `invite_used_up`, `already_member`, `already_invited`, `cannot_invite_self`, `invitation_not_pending`, `last_admin`, `band_not_in_organization`, `organization_archived`, `archive_already_requested`, `archive_not_requested`, `account_deactivated`, `member_deactivated`, `merge_same_song`, `merge_cycle`, `merge_already_requested`, `merge_not_pending` |
+| `P0002` | `invite_not_found`, `user_not_found`, `invitation_not_found`, `member_not_found`, `version_not_found`, `song_not_found` |
+| `P0001` | `invite_revoked`, `invite_expired`, `invite_used_up`, `already_member`, `already_invited`, `cannot_invite_self`, `invitation_not_pending`, `last_admin`, `band_not_in_organization`, `organization_archived`, `archive_already_requested`, `archive_not_requested`, `account_deactivated`, `member_deactivated`, `song_exists` |
 | `23505` | `username_taken` |
 
 `join_with_invite_link` checks, in order: not found, organization archived, revoked, expired, used up.
@@ -211,7 +223,8 @@ Each file is self-contained and defines a small `tests` helper schema (`tests.as
 - `03_invites`: invite links and invitations, every RPC happy path and error code.
 - `04_archive`: archive request/approve/cancel, read-only archived organizations.
 - `05_deactivation`: deactivated accounts and `auth.users` deletion.
-- `06_songs`: visibility (anon/outsider/member/admin), owner-only editing, repertoire, setlist tombstones, forks, merges.
+- `06_songs`: visibility (anon/outsider/member/admin), owner-only editing, repertoire, setlist tombstones, forks.
+- `10_song_linking`: normalized key, `find_or_create_song`, `move_version_to_song`, empty songs, `search_songs`, merge removed.
 - `07_availability_notifications`: absences, assignment responses, notifications.
 - `08_personal_setlists`: personal vs organization setlists, privacy, overrides, tombstones, immutability of owner.
 - `09_calendar_details`: event type, same-organization setlist and series links, unique occurrences, admin-only writes.
@@ -241,11 +254,11 @@ The app keeps every song, score and setlist in Drift and syncs them with this sc
 - Embedding a setlist's items needs the foreign key hint `setlist_items!setlist_items_setlist_fkey(*)`
   (there are two relationships: the composite one for organizations and the plain one).
 - **Conflicts use `edited_at`, not `updated_at`.** `updated_at` is set by the server on every update (a push,
-  a song merge moving versions, a share cleanup) and only tells a device that something changed.
+  a move to another song, a share cleanup) and only tells a device that something changed.
   `song_versions`, `scores` and `setlists` also have `edited_at`: the time the user last edited the content,
   stamped by the editing device with millisecond precision. Only clients write it, no trigger or server
-  function does (pgTAP checks that a merge leaves it alone). When a push finds the backend row changed since
-  the device last synced, the later `edited_at` wins; a merge alone therefore never discards a pending edit.
+  function does (pgTAP checks that a move leaves it alone). When a push finds the backend row changed since
+  the device last synced, the later `edited_at` wins; a move alone therefore never discards a pending edit.
   On the device the same value (`editedAtMs`) grows with every save, so a save made while a push is in
   flight keeps the row dirty.
 - **Sharing is pushed separately.** Label, visibility and the `version_shares` diff go out when they changed
@@ -261,13 +274,18 @@ The app keeps every song, score and setlist in Drift and syncs them with this sc
 - Changing a song's title or artist locally only reaches the backend when the user created the song (`songs`
   is shared by every version of it); on a song created by someone else the sync restores the shared title.
   The app therefore keeps `songs.created_by` on each cached version (`songCreatorId`) and shows title and
-  artist read-only to everybody else, with "Suggest merge" instead.
+  artist read-only to everybody else, with "Move to another song" instead. A rename onto another song's
+  name is refused (`song_exists`); the local copy then takes the song's real name.
 - **Sharing in the app.** The sharing sheet writes label, visibility and shares locally (`updateSharing`, works
   offline) and the next sync pushes them. "Other versions" lists the cached versions at once and merges the
   rows `song_versions` returns for the song (RLS decides what is visible). Discover searches
   `visibility = 'public'` versions by the song's title or artist. Forking calls `fork_song_version` online
-  (which copies the score and notifies the owner) and makes a local copy with `forkedFromVersionId` offline.
-  An offline fork whose parent stopped being visible by the time it is pushed loses its lineage (and gets a
-  song of its own if the song became invisible too). Merges use `request_song_merge` /
-  `respond_to_song_merge`; the app lists the caller's pending requests (`song_merge_requests` is readable by
-  requester and approver) to avoid sending the same request twice.
+  (which copies the score and notifies the owner) and makes a local copy with `forkedFromVersionId` offline;
+  once the backend made the fork the app never copies it locally again. An offline fork whose parent stopped
+  being visible by the time it is pushed loses its lineage but still joins the same song (`find_or_create_song`).
+- **Song linking in the app.** Creating, importing or scanning a version suggests matching songs (device cache
+  plus `search_songs` online); picking one fixes title and artist to that song's. A version with no linked song
+  is pushed under `find_or_create_song(title, artist)`, never under a client-made song id. "Move to another
+  song" writes `songWorkId` locally with a `moveDirty` flag and the next sync calls `move_version_to_song`
+  (a vanished target falls back to `find_or_create_song`). Versions opened on purpose from Discover are pinned
+  in memory so a sync does not remove them while their viewer is open.

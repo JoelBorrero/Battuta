@@ -30,14 +30,15 @@ SongVersionListing listing(
 
 void main() {
   group('actions on the viewer', () {
-    testWidgets('my version offers sharing, fork and merge', (tester) async {
+    testWidgets('my version offers sharing, fork and move', (tester) async {
       final h = SharingHarness(songs: [versionOf('v1')]);
       await h.pump(tester, const SongDetailPage(songId: 'v1'));
 
       expect(find.byKey(const ValueKey('sharing_btn')), findsOneWidget);
       expect(find.text('Sharing · Private'), findsOneWidget);
       expect(find.byKey(const ValueKey('fork_btn')), findsOneWidget);
-      expect(find.text('Same song as…'), findsOneWidget);
+      expect(find.byKey(const ValueKey('move_song_btn')), findsOneWidget);
+      expect(find.text('Move to another song'), findsOneWidget);
     });
 
     testWidgets('the sharing button shows the current visibility', (
@@ -51,7 +52,7 @@ void main() {
     });
 
     testWidgets(
-      'somebody else\'s version: no sharing, fork and suggest merge',
+      'somebody else\'s version: only fork',
       (tester) async {
         final h = SharingHarness(
           songs: [versionOf('v1', owner: 'u-x', creator: 'u-x')],
@@ -60,8 +61,7 @@ void main() {
 
         expect(find.byKey(const ValueKey('sharing_btn')), findsNothing);
         expect(find.byKey(const ValueKey('fork_btn')), findsOneWidget);
-        expect(find.text('Suggest merge'), findsOneWidget);
-        expect(find.text('Same song as…'), findsNothing);
+        expect(find.byKey(const ValueKey('move_song_btn')), findsNothing);
       },
     );
 
@@ -73,7 +73,7 @@ void main() {
       await h.pump(tester, const SongDetailPage(songId: 'v1'));
 
       expect(find.byKey(const ValueKey('sharing_btn')), findsNothing);
-      expect(find.byKey(const ValueKey('merge_btn')), findsNothing);
+      expect(find.byKey(const ValueKey('move_song_btn')), findsNothing);
       expect(find.byKey(const ValueKey('fork_btn')), findsOneWidget);
       expect(find.byKey(const ValueKey('song_versions_section')), findsNothing);
     });
@@ -287,7 +287,7 @@ void main() {
         find.textContaining('Only the person who created it'),
         findsOneWidget,
       );
-      expect(find.byKey(const ValueKey('editor_merge_btn')), findsOneWidget);
+      expect(find.byKey(const ValueKey('editor_move_btn')), findsOneWidget);
       // The rest of the version stays editable.
       expect(find.byKey(const ValueKey('editor_sharing_btn')), findsOneWidget);
       expect(
@@ -314,7 +314,7 @@ void main() {
         ),
       );
       expect(title.readOnly, isFalse);
-      expect(find.byKey(const ValueKey('editor_merge_btn')), findsNothing);
+      expect(find.byKey(const ValueKey('editor_move_btn')), findsOneWidget);
       expect(find.byKey(const ValueKey('editor_sharing_btn')), findsOneWidget);
     });
 

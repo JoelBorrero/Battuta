@@ -2582,17 +2582,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Alguien hizo una copia de uno de tus arreglos';
 
   @override
-  String notifSongMergeRequested(String source, String target) {
-    return 'Solicitud de fusión: $source en $target';
-  }
-
-  @override
-  String get notifSongMergeAccepted => 'Tu solicitud de fusión fue aceptada';
-
-  @override
-  String get notifSongMergeDeclined => 'Tu solicitud de fusión fue rechazada';
-
-  @override
   String get notifUnknown => 'Tienes una notificación nueva';
 
   @override
@@ -3014,84 +3003,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'El título y el artista pertenecen a la canción. Solo quien la creó puede cambiarlos.';
 
   @override
-  String get mergeSameSongButton => 'Es la misma canción que…';
-
-  @override
-  String get mergeSuggestButton => 'Sugerir fusión';
-
-  @override
-  String get mergeSheetTitle => 'Fusionar canciones';
-
-  @override
-  String mergeIntroMine(String title) {
-    return 'Elige la canción que “$title” duplica. Sus versiones pasarán a la canción que elijas cuando su creador acepte.';
-  }
-
-  @override
-  String mergeIntroOther(String title) {
-    return '“$title” la creó otra persona. Elige una de tus canciones que sea la misma: sus versiones pasarán a “$title” cuando su creador acepte.';
-  }
-
-  @override
-  String get mergeSearchLabel => 'Buscar canciones';
-
-  @override
-  String get mergeNoResults => 'No hay canciones que coincidan.';
-
-  @override
-  String get mergePendingBadge => 'Solicitud pendiente';
-
-  @override
-  String get mergeConfirmTitle => '¿Solicitar esta fusión?';
-
-  @override
-  String mergeConfirmBody(String source, String target) {
-    return 'Las versiones de “$source” pasarán a “$target”.';
-  }
-
-  @override
-  String get mergeRequestAction => 'Solicitar fusión';
-
-  @override
-  String get mergeSent => 'Solicitud de fusión enviada';
-
-  @override
-  String get mergeDone => 'Las canciones se fusionaron';
-
-  @override
-  String get mergeNeedsInternet =>
-      'Fusionar canciones requiere conexión a internet.';
-
-  @override
-  String get mergeSignIn => 'Inicia sesión para fusionar canciones.';
-
-  @override
-  String get mergeRequestTitle => 'Solicitud de fusión';
-
-  @override
-  String mergeRequestBody(String requester, String source, String target) {
-    return '$requester pide fusionar “$source” en “$target”. Todas las versiones de “$source” pasarían a “$target”.';
-  }
-
-  @override
-  String get mergeRequesterUnknown => 'Alguien';
-
-  @override
-  String get mergeAccept => 'Aceptar';
-
-  @override
-  String get mergeDecline => 'Rechazar';
-
-  @override
-  String get mergeAccepted => 'Canciones fusionadas';
-
-  @override
-  String get mergeDeclined => 'Solicitud rechazada';
-
-  @override
-  String get mergeAlreadyAnswered => 'Esta solicitud ya se respondió.';
-
-  @override
   String get songPageTitle => 'Canción';
 
   @override
@@ -3129,23 +3040,99 @@ class AppLocalizationsEs extends AppLocalizations {
   String get backendErrorSongNotFound => 'Esa canción ya no está disponible.';
 
   @override
-  String get backendErrorMergeNotCreator =>
-      'Solo puedes fusionar canciones si creaste una de ellas.';
-
-  @override
-  String get backendErrorMergeSameSong => 'Ya son la misma canción.';
-
-  @override
-  String get backendErrorMergeAlreadyRequested =>
-      'Ya hay una solicitud de fusión pendiente para estas canciones.';
-
-  @override
-  String get backendErrorMergeNotPending => 'Esta solicitud ya se respondió.';
-
-  @override
-  String get backendErrorMergeRequestNotFound =>
-      'Esa solicitud de fusión ya no existe.';
-
-  @override
   String get discoverLoadMore => 'Cargar más';
+
+  @override
+  String get songLinkSuggestionsTitle => '¿Es una de estas canciones?';
+
+  @override
+  String get songLinkSuggestionsHint =>
+      'Elige una canción para añadir tu versión. Si no, se crea una canción nueva.';
+
+  @override
+  String songLinkVersionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versiones',
+      one: '1 versión',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get songLinkNewSong => 'Canción nueva';
+
+  @override
+  String songLinkNewSongSubtitle(String title) {
+    return 'Crear “$title”';
+  }
+
+  @override
+  String songLinkLinkedTo(String title) {
+    return 'Versión de “$title”';
+  }
+
+  @override
+  String get songLinkChange => 'Cambiar';
+
+  @override
+  String get songLinkOfflineNote =>
+      'Se muestran las canciones guardadas en este dispositivo.';
+
+  @override
+  String get songLinkSheetTitle => '¿Qué canción es?';
+
+  @override
+  String songLinkSheetBody(String title) {
+    return '“$title” se parece a una canción que ya existe. Añade tu versión a ella o crea una canción nueva.';
+  }
+
+  @override
+  String get moveToSongButton => 'Mover a otra canción';
+
+  @override
+  String get moveToSongTitle => 'Mover a otra canción';
+
+  @override
+  String moveToSongIntro(String title) {
+    return 'Elige la canción a la que pertenece “$title”. Tu versión se mueve allí y muestra el título y el artista de esa canción.';
+  }
+
+  @override
+  String get moveToSongSearchLabel => 'Buscar canciones';
+
+  @override
+  String get moveToSongNoResults => 'No hay canciones que coincidan.';
+
+  @override
+  String get moveToSongAction => 'Mover aquí';
+
+  @override
+  String get moveToSongConfirmTitle => '¿Mover esta versión?';
+
+  @override
+  String moveToSongConfirmBody(String song) {
+    return 'Esta versión se moverá a “$song”. Las listas y los repertorios la siguen usando.';
+  }
+
+  @override
+  String moveToSongDone(String song) {
+    return 'Versión movida a “$song”';
+  }
+
+  @override
+  String get versionUnavailableTitle => 'Esta versión ya no está disponible';
+
+  @override
+  String get versionUnavailableBody =>
+      'Se eliminó, se hizo privada o ya no se comparte contigo.';
+
+  @override
+  String get backendErrorNotVersionOwner =>
+      'Solo el dueño de una versión puede moverla.';
+
+  @override
+  String get backendErrorSongExists =>
+      'Ya existe una canción con ese título y artista. Mueve tu versión a ella.';
 }

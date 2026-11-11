@@ -24,6 +24,7 @@ import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart'
 import 'package:battuta/features/repertoire/presentation/widgets/song_import_modal.dart';
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
 import 'package:battuta/features/score/domain/entities/score.dart';
+import 'package:battuta/features/sharing/presentation/widgets/song_link_sheet.dart';
 import 'package:battuta/features/sync/presentation/widgets/cloud_sync_status_indicator.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -199,7 +200,13 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     ScanFlowModal.show(
       context,
       onScoreExtracted: (Score score) async {
-        final song = score.toSong();
+        final linked = await linkSongBeforeSave(
+          context,
+          ref,
+          score.toSong(),
+        );
+        if (linked == null) return;
+        final song = linked;
         await ref.read(repertoireProvider.notifier).addSong(song);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

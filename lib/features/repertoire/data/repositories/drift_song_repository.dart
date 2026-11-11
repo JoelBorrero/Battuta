@@ -86,7 +86,12 @@ class DriftSongRepository implements SongRepository {
                 ..where((t) => t.id.equals(id) & _visible(t, account)))
               .getSingleOrNull();
       if (row == null) {
-        return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
+        return Left(
+          CacheFailure(
+            message: 'Song with ID "$id" not found.',
+            errorCode: BackendErrorCode.versionNotFound,
+          ),
+        );
       }
       return Right(songFromRow(row));
     } catch (e, st) {
@@ -247,6 +252,54 @@ class DriftSongRepository implements SongRepository {
       return Left(
         CacheFailure(
           message: 'Failed to update sharing of "$id": $e',
+          stackTrace: st,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, Song>> moveToSong(
+    String id, {
+    required String songWorkId,
+    required String title,
+    required String artist,
+    String? songCreatorId,
+  }) async {
+    try {
+      final account = _account;
+      final row =
+          await (db.select(db.songs)
+                ..where((t) => t.id.equals(id) & _visible(t, account)))
+              .getSingleOrNull();
+      if (row == null) {
+        return Left(CacheFailure(message: 'Song with ID "$id" not found.'));
+      }
+      if (_foreign(row, account) || row.ownerId == null) {
+        return Left(_notOwner(id));
+      }
+      if (row.songWorkId != songWorkId) {
+        await (db.update(db.songs)..where((t) => t.id.equals(id))).write(
+          SongsCompanion(
+            songWorkId: Value(songWorkId),
+            title: Value(title),
+            artist: Value(artist),
+            songCreatorId: Value(songCreatorId),
+            isDirty: const Value(true),
+            // A version the backend does not know yet is simply created under
+            // the new song; only a known one needs the move call.
+            moveDirty: Value(row.remoteUpdatedAt != null),
+          ),
+        );
+      }
+      final updated = await (db.select(
+        db.songs,
+      )..where((t) => t.id.equals(id))).getSingle();
+      return Right(songFromRow(updated));
+    } catch (e, st) {
+      return Left(
+        CacheFailure(
+          message: 'Failed to move "$id" to another song: $e',
           stackTrace: st,
         ),
       );

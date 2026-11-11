@@ -66,7 +66,7 @@ final class RepertoireProvider
   Repertoire create() => Repertoire();
 }
 
-String _$repertoireHash() => r'3b3abb12b9303b5ea6fdcf77ede475d32e540448';
+String _$repertoireHash() => r'6adf2225a608b2a178d3b01a9fddab24b8222478';
 
 /// Provides the current repertoire list and exposes mutation methods.
 ///

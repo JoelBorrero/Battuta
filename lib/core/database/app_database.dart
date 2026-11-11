@@ -66,6 +66,10 @@ class Songs extends Table {
   /// v4: account that created the work (`songs.created_by`); null if unknown.
   TextColumn get songCreatorId => text().nullable()();
 
+  /// v5: the version was moved to another song ([songWorkId]) locally and the
+  /// move is not pushed yet.
+  BoolColumn get moveDirty => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -164,8 +168,9 @@ class AppDatabase extends _$AppDatabase {
   /// v2: adds the account-scoped backend cache ([CacheRecords], [CacheRefreshes]).
   /// v3: song versions, personal/organization setlists and sync state columns.
   /// v4: the creator of a song's work (title/artist rule).
+  /// v5: a queued move of a version to another song.
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -208,6 +213,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 4) {
         await m.addColumn(songs, songs.songCreatorId);
+      }
+      if (from < 5) {
+        await m.addColumn(songs, songs.moveDirty);
       }
     },
   );

@@ -130,26 +130,9 @@ void main() {
         }),
         NotificationDestination.songPage,
       );
-      expect(
-        of(NotificationType.songMergeRequested),
-        NotificationDestination.repertoire,
-      );
-      expect(
-        of(NotificationType.songMergeRequested, {'request_id': 'r1'}),
-        NotificationDestination.mergeRequest,
-      );
-      expect(
-        of(NotificationType.songMergeAccepted, {'target_song_id': 's2'}),
-        NotificationDestination.songPage,
-      );
-      expect(
-        of(NotificationType.songMergeAccepted),
-        NotificationDestination.repertoire,
-      );
-      expect(
-        of(NotificationType.songMergeDeclined, {'target_song_id': 's2'}),
-        NotificationDestination.repertoire,
-      );
+      // Merge is gone: an old merge notification is a type this app ignores.
+      expect(NotificationType.parse('song_merge_requested'),
+          NotificationType.unknown);
       expect(of(NotificationType.unknown), NotificationDestination.none);
     });
 
@@ -160,7 +143,7 @@ void main() {
       expect(target.versionId, 'v1');
     });
 
-    test('a copy names the song, a merge names the request or the target', () {
+    test('a copy names the song', () {
       expect(
         notificationTarget(
           note(
@@ -169,24 +152,6 @@ void main() {
           ),
         ).songId,
         's1',
-      );
-      expect(
-        notificationTarget(
-          note(
-            NotificationType.songMergeRequested,
-            payload: {'request_id': 'r1', 'target_song_id': 's2'},
-          ),
-        ).requestId,
-        'r1',
-      );
-      expect(
-        notificationTarget(
-          note(
-            NotificationType.songMergeAccepted,
-            payload: {'source_song_id': 's1', 'target_song_id': 's2'},
-          ),
-        ).songId,
-        's2',
       );
     });
   });

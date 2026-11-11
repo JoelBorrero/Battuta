@@ -15,8 +15,10 @@ import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
-import 'package:battuta/features/sharing/presentation/widgets/merge_request_sheet.dart';
+import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
+import 'package:battuta/features/sharing/presentation/widgets/move_to_song_sheet.dart';
 import 'package:battuta/features/sharing/presentation/widgets/sharing_sheet.dart';
+import 'package:battuta/features/sharing/presentation/widgets/song_suggestions_panel.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,6 +60,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   bool _initialized = false;
   bool _isSaving = false;
   Song? _originalSong;
+
+  /// The existing song a new version is attached to (picked from the
+  /// suggestions); null keeps what was typed as a new song.
+  SongSuggestion? _linked;
 
   // Tap-tempo timestamp tracker
   final List<DateTime> _tapTimestamps = [];
@@ -318,6 +324,28 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   bool _canEditTitle(String? accountId) =>
       _originalSong == null || _originalSong!.canEditTitleBy(accountId);
 
+  /// A suggestion was picked (or dropped with `null`) for a new version.
+  void _onSongPicked(SongSuggestion? song) {
+    setState(() {
+      _linked = song;
+      if (song != null) {
+        _titleController.text = song.title;
+        _artistController.text = song.artist;
+      }
+    });
+  }
+
+  /// Moves this version to another song and shows the new title and artist.
+  Future<void> _moveToAnotherSong(Song original) async {
+    final moved = await showMoveToSongSheet(context, original);
+    if (moved == null || !mounted) return;
+    setState(() {
+      _originalSong = moved;
+      _titleController.text = moved.title;
+      _artistController.text = moved.artist;
+    });
+  }
+
   Future<void> _saveSong() async {
     final l10n = AppLocalizations.of(context);
     if (!_canEdit(ref.read(currentAccountIdProvider))) {
@@ -380,6 +408,10 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
         sections: finalSections,
         createdAt: _originalSong?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
+        // A new version picked from the suggestions joins that song; an
+        // existing one keeps its song (the repository ignores these).
+        songWorkId: _linked?.songWorkId,
+        songCreatorId: _linked?.createdBy,
       );
 
       final notifier = ref.read(repertoireProvider.notifier);
@@ -521,6 +553,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     final me = ref.watch(currentAccountIdProvider);
     final canEdit = _canEdit(me);
     final titleLocked = canEdit && !_canEditTitle(me);
+    final fieldsLocked = titleLocked || _linked != null;
     final original = _originalSong;
     final l10n = AppLocalizations.of(context);
     return Scaffold(
@@ -579,7 +612,8 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        l10n?.readOnlyVersionEditorNotice ?? 'Only the owner can edit this version.',
+                        l10n?.readOnlyVersionEditorNotice ??
+                            'Only the owner can edit this version.',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface,
@@ -593,7 +627,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               key: const Key('song_title_field'),
               controller: _titleController,
-              readOnly: titleLocked,
+              readOnly: fieldsLocked,
               decoration: InputDecoration(
                 helperText: titleLocked ? l10n?.songTitleLockedHint : null,
                 helperMaxLines: 3,
@@ -614,7 +648,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
             TextFormField(
               key: const Key('song_artist_field'),
               controller: _artistController,
-              readOnly: titleLocked,
+              readOnly: fieldsLocked,
               decoration: InputDecoration(
                 labelText: l10n?.artistComposerLabel ?? 'Artist / Composer *',
                 hintText: l10n?.artistComposerHint ?? 'e.g. John Newton',
@@ -622,6 +656,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                 prefixIcon: const Icon(Icons.person),
               ),
               validator: (val) {
+                if (_linked != null) return null;
                 if (val == null || val.trim().isEmpty) {
                   return l10n?.artistValidation ??
                       'Please enter an artist or composer';
@@ -629,6 +664,15 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                 return null;
               },
             ),
+            if (!isEditing && canEdit)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: SongSuggestionsPanel(
+                  titleController: _titleController,
+                  selected: _linked,
+                  onSelected: _onSongPicked,
+                ),
+              ),
             if (original != null &&
                 canEdit &&
                 me != null &&
@@ -649,22 +693,20 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
                       onPressed: () =>
                           showSharingSheet(context, ref, original.id),
                     ),
-                    if (titleLocked && original.songWorkId != null)
+                    if (original.songWorkId != null)
                       OutlinedButton.icon(
-                        key: const ValueKey('editor_merge_btn'),
+                        key: const ValueKey('editor_move_btn'),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(44, 44),
                         ),
-                        icon: const Icon(Icons.merge_type, size: 18),
+                        icon: const Icon(
+                          Icons.drive_file_move_outline,
+                          size: 18,
+                        ),
                         label: Text(
-                          l10n?.mergeSuggestButton ?? 'Suggest merge',
+                          l10n?.moveToSongButton ?? 'Move to another song',
                         ),
-                        onPressed: () => showMergeRequestSheet(
-                          context,
-                          songWorkId: original.songWorkId!,
-                          title: original.title,
-                          createdByMe: false,
-                        ),
+                        onPressed: () => _moveToAnotherSong(original),
                       ),
                   ],
                 ),

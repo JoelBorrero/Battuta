@@ -233,15 +233,15 @@ select lives_ok($$ update public.setlists set edited_at = '2026-01-02T10:00:00Z'
 select is((select edited_at from public.setlists where id = 'o-alice'), '2026-01-02T10:00:00Z'::timestamptz,
     'and it is kept');
 
--- A merge moves versions under another song but leaves the edit time alone.
+-- Moving a version to another song leaves the edit time alone.
 select tests.as_user('bob');
 select lives_ok(format($$ insert into public.songs (id, title, artist, created_by)
     values ('00000000-0000-0000-0000-000000000003', 'Song Three', 'Band', %L) $$, tests.uid('bob')),
     'bob creates a second song');
-select lives_ok($$ select public.request_song_merge(tests.song('Song One'), tests.song('Song Three')) $$,
-    'bob merges his first song into it');
+select lives_ok($$ select public.move_version_to_song(tests.version('V-org'), tests.song('Song Three')) $$,
+    'bob moves his version to it');
 select is((select song_id from public.song_versions where id = tests.version('V-org')),
-    tests.song('Song Three'), 'the version moved under the surviving song');
+    tests.song('Song Three'), 'the version moved to the other song');
 select is((select edited_at from public.song_versions where id = tests.version('V-org')),
     '2026-01-01T10:00:00.123Z'::timestamptz, 'but its edit time did not change');
 select tests.reset();

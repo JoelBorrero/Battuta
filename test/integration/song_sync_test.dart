@@ -357,24 +357,25 @@ void main() {
     });
 
     itest(
-      'a song merge does not discard a pending edit of the owner',
+      'moving a version on the backend does not discard a pending edit',
       () async {
         final d = track(SongDevice.of(member));
-        final one = newSong('Merge Pending One', key: 'C');
-        final two = newSong('Merge Pending Two');
+        final one = newSong('Move Pending One', key: 'C');
+        final two = newSong('Move Pending Two');
         ok(await d.songs.saveSong(one));
         ok(await d.songs.saveSong(two));
         await d.syncOk();
 
-        // Edited offline, then a merge touches the backend row before the sync.
+        // Edited offline, then a move touches the backend row before the sync.
         ok(await d.songs.saveSong(one.copyWith(key: 'A')));
         final before = await remoteVersion(member, one.id);
         final sourceWork = before!['song_id'] as String;
         final targetWork =
             (await remoteVersion(member, two.id))!['song_id'] as String;
+        expect(sourceWork, isNot(targetWork));
         await member.client.rpc(
-          'request_song_merge',
-          params: {'p_source_song': sourceWork, 'p_target_song': targetWork},
+          'move_version_to_song',
+          params: {'p_version_id': one.id, 'p_song_id': targetWork},
         );
         final merged = await remoteVersion(member, one.id);
         expect(merged!['song_id'], targetWork);
@@ -731,12 +732,12 @@ void main() {
     );
 
     itest(
-      'after a merge the cached version follows the surviving song',
+      'after a move the cached version follows the new song',
       () async {
         final org = await orgWithMember();
         final adminDevice = track(SongDevice.of(admin));
-        final a = newSong('Merge Source Title');
-        final b = newSong('Merge Target Title');
+        final a = newSong('Move Source Title');
+        final b = newSong('Move Target Title');
         ok(await adminDevice.songs.saveSong(a));
         ok(await adminDevice.songs.saveSong(b));
         await adminDevice.syncOk();
@@ -753,17 +754,18 @@ void main() {
             (await remoteVersion(admin, a.id))!['song_id'] as String;
         expect(before.songWorkId, sourceWork);
 
-        // The admin created both works, so the merge is accepted at once.
+        // The admin moves the version to the other song (the old one is empty
+        // afterwards and disappears).
         await admin.client.rpc(
-          'request_song_merge',
-          params: {'p_source_song': sourceWork, 'p_target_song': targetWork},
+          'move_version_to_song',
+          params: {'p_version_id': a.id, 'p_song_id': targetWork},
         );
 
         await memberDevice.syncOk();
         final after = (await memberDevice.songs.getSongById(a.id))
             .getOrElse((_) => throw 'missing');
         expect(after.songWorkId, targetWork);
-        expect(after.title, 'Merge Target Title');
+        expect(after.title, 'Move Target Title');
       },
     );
   });

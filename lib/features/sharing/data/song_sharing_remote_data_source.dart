@@ -1,12 +1,27 @@
-/// Thin Supabase calls for song sharing: other versions, public search, fork
-/// and merge requests. Every method throws a typed `Failure`; the repository
+/// Thin Supabase calls for song sharing: other versions, public search, song
+/// search and fork. Every method throws a typed `Failure`; the repository
 /// turns that into an `Either`.
 library;
 
 import 'package:battuta/core/errors/backend_error_code.dart';
+import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/organizations/data/backend_gateway.dart';
 import 'package:battuta/features/sharing/domain/entities/song_sharing.dart';
+import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
+
+/// The backend made the fork ([row] is what the RPC returned) but reading the
+/// full version back failed ([cause]). The fork exists: nothing may be forked
+/// again.
+class ForkReadFailed implements Exception {
+  const ForkReadFailed({required this.row, required this.cause});
+
+  final Map<String, dynamic> row;
+  final Object cause;
+
+  @override
+  String toString() => 'The fork was made but could not be read: $cause';
+}
 
 abstract interface class SongSharingRemoteDataSource {
   Future<List<SongVersionListing>> fetchVersionsOfSong(String songWorkId);
@@ -19,32 +34,15 @@ abstract interface class SongSharingRemoteDataSource {
 
   Future<SongWork> fetchSong(String songId);
 
-  Future<List<SongWork>> searchSongs(
-    String query, {
-    bool onlyMine = false,
-    int limit = 20,
-  });
+  Future<List<SongSuggestion>> searchSongs(String query, {int limit = 8});
 
   /// A `song_versions` row with its song (`songs`) and `version_shares`.
   Future<Map<String, dynamic>> fetchVersionRow(String versionId);
 
   /// Forks through the backend and returns the new version's row (as
-  /// [fetchVersionRow] does).
+  /// [fetchVersionRow] does). Throws [ForkReadFailed] when the fork was made
+  /// but the row could not be read back.
   Future<Map<String, dynamic>> forkVersion(String versionId, {String? label});
-
-  Future<SongMergeRequest> requestMerge(
-    String sourceSongId,
-    String targetSongId,
-  );
-
-  Future<SongMergeRequest> respondToMerge(
-    String requestId, {
-    required bool accept,
-  });
-
-  Future<SongMergeRequest> fetchMergeRequest(String requestId);
-
-  Future<List<SongMergeRequest>> pendingMergeRequests();
 }
 
 class SupabaseSongSharingRemoteDataSource extends SupabaseGateway
@@ -58,9 +56,6 @@ class SupabaseSongSharingRemoteDataSource extends SupabaseGateway
 
   static const _versionRow =
       '*, songs(id, title, artist, created_by), version_shares(organization_id)';
-
-  static const _mergeColumns =
-      '*, requester:profiles!requested_by(username, display_name)';
 
   /// Characters that would break the `or(...)` filter grammar.
   static String _clean(String query) =>
@@ -110,12 +105,10 @@ class SupabaseSongSharingRemoteDataSource extends SupabaseGateway
 
   @override
   Future<SongWork> fetchSong(String songId) => run((c, _) async {
-    final resolved = await c.rpc('resolve_song', params: {'p_song': songId});
-    final id = resolved is String ? resolved : songId;
     final row = await c
         .from('songs')
-        .select('id, title, artist, created_by, merged_into_id')
-        .eq('id', id)
+        .select('id, title, artist, created_by')
+        .eq('id', songId)
         .maybeSingle();
     if (row == null) {
       throw BackendErrorCode.songNotFound.failure(
@@ -126,26 +119,17 @@ class SupabaseSongSharingRemoteDataSource extends SupabaseGateway
   });
 
   @override
-  Future<List<SongWork>> searchSongs(
-    String query, {
-    bool onlyMine = false,
-    int limit = 20,
-  }) => run((c, uid) async {
-    final text = _clean(query);
-    var request = c
-        .from('songs')
-        .select('id, title, artist, created_by, merged_into_id')
-        .isFilter('merged_into_id', null);
-    if (onlyMine) request = request.eq('created_by', uid);
-    if (text.isNotEmpty) {
-      request = request.or('title.ilike.*$text*,artist.ilike.*$text*');
-    }
-    final data = await request.order('title').order('id').limit(limit);
-    return [
-      for (final row in (data as List).cast<Map<String, dynamic>>())
-        SongWork.fromJson(row),
-    ];
-  });
+  Future<List<SongSuggestion>> searchSongs(String query, {int limit = 8}) =>
+      run((c, _) async {
+        final data = await c.rpc(
+          'search_songs',
+          params: {'p_query': query, 'p_limit': limit},
+        );
+        return [
+          for (final row in (data as List).cast<Map<String, dynamic>>())
+            SongSuggestion.fromJson(row),
+        ];
+      });
 
   @override
   Future<Map<String, dynamic>> fetchVersionRow(String versionId) =>
@@ -169,66 +153,22 @@ class SupabaseSongSharingRemoteDataSource extends SupabaseGateway
   }
 
   @override
-  Future<Map<String, dynamic>> forkVersion(String versionId, {String? label}) =>
-      run((c, _) async {
-        final created = await c.rpc(
-          'fork_song_version',
-          params: {'p_version_id': versionId, 'p_label': label},
-        );
-        final id = (created as Map)['id'] as String;
-        return _versionRowOf(c, id);
-      });
-
-  @override
-  Future<SongMergeRequest> requestMerge(
-    String sourceSongId,
-    String targetSongId,
-  ) => run((c, _) async {
-    final created = await c.rpc(
-      'request_song_merge',
-      params: {'p_source_song': sourceSongId, 'p_target_song': targetSongId},
-    );
-    return SongMergeRequest.fromJson(Map<String, dynamic>.from(created as Map));
-  });
-
-  @override
-  Future<SongMergeRequest> respondToMerge(
-    String requestId, {
-    required bool accept,
-  }) => run((c, _) async {
-    final updated = await c.rpc(
-      'respond_to_song_merge',
-      params: {'p_request_id': requestId, 'p_accept': accept},
-    );
-    return SongMergeRequest.fromJson(Map<String, dynamic>.from(updated as Map));
-  });
-
-  @override
-  Future<SongMergeRequest> fetchMergeRequest(String requestId) =>
-      run((c, _) async {
-        final row = await c
-            .from('song_merge_requests')
-            .select(_mergeColumns)
-            .eq('id', requestId)
-            .maybeSingle();
-        if (row == null) {
-          throw BackendErrorCode.mergeRequestNotFound.failure(
-            message: 'Merge request "$requestId" not found.',
-          );
-        }
-        return SongMergeRequest.fromJson(row);
-      });
-
-  @override
-  Future<List<SongMergeRequest>> pendingMergeRequests() => run((c, _) async {
-    final data = await c
-        .from('song_merge_requests')
-        .select(_mergeColumns)
-        .eq('status', 'pending')
-        .order('created_at', ascending: false);
-    return [
-      for (final row in (data as List).cast<Map<String, dynamic>>())
-        SongMergeRequest.fromJson(row),
-    ];
-  });
+  Future<Map<String, dynamic>> forkVersion(
+    String versionId, {
+    String? label,
+  }) async {
+    final row = await run((c, _) async {
+      final created = await c.rpc(
+        'fork_song_version',
+        params: {'p_version_id': versionId, 'p_label': label},
+      );
+      return Map<String, dynamic>.from(created as Map);
+    });
+    // From here on the fork exists on the backend.
+    try {
+      return await fetchVersionRow(row['id'] as String);
+    } on Failure catch (e) {
+      throw ForkReadFailed(row: row, cause: e);
+    }
+  }
 }
