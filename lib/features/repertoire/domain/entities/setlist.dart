@@ -18,6 +18,7 @@ class Setlist {
     this.tags = const [],
     required this.createdAt,
     required this.updatedAt,
+    this.organizationId,
   });
 
   /// Unique identifier for this setlist.
@@ -44,6 +45,14 @@ class Setlist {
   /// Last modification timestamp.
   final DateTime updatedAt;
 
+  /// Organization this setlist belongs to; null for a personal setlist.
+  ///
+  /// Members read organization setlists; only its admins edit them.
+  final String? organizationId;
+
+  /// Whether this is an organization setlist.
+  bool get isOrganizationSetlist => organizationId != null;
+
   /// Count of songs in the setlist.
   int get songCount => items.length;
 
@@ -57,6 +66,7 @@ class Setlist {
     'tags': tags,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    'organizationId': organizationId,
   };
 
   /// Constructs a [Setlist] from a JSON map.
@@ -77,6 +87,7 @@ class Setlist {
         const [],
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
+    organizationId: json['organizationId'] as String?,
   );
 
   /// Creates a copy of this [Setlist] with optional updated fields.
@@ -91,6 +102,7 @@ class Setlist {
     List<String>? tags,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? organizationId,
   }) {
     return Setlist(
       id: id ?? this.id,
@@ -101,6 +113,7 @@ class Setlist {
       tags: tags ?? this.tags,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      organizationId: organizationId ?? this.organizationId,
     );
   }
 
@@ -115,6 +128,7 @@ class Setlist {
           eventDate == other.eventDate &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
+          organizationId == other.organizationId &&
           _listEquals(items, other.items) &&
           _listEquals(tags, other.tags);
 
@@ -126,6 +140,7 @@ class Setlist {
     eventDate,
     createdAt,
     updatedAt,
+    organizationId,
     Object.hashAll(items),
     Object.hashAll(tags),
   );

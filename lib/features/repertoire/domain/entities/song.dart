@@ -8,12 +8,19 @@
 library;
 
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'song.freezed.dart';
 part 'song.g.dart';
 
 /// The primary song entity used across the Battuta app.
+///
+/// One [Song] is one **version** (arrangement) of a work: [id] is the version
+/// id and [songWorkId] the id of the work it belongs to on the backend. The
+/// version fields ([songWorkId], [ownerId], [label], [visibility],
+/// [forkedFromVersionId], [sharedOrganizationIds]) are managed by the cloud
+/// sync; a song created in local mode has no owner yet.
 ///
 /// ```dart
 /// final song = Song(
@@ -71,6 +78,24 @@ abstract class Song with _$Song {
 
     /// Timestamp of the last modification.
     required DateTime updatedAt,
+
+    /// Id of the work (`songs.id`) this version belongs to; null until synced.
+    String? songWorkId,
+
+    /// Account that owns this version; null for local-mode songs.
+    String? ownerId,
+
+    /// Name of this arrangement (e.g. `"Original"`, `"Acoustic"`).
+    @Default('Original') String label,
+
+    /// Who can see this version.
+    @Default(SongVisibility.private) SongVisibility visibility,
+
+    /// Version this one was forked from, if any.
+    String? forkedFromVersionId,
+
+    /// Organizations this version is shared with (visibility `organizations`).
+    @Default([]) List<String> sharedOrganizationIds,
   }) = _Song;
 
   const Song._();
@@ -83,6 +108,12 @@ abstract class Song with _$Song {
     final (beats, beatValue) = timeSignature;
     return '$beats/$beatValue';
   }
+
+  /// Whether [accountId] may edit this version: local-mode songs (no owner)
+  /// and the owner's own versions. Versions of other users (e.g. from an
+  /// organization's repertoire) are read-only.
+  bool isEditableBy(String? accountId) =>
+      ownerId == null || ownerId == accountId;
 
   /// Formatted tempo string for display (e.g., `"120 BPM"`).
   String get tempoLabel => '$tempo BPM';

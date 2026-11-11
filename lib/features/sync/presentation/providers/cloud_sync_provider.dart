@@ -7,7 +7,6 @@ library;
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/core/services/demo_mode_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
-import 'package:battuta/features/sync/data/demo_cloud_sync_service.dart';
 import 'package:battuta/features/sync/data/supabase_cloud_sync_service.dart';
 import 'package:battuta/features/sync/domain/models/cloud_sync_result.dart';
 import 'package:battuta/features/sync/domain/services/cloud_sync_service.dart';
@@ -53,12 +52,7 @@ class CloudSyncState extends Equatable {
 final cloudSyncServiceProvider = Provider<CloudSyncService>((ref) {
   final db = ref.watch(appDatabaseProvider);
   final clientManager = ref.watch(supabaseClientManagerProvider);
-  final demoSyncService = ref.watch(demoCloudSyncServiceProvider);
-  return SupabaseCloudSyncService(
-    db: db,
-    clientManager: clientManager,
-    demoSyncService: demoSyncService,
-  );
+  return SupabaseCloudSyncService(db: db, clientManager: clientManager);
 });
 
 class CloudSyncNotifier extends Notifier<CloudSyncState> {
@@ -96,13 +90,13 @@ class CloudSyncNotifier extends Notifier<CloudSyncState> {
   }
 
   void clearError() {
-    if (state.status == CloudSyncStatus.error || state.status == CloudSyncStatus.offline) {
+    if (state.status == CloudSyncStatus.error ||
+        state.status == CloudSyncStatus.offline) {
       state = state.copyWith(status: CloudSyncStatus.idle, errorMessage: null);
     }
   }
 }
 
-final cloudSyncProvider =
-    NotifierProvider<CloudSyncNotifier, CloudSyncState>(
-      CloudSyncNotifier.new,
-    );
+final cloudSyncProvider = NotifierProvider<CloudSyncNotifier, CloudSyncState>(
+  CloudSyncNotifier.new,
+);

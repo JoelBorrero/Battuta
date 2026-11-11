@@ -114,9 +114,13 @@ select lives_ok(format($$ insert into public.song_versions (id, song_id, owner_i
 select throws_ok(format($$ insert into public.song_versions (song_id, owner_id, label)
     values ('00000000-0000-0000-0000-000000000001', %L, 'Impostor') $$, tests.uid('alice')),
     '42501', null, 'cannot create a version owned by someone else');
+-- A client may record the parent of a fork it creates offline, but only one it can see
+-- (04 personal setlists / edit time migration).
+select tests.as_user('alice');
 select throws_ok(format($$ insert into public.song_versions (song_id, owner_id, label, forked_from_version_id)
-    values ('00000000-0000-0000-0000-000000000001', %L, 'Fake fork', tests.version('V-org')) $$, tests.uid('bob')),
-    '42501', null, 'forked_from_version_id is only set by fork_song_version');
+    values ('00000000-0000-0000-0000-000000000001', %L, 'Fake fork', tests.version('V-private')) $$, tests.uid('alice')),
+    '42501', null, 'forked_from_version_id cannot point at a version the owner cannot see');
+select tests.as_user('bob');
 select throws_ok(format($$ insert into public.version_shares (version_id, organization_id) values (tests.version('V-org'), %L) $$,
     tests.org('Org B')), '42501', null, 'owner cannot share to an organization they are not in');
 select lives_ok(format($$ insert into public.version_shares (version_id, organization_id) values (tests.version('V-org'), %L) $$,

@@ -14,12 +14,19 @@ class SetlistItem {
     this.keyOverride,
     this.tempoOverride,
     this.notes,
+    this.titleSnapshot,
+    this.artistSnapshot,
+    this.labelSnapshot,
+    this.keySnapshot,
   }) : assert(orderIndex >= 0, 'orderIndex cannot be negative');
 
   /// Unique identifier for this setlist entry.
   final String id;
 
-  /// Identifier of the referenced [Song].
+  /// Identifier of the referenced [Song] (a song version).
+  ///
+  /// Empty for a tombstone: the version disappeared (deleted, unshared or made
+  /// private) and only the snapshot below is left.
   final String songId;
 
   /// Position of the song in the setlist (0-indexed).
@@ -34,6 +41,22 @@ class SetlistItem {
   /// Performance-specific rehearsal or cue notes.
   final String? notes;
 
+  /// Title of the song as last seen on the backend; shown when the version is
+  /// gone.
+  final String? titleSnapshot;
+
+  /// Artist of the song as last seen on the backend.
+  final String? artistSnapshot;
+
+  /// Version label as last seen on the backend.
+  final String? labelSnapshot;
+
+  /// Version key as last seen on the backend.
+  final String? keySnapshot;
+
+  /// Whether the referenced version is gone and this entry is read-only.
+  bool get isTombstone => songId.isEmpty;
+
   /// Converts this [SetlistItem] to a JSON-compatible map.
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -42,6 +65,10 @@ class SetlistItem {
     'keyOverride': keyOverride,
     'tempoOverride': tempoOverride,
     'notes': notes,
+    'titleSnapshot': titleSnapshot,
+    'artistSnapshot': artistSnapshot,
+    'labelSnapshot': labelSnapshot,
+    'keySnapshot': keySnapshot,
   };
 
   /// Constructs a [SetlistItem] from a JSON map.
@@ -52,6 +79,10 @@ class SetlistItem {
     keyOverride: json['keyOverride'] as String?,
     tempoOverride: json['tempoOverride'] as int?,
     notes: json['notes'] as String?,
+    titleSnapshot: json['titleSnapshot'] as String?,
+    artistSnapshot: json['artistSnapshot'] as String?,
+    labelSnapshot: json['labelSnapshot'] as String?,
+    keySnapshot: json['keySnapshot'] as String?,
   );
 
   /// Creates a copy of this [SetlistItem] with optional updated fields.
@@ -65,6 +96,10 @@ class SetlistItem {
     bool clearTempoOverride = false,
     String? notes,
     bool clearNotes = false,
+    String? titleSnapshot,
+    String? artistSnapshot,
+    String? labelSnapshot,
+    String? keySnapshot,
   }) {
     return SetlistItem(
       id: id ?? this.id,
@@ -75,6 +110,10 @@ class SetlistItem {
           ? null
           : (tempoOverride ?? this.tempoOverride),
       notes: clearNotes ? null : (notes ?? this.notes),
+      titleSnapshot: titleSnapshot ?? this.titleSnapshot,
+      artistSnapshot: artistSnapshot ?? this.artistSnapshot,
+      labelSnapshot: labelSnapshot ?? this.labelSnapshot,
+      keySnapshot: keySnapshot ?? this.keySnapshot,
     );
   }
 
@@ -88,11 +127,25 @@ class SetlistItem {
           orderIndex == other.orderIndex &&
           keyOverride == other.keyOverride &&
           tempoOverride == other.tempoOverride &&
-          notes == other.notes;
+          notes == other.notes &&
+          titleSnapshot == other.titleSnapshot &&
+          artistSnapshot == other.artistSnapshot &&
+          labelSnapshot == other.labelSnapshot &&
+          keySnapshot == other.keySnapshot;
 
   @override
-  int get hashCode =>
-      Object.hash(id, songId, orderIndex, keyOverride, tempoOverride, notes);
+  int get hashCode => Object.hash(
+    id,
+    songId,
+    orderIndex,
+    keyOverride,
+    tempoOverride,
+    notes,
+    titleSnapshot,
+    artistSnapshot,
+    labelSnapshot,
+    keySnapshot,
+  );
 
   @override
   String toString() =>

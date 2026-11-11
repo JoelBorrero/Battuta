@@ -41,3 +41,18 @@ Product / ops:
 - The realtime deactivation path in the coordinator does not check which account the error belongs to
   (the repository path does).
 - One extra profile request per sign-in/session restore.
+
+## From 004: song sync
+- **007:** wire `canAdministerOrganization` (today even admins get `not_admin` from the setlist repository).
+- **008:** title/artist edits on a version whose song was created by someone else are reverted by sync; needs a
+  UI rule (edit only your own song's title, or propose a merge).
+- **008:** `updateSharing` exists only on `DriftSongRepository`, not on the `SongRepository` interface.
+- Sharing changes (label, visibility, shares) have no edit time: the device that syncs last wins.
+- A refused share after a successful visibility update leaves the version `organizations` with only the
+  accepted shares (no rollback).
+- Organization setlists: an admin can set a far-future `edited_at` and always win over other admins (clamp on
+  the server).
+- A client can record fork lineage from any visible version without the `song_version_forked` notification
+  (only `fork_song_version` notifies).
+- Integration test "making a version private removes it from the member" failed once (not reproduced in 8
+  runs): possible flake.

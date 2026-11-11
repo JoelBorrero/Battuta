@@ -33,6 +33,18 @@ _Song _$SongFromJson(Map<String, dynamic> json) => _Song(
   notes: json['notes'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
+  songWorkId: json['songWorkId'] as String?,
+  ownerId: json['ownerId'] as String?,
+  label: json['label'] as String? ?? 'Original',
+  visibility:
+      $enumDecodeNullable(_$SongVisibilityEnumMap, json['visibility']) ??
+      SongVisibility.private,
+  forkedFromVersionId: json['forkedFromVersionId'] as String?,
+  sharedOrganizationIds:
+      (json['sharedOrganizationIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$SongToJson(_Song instance) => <String, dynamic>{
@@ -51,9 +63,21 @@ Map<String, dynamic> _$SongToJson(_Song instance) => <String, dynamic>{
   'notes': instance.notes,
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
+  'songWorkId': instance.songWorkId,
+  'ownerId': instance.ownerId,
+  'label': instance.label,
+  'visibility': _$SongVisibilityEnumMap[instance.visibility]!,
+  'forkedFromVersionId': instance.forkedFromVersionId,
+  'sharedOrganizationIds': instance.sharedOrganizationIds,
 };
 
 $Rec? _$recordConvertNullable<$Rec>(
   Object? value,
   $Rec Function(Map) convert,
 ) => value == null ? null : convert(value as Map<String, dynamic>);
+
+const _$SongVisibilityEnumMap = {
+  SongVisibility.private: 'private',
+  SongVisibility.organizations: 'organizations',
+  SongVisibility.public: 'public',
+};

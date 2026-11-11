@@ -67,6 +67,7 @@ enum BackendErrorCode {
 
   // Client side conditions.
   offline('offline', BackendErrorKind.other),
+  notOwner('not_owner', BackendErrorKind.permission),
   notSignedIn('not_signed_in', BackendErrorKind.permission),
   unknown('unknown', BackendErrorKind.other);
 
@@ -79,7 +80,10 @@ enum BackendErrorCode {
 
   /// Codes the backend can raise (excludes the client side ones).
   static List<BackendErrorCode> get documented => values
-      .where((c) => c != offline && c != notSignedIn && c != unknown)
+      .where(
+        (c) =>
+            c != offline && c != notOwner && c != notSignedIn && c != unknown,
+      )
       .toList(growable: false);
 
   /// Maps a backend message to a code. Never throws: unknown text becomes

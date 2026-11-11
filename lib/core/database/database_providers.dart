@@ -7,6 +7,7 @@ library;
 import 'dart:io';
 
 import 'package:battuta/core/database/app_database.dart';
+import 'package:battuta/features/organizations/presentation/providers/organization_data_providers.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_setlist_repository.dart';
 import 'package:battuta/features/repertoire/data/repositories/drift_song_repository.dart';
 import 'package:battuta/features/repertoire/data/repositories/in_memory_setlist_repository.dart';
@@ -33,7 +34,7 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 /// Provides the offline [SongRepository] backed by Drift SQLite.
 final driftSongRepositoryProvider = Provider<SongRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return DriftSongRepository(db);
+  return DriftSongRepository(db, session: ref.watch(accountSessionProvider));
 });
 
 /// Provides the offline [SetlistRepository] backed by Drift SQLite.
@@ -43,11 +44,11 @@ final setlistRepositoryProvider = Provider<SetlistRepository>((ref) {
     return InMemorySetlistRepository();
   }
   final db = ref.watch(appDatabaseProvider);
-  return DriftSetlistRepository(db);
+  return DriftSetlistRepository(db, session: ref.watch(accountSessionProvider));
 });
 
 /// Provides the offline [ScoreRepository] backed by Drift SQLite.
 final scoreRepositoryProvider = Provider<ScoreRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return DriftScoreRepository(db);
+  return DriftScoreRepository(db, session: ref.watch(accountSessionProvider));
 });

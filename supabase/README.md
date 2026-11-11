@@ -4,8 +4,10 @@ Schema, Row Level Security (RLS), RPCs and tests for real accounts, organization
 Battuta stays offline-first: Drift (SQLite) is the source of truth for the UI, and signing in is only
 needed for organizations and shared data (cached locally). Without an account the app runs on local data.
 
-Everything lives in one baseline migration: `migrations/20261110000000_baseline.sql`.
-The backend is a test environment, so the schema is rebuilt from scratch rather than patched.
+The schema is one baseline migration, `migrations/20261110000000_baseline.sql` (never edited), plus small
+follow-up migrations: `20261110000100_personal_setlists_and_overrides.sql` (personal setlists, key and tempo
+overrides on setlist entries, and the `edited_at` conflict stamps). The backend is a test environment, so the baseline was rebuilt from scratch
+rather than patched.
 
 ---
 
@@ -29,7 +31,7 @@ others. Inside an organization a musician can play in several bands.
 | `scores` (+ `sections`, `measures`, `note_events`, `chord_symbols`) | Notation of a version. |
 | `organization_repertoire` | The versions an organization plays (picked by admins among versions visible to it). |
 | `song_merge_requests` | Merge of two separately created copies of the same work. |
-| `setlists`, `setlist_items` | Setlists reference repertoire versions; items keep a title snapshot. |
+| `setlists`, `setlist_items` | A setlist belongs to **either** an organization (`organization_id`) **or** a user (`owner_id`, a personal setlist): exactly one is set. Items reference a version and keep a title snapshot plus `key_override`, `tempo_override` and `notes`. Organization items reference repertoire versions; personal items reference any version the owner can see. |
 | `calendar_events`, `recurring_schedules` | Belong to an organization, optional `band_id`. |
 | `event_assignments` | Who plays what at an event, with `response` (`pending`, `accepted`, `declined`), `responded_at`, `decline_reason`. |
 | `member_absences` | Days a member is away (`starts_on`, `ends_on`, `note`). |
@@ -48,6 +50,9 @@ Defense in depth: table/column `GRANT`s, then RLS. `anon` can only read public s
 - Organization data is visible only to active members.
 - Writes to organization content (bands, band members, setlists and items, events, schedules,
   assignments, repertoire): organization admins only, and only while the organization is not archived.
+- Personal setlists (and their items) are visible and writable only by their owner (an active account).
+  A setlist can never change between personal and organization, or change owner: only `title`, `description`,
+  `event_date`, `tags_json` and `band_id` are updatable.
 - A member can update only their own musician fields through a column-level grant. Nobody, admins
   included, can change `role`, `organization_id` or `user_id` directly. Admins may edit members' musician
   fields; the member is notified (`member_profile_edited`, with the changed fields).
@@ -208,6 +213,7 @@ Each file is self-contained and defines a small `tests` helper schema (`tests.as
 - `05_deactivation`: deactivated accounts and `auth.users` deletion.
 - `06_songs`: visibility (anon/outsider/member/admin), owner-only editing, repertoire, setlist tombstones, forks, merges.
 - `07_availability_notifications`: absences, assignment responses, notifications.
+- `08_personal_setlists`: personal vs organization setlists, privacy, overrides, tombstones, immutability of owner.
 
 `supabase/.gitignore` keeps local-only files (`.branches`, `.temp`) out of git.
 
@@ -221,5 +227,35 @@ supabase db push
 Then copy the Project URL and the publishable (anon) key into the app (`SUPABASE_URL` and
 `SUPABASE_ANON_KEY` in `.env`, or Settings > Cloud Synchronization).
 
-Note: until the Dart data layer is migrated (task 003), the existing cloud sync still targets the old
-`team_id` tables and will fail gracefully against this schema.
+## 6. How the app uses the song tables
+
+The app keeps every song, score and setlist in Drift and syncs them with this schema (see
+`lib/features/sync/`). Things that matter when changing the schema:
+
+- A local song row is one `song_versions` row (`Song.id` = version id); `songs` is created on the first push.
+- Clients cannot `INSERT ... RETURNING` a version (the select policy cannot see the row inside the statement
+  that creates it): insert, then read `updated_at`.
+- Clients cannot upsert a version either (no update grant on `id`, `song_id`, `owner_id`): the app inserts
+  new versions and updates the editable columns of existing ones.
+- Embedding a setlist's items needs the foreign key hint `setlist_items!setlist_items_setlist_fkey(*)`
+  (there are two relationships: the composite one for organizations and the plain one).
+- **Conflicts use `edited_at`, not `updated_at`.** `updated_at` is set by the server on every update (a push,
+  a song merge moving versions, a share cleanup) and only tells a device that something changed.
+  `song_versions`, `scores` and `setlists` also have `edited_at`: the time the user last edited the content,
+  stamped by the editing device with millisecond precision. Only clients write it, no trigger or server
+  function does (pgTAP checks that a merge leaves it alone). When a push finds the backend row changed since
+  the device last synced, the later `edited_at` wins; a merge alone therefore never discards a pending edit.
+  On the device the same value (`editedAtMs`) grows with every save, so a save made while a push is in
+  flight keeps the row dirty.
+- **Sharing is pushed separately.** Label, visibility and the `version_shares` diff go out when they changed
+  locally (`sharingDirty`), independent of who won the content conflict. A share the backend refuses (for
+  example an organization the owner does not belong to) is reported once and the local copy takes the
+  backend's sharing, so it is not retried on every sync.
+- **Fork lineage.** Clients may set `forked_from_version_id` on insert (a fork made offline), but the parent
+  must be visible to the owner. `fork_song_version` remains the way to fork online (it also copies scores).
+- **Known limitation: resurrection.** The backend keeps no tombstones for hard deletes. If a version was
+  deleted on one device and another device still has a pending edit of it, the edit re-creates the version
+  as the owner's version on its next push (non-destructive choice). Without a pending edit the deletion
+  reaches the other device through the reconcile of visible ids.
+- Changing a song's title or artist locally only reaches the backend when the user created the song (`songs`
+  is shared by every version of it); on a song created by someone else the sync restores the shared title.

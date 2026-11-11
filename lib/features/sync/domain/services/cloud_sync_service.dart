@@ -13,15 +13,23 @@ abstract class CloudSyncService {
   /// The timestamp of the last successful sync cycle, or null if never synced.
   DateTime? get lastSyncedAt;
 
-  /// Runs a complete two-way sync: pushes local pending mutations to Supabase,
-  /// then pulls remote updates newer than [lastSyncedAt] into local Drift.
-  /// When [isDemo] is true, synchronizes demo data with Supabase.
+  /// Runs a complete two-way sync for the signed-in account: pushes local
+  /// pending mutations (song versions, scores, setlists) to Supabase, then
+  /// pulls what changed on the backend into local Drift and removes what the
+  /// account can no longer see. Without a session or connection it returns an
+  /// offline result and leaves local data untouched.
+  ///
+  /// [teamId] is ignored (organizations are synced by their own data layer).
+  /// When [isDemo] is true there is nothing to sync and the result is offline.
   Future<CloudSyncResult> syncAll({String? teamId, bool isDemo = false});
 
-  /// Pushes local Drift entities (Scores, Songs, Setlists) to Supabase.
+  /// Pushes the account's local changes to Supabase.
   Future<CloudSyncResult> pushLocalChanges({bool isDemo = false});
 
   /// Pulls updated entities from Supabase and applies them to Drift using
   /// Last-Write-Wins (LWW) conflict resolution.
-  Future<CloudSyncResult> pullRemoteChanges({String? teamId, bool isDemo = false});
+  Future<CloudSyncResult> pullRemoteChanges({
+    String? teamId,
+    bool isDemo = false,
+  });
 }

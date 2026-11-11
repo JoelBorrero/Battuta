@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
+import 'package:battuta/features/repertoire/domain/entities/song_visibility.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -134,6 +135,31 @@ void main() {
       expect(song.sections.length, 1);
       expect(song.sections.first.id, isNotEmpty);
       expect(song.sections.first.orderIndex, 0);
+    });
+
+    test('an imported file never carries the exporter\'s ownership or sharing', () {
+      final exported = jsonDecode(
+        SongImportExportService.exportSongToJson(
+          testSong.copyWith(
+            songWorkId: 'work-1',
+            ownerId: 'someone-else',
+            label: 'Their arrangement',
+            visibility: SongVisibility.public,
+            forkedFromVersionId: 'v0',
+            sharedOrganizationIds: const ['o1'],
+          ),
+        ),
+      ) as Map<String, dynamic>;
+      expect(exported['ownerId'], 'someone-else');
+
+      final imported = SongImportExportService.parseSong(jsonEncode(exported));
+      expect(imported.ownerId, isNull);
+      expect(imported.songWorkId, isNull);
+      expect(imported.label, 'Original');
+      expect(imported.visibility, SongVisibility.private);
+      expect(imported.forkedFromVersionId, isNull);
+      expect(imported.sharedOrganizationIds, isEmpty);
+      expect(imported.title, 'Cornerstone');
     });
   });
 }

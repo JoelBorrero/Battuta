@@ -112,6 +112,19 @@ class SongImportExportService {
   static Map<String, dynamic> _sanitizeSongJson(Map<String, dynamic> map) {
     final sanitized = Map<String, dynamic>.from(map);
 
+    // An imported file is always a new local-mode song: it must not carry the
+    // ownership or sharing of the account that exported it.
+    for (final key in const [
+      'songWorkId',
+      'ownerId',
+      'forkedFromVersionId',
+      'sharedOrganizationIds',
+      'visibility',
+      'label',
+    ]) {
+      sanitized.remove(key);
+    }
+
     // ID
     if (sanitized['id'] == null || (sanitized['id'] as String).trim().isEmpty) {
       sanitized['id'] = _uuid.v4();

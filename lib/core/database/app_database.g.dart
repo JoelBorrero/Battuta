@@ -141,6 +141,148 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _songWorkIdMeta = const VerificationMeta(
+    'songWorkId',
+  );
+  @override
+  late final GeneratedColumn<String> songWorkId = GeneratedColumn<String>(
+    'song_work_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('Original'),
+  );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('private'),
+  );
+  static const VerificationMeta _forkedFromVersionIdMeta =
+      const VerificationMeta('forkedFromVersionId');
+  @override
+  late final GeneratedColumn<String> forkedFromVersionId =
+      GeneratedColumn<String>(
+        'forked_from_version_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _sharedOrganizationIdsJsonMeta =
+      const VerificationMeta('sharedOrganizationIdsJson');
+  @override
+  late final GeneratedColumn<String> sharedOrganizationIdsJson =
+      GeneratedColumn<String>(
+        'shared_organization_ids_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remoteUpdatedAtMeta = const VerificationMeta(
+    'remoteUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> remoteUpdatedAt = GeneratedColumn<String>(
+    'remote_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMsMeta = const VerificationMeta(
+    'editedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> editedAtMs = GeneratedColumn<int>(
+    'edited_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _sharingDirtyMeta = const VerificationMeta(
+    'sharingDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> sharingDirty = GeneratedColumn<bool>(
+    'sharing_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("sharing_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -156,6 +298,18 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     notes,
     createdAt,
     updatedAt,
+    songWorkId,
+    ownerId,
+    label,
+    visibility,
+    forkedFromVersionId,
+    sharedOrganizationIdsJson,
+    isDirty,
+    deletedAt,
+    remoteUpdatedAt,
+    accountId,
+    editedAtMs,
+    sharingDirty,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -270,6 +424,96 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('song_work_id')) {
+      context.handle(
+        _songWorkIdMeta,
+        songWorkId.isAcceptableOrUnknown(
+          data['song_work_id']!,
+          _songWorkIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    }
+    if (data.containsKey('forked_from_version_id')) {
+      context.handle(
+        _forkedFromVersionIdMeta,
+        forkedFromVersionId.isAcceptableOrUnknown(
+          data['forked_from_version_id']!,
+          _forkedFromVersionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shared_organization_ids_json')) {
+      context.handle(
+        _sharedOrganizationIdsJsonMeta,
+        sharedOrganizationIdsJson.isAcceptableOrUnknown(
+          data['shared_organization_ids_json']!,
+          _sharedOrganizationIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('remote_updated_at')) {
+      context.handle(
+        _remoteUpdatedAtMeta,
+        remoteUpdatedAt.isAcceptableOrUnknown(
+          data['remote_updated_at']!,
+          _remoteUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    }
+    if (data.containsKey('edited_at_ms')) {
+      context.handle(
+        _editedAtMsMeta,
+        editedAtMs.isAcceptableOrUnknown(
+          data['edited_at_ms']!,
+          _editedAtMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sharing_dirty')) {
+      context.handle(
+        _sharingDirtyMeta,
+        sharingDirty.isAcceptableOrUnknown(
+          data['sharing_dirty']!,
+          _sharingDirtyMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -331,6 +575,54 @@ class $SongsTable extends Songs with TableInfo<$SongsTable, SongEntry> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      songWorkId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}song_work_id'],
+      ),
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      ),
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
+      forkedFromVersionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}forked_from_version_id'],
+      ),
+      sharedOrganizationIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shared_organization_ids_json'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      remoteUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_updated_at'],
+      ),
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      ),
+      editedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}edited_at_ms'],
+      )!,
+      sharingDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}sharing_dirty'],
+      )!,
     );
   }
 
@@ -354,6 +646,32 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? songWorkId;
+  final String? ownerId;
+  final String label;
+  final String visibility;
+  final String? forkedFromVersionId;
+  final String sharedOrganizationIdsJson;
+  final bool isDirty;
+
+  /// Local tombstone: set when a synced version is deleted, until the delete
+  /// has been pushed.
+  final DateTime? deletedAt;
+
+  /// `updated_at` of the backend row this copy was last synced with, as the
+  /// exact ISO-8601 text the backend sent (Drift's `DateTime` would drop the
+  /// sub-second part and make unchanged rows look changed).
+  final String? remoteUpdatedAt;
+  final String? accountId;
+
+  /// When the user last edited the version, in milliseconds since the epoch.
+  /// Strictly increasing per row, so two saves never share a value; it is what
+  /// devices compare to decide whose edit is newer, and what tells a push that
+  /// the row was edited again while it was in flight.
+  final int editedAtMs;
+
+  /// Label, visibility or shares changed locally and are not pushed yet.
+  final bool sharingDirty;
   const SongEntry({
     required this.id,
     required this.title,
@@ -368,6 +686,18 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     this.notes,
     required this.createdAt,
     required this.updatedAt,
+    this.songWorkId,
+    this.ownerId,
+    required this.label,
+    required this.visibility,
+    this.forkedFromVersionId,
+    required this.sharedOrganizationIdsJson,
+    required this.isDirty,
+    this.deletedAt,
+    this.remoteUpdatedAt,
+    this.accountId,
+    required this.editedAtMs,
+    required this.sharingDirty,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -389,6 +719,32 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || songWorkId != null) {
+      map['song_work_id'] = Variable<String>(songWorkId);
+    }
+    if (!nullToAbsent || ownerId != null) {
+      map['owner_id'] = Variable<String>(ownerId);
+    }
+    map['label'] = Variable<String>(label);
+    map['visibility'] = Variable<String>(visibility);
+    if (!nullToAbsent || forkedFromVersionId != null) {
+      map['forked_from_version_id'] = Variable<String>(forkedFromVersionId);
+    }
+    map['shared_organization_ids_json'] = Variable<String>(
+      sharedOrganizationIdsJson,
+    );
+    map['is_dirty'] = Variable<bool>(isDirty);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || remoteUpdatedAt != null) {
+      map['remote_updated_at'] = Variable<String>(remoteUpdatedAt);
+    }
+    if (!nullToAbsent || accountId != null) {
+      map['account_id'] = Variable<String>(accountId);
+    }
+    map['edited_at_ms'] = Variable<int>(editedAtMs);
+    map['sharing_dirty'] = Variable<bool>(sharingDirty);
     return map;
   }
 
@@ -411,6 +767,30 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           : Value(notes),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      songWorkId: songWorkId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(songWorkId),
+      ownerId: ownerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerId),
+      label: Value(label),
+      visibility: Value(visibility),
+      forkedFromVersionId: forkedFromVersionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(forkedFromVersionId),
+      sharedOrganizationIdsJson: Value(sharedOrganizationIdsJson),
+      isDirty: Value(isDirty),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      remoteUpdatedAt: remoteUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteUpdatedAt),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
+      editedAtMs: Value(editedAtMs),
+      sharingDirty: Value(sharingDirty),
     );
   }
 
@@ -435,6 +815,22 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      songWorkId: serializer.fromJson<String?>(json['songWorkId']),
+      ownerId: serializer.fromJson<String?>(json['ownerId']),
+      label: serializer.fromJson<String>(json['label']),
+      visibility: serializer.fromJson<String>(json['visibility']),
+      forkedFromVersionId: serializer.fromJson<String?>(
+        json['forkedFromVersionId'],
+      ),
+      sharedOrganizationIdsJson: serializer.fromJson<String>(
+        json['sharedOrganizationIdsJson'],
+      ),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      remoteUpdatedAt: serializer.fromJson<String?>(json['remoteUpdatedAt']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
+      editedAtMs: serializer.fromJson<int>(json['editedAtMs']),
+      sharingDirty: serializer.fromJson<bool>(json['sharingDirty']),
     );
   }
   @override
@@ -454,6 +850,20 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'songWorkId': serializer.toJson<String?>(songWorkId),
+      'ownerId': serializer.toJson<String?>(ownerId),
+      'label': serializer.toJson<String>(label),
+      'visibility': serializer.toJson<String>(visibility),
+      'forkedFromVersionId': serializer.toJson<String?>(forkedFromVersionId),
+      'sharedOrganizationIdsJson': serializer.toJson<String>(
+        sharedOrganizationIdsJson,
+      ),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'remoteUpdatedAt': serializer.toJson<String?>(remoteUpdatedAt),
+      'accountId': serializer.toJson<String?>(accountId),
+      'editedAtMs': serializer.toJson<int>(editedAtMs),
+      'sharingDirty': serializer.toJson<bool>(sharingDirty),
     };
   }
 
@@ -471,6 +881,18 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<String?> songWorkId = const Value.absent(),
+    Value<String?> ownerId = const Value.absent(),
+    String? label,
+    String? visibility,
+    Value<String?> forkedFromVersionId = const Value.absent(),
+    String? sharedOrganizationIdsJson,
+    bool? isDirty,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> remoteUpdatedAt = const Value.absent(),
+    Value<String?> accountId = const Value.absent(),
+    int? editedAtMs,
+    bool? sharingDirty,
   }) => SongEntry(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -488,6 +910,23 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    songWorkId: songWorkId.present ? songWorkId.value : this.songWorkId,
+    ownerId: ownerId.present ? ownerId.value : this.ownerId,
+    label: label ?? this.label,
+    visibility: visibility ?? this.visibility,
+    forkedFromVersionId: forkedFromVersionId.present
+        ? forkedFromVersionId.value
+        : this.forkedFromVersionId,
+    sharedOrganizationIdsJson:
+        sharedOrganizationIdsJson ?? this.sharedOrganizationIdsJson,
+    isDirty: isDirty ?? this.isDirty,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    remoteUpdatedAt: remoteUpdatedAt.present
+        ? remoteUpdatedAt.value
+        : this.remoteUpdatedAt,
+    accountId: accountId.present ? accountId.value : this.accountId,
+    editedAtMs: editedAtMs ?? this.editedAtMs,
+    sharingDirty: sharingDirty ?? this.sharingDirty,
   );
   SongEntry copyWithCompanion(SongsCompanion data) {
     return SongEntry(
@@ -512,6 +951,32 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      songWorkId: data.songWorkId.present
+          ? data.songWorkId.value
+          : this.songWorkId,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      label: data.label.present ? data.label.value : this.label,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
+      forkedFromVersionId: data.forkedFromVersionId.present
+          ? data.forkedFromVersionId.value
+          : this.forkedFromVersionId,
+      sharedOrganizationIdsJson: data.sharedOrganizationIdsJson.present
+          ? data.sharedOrganizationIdsJson.value
+          : this.sharedOrganizationIdsJson,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      remoteUpdatedAt: data.remoteUpdatedAt.present
+          ? data.remoteUpdatedAt.value
+          : this.remoteUpdatedAt,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      editedAtMs: data.editedAtMs.present
+          ? data.editedAtMs.value
+          : this.editedAtMs,
+      sharingDirty: data.sharingDirty.present
+          ? data.sharingDirty.value
+          : this.sharingDirty,
     );
   }
 
@@ -530,13 +995,25 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           ..write('coverImagePath: $coverImagePath, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('songWorkId: $songWorkId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('label: $label, ')
+          ..write('visibility: $visibility, ')
+          ..write('forkedFromVersionId: $forkedFromVersionId, ')
+          ..write('sharedOrganizationIdsJson: $sharedOrganizationIdsJson, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
+          ..write('accountId: $accountId, ')
+          ..write('editedAtMs: $editedAtMs, ')
+          ..write('sharingDirty: $sharingDirty')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     title,
     artist,
@@ -550,7 +1027,19 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
     notes,
     createdAt,
     updatedAt,
-  );
+    songWorkId,
+    ownerId,
+    label,
+    visibility,
+    forkedFromVersionId,
+    sharedOrganizationIdsJson,
+    isDirty,
+    deletedAt,
+    remoteUpdatedAt,
+    accountId,
+    editedAtMs,
+    sharingDirty,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -567,7 +1056,19 @@ class SongEntry extends DataClass implements Insertable<SongEntry> {
           other.coverImagePath == this.coverImagePath &&
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.songWorkId == this.songWorkId &&
+          other.ownerId == this.ownerId &&
+          other.label == this.label &&
+          other.visibility == this.visibility &&
+          other.forkedFromVersionId == this.forkedFromVersionId &&
+          other.sharedOrganizationIdsJson == this.sharedOrganizationIdsJson &&
+          other.isDirty == this.isDirty &&
+          other.deletedAt == this.deletedAt &&
+          other.remoteUpdatedAt == this.remoteUpdatedAt &&
+          other.accountId == this.accountId &&
+          other.editedAtMs == this.editedAtMs &&
+          other.sharingDirty == this.sharingDirty);
 }
 
 class SongsCompanion extends UpdateCompanion<SongEntry> {
@@ -584,6 +1085,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
   final Value<String?> notes;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<String?> songWorkId;
+  final Value<String?> ownerId;
+  final Value<String> label;
+  final Value<String> visibility;
+  final Value<String?> forkedFromVersionId;
+  final Value<String> sharedOrganizationIdsJson;
+  final Value<bool> isDirty;
+  final Value<DateTime?> deletedAt;
+  final Value<String?> remoteUpdatedAt;
+  final Value<String?> accountId;
+  final Value<int> editedAtMs;
+  final Value<bool> sharingDirty;
   final Value<int> rowid;
   const SongsCompanion({
     this.id = const Value.absent(),
@@ -599,6 +1112,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.songWorkId = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.visibility = const Value.absent(),
+    this.forkedFromVersionId = const Value.absent(),
+    this.sharedOrganizationIdsJson = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.remoteUpdatedAt = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.editedAtMs = const Value.absent(),
+    this.sharingDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SongsCompanion.insert({
@@ -615,6 +1140,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     this.notes = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.songWorkId = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.visibility = const Value.absent(),
+    this.forkedFromVersionId = const Value.absent(),
+    this.sharedOrganizationIdsJson = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.remoteUpdatedAt = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.editedAtMs = const Value.absent(),
+    this.sharingDirty = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -637,6 +1174,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? songWorkId,
+    Expression<String>? ownerId,
+    Expression<String>? label,
+    Expression<String>? visibility,
+    Expression<String>? forkedFromVersionId,
+    Expression<String>? sharedOrganizationIdsJson,
+    Expression<bool>? isDirty,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? remoteUpdatedAt,
+    Expression<String>? accountId,
+    Expression<int>? editedAtMs,
+    Expression<bool>? sharingDirty,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -655,6 +1204,20 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (songWorkId != null) 'song_work_id': songWorkId,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (label != null) 'label': label,
+      if (visibility != null) 'visibility': visibility,
+      if (forkedFromVersionId != null)
+        'forked_from_version_id': forkedFromVersionId,
+      if (sharedOrganizationIdsJson != null)
+        'shared_organization_ids_json': sharedOrganizationIdsJson,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (remoteUpdatedAt != null) 'remote_updated_at': remoteUpdatedAt,
+      if (accountId != null) 'account_id': accountId,
+      if (editedAtMs != null) 'edited_at_ms': editedAtMs,
+      if (sharingDirty != null) 'sharing_dirty': sharingDirty,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -673,6 +1236,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     Value<String?>? notes,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<String?>? songWorkId,
+    Value<String?>? ownerId,
+    Value<String>? label,
+    Value<String>? visibility,
+    Value<String?>? forkedFromVersionId,
+    Value<String>? sharedOrganizationIdsJson,
+    Value<bool>? isDirty,
+    Value<DateTime?>? deletedAt,
+    Value<String?>? remoteUpdatedAt,
+    Value<String?>? accountId,
+    Value<int>? editedAtMs,
+    Value<bool>? sharingDirty,
     Value<int>? rowid,
   }) {
     return SongsCompanion(
@@ -690,6 +1265,19 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      songWorkId: songWorkId ?? this.songWorkId,
+      ownerId: ownerId ?? this.ownerId,
+      label: label ?? this.label,
+      visibility: visibility ?? this.visibility,
+      forkedFromVersionId: forkedFromVersionId ?? this.forkedFromVersionId,
+      sharedOrganizationIdsJson:
+          sharedOrganizationIdsJson ?? this.sharedOrganizationIdsJson,
+      isDirty: isDirty ?? this.isDirty,
+      deletedAt: deletedAt ?? this.deletedAt,
+      remoteUpdatedAt: remoteUpdatedAt ?? this.remoteUpdatedAt,
+      accountId: accountId ?? this.accountId,
+      editedAtMs: editedAtMs ?? this.editedAtMs,
+      sharingDirty: sharingDirty ?? this.sharingDirty,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -738,6 +1326,46 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (songWorkId.present) {
+      map['song_work_id'] = Variable<String>(songWorkId.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
+    }
+    if (forkedFromVersionId.present) {
+      map['forked_from_version_id'] = Variable<String>(
+        forkedFromVersionId.value,
+      );
+    }
+    if (sharedOrganizationIdsJson.present) {
+      map['shared_organization_ids_json'] = Variable<String>(
+        sharedOrganizationIdsJson.value,
+      );
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (remoteUpdatedAt.present) {
+      map['remote_updated_at'] = Variable<String>(remoteUpdatedAt.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (editedAtMs.present) {
+      map['edited_at_ms'] = Variable<int>(editedAtMs.value);
+    }
+    if (sharingDirty.present) {
+      map['sharing_dirty'] = Variable<bool>(sharingDirty.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -760,6 +1388,18 @@ class SongsCompanion extends UpdateCompanion<SongEntry> {
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('songWorkId: $songWorkId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('label: $label, ')
+          ..write('visibility: $visibility, ')
+          ..write('forkedFromVersionId: $forkedFromVersionId, ')
+          ..write('sharedOrganizationIdsJson: $sharedOrganizationIdsJson, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
+          ..write('accountId: $accountId, ')
+          ..write('editedAtMs: $editedAtMs, ')
+          ..write('sharingDirty: $sharingDirty, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -858,6 +1498,77 @@ class $SetlistsTable extends Setlists
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remoteUpdatedAtMeta = const VerificationMeta(
+    'remoteUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> remoteUpdatedAt = GeneratedColumn<String>(
+    'remote_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+    'account_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMsMeta = const VerificationMeta(
+    'editedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> editedAtMs = GeneratedColumn<int>(
+    'edited_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -868,6 +1579,12 @@ class $SetlistsTable extends Setlists
     tagsJson,
     createdAt,
     updatedAt,
+    organizationId,
+    isDirty,
+    deletedAt,
+    remoteUpdatedAt,
+    accountId,
+    editedAtMs,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -937,6 +1654,51 @@ class $SetlistsTable extends Setlists
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('remote_updated_at')) {
+      context.handle(
+        _remoteUpdatedAtMeta,
+        remoteUpdatedAt.isAcceptableOrUnknown(
+          data['remote_updated_at']!,
+          _remoteUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(
+        _accountIdMeta,
+        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
+      );
+    }
+    if (data.containsKey('edited_at_ms')) {
+      context.handle(
+        _editedAtMsMeta,
+        editedAtMs.isAcceptableOrUnknown(
+          data['edited_at_ms']!,
+          _editedAtMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -978,6 +1740,30 @@ class $SetlistsTable extends Setlists
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      ),
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      remoteUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_updated_at'],
+      ),
+      accountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}account_id'],
+      ),
+      editedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}edited_at_ms'],
+      )!,
     );
   }
 
@@ -996,6 +1782,16 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
   final String tagsJson;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// Null for a personal setlist.
+  final String? organizationId;
+  final bool isDirty;
+  final DateTime? deletedAt;
+  final String? remoteUpdatedAt;
+  final String? accountId;
+
+  /// See [Songs.editedAtMs].
+  final int editedAtMs;
   const SetlistEntry({
     required this.id,
     required this.title,
@@ -1005,6 +1801,12 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
     required this.tagsJson,
     required this.createdAt,
     required this.updatedAt,
+    this.organizationId,
+    required this.isDirty,
+    this.deletedAt,
+    this.remoteUpdatedAt,
+    this.accountId,
+    required this.editedAtMs,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1021,6 +1823,20 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
     map['tags_json'] = Variable<String>(tagsJson);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || organizationId != null) {
+      map['organization_id'] = Variable<String>(organizationId);
+    }
+    map['is_dirty'] = Variable<bool>(isDirty);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || remoteUpdatedAt != null) {
+      map['remote_updated_at'] = Variable<String>(remoteUpdatedAt);
+    }
+    if (!nullToAbsent || accountId != null) {
+      map['account_id'] = Variable<String>(accountId);
+    }
+    map['edited_at_ms'] = Variable<int>(editedAtMs);
     return map;
   }
 
@@ -1038,6 +1854,20 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
       tagsJson: Value(tagsJson),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      organizationId: organizationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(organizationId),
+      isDirty: Value(isDirty),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      remoteUpdatedAt: remoteUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteUpdatedAt),
+      accountId: accountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accountId),
+      editedAtMs: Value(editedAtMs),
     );
   }
 
@@ -1055,6 +1885,12 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
       tagsJson: serializer.fromJson<String>(json['tagsJson']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      organizationId: serializer.fromJson<String?>(json['organizationId']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      remoteUpdatedAt: serializer.fromJson<String?>(json['remoteUpdatedAt']),
+      accountId: serializer.fromJson<String?>(json['accountId']),
+      editedAtMs: serializer.fromJson<int>(json['editedAtMs']),
     );
   }
   @override
@@ -1069,6 +1905,12 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
       'tagsJson': serializer.toJson<String>(tagsJson),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'organizationId': serializer.toJson<String?>(organizationId),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'remoteUpdatedAt': serializer.toJson<String?>(remoteUpdatedAt),
+      'accountId': serializer.toJson<String?>(accountId),
+      'editedAtMs': serializer.toJson<int>(editedAtMs),
     };
   }
 
@@ -1081,6 +1923,12 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
     String? tagsJson,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<String?> organizationId = const Value.absent(),
+    bool? isDirty,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> remoteUpdatedAt = const Value.absent(),
+    Value<String?> accountId = const Value.absent(),
+    int? editedAtMs,
   }) => SetlistEntry(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -1090,6 +1938,16 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
     tagsJson: tagsJson ?? this.tagsJson,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    organizationId: organizationId.present
+        ? organizationId.value
+        : this.organizationId,
+    isDirty: isDirty ?? this.isDirty,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    remoteUpdatedAt: remoteUpdatedAt.present
+        ? remoteUpdatedAt.value
+        : this.remoteUpdatedAt,
+    accountId: accountId.present ? accountId.value : this.accountId,
+    editedAtMs: editedAtMs ?? this.editedAtMs,
   );
   SetlistEntry copyWithCompanion(SetlistsCompanion data) {
     return SetlistEntry(
@@ -1103,6 +1961,18 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
       tagsJson: data.tagsJson.present ? data.tagsJson.value : this.tagsJson,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      remoteUpdatedAt: data.remoteUpdatedAt.present
+          ? data.remoteUpdatedAt.value
+          : this.remoteUpdatedAt,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      editedAtMs: data.editedAtMs.present
+          ? data.editedAtMs.value
+          : this.editedAtMs,
     );
   }
 
@@ -1116,7 +1986,13 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
           ..write('itemsJson: $itemsJson, ')
           ..write('tagsJson: $tagsJson, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
+          ..write('accountId: $accountId, ')
+          ..write('editedAtMs: $editedAtMs')
           ..write(')'))
         .toString();
   }
@@ -1131,6 +2007,12 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
     tagsJson,
     createdAt,
     updatedAt,
+    organizationId,
+    isDirty,
+    deletedAt,
+    remoteUpdatedAt,
+    accountId,
+    editedAtMs,
   );
   @override
   bool operator ==(Object other) =>
@@ -1143,7 +2025,13 @@ class SetlistEntry extends DataClass implements Insertable<SetlistEntry> {
           other.itemsJson == this.itemsJson &&
           other.tagsJson == this.tagsJson &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.organizationId == this.organizationId &&
+          other.isDirty == this.isDirty &&
+          other.deletedAt == this.deletedAt &&
+          other.remoteUpdatedAt == this.remoteUpdatedAt &&
+          other.accountId == this.accountId &&
+          other.editedAtMs == this.editedAtMs);
 }
 
 class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
@@ -1155,6 +2043,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
   final Value<String> tagsJson;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<String?> organizationId;
+  final Value<bool> isDirty;
+  final Value<DateTime?> deletedAt;
+  final Value<String?> remoteUpdatedAt;
+  final Value<String?> accountId;
+  final Value<int> editedAtMs;
   final Value<int> rowid;
   const SetlistsCompanion({
     this.id = const Value.absent(),
@@ -1165,6 +2059,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
     this.tagsJson = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.remoteUpdatedAt = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.editedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SetlistsCompanion.insert({
@@ -1176,6 +2076,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
     this.tagsJson = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.organizationId = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.remoteUpdatedAt = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.editedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -1190,6 +2096,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
     Expression<String>? tagsJson,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? organizationId,
+    Expression<bool>? isDirty,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? remoteUpdatedAt,
+    Expression<String>? accountId,
+    Expression<int>? editedAtMs,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1201,6 +2113,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
       if (tagsJson != null) 'tags_json': tagsJson,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (remoteUpdatedAt != null) 'remote_updated_at': remoteUpdatedAt,
+      if (accountId != null) 'account_id': accountId,
+      if (editedAtMs != null) 'edited_at_ms': editedAtMs,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1214,6 +2132,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
     Value<String>? tagsJson,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<String?>? organizationId,
+    Value<bool>? isDirty,
+    Value<DateTime?>? deletedAt,
+    Value<String?>? remoteUpdatedAt,
+    Value<String?>? accountId,
+    Value<int>? editedAtMs,
     Value<int>? rowid,
   }) {
     return SetlistsCompanion(
@@ -1225,6 +2149,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
       tagsJson: tagsJson ?? this.tagsJson,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      organizationId: organizationId ?? this.organizationId,
+      isDirty: isDirty ?? this.isDirty,
+      deletedAt: deletedAt ?? this.deletedAt,
+      remoteUpdatedAt: remoteUpdatedAt ?? this.remoteUpdatedAt,
+      accountId: accountId ?? this.accountId,
+      editedAtMs: editedAtMs ?? this.editedAtMs,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1256,6 +2186,24 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (remoteUpdatedAt.present) {
+      map['remote_updated_at'] = Variable<String>(remoteUpdatedAt.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (editedAtMs.present) {
+      map['edited_at_ms'] = Variable<int>(editedAtMs.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1273,6 +2221,12 @@ class SetlistsCompanion extends UpdateCompanion<SetlistEntry> {
           ..write('tagsJson: $tagsJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
+          ..write('accountId: $accountId, ')
+          ..write('editedAtMs: $editedAtMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1397,6 +2351,55 @@ class $ScoresTable extends Scores with TableInfo<$ScoresTable, ScoreEntry> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remoteUpdatedAtMeta = const VerificationMeta(
+    'remoteUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> remoteUpdatedAt = GeneratedColumn<String>(
+    'remote_updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMsMeta = const VerificationMeta(
+    'editedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> editedAtMs = GeneratedColumn<int>(
+    'edited_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1410,6 +2413,10 @@ class $ScoresTable extends Scores with TableInfo<$ScoresTable, ScoreEntry> {
     sectionsJson,
     metadataJson,
     updatedAt,
+    isDirty,
+    deletedAt,
+    remoteUpdatedAt,
+    editedAtMs,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1512,6 +2519,36 @@ class $ScoresTable extends Scores with TableInfo<$ScoresTable, ScoreEntry> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('remote_updated_at')) {
+      context.handle(
+        _remoteUpdatedAtMeta,
+        remoteUpdatedAt.isAcceptableOrUnknown(
+          data['remote_updated_at']!,
+          _remoteUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('edited_at_ms')) {
+      context.handle(
+        _editedAtMsMeta,
+        editedAtMs.isAcceptableOrUnknown(
+          data['edited_at_ms']!,
+          _editedAtMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1565,6 +2602,22 @@ class $ScoresTable extends Scores with TableInfo<$ScoresTable, ScoreEntry> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      remoteUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_updated_at'],
+      ),
+      editedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}edited_at_ms'],
+      )!,
     );
   }
 
@@ -1586,6 +2639,12 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
   final String sectionsJson;
   final String metadataJson;
   final DateTime updatedAt;
+  final bool isDirty;
+  final DateTime? deletedAt;
+  final String? remoteUpdatedAt;
+
+  /// See [Songs.editedAtMs].
+  final int editedAtMs;
   const ScoreEntry({
     required this.id,
     this.songId,
@@ -1598,6 +2657,10 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
     required this.sectionsJson,
     required this.metadataJson,
     required this.updatedAt,
+    required this.isDirty,
+    this.deletedAt,
+    this.remoteUpdatedAt,
+    required this.editedAtMs,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1619,6 +2682,14 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
     map['sections_json'] = Variable<String>(sectionsJson);
     map['metadata_json'] = Variable<String>(metadataJson);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || remoteUpdatedAt != null) {
+      map['remote_updated_at'] = Variable<String>(remoteUpdatedAt);
+    }
+    map['edited_at_ms'] = Variable<int>(editedAtMs);
     return map;
   }
 
@@ -1641,6 +2712,14 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
       sectionsJson: Value(sectionsJson),
       metadataJson: Value(metadataJson),
       updatedAt: Value(updatedAt),
+      isDirty: Value(isDirty),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      remoteUpdatedAt: remoteUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteUpdatedAt),
+      editedAtMs: Value(editedAtMs),
     );
   }
 
@@ -1661,6 +2740,10 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
       sectionsJson: serializer.fromJson<String>(json['sectionsJson']),
       metadataJson: serializer.fromJson<String>(json['metadataJson']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      remoteUpdatedAt: serializer.fromJson<String?>(json['remoteUpdatedAt']),
+      editedAtMs: serializer.fromJson<int>(json['editedAtMs']),
     );
   }
   @override
@@ -1678,6 +2761,10 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
       'sectionsJson': serializer.toJson<String>(sectionsJson),
       'metadataJson': serializer.toJson<String>(metadataJson),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'remoteUpdatedAt': serializer.toJson<String?>(remoteUpdatedAt),
+      'editedAtMs': serializer.toJson<int>(editedAtMs),
     };
   }
 
@@ -1693,6 +2780,10 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
     String? sectionsJson,
     String? metadataJson,
     DateTime? updatedAt,
+    bool? isDirty,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> remoteUpdatedAt = const Value.absent(),
+    int? editedAtMs,
   }) => ScoreEntry(
     id: id ?? this.id,
     songId: songId.present ? songId.value : this.songId,
@@ -1705,6 +2796,12 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
     sectionsJson: sectionsJson ?? this.sectionsJson,
     metadataJson: metadataJson ?? this.metadataJson,
     updatedAt: updatedAt ?? this.updatedAt,
+    isDirty: isDirty ?? this.isDirty,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    remoteUpdatedAt: remoteUpdatedAt.present
+        ? remoteUpdatedAt.value
+        : this.remoteUpdatedAt,
+    editedAtMs: editedAtMs ?? this.editedAtMs,
   );
   ScoreEntry copyWithCompanion(ScoresCompanion data) {
     return ScoreEntry(
@@ -1727,6 +2824,14 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
           ? data.metadataJson.value
           : this.metadataJson,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      remoteUpdatedAt: data.remoteUpdatedAt.present
+          ? data.remoteUpdatedAt.value
+          : this.remoteUpdatedAt,
+      editedAtMs: data.editedAtMs.present
+          ? data.editedAtMs.value
+          : this.editedAtMs,
     );
   }
 
@@ -1743,7 +2848,11 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
           ..write('tempo: $tempo, ')
           ..write('sectionsJson: $sectionsJson, ')
           ..write('metadataJson: $metadataJson, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
+          ..write('editedAtMs: $editedAtMs')
           ..write(')'))
         .toString();
   }
@@ -1761,6 +2870,10 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
     sectionsJson,
     metadataJson,
     updatedAt,
+    isDirty,
+    deletedAt,
+    remoteUpdatedAt,
+    editedAtMs,
   );
   @override
   bool operator ==(Object other) =>
@@ -1776,7 +2889,11 @@ class ScoreEntry extends DataClass implements Insertable<ScoreEntry> {
           other.tempo == this.tempo &&
           other.sectionsJson == this.sectionsJson &&
           other.metadataJson == this.metadataJson &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.isDirty == this.isDirty &&
+          other.deletedAt == this.deletedAt &&
+          other.remoteUpdatedAt == this.remoteUpdatedAt &&
+          other.editedAtMs == this.editedAtMs);
 }
 
 class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
@@ -1791,6 +2908,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
   final Value<String> sectionsJson;
   final Value<String> metadataJson;
   final Value<DateTime> updatedAt;
+  final Value<bool> isDirty;
+  final Value<DateTime?> deletedAt;
+  final Value<String?> remoteUpdatedAt;
+  final Value<int> editedAtMs;
   final Value<int> rowid;
   const ScoresCompanion({
     this.id = const Value.absent(),
@@ -1804,6 +2925,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
     this.sectionsJson = const Value.absent(),
     this.metadataJson = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.remoteUpdatedAt = const Value.absent(),
+    this.editedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ScoresCompanion.insert({
@@ -1818,6 +2943,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
     required String sectionsJson,
     this.metadataJson = const Value.absent(),
     required DateTime updatedAt,
+    this.isDirty = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.remoteUpdatedAt = const Value.absent(),
+    this.editedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -1838,6 +2967,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
     Expression<String>? sectionsJson,
     Expression<String>? metadataJson,
     Expression<DateTime>? updatedAt,
+    Expression<bool>? isDirty,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? remoteUpdatedAt,
+    Expression<int>? editedAtMs,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1852,6 +2985,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
       if (sectionsJson != null) 'sections_json': sectionsJson,
       if (metadataJson != null) 'metadata_json': metadataJson,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (remoteUpdatedAt != null) 'remote_updated_at': remoteUpdatedAt,
+      if (editedAtMs != null) 'edited_at_ms': editedAtMs,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1868,6 +3005,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
     Value<String>? sectionsJson,
     Value<String>? metadataJson,
     Value<DateTime>? updatedAt,
+    Value<bool>? isDirty,
+    Value<DateTime?>? deletedAt,
+    Value<String?>? remoteUpdatedAt,
+    Value<int>? editedAtMs,
     Value<int>? rowid,
   }) {
     return ScoresCompanion(
@@ -1882,6 +3023,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
       sectionsJson: sectionsJson ?? this.sectionsJson,
       metadataJson: metadataJson ?? this.metadataJson,
       updatedAt: updatedAt ?? this.updatedAt,
+      isDirty: isDirty ?? this.isDirty,
+      deletedAt: deletedAt ?? this.deletedAt,
+      remoteUpdatedAt: remoteUpdatedAt ?? this.remoteUpdatedAt,
+      editedAtMs: editedAtMs ?? this.editedAtMs,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1922,6 +3067,18 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (remoteUpdatedAt.present) {
+      map['remote_updated_at'] = Variable<String>(remoteUpdatedAt.value);
+    }
+    if (editedAtMs.present) {
+      map['edited_at_ms'] = Variable<int>(editedAtMs.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1942,6 +3099,10 @@ class ScoresCompanion extends UpdateCompanion<ScoreEntry> {
           ..write('sectionsJson: $sectionsJson, ')
           ..write('metadataJson: $metadataJson, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('remoteUpdatedAt: $remoteUpdatedAt, ')
+          ..write('editedAtMs: $editedAtMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2676,6 +3837,18 @@ typedef $$SongsTableCreateCompanionBuilder = SongsCompanion Function({
   Value<String?> notes,
   required DateTime createdAt,
   required DateTime updatedAt,
+  Value<String?> songWorkId,
+  Value<String?> ownerId,
+  Value<String> label,
+  Value<String> visibility,
+  Value<String?> forkedFromVersionId,
+  Value<String> sharedOrganizationIdsJson,
+  Value<bool> isDirty,
+  Value<DateTime?> deletedAt,
+  Value<String?> remoteUpdatedAt,
+  Value<String?> accountId,
+  Value<int> editedAtMs,
+  Value<bool> sharingDirty,
   Value<int> rowid,
 });
 typedef $$SongsTableUpdateCompanionBuilder = SongsCompanion Function({
@@ -2692,6 +3865,18 @@ typedef $$SongsTableUpdateCompanionBuilder = SongsCompanion Function({
   Value<String?> notes,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<String?> songWorkId,
+  Value<String?> ownerId,
+  Value<String> label,
+  Value<String> visibility,
+  Value<String?> forkedFromVersionId,
+  Value<String> sharedOrganizationIdsJson,
+  Value<bool> isDirty,
+  Value<DateTime?> deletedAt,
+  Value<String?> remoteUpdatedAt,
+  Value<String?> accountId,
+  Value<int> editedAtMs,
+  Value<bool> sharingDirty,
   Value<int> rowid,
 });
 
@@ -2765,6 +3950,66 @@ class $$SongsTableFilterComposer extends Composer<_$AppDatabase, $SongsTable> {
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get songWorkId => $composableBuilder(
+    column: $table.songWorkId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get forkedFromVersionId => $composableBuilder(
+    column: $table.forkedFromVersionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sharedOrganizationIdsJson => $composableBuilder(
+    column: $table.sharedOrganizationIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sharingDirty => $composableBuilder(
+    column: $table.sharingDirty,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2842,6 +4087,66 @@ class $$SongsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get songWorkId => $composableBuilder(
+    column: $table.songWorkId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get forkedFromVersionId => $composableBuilder(
+    column: $table.forkedFromVersionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sharedOrganizationIdsJson => $composableBuilder(
+    column: $table.sharedOrganizationIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sharingDirty => $composableBuilder(
+    column: $table.sharingDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SongsTableAnnotationComposer
@@ -2899,6 +4204,56 @@ class $$SongsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get songWorkId => $composableBuilder(
+    column: $table.songWorkId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get forkedFromVersionId => $composableBuilder(
+    column: $table.forkedFromVersionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sharedOrganizationIdsJson => $composableBuilder(
+    column: $table.sharedOrganizationIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get sharingDirty => $composableBuilder(
+    column: $table.sharingDirty,
+    builder: (column) => column,
+  );
 }
 
 class $$SongsTableTableManager
@@ -2942,6 +4297,18 @@ class $$SongsTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> songWorkId = const Value.absent(),
+                Value<String?> ownerId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
+                Value<String?> forkedFromVersionId = const Value.absent(),
+                Value<String> sharedOrganizationIdsJson = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> remoteUpdatedAt = const Value.absent(),
+                Value<String?> accountId = const Value.absent(),
+                Value<int> editedAtMs = const Value.absent(),
+                Value<bool> sharingDirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion(
                 id: id,
@@ -2957,6 +4324,18 @@ class $$SongsTableTableManager
                 notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                songWorkId: songWorkId,
+                ownerId: ownerId,
+                label: label,
+                visibility: visibility,
+                forkedFromVersionId: forkedFromVersionId,
+                sharedOrganizationIdsJson: sharedOrganizationIdsJson,
+                isDirty: isDirty,
+                deletedAt: deletedAt,
+                remoteUpdatedAt: remoteUpdatedAt,
+                accountId: accountId,
+                editedAtMs: editedAtMs,
+                sharingDirty: sharingDirty,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2974,6 +4353,18 @@ class $$SongsTableTableManager
                 Value<String?> notes = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<String?> songWorkId = const Value.absent(),
+                Value<String?> ownerId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
+                Value<String?> forkedFromVersionId = const Value.absent(),
+                Value<String> sharedOrganizationIdsJson = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> remoteUpdatedAt = const Value.absent(),
+                Value<String?> accountId = const Value.absent(),
+                Value<int> editedAtMs = const Value.absent(),
+                Value<bool> sharingDirty = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SongsCompanion.insert(
                 id: id,
@@ -2989,6 +4380,18 @@ class $$SongsTableTableManager
                 notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                songWorkId: songWorkId,
+                ownerId: ownerId,
+                label: label,
+                visibility: visibility,
+                forkedFromVersionId: forkedFromVersionId,
+                sharedOrganizationIdsJson: sharedOrganizationIdsJson,
+                isDirty: isDirty,
+                deletedAt: deletedAt,
+                remoteUpdatedAt: remoteUpdatedAt,
+                accountId: accountId,
+                editedAtMs: editedAtMs,
+                sharingDirty: sharingDirty,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3031,6 +4434,12 @@ typedef $$SetlistsTableCreateCompanionBuilder = SetlistsCompanion Function({
   Value<String> tagsJson,
   required DateTime createdAt,
   required DateTime updatedAt,
+  Value<String?> organizationId,
+  Value<bool> isDirty,
+  Value<DateTime?> deletedAt,
+  Value<String?> remoteUpdatedAt,
+  Value<String?> accountId,
+  Value<int> editedAtMs,
   Value<int> rowid,
 });
 typedef $$SetlistsTableUpdateCompanionBuilder = SetlistsCompanion Function({
@@ -3042,6 +4451,12 @@ typedef $$SetlistsTableUpdateCompanionBuilder = SetlistsCompanion Function({
   Value<String> tagsJson,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<String?> organizationId,
+  Value<bool> isDirty,
+  Value<DateTime?> deletedAt,
+  Value<String?> remoteUpdatedAt,
+  Value<String?> accountId,
+  Value<int> editedAtMs,
   Value<int> rowid,
 });
 
@@ -3091,6 +4506,36 @@ class $$SetlistsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3143,6 +4588,36 @@ class $$SetlistsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get accountId => $composableBuilder(
+    column: $table.accountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SetlistsTableAnnotationComposer
@@ -3179,6 +4654,30 @@ class $$SetlistsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  GeneratedColumn<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => column,
+  );
 }
 
 class $$SetlistsTableTableManager
@@ -3220,6 +4719,12 @@ class $$SetlistsTableTableManager
                 Value<String> tagsJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> organizationId = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> remoteUpdatedAt = const Value.absent(),
+                Value<String?> accountId = const Value.absent(),
+                Value<int> editedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SetlistsCompanion(
                 id: id,
@@ -3230,6 +4735,12 @@ class $$SetlistsTableTableManager
                 tagsJson: tagsJson,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                organizationId: organizationId,
+                isDirty: isDirty,
+                deletedAt: deletedAt,
+                remoteUpdatedAt: remoteUpdatedAt,
+                accountId: accountId,
+                editedAtMs: editedAtMs,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3242,6 +4753,12 @@ class $$SetlistsTableTableManager
                 Value<String> tagsJson = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<String?> organizationId = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> remoteUpdatedAt = const Value.absent(),
+                Value<String?> accountId = const Value.absent(),
+                Value<int> editedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SetlistsCompanion.insert(
                 id: id,
@@ -3252,6 +4769,12 @@ class $$SetlistsTableTableManager
                 tagsJson: tagsJson,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                organizationId: organizationId,
+                isDirty: isDirty,
+                deletedAt: deletedAt,
+                remoteUpdatedAt: remoteUpdatedAt,
+                accountId: accountId,
+                editedAtMs: editedAtMs,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3300,6 +4823,10 @@ typedef $$ScoresTableCreateCompanionBuilder = ScoresCompanion Function({
   required String sectionsJson,
   Value<String> metadataJson,
   required DateTime updatedAt,
+  Value<bool> isDirty,
+  Value<DateTime?> deletedAt,
+  Value<String?> remoteUpdatedAt,
+  Value<int> editedAtMs,
   Value<int> rowid,
 });
 typedef $$ScoresTableUpdateCompanionBuilder = ScoresCompanion Function({
@@ -3314,6 +4841,10 @@ typedef $$ScoresTableUpdateCompanionBuilder = ScoresCompanion Function({
   Value<String> sectionsJson,
   Value<String> metadataJson,
   Value<DateTime> updatedAt,
+  Value<bool> isDirty,
+  Value<DateTime?> deletedAt,
+  Value<String?> remoteUpdatedAt,
+  Value<int> editedAtMs,
   Value<int> rowid,
 });
 
@@ -3378,6 +4909,26 @@ class $$ScoresTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3445,6 +4996,26 @@ class $$ScoresTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ScoresTableAnnotationComposer
@@ -3496,6 +5067,22 @@ class $$ScoresTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteUpdatedAt => $composableBuilder(
+    column: $table.remoteUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get editedAtMs => $composableBuilder(
+    column: $table.editedAtMs,
+    builder: (column) => column,
+  );
 }
 
 class $$ScoresTableTableManager
@@ -3537,6 +5124,10 @@ class $$ScoresTableTableManager
                 Value<String> sectionsJson = const Value.absent(),
                 Value<String> metadataJson = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> remoteUpdatedAt = const Value.absent(),
+                Value<int> editedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ScoresCompanion(
                 id: id,
@@ -3550,6 +5141,10 @@ class $$ScoresTableTableManager
                 sectionsJson: sectionsJson,
                 metadataJson: metadataJson,
                 updatedAt: updatedAt,
+                isDirty: isDirty,
+                deletedAt: deletedAt,
+                remoteUpdatedAt: remoteUpdatedAt,
+                editedAtMs: editedAtMs,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3565,6 +5160,10 @@ class $$ScoresTableTableManager
                 required String sectionsJson,
                 Value<String> metadataJson = const Value.absent(),
                 required DateTime updatedAt,
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> remoteUpdatedAt = const Value.absent(),
+                Value<int> editedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ScoresCompanion.insert(
                 id: id,
@@ -3578,6 +5177,10 @@ class $$ScoresTableTableManager
                 sectionsJson: sectionsJson,
                 metadataJson: metadataJson,
                 updatedAt: updatedAt,
+                isDirty: isDirty,
+                deletedAt: deletedAt,
+                remoteUpdatedAt: remoteUpdatedAt,
+                editedAtMs: editedAtMs,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
