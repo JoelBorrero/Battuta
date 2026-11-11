@@ -3,16 +3,6 @@
 Deferred findings that must not be forgotten. When a task closes, add anything it deferred here; when an
 item is fixed, delete it (the fixing task's summary records it).
 
-## ⚠ Verify first: integration tests not run (Docker was down)
-Docker Desktop stopped responding on 2026-11-10 while 005 started, so tasks 005 onward were built and
-reviewed without the local Supabase stack. Before relying on them:
-1. Restart Docker Desktop, then `supabase start`.
-2. `supabase db reset` (twice) and `supabase test db`.
-3. `supabase db reset`, then `flutter test --tags supabase --run-skipped test/integration`.
-4. Fix any failure, then remove this section. Tasks affected are listed below as they close.
-
-Affected tasks: 005, 006 (also run `supabase/tests/09_calendar_details.test.sql`).
-
 ## From 001: harden transposer
 - Sharp/flat spelling on free-form keys: `b minor` +2 → `Db minor` instead of `C# minor`.
 - Hand-built custom labels that only look root-prefixed (`Cat` with root `C` → `Dat`).
@@ -22,7 +12,7 @@ Affected tasks: 005, 006 (also run `supabase/tests/09_calendar_details.test.sql`
 Planned into a later slice:
 - Deactivated users' email stays in `auth.users` (needs a server-side scrub job).
 - **008:** archive has no undo; say so in the archive confirmation UI.
-- **007:** declined users can be re-invited repeatedly; removed members can rejoin with a still-valid link.
+- Removed members can rejoin with a still-valid invite link (the username search now shows "previously declined"; re-inviting declined users is still allowed).
 - **009:** merge-request spam: anyone who can see a song can keep sending its creator merge requests
   (with their own private title).
 
@@ -91,3 +81,15 @@ Product / ops:
 - "Find cover" lets you re-pick the member who declined (no-op).
 - Alert dismissal ids repeat if the same member declines the same assignment again.
 - The alerts banner shows for admins of archived organizations.
+
+## From 007: invites and inbox
+- **Live page overflows below 768 px** (pre-existing, `live_session_page.dart` lines ~160, 201, 307): needs its
+  own fix task; the Live layout test only runs at ≥ 768 px.
+- Join confirmation says "Join this organization?" without the name: needs an RPC that returns the organization
+  name (and maybe member count) for a token before joining.
+- A cold-start link may arrive twice (engine route + `app_links`); joining is idempotent, but verify on a device.
+- Notification taps go to the tab, not the item (calendar event not highlighted; merge → repertoire,
+  archive → Roster until 008/009 add the screens).
+- Revoke/expiry: no universal https links (no web domain yet).
+- A token captured in offline mode stays in memory until dismissed, "Continue offline", sign-out or account
+  switch (the join still asks for confirmation).

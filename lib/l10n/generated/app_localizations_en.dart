@@ -1971,10 +1971,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noOrganizationInvitesNote =>
-      'Create an organization for your team. Invitations to join one will arrive in a later update.';
-
-  @override
-  String get inviteComingSoon => 'Invite · Coming soon';
+      'Create an organization for your team, or join one with an invite link.';
 
   @override
   String get manageBandsAction => 'Manage bands';
@@ -2217,4 +2214,403 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lineupMemberUnknown => 'Former member';
+
+  @override
+  String get inviteAction => 'Invite';
+
+  @override
+  String get inviteSheetTitle => 'Invite people';
+
+  @override
+  String get inviteTabLink => 'Link & QR';
+
+  @override
+  String get inviteTabUsername => 'Username';
+
+  @override
+  String get inviteExpiryLabel => 'Expires in';
+
+  @override
+  String get inviteExpiry1Day => '1 day';
+
+  @override
+  String get inviteExpiry7Days => '7 days';
+
+  @override
+  String get inviteExpiry30Days => '30 days';
+
+  @override
+  String get inviteMaxUsesLabel => 'Max uses (optional)';
+
+  @override
+  String get inviteMaxUsesInvalid => 'Enter a whole number of 1 or more';
+
+  @override
+  String get inviteBandLabel => 'Band (optional)';
+
+  @override
+  String get inviteNoBand => 'No band';
+
+  @override
+  String get inviteCreateLink => 'Create link';
+
+  @override
+  String get inviteLinkLabel => 'Invite link';
+
+  @override
+  String get inviteCopy => 'Copy';
+
+  @override
+  String get inviteLinkCopied => 'Link copied';
+
+  @override
+  String get inviteShare => 'Share';
+
+  @override
+  String inviteShareMessage(String organization, String link) {
+    return 'Join $organization on Battuta: $link';
+  }
+
+  @override
+  String get inviteQrSemantics => 'QR code of the invite link';
+
+  @override
+  String get inviteQrHint =>
+      'Scan it with the camera of a phone or tablet to open Battuta.';
+
+  @override
+  String get inviteActiveLinksTitle => 'Active links';
+
+  @override
+  String get inviteNoActiveLinks => 'No active links yet.';
+
+  @override
+  String inviteLinkExpires(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String inviteLinkUsesUnlimited(int count) {
+    return '$count uses';
+  }
+
+  @override
+  String inviteLinkUsesLimited(int count, int max) {
+    return '$count of $max uses';
+  }
+
+  @override
+  String get inviteShowAction => 'Show';
+
+  @override
+  String get inviteRevokeAction => 'Revoke';
+
+  @override
+  String get inviteSearchLabel => 'Search by username or name';
+
+  @override
+  String get inviteSearchHint => 'Type at least 3 characters.';
+
+  @override
+  String get inviteNoResults => 'No one found.';
+
+  @override
+  String get inviteSendAction => 'Invite';
+
+  @override
+  String get inviteSentLabel => 'Invited';
+
+  @override
+  String get inviteAlreadyMemberLabel => 'Member';
+
+  @override
+  String get invitePreviouslyDeclined => 'Previously declined';
+
+  @override
+  String inviteSentSnack(String name) {
+    return 'Invitation sent to $name';
+  }
+
+  @override
+  String get invitePendingTitle => 'Pending invitations';
+
+  @override
+  String get inviteNoPending => 'No pending invitations.';
+
+  @override
+  String get inviteCancelAction => 'Cancel invitation';
+
+  @override
+  String get inviteInvitedUserFallback => 'Invited user';
+
+  @override
+  String get backendErrorInviteNotFound => 'This invite link is not valid.';
+
+  @override
+  String get backendErrorInviteExpired => 'This invite link has expired.';
+
+  @override
+  String get backendErrorInviteRevoked => 'This invite link was revoked.';
+
+  @override
+  String get backendErrorInviteUsedUp => 'This invite link has no uses left.';
+
+  @override
+  String get backendErrorAlreadyMember => 'That person is already a member.';
+
+  @override
+  String get backendErrorAlreadyInvited =>
+      'That person already has a pending invitation.';
+
+  @override
+  String get backendErrorUserNotFound =>
+      'No active user found with that username.';
+
+  @override
+  String get backendErrorCannotInviteSelf => 'You cannot invite yourself.';
+
+  @override
+  String get backendErrorInvitationNotPending =>
+      'This invitation was already answered.';
+
+  @override
+  String get backendErrorInvitationNotFound =>
+      'This invitation no longer exists.';
+
+  @override
+  String get backendErrorBandNotInOrganization =>
+      'That band does not belong to this organization.';
+
+  @override
+  String get backendErrorInvalidExpiry => 'That expiry is not allowed.';
+
+  @override
+  String get backendErrorInvalidMaxUses =>
+      'That number of uses is not allowed.';
+
+  @override
+  String get joinTitle => 'Join organization';
+
+  @override
+  String get joinJoining => 'Joining…';
+
+  @override
+  String get joinFailedTitle => 'Could not join';
+
+  @override
+  String get joinRetry => 'Try again';
+
+  @override
+  String get joinBackToApp => 'Back to Battuta';
+
+  @override
+  String get joinWithLinkAction => 'Join with invite link';
+
+  @override
+  String get joinPasteTitle => 'Join with an invite link';
+
+  @override
+  String get joinPasteLabel => 'Invite link or code';
+
+  @override
+  String get joinPasteSubmit => 'Join';
+
+  @override
+  String get joinPasteInvalid => 'That is not a valid invite link or code.';
+
+  @override
+  String get joinPendingNote =>
+      'Invite saved. Sign in or create an account to join.';
+
+  @override
+  String get joinPendingDismiss => 'Dismiss';
+
+  @override
+  String get joinConfirmTitle => 'Join this organization?';
+
+  @override
+  String joinConfirmMessage(String account) {
+    return 'You are signed in as $account. Join with the invite link you opened?';
+  }
+
+  @override
+  String get joinConfirmAction => 'Join';
+
+  @override
+  String get inviteRevokeConfirmTitle => 'Revoke this link?';
+
+  @override
+  String get inviteRevokeConfirmBody =>
+      'Nobody will be able to join with it anymore. You can create a new link later.';
+
+  @override
+  String get joinSuccessSnack => 'You joined the organization.';
+
+  @override
+  String invitationFrom(String organization) {
+    return '$organization invited you to join.';
+  }
+
+  @override
+  String get invitationOrganizationFallback => 'An organization';
+
+  @override
+  String get invitationAccept => 'Accept';
+
+  @override
+  String get invitationDecline => 'Decline';
+
+  @override
+  String invitationAcceptedSnack(String organization) {
+    return 'You joined $organization.';
+  }
+
+  @override
+  String get invitationDeclinedSnack => 'Invitation declined.';
+
+  @override
+  String invitationSeeAll(int count) {
+    return 'See all invitations ($count)';
+  }
+
+  @override
+  String get inboxTitle => 'Inbox';
+
+  @override
+  String get inboxTooltip => 'Inbox';
+
+  @override
+  String inboxTooltipUnread(int count) {
+    return 'Inbox, $count new';
+  }
+
+  @override
+  String get inboxMarkAllRead => 'Mark all as read';
+
+  @override
+  String get inboxEmptyTitle => 'You are all caught up';
+
+  @override
+  String get inboxEmptyMessage =>
+      'Invitations and updates from your organizations show up here.';
+
+  @override
+  String get inboxSignInMessage =>
+      'Sign in to see your invitations and updates.';
+
+  @override
+  String get inboxInvitationsTitle => 'Invitations';
+
+  @override
+  String get inboxUpdatesTitle => 'Updates';
+
+  @override
+  String get inboxOrganizationGone => 'You are no longer in that organization.';
+
+  @override
+  String notifInvitation(String organization) {
+    return 'You were invited to join $organization';
+  }
+
+  @override
+  String notifRoleChanged(String organization, String role) {
+    return 'Your role in $organization is now $role';
+  }
+
+  @override
+  String notifRemoved(String organization) {
+    return 'You were removed from $organization';
+  }
+
+  @override
+  String notifMemberProfileEdited(String organization, String fields) {
+    return 'An admin updated your profile in $organization: $fields';
+  }
+
+  @override
+  String notifEventAssigned(String event) {
+    return 'You were assigned to $event';
+  }
+
+  @override
+  String notifEventUnassigned(String event) {
+    return 'You were taken off $event';
+  }
+
+  @override
+  String notifAssignmentDeclined(String event) {
+    return 'A member declined $event';
+  }
+
+  @override
+  String notifArchiveRequested(String organization) {
+    return 'Archiving $organization was requested';
+  }
+
+  @override
+  String notifArchiveCancelled(String organization) {
+    return 'Archiving $organization was cancelled';
+  }
+
+  @override
+  String notifArchiveCompleted(String organization) {
+    return '$organization was archived';
+  }
+
+  @override
+  String get notifSongVersionForked =>
+      'Someone made a copy of one of your arrangements';
+
+  @override
+  String notifSongMergeRequested(String source, String target) {
+    return 'Merge request: $source into $target';
+  }
+
+  @override
+  String get notifSongMergeAccepted => 'Your merge request was accepted';
+
+  @override
+  String get notifSongMergeDeclined => 'Your merge request was declined';
+
+  @override
+  String get notifUnknown => 'You have a new notification';
+
+  @override
+  String get notifOrganizationFallback => 'your organization';
+
+  @override
+  String get notifEventFallback => 'a service';
+
+  @override
+  String get notifFieldInstruments => 'instruments';
+
+  @override
+  String get notifFieldMinPitch => 'lowest note';
+
+  @override
+  String get notifFieldMaxPitch => 'highest note';
+
+  @override
+  String get notifFieldNotes => 'notes';
+
+  @override
+  String get notifFieldsFallback => 'profile details';
+
+  @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String timeMinutesAgo(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String timeHoursAgo(int count) {
+    return '$count h ago';
+  }
+
+  @override
+  String timeDaysAgo(int count) {
+    return '$count d ago';
+  }
 }

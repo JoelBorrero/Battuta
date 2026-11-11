@@ -2,13 +2,16 @@
 library;
 
 import 'package:battuta/app/localization/backend_error_messages.dart';
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/battuta_brand.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/organization_data_providers.dart';
+import 'package:battuta/features/organizations/presentation/widgets/paste_invite_dialog.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// App bar title: the active organization (tap to switch).
 class OrganizationSwitcherButton extends ConsumerWidget {
@@ -158,6 +161,20 @@ class _SwitcherSheet extends ConsumerWidget {
                 await showCreateOrganizationDialog(context);
               },
             ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const ValueKey('switcher_join_btn'),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(44, 48)),
+              icon: const Icon(Icons.link),
+              label: Text(l10n.joinWithLinkAction),
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final token = await showPasteInviteDialog(context);
+                if (token == null || !context.mounted) return;
+                navigator.pop();
+                GoRouter.of(context).go(AppRoutes.join(token));
+              },
+            ),
           ],
         ),
       ),
@@ -290,4 +307,11 @@ class _CreateOrganizationDialogState
       ],
     );
   }
+}
+
+/// Asks for an invite link or code and opens its join page (signed-in users).
+Future<void> joinWithPastedInvite(BuildContext context) async {
+  final token = await showPasteInviteDialog(context);
+  if (token == null || !context.mounted) return;
+  GoRouter.of(context).go(AppRoutes.join(token));
 }

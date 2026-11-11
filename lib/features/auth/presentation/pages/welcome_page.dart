@@ -5,6 +5,9 @@ import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/app_entry_provider.dart';
+import 'package:battuta/features/auth/presentation/widgets/pending_invite_note.dart';
+import 'package:battuta/features/organizations/presentation/providers/pending_invite_provider.dart';
+import 'package:battuta/features/organizations/presentation/widgets/paste_invite_dialog.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,7 +63,9 @@ class WelcomePage extends ConsumerWidget {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+                  const PendingInviteNote(),
+                  const SizedBox(height: 8),
                   FilledButton(
                     key: const ValueKey('welcome_sign_in_btn'),
                     style: FilledButton.styleFrom(minimumSize: buttonSize),
@@ -80,9 +85,22 @@ class WelcomePage extends ConsumerWidget {
                     style: TextButton.styleFrom(minimumSize: buttonSize),
                     onPressed: () async {
                       ref.read(accountNoticeProvider.notifier).clear();
+                      ref.read(pendingInviteTokenProvider.notifier).clear();
                       await ref.read(offlineChoiceProvider.notifier).choose();
                     },
                     child: Text(l10n.welcomeContinueOffline),
+                  ),
+                  TextButton.icon(
+                    key: const ValueKey('welcome_paste_invite_btn'),
+                    style: TextButton.styleFrom(minimumSize: buttonSize),
+                    icon: const Icon(Icons.link),
+                    label: Text(l10n.joinWithLinkAction),
+                    onPressed: () async {
+                      final token = await showPasteInviteDialog(context);
+                      if (token != null) {
+                        ref.read(pendingInviteTokenProvider.notifier).set(token);
+                      }
+                    },
                   ),
                   const SizedBox(height: 8),
                   Text(

@@ -7,6 +7,7 @@ import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/battuta_brand.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/organizations/presentation/widgets/invite_sheet.dart';
 import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
 import 'package:battuta/features/team/domain/entities/team_group.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
@@ -140,6 +141,13 @@ class _RosterViewState extends ConsumerState<RosterView> {
             label: Text(l10n.createOrganizationAction),
             onPressed: () => showCreateOrganizationDialog(context),
           ),
+          OutlinedButton.icon(
+            key: const ValueKey('empty_join_org_btn'),
+            style: OutlinedButton.styleFrom(minimumSize: const Size(44, 48)),
+            icon: const Icon(Icons.link),
+            label: Text(l10n.joinWithLinkAction),
+            onPressed: () => joinWithPastedInvite(context),
+          ),
         ],
       );
     }
@@ -196,13 +204,13 @@ class _RosterViewState extends ConsumerState<RosterView> {
           children: [
             if (isAdmin)
               OutlinedButton.icon(
-                key: const ValueKey('invite_coming_soon_btn'),
+                key: const ValueKey('invite_btn'),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(44, 44),
                 ),
                 icon: const Icon(Icons.person_add_alt_outlined, size: 18),
-                label: Text(l10n.inviteComingSoon),
-                onPressed: null,
+                label: Text(l10n.inviteAction),
+                onPressed: () => showInviteSheet(context),
               ),
             if (isAdmin)
               OutlinedButton.icon(

@@ -70,6 +70,13 @@ class CalendarView extends ConsumerWidget {
             label: Text(l10n.createOrganizationAction),
             onPressed: () => showCreateOrganizationDialog(context),
           ),
+          OutlinedButton.icon(
+            key: const ValueKey('calendar_join_org_btn'),
+            style: OutlinedButton.styleFrom(minimumSize: const Size(44, 48)),
+            icon: const Icon(Icons.link),
+            label: Text(l10n.joinWithLinkAction),
+            onPressed: () => joinWithPastedInvite(context),
+          ),
         ],
       );
     }

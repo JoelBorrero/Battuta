@@ -3,6 +3,7 @@ library;
 
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/auth/presentation/widgets/account_form.dart';
+import 'package:battuta/features/auth/presentation/widgets/pending_invite_note.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,7 @@ class SignInPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const PendingInviteNote(),
                   const AccountForm(mode: AccountFormMode.signIn),
                   const SizedBox(height: 8),
                   TextButton(

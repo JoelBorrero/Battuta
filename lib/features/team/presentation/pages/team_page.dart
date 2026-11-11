@@ -6,9 +6,12 @@ library;
 
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
+import 'package:battuta/features/organizations/presentation/widgets/invitation_card.dart';
 import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
 import 'package:battuta/features/team/presentation/providers/calendar_providers.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
+import 'package:battuta/features/team/presentation/providers/team_tab_request_provider.dart';
 import 'package:battuta/features/team/presentation/widgets/calendar_view.dart';
 import 'package:battuta/features/team/presentation/widgets/roster_view.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -27,7 +30,23 @@ class _TeamPageState extends ConsumerState<TeamPage> {
   int _selectedTabIndex = 0; // 0: Roster, 1: Calendar & Services
 
   @override
+  void initState() {
+    super.initState();
+    // A request made before this page existed (e.g. from the inbox).
+    final request = ref.read(teamTabRequestProvider);
+    if (request != null) {
+      _selectedTabIndex = request.index;
+      Future(() => ref.read(teamTabRequestProvider.notifier).clear());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ref.listen(teamTabRequestProvider, (_, next) {
+      if (next == null) return;
+      setState(() => _selectedTabIndex = next.index);
+      ref.read(teamTabRequestProvider.notifier).clear();
+    });
     final members = ref.watch(teamMembersProvider);
     final upcomingCount = ref.watch(serviceCalendarProvider).length;
     final isAdmin = ref.watch(isCurrentUserAdminProvider);
@@ -41,6 +60,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
           fallbackTitle: l10n?.worshipTeamTitle ?? 'Worship Team & Band',
         ),
         actions: [
+          const InboxButton(),
           if (isAdmin && signedIn)
             Consumer(
               builder: (context, ref, _) {
@@ -77,6 +97,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
       ),
       body: Column(
         children: [
+          if (signedIn) const InvitationsBanner(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: SizedBox(

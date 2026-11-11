@@ -21,6 +21,21 @@ String backendErrorMessage(AppLocalizations l10n, Object error) {
     BackendErrorCode.memberDeactivated => l10n.backendErrorNotMember,
     BackendErrorCode.organizationArchived =>
       l10n.backendErrorOrganizationArchived,
+    BackendErrorCode.inviteNotFound => l10n.backendErrorInviteNotFound,
+    BackendErrorCode.inviteExpired => l10n.backendErrorInviteExpired,
+    BackendErrorCode.inviteRevoked => l10n.backendErrorInviteRevoked,
+    BackendErrorCode.inviteUsedUp => l10n.backendErrorInviteUsedUp,
+    BackendErrorCode.alreadyMember => l10n.backendErrorAlreadyMember,
+    BackendErrorCode.alreadyInvited => l10n.backendErrorAlreadyInvited,
+    BackendErrorCode.userNotFound => l10n.backendErrorUserNotFound,
+    BackendErrorCode.cannotInviteSelf => l10n.backendErrorCannotInviteSelf,
+    BackendErrorCode.invitationNotPending =>
+      l10n.backendErrorInvitationNotPending,
+    BackendErrorCode.invitationNotFound => l10n.backendErrorInvitationNotFound,
+    BackendErrorCode.bandNotInOrganization =>
+      l10n.backendErrorBandNotInOrganization,
+    BackendErrorCode.invalidExpiry => l10n.backendErrorInvalidExpiry,
+    BackendErrorCode.invalidMaxUses => l10n.backendErrorInvalidMaxUses,
     BackendErrorCode.notSignedIn ||
     BackendErrorCode.notAuthenticated => l10n.backendErrorNotSignedIn,
     // Auth errors without a typed code (e.g. wrong password) carry GoTrue's

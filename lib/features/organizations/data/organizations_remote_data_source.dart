@@ -376,7 +376,10 @@ class SupabaseOrganizationsRemoteDataSource extends SupabaseGateway
       run((c, _) async {
         final data = await c
             .from('invitations')
-            .select('*, organizations(name)')
+            .select(
+              '*, organizations(name), '
+              'invitee:profiles!invited_user_id(username, display_name)',
+            )
             .eq('organization_id', organizationId);
         return _rows(data).map(Invitation.fromJson).toList();
       });

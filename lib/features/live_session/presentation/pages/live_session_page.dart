@@ -7,6 +7,7 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/sync/domain/services/live_sync_service.dart';
 import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
 import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
@@ -64,6 +65,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
       appBar: AppBar(
         title: Text(l10n?.liveStageSync ?? 'Live Stage Sync'),
         actions: [
+          const InboxButton(),
           // Connection Status Pill
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

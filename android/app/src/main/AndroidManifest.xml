@@ -36,6 +36,13 @@
                 <!-- Accepts battuta://login-callback -->
                 <data android:scheme="battuta" android:host="login-callback" />
             </intent-filter>
+            <!-- Invite links: battuta://join/<token> -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="battuta" android:host="join" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

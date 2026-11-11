@@ -98,10 +98,13 @@ class Invitation extends Equatable {
     this.createdAt,
     this.respondedAt,
     this.organizationName,
+    this.inviteeUsername,
+    this.inviteeDisplayName,
   });
 
   /// [json] is a row of `invitations`; the organization name may be embedded
-  /// as `organizations(name)`.
+  /// as `organizations(name)` and the invited person's public profile as
+  /// `invitee` (only admins can read it).
   factory Invitation.fromJson(Map<String, dynamic> json) => Invitation(
     id: json['id'] as String,
     organizationId: json['organization_id'] as String,
@@ -114,6 +117,12 @@ class Invitation extends Equatable {
     organizationName: json['organizations'] is Map
         ? (json['organizations'] as Map)['name'] as String?
         : json['organization_name'] as String?,
+    inviteeUsername: json['invitee'] is Map
+        ? (json['invitee'] as Map)['username'] as String?
+        : json['invitee_username'] as String?,
+    inviteeDisplayName: json['invitee'] is Map
+        ? (json['invitee'] as Map)['display_name'] as String?
+        : json['invitee_display_name'] as String?,
   );
 
   final String id;
@@ -125,6 +134,10 @@ class Invitation extends Equatable {
   final DateTime? createdAt;
   final DateTime? respondedAt;
   final String? organizationName;
+
+  /// Public profile of the invited person, when the reader may see it.
+  final String? inviteeUsername;
+  final String? inviteeDisplayName;
 
   bool get isPending => status == InvitationStatus.pending;
 
@@ -138,6 +151,22 @@ class Invitation extends Equatable {
     createdAt: createdAt,
     respondedAt: respondedAt,
     organizationName: organizationName ?? name,
+    inviteeUsername: inviteeUsername,
+    inviteeDisplayName: inviteeDisplayName,
+  );
+
+  Invitation withInvitee({String? username, String? displayName}) => Invitation(
+    id: id,
+    organizationId: organizationId,
+    invitedUserId: invitedUserId,
+    bandId: bandId,
+    invitedBy: invitedBy,
+    status: status,
+    createdAt: createdAt,
+    respondedAt: respondedAt,
+    organizationName: organizationName,
+    inviteeUsername: inviteeUsername ?? username,
+    inviteeDisplayName: inviteeDisplayName ?? displayName,
   );
 
   Map<String, dynamic> toJson() => {
@@ -150,6 +179,8 @@ class Invitation extends Equatable {
     'created_at': formatTimestamp(createdAt),
     'responded_at': formatTimestamp(respondedAt),
     'organization_name': organizationName,
+    if (inviteeUsername != null) 'invitee_username': inviteeUsername,
+    if (inviteeDisplayName != null) 'invitee_display_name': inviteeDisplayName,
   };
 
   @override
@@ -163,5 +194,7 @@ class Invitation extends Equatable {
     createdAt,
     respondedAt,
     organizationName,
+    inviteeUsername,
+    inviteeDisplayName,
   ];
 }

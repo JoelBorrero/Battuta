@@ -8,6 +8,7 @@ library;
 import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/domain/services/song_import_export_service.dart';
@@ -308,6 +309,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
         ),
         actions: [
           const CloudSyncStatusIndicator(compact: true),
+          const InboxButton(),
           IconButton(
             icon: const Icon(Icons.file_download_outlined),
             tooltip: 'Import song or lead sheet',

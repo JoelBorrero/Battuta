@@ -3561,14 +3561,8 @@ abstract class AppLocalizations {
   /// No organization note
   ///
   /// In en, this message translates to:
-  /// **'Create an organization for your team. Invitations to join one will arrive in a later update.'**
+  /// **'Create an organization for your team, or join one with an invite link.'**
   String get noOrganizationInvitesNote;
-
-  /// Disabled invite button
-  ///
-  /// In en, this message translates to:
-  /// **'Invite · Coming soon'**
-  String get inviteComingSoon;
 
   /// Manage bands button
   ///
@@ -3971,6 +3965,684 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Former member'**
   String get lineupMemberUnknown;
+
+  /// inviteAction
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get inviteAction;
+
+  /// inviteSheetTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Invite people'**
+  String get inviteSheetTitle;
+
+  /// inviteTabLink
+  ///
+  /// In en, this message translates to:
+  /// **'Link & QR'**
+  String get inviteTabLink;
+
+  /// inviteTabUsername
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get inviteTabUsername;
+
+  /// inviteExpiryLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in'**
+  String get inviteExpiryLabel;
+
+  /// inviteExpiry1Day
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get inviteExpiry1Day;
+
+  /// inviteExpiry7Days
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get inviteExpiry7Days;
+
+  /// inviteExpiry30Days
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get inviteExpiry30Days;
+
+  /// inviteMaxUsesLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Max uses (optional)'**
+  String get inviteMaxUsesLabel;
+
+  /// inviteMaxUsesInvalid
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number of 1 or more'**
+  String get inviteMaxUsesInvalid;
+
+  /// inviteBandLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Band (optional)'**
+  String get inviteBandLabel;
+
+  /// inviteNoBand
+  ///
+  /// In en, this message translates to:
+  /// **'No band'**
+  String get inviteNoBand;
+
+  /// inviteCreateLink
+  ///
+  /// In en, this message translates to:
+  /// **'Create link'**
+  String get inviteCreateLink;
+
+  /// inviteLinkLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link'**
+  String get inviteLinkLabel;
+
+  /// inviteCopy
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get inviteCopy;
+
+  /// inviteLinkCopied
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get inviteLinkCopied;
+
+  /// inviteShare
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get inviteShare;
+
+  /// inviteShareMessage
+  ///
+  /// In en, this message translates to:
+  /// **'Join {organization} on Battuta: {link}'**
+  String inviteShareMessage(String organization, String link);
+
+  /// inviteQrSemantics
+  ///
+  /// In en, this message translates to:
+  /// **'QR code of the invite link'**
+  String get inviteQrSemantics;
+
+  /// inviteQrHint
+  ///
+  /// In en, this message translates to:
+  /// **'Scan it with the camera of a phone or tablet to open Battuta.'**
+  String get inviteQrHint;
+
+  /// inviteActiveLinksTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Active links'**
+  String get inviteActiveLinksTitle;
+
+  /// inviteNoActiveLinks
+  ///
+  /// In en, this message translates to:
+  /// **'No active links yet.'**
+  String get inviteNoActiveLinks;
+
+  /// inviteLinkExpires
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String inviteLinkExpires(String date);
+
+  /// inviteLinkUsesUnlimited
+  ///
+  /// In en, this message translates to:
+  /// **'{count} uses'**
+  String inviteLinkUsesUnlimited(int count);
+
+  /// inviteLinkUsesLimited
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max} uses'**
+  String inviteLinkUsesLimited(int count, int max);
+
+  /// inviteShowAction
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get inviteShowAction;
+
+  /// inviteRevokeAction
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get inviteRevokeAction;
+
+  /// inviteSearchLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Search by username or name'**
+  String get inviteSearchLabel;
+
+  /// inviteSearchHint
+  ///
+  /// In en, this message translates to:
+  /// **'Type at least 3 characters.'**
+  String get inviteSearchHint;
+
+  /// inviteNoResults
+  ///
+  /// In en, this message translates to:
+  /// **'No one found.'**
+  String get inviteNoResults;
+
+  /// inviteSendAction
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get inviteSendAction;
+
+  /// inviteSentLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get inviteSentLabel;
+
+  /// inviteAlreadyMemberLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get inviteAlreadyMemberLabel;
+
+  /// invitePreviouslyDeclined
+  ///
+  /// In en, this message translates to:
+  /// **'Previously declined'**
+  String get invitePreviouslyDeclined;
+
+  /// inviteSentSnack
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent to {name}'**
+  String inviteSentSnack(String name);
+
+  /// invitePendingTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Pending invitations'**
+  String get invitePendingTitle;
+
+  /// inviteNoPending
+  ///
+  /// In en, this message translates to:
+  /// **'No pending invitations.'**
+  String get inviteNoPending;
+
+  /// inviteCancelAction
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invitation'**
+  String get inviteCancelAction;
+
+  /// inviteInvitedUserFallback
+  ///
+  /// In en, this message translates to:
+  /// **'Invited user'**
+  String get inviteInvitedUserFallback;
+
+  /// backendErrorInviteNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'This invite link is not valid.'**
+  String get backendErrorInviteNotFound;
+
+  /// backendErrorInviteExpired
+  ///
+  /// In en, this message translates to:
+  /// **'This invite link has expired.'**
+  String get backendErrorInviteExpired;
+
+  /// backendErrorInviteRevoked
+  ///
+  /// In en, this message translates to:
+  /// **'This invite link was revoked.'**
+  String get backendErrorInviteRevoked;
+
+  /// backendErrorInviteUsedUp
+  ///
+  /// In en, this message translates to:
+  /// **'This invite link has no uses left.'**
+  String get backendErrorInviteUsedUp;
+
+  /// backendErrorAlreadyMember
+  ///
+  /// In en, this message translates to:
+  /// **'That person is already a member.'**
+  String get backendErrorAlreadyMember;
+
+  /// backendErrorAlreadyInvited
+  ///
+  /// In en, this message translates to:
+  /// **'That person already has a pending invitation.'**
+  String get backendErrorAlreadyInvited;
+
+  /// backendErrorUserNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'No active user found with that username.'**
+  String get backendErrorUserNotFound;
+
+  /// backendErrorCannotInviteSelf
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot invite yourself.'**
+  String get backendErrorCannotInviteSelf;
+
+  /// backendErrorInvitationNotPending
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation was already answered.'**
+  String get backendErrorInvitationNotPending;
+
+  /// backendErrorInvitationNotFound
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation no longer exists.'**
+  String get backendErrorInvitationNotFound;
+
+  /// backendErrorBandNotInOrganization
+  ///
+  /// In en, this message translates to:
+  /// **'That band does not belong to this organization.'**
+  String get backendErrorBandNotInOrganization;
+
+  /// backendErrorInvalidExpiry
+  ///
+  /// In en, this message translates to:
+  /// **'That expiry is not allowed.'**
+  String get backendErrorInvalidExpiry;
+
+  /// backendErrorInvalidMaxUses
+  ///
+  /// In en, this message translates to:
+  /// **'That number of uses is not allowed.'**
+  String get backendErrorInvalidMaxUses;
+
+  /// joinTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Join organization'**
+  String get joinTitle;
+
+  /// joinJoining
+  ///
+  /// In en, this message translates to:
+  /// **'Joining…'**
+  String get joinJoining;
+
+  /// joinFailedTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join'**
+  String get joinFailedTitle;
+
+  /// joinRetry
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get joinRetry;
+
+  /// joinBackToApp
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Battuta'**
+  String get joinBackToApp;
+
+  /// joinWithLinkAction
+  ///
+  /// In en, this message translates to:
+  /// **'Join with invite link'**
+  String get joinWithLinkAction;
+
+  /// joinPasteTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Join with an invite link'**
+  String get joinPasteTitle;
+
+  /// joinPasteLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link or code'**
+  String get joinPasteLabel;
+
+  /// joinPasteSubmit
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinPasteSubmit;
+
+  /// joinPasteInvalid
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a valid invite link or code.'**
+  String get joinPasteInvalid;
+
+  /// joinPendingNote
+  ///
+  /// In en, this message translates to:
+  /// **'Invite saved. Sign in or create an account to join.'**
+  String get joinPendingNote;
+
+  /// joinPendingDismiss
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get joinPendingDismiss;
+
+  /// joinConfirmTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Join this organization?'**
+  String get joinConfirmTitle;
+
+  /// joinConfirmMessage
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in as {account}. Join with the invite link you opened?'**
+  String joinConfirmMessage(String account);
+
+  /// joinConfirmAction
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinConfirmAction;
+
+  /// inviteRevokeConfirmTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke this link?'**
+  String get inviteRevokeConfirmTitle;
+
+  /// inviteRevokeConfirmBody
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody will be able to join with it anymore. You can create a new link later.'**
+  String get inviteRevokeConfirmBody;
+
+  /// joinSuccessSnack
+  ///
+  /// In en, this message translates to:
+  /// **'You joined the organization.'**
+  String get joinSuccessSnack;
+
+  /// invitationFrom
+  ///
+  /// In en, this message translates to:
+  /// **'{organization} invited you to join.'**
+  String invitationFrom(String organization);
+
+  /// invitationOrganizationFallback
+  ///
+  /// In en, this message translates to:
+  /// **'An organization'**
+  String get invitationOrganizationFallback;
+
+  /// invitationAccept
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get invitationAccept;
+
+  /// invitationDecline
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get invitationDecline;
+
+  /// invitationAcceptedSnack
+  ///
+  /// In en, this message translates to:
+  /// **'You joined {organization}.'**
+  String invitationAcceptedSnack(String organization);
+
+  /// invitationDeclinedSnack
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation declined.'**
+  String get invitationDeclinedSnack;
+
+  /// invitationSeeAll
+  ///
+  /// In en, this message translates to:
+  /// **'See all invitations ({count})'**
+  String invitationSeeAll(int count);
+
+  /// inboxTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get inboxTitle;
+
+  /// inboxTooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get inboxTooltip;
+
+  /// inboxTooltipUnread
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox, {count} new'**
+  String inboxTooltipUnread(int count);
+
+  /// inboxMarkAllRead
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get inboxMarkAllRead;
+
+  /// inboxEmptyTitle
+  ///
+  /// In en, this message translates to:
+  /// **'You are all caught up'**
+  String get inboxEmptyTitle;
+
+  /// inboxEmptyMessage
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations and updates from your organizations show up here.'**
+  String get inboxEmptyMessage;
+
+  /// inboxSignInMessage
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your invitations and updates.'**
+  String get inboxSignInMessage;
+
+  /// inboxInvitationsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get inboxInvitationsTitle;
+
+  /// inboxUpdatesTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get inboxUpdatesTitle;
+
+  /// inboxOrganizationGone
+  ///
+  /// In en, this message translates to:
+  /// **'You are no longer in that organization.'**
+  String get inboxOrganizationGone;
+
+  /// notifInvitation
+  ///
+  /// In en, this message translates to:
+  /// **'You were invited to join {organization}'**
+  String notifInvitation(String organization);
+
+  /// notifRoleChanged
+  ///
+  /// In en, this message translates to:
+  /// **'Your role in {organization} is now {role}'**
+  String notifRoleChanged(String organization, String role);
+
+  /// notifRemoved
+  ///
+  /// In en, this message translates to:
+  /// **'You were removed from {organization}'**
+  String notifRemoved(String organization);
+
+  /// notifMemberProfileEdited
+  ///
+  /// In en, this message translates to:
+  /// **'An admin updated your profile in {organization}: {fields}'**
+  String notifMemberProfileEdited(String organization, String fields);
+
+  /// notifEventAssigned
+  ///
+  /// In en, this message translates to:
+  /// **'You were assigned to {event}'**
+  String notifEventAssigned(String event);
+
+  /// notifEventUnassigned
+  ///
+  /// In en, this message translates to:
+  /// **'You were taken off {event}'**
+  String notifEventUnassigned(String event);
+
+  /// notifAssignmentDeclined
+  ///
+  /// In en, this message translates to:
+  /// **'A member declined {event}'**
+  String notifAssignmentDeclined(String event);
+
+  /// notifArchiveRequested
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving {organization} was requested'**
+  String notifArchiveRequested(String organization);
+
+  /// notifArchiveCancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving {organization} was cancelled'**
+  String notifArchiveCancelled(String organization);
+
+  /// notifArchiveCompleted
+  ///
+  /// In en, this message translates to:
+  /// **'{organization} was archived'**
+  String notifArchiveCompleted(String organization);
+
+  /// notifSongVersionForked
+  ///
+  /// In en, this message translates to:
+  /// **'Someone made a copy of one of your arrangements'**
+  String get notifSongVersionForked;
+
+  /// notifSongMergeRequested
+  ///
+  /// In en, this message translates to:
+  /// **'Merge request: {source} into {target}'**
+  String notifSongMergeRequested(String source, String target);
+
+  /// notifSongMergeAccepted
+  ///
+  /// In en, this message translates to:
+  /// **'Your merge request was accepted'**
+  String get notifSongMergeAccepted;
+
+  /// notifSongMergeDeclined
+  ///
+  /// In en, this message translates to:
+  /// **'Your merge request was declined'**
+  String get notifSongMergeDeclined;
+
+  /// notifUnknown
+  ///
+  /// In en, this message translates to:
+  /// **'You have a new notification'**
+  String get notifUnknown;
+
+  /// notifOrganizationFallback
+  ///
+  /// In en, this message translates to:
+  /// **'your organization'**
+  String get notifOrganizationFallback;
+
+  /// notifEventFallback
+  ///
+  /// In en, this message translates to:
+  /// **'a service'**
+  String get notifEventFallback;
+
+  /// notifFieldInstruments
+  ///
+  /// In en, this message translates to:
+  /// **'instruments'**
+  String get notifFieldInstruments;
+
+  /// notifFieldMinPitch
+  ///
+  /// In en, this message translates to:
+  /// **'lowest note'**
+  String get notifFieldMinPitch;
+
+  /// notifFieldMaxPitch
+  ///
+  /// In en, this message translates to:
+  /// **'highest note'**
+  String get notifFieldMaxPitch;
+
+  /// notifFieldNotes
+  ///
+  /// In en, this message translates to:
+  /// **'notes'**
+  String get notifFieldNotes;
+
+  /// notifFieldsFallback
+  ///
+  /// In en, this message translates to:
+  /// **'profile details'**
+  String get notifFieldsFallback;
+
+  /// timeJustNow
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeJustNow;
+
+  /// timeMinutesAgo
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String timeMinutesAgo(int count);
+
+  /// timeHoursAgo
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h ago'**
+  String timeHoursAgo(int count);
+
+  /// timeDaysAgo
+  ///
+  /// In en, this message translates to:
+  /// **'{count} d ago'**
+  String timeDaysAgo(int count);
 }
 
 class _AppLocalizationsDelegate

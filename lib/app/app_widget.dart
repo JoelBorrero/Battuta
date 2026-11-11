@@ -10,6 +10,7 @@ import 'package:battuta/app/config/app_constants.dart';
 import 'package:battuta/app/design_system/brand/brand_intro.dart';
 import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/routes/app_router.dart';
+import 'package:battuta/app/routes/deep_links.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
@@ -56,7 +57,9 @@ class _BattutaAppState extends ConsumerState<BattutaApp> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(accountLifecycleProvider);
+    ref
+      ..watch(accountLifecycleProvider)
+      ..watch(deepLinkHandlerProvider);
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(appLocaleProvider);

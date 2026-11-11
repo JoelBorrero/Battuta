@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:battuta/app/app.dart';
 import 'package:battuta/app/localization/locale_provider.dart';
+import 'package:battuta/app/routes/deep_links.dart';
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/features/auth/presentation/providers/app_entry_provider.dart';
@@ -54,6 +57,13 @@ class FakeCloudSyncService implements CloudSyncService {
       syncAll();
 }
 
+class FakeDeepLinkSource implements DeepLinkSource {
+  final controller = StreamController<Uri>.broadcast();
+
+  @override
+  Stream<Uri> get links => controller.stream;
+}
+
 /// The whole app (router, welcome flow, shell) on fakes.
 class AppHarness {
   AppHarness({
@@ -71,6 +81,7 @@ class AppHarness {
   final AppDatabase db;
   final coordinator = FakeCoordinator();
   final cloudSync = FakeCloudSyncService();
+  final deepLinks = FakeDeepLinkSource();
 
   Widget build() => ProviderScope(
     overrides: [
@@ -83,6 +94,7 @@ class AppHarness {
       organizationRepositoryProvider.overrideWithValue(organizations),
       organizationsSyncCoordinatorProvider.overrideWithValue(coordinator),
       cloudSyncServiceProvider.overrideWithValue(cloudSync),
+      deepLinkSourceProvider.overrideWithValue(deepLinks),
     ],
     child: const BattutaApp(),
   );

@@ -105,26 +105,23 @@ void main() {
       expect(find.byKey(const ValueKey('admin_badge_m-raul')), findsNothing);
     });
 
-    testWidgets('has no Add member path; admins see a disabled Invite', (
+    testWidgets('has no Add member path; admins see an enabled Invite', (
       tester,
     ) async {
       await pump(tester, repo());
 
       expect(find.text('Add Member'), findsNothing);
       expect(find.byIcon(Icons.person_add), findsNothing);
-      final invite = find.byKey(const ValueKey('invite_coming_soon_btn'));
+      final invite = find.byKey(const ValueKey('invite_btn'));
       expect(invite, findsOneWidget);
-      expect(find.text('Invite · Coming soon'), findsOneWidget);
-      expect(tester.widget<OutlinedButton>(invite).onPressed, isNull);
+      expect(find.text('Invite'), findsOneWidget);
+      expect(tester.widget<OutlinedButton>(invite).onPressed, isNotNull);
     });
 
     testWidgets('members do not see Invite or Manage bands', (tester) async {
       await pump(tester, repo(myRole: OrganizationRole.member));
 
-      expect(
-        find.byKey(const ValueKey('invite_coming_soon_btn')),
-        findsNothing,
-      );
+      expect(find.byKey(const ValueKey('invite_btn')), findsNothing);
       expect(find.byKey(const ValueKey('manage_bands_btn')), findsNothing);
       expect(find.byKey(const ValueKey('leave_org_btn')), findsOneWidget);
     });

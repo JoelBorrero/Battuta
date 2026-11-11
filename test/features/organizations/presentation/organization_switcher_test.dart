@@ -182,7 +182,7 @@ void main() {
 
     expect(find.text('No organization yet'), findsOneWidget);
     expect(
-      find.textContaining('Invitations to join one will arrive'),
+      find.textContaining('join one with an invite link'),
       findsOneWidget,
     );
 

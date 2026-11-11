@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
+import 'package:battuta/features/auth/domain/entities/user_profile.dart';
+import 'package:battuta/features/organizations/domain/entities/invites.dart';
+import 'package:battuta/features/organizations/domain/entities/notification.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/organizations/domain/repositories/organization_repository.dart';
 import 'package:flutter_test/flutter_test.dart' show Fake;
@@ -35,6 +38,255 @@ class FakeOrganizationRepository extends Fake
   final List<String> calls = [];
 
   int _ids = 0;
+
+  final List<InviteLink> _links = [];
+  final List<Invitation> _invitations = [];
+  final List<Invitation> _myInvitations = [];
+  final List<AppNotification> _notifications = [];
+
+  /// People `searchProfiles` can find.
+  List<UserProfile> directory = const [];
+
+  /// Queries received by `searchProfiles`.
+  final List<String> searches = [];
+
+  /// What `joinWithInviteLink` returns when it succeeds.
+  String joinOrganizationId = 'org-1';
+
+  /// Whether the next calls of `markNotificationsRead` etc. fail as offline.
+  bool offline = false;
+
+  Failure get _offlineFailure => backendFailure(BackendErrorCode.offline);
+
+  void setInviteLinks(List<InviteLink> links) {
+    _links
+      ..clear()
+      ..addAll(links);
+    _notify();
+  }
+
+  void setInvitations(List<Invitation> invitations) {
+    _invitations
+      ..clear()
+      ..addAll(invitations);
+    _notify();
+  }
+
+  void setMyInvitations(List<Invitation> invitations) {
+    _myInvitations
+      ..clear()
+      ..addAll(invitations);
+    _notify();
+  }
+
+  void setNotifications(List<AppNotification> notifications) {
+    _notifications
+      ..clear()
+      ..addAll(notifications);
+    _notify();
+  }
+
+  @override
+  Stream<List<InviteLink>> watchInviteLinks(String organizationId) => _watch(
+    () => [
+      for (final l in _links)
+        if (l.organizationId == organizationId) l,
+    ],
+  );
+
+  @override
+  Stream<List<Invitation>> watchInvitations(String organizationId) => _watch(
+    () => [
+      for (final i in _invitations)
+        if (i.organizationId == organizationId) i,
+    ],
+  );
+
+  @override
+  Stream<List<Invitation>> watchMyInvitations() =>
+      _watch(() => [..._myInvitations]);
+
+  @override
+  Future<Either<Failure, Unit>> refreshInvitations(String organizationId) async =>
+      right(unit);
+
+  @override
+  Stream<List<AppNotification>> watchNotifications() =>
+      _watch(() => [..._notifications]);
+
+  @override
+  Future<Either<Failure, Unit>> markNotificationsRead([
+    List<String>? ids,
+  ]) async {
+    calls.add('markNotificationsRead:${ids?.join(',') ?? 'all'}');
+    if (offline) return left(_offlineFailure);
+    if (_failed<Unit>() case final f?) return f;
+    final at = DateTime(2026, 11, 11);
+    for (var i = 0; i < _notifications.length; i++) {
+      if (ids == null || ids.contains(_notifications[i].id)) {
+        _notifications[i] = _notifications[i].markRead(at);
+      }
+    }
+    _notify();
+    return right(unit);
+  }
+
+  @override
+  Future<Either<Failure, InviteLink>> createInviteLink(
+    String organizationId, {
+    String? bandId,
+    Duration expiresIn = const Duration(days: 7),
+    int? maxUses,
+  }) async {
+    calls.add(
+      'createInviteLink:$organizationId:${bandId ?? '-'}:${expiresIn.inDays}:'
+      '${maxUses ?? '-'}',
+    );
+    if (offline) return left(_offlineFailure);
+    if (_failed<InviteLink>() case final f?) return f;
+    final link = InviteLink(
+      id: 'link-${_ids++}',
+      organizationId: organizationId,
+      token: 'a1b2c3d4e5f60718293a4b5c6d7e8f90${_ids.toString().padLeft(4, '0')}',
+      expiresAt: DateTime.now().add(expiresIn),
+      bandId: bandId,
+      maxUses: maxUses,
+    );
+    _links.add(link);
+    _notify();
+    return right(link);
+  }
+
+  @override
+  Future<Either<Failure, InviteLink>> revokeInviteLink(
+    String organizationId,
+    String linkId,
+  ) async {
+    calls.add('revokeInviteLink:$linkId');
+    if (_failed<InviteLink>() case final f?) return f;
+    final index = _links.indexWhere((l) => l.id == linkId);
+    final old = _links[index];
+    final revoked = InviteLink(
+      id: old.id,
+      organizationId: old.organizationId,
+      token: old.token,
+      expiresAt: old.expiresAt,
+      bandId: old.bandId,
+      maxUses: old.maxUses,
+      useCount: old.useCount,
+      revokedAt: DateTime.now(),
+    );
+    _links[index] = revoked;
+    _notify();
+    return right(revoked);
+  }
+
+  @override
+  Future<Either<Failure, OrganizationMember>> joinWithInviteLink(
+    String token,
+  ) async {
+    calls.add('joinWithInviteLink:$token');
+    if (offline) return left(_offlineFailure);
+    if (_failed<OrganizationMember>() case final f?) return f;
+    return right(
+      OrganizationMember(
+        id: 'm-joined',
+        organizationId: joinOrganizationId,
+        userId: 'u-me',
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<UserProfile>>> searchProfiles(
+    String query,
+  ) async {
+    calls.add('searchProfiles:$query');
+    searches.add(query);
+    if (offline) return left(_offlineFailure);
+    if (_failed<List<UserProfile>>() case final f?) return f;
+    final q = query.toLowerCase();
+    return right([
+      for (final p in directory)
+        if (p.username.toLowerCase().contains(q) ||
+            p.displayName.toLowerCase().contains(q))
+          p,
+    ]);
+  }
+
+  @override
+  Future<Either<Failure, Invitation>> inviteUserByUsername(
+    String organizationId,
+    String username, {
+    String? bandId,
+  }) async {
+    calls.add('inviteUserByUsername:$username:${bandId ?? '-'}');
+    if (offline) return left(_offlineFailure);
+    if (_failed<Invitation>() case final f?) return f;
+    final profile = directory.firstWhere((p) => p.username == username);
+    final invitation = Invitation(
+      id: 'inv-${_ids++}',
+      organizationId: organizationId,
+      invitedUserId: profile.id,
+      bandId: bandId,
+      inviteeUsername: profile.username,
+      inviteeDisplayName: profile.displayName,
+    );
+    _invitations.add(invitation);
+    _notify();
+    return right(invitation);
+  }
+
+  @override
+  Future<Either<Failure, Invitation>> cancelInvitation(
+    String organizationId,
+    String invitationId,
+  ) async {
+    calls.add('cancelInvitation:$invitationId');
+    if (_failed<Invitation>() case final f?) return f;
+    final index = _invitations.indexWhere((i) => i.id == invitationId);
+    final old = _invitations[index];
+    final cancelled = Invitation(
+      id: old.id,
+      organizationId: old.organizationId,
+      invitedUserId: old.invitedUserId,
+      status: InvitationStatus.cancelled,
+      inviteeUsername: old.inviteeUsername,
+      inviteeDisplayName: old.inviteeDisplayName,
+    );
+    _invitations[index] = cancelled;
+    _notify();
+    return right(cancelled);
+  }
+
+  @override
+  Future<Either<Failure, Invitation>> respondToInvitation(
+    Invitation invitation, {
+    required bool accept,
+  }) async {
+    calls.add('respondToInvitation:${invitation.id}:$accept');
+    if (_failed<Invitation>() case final f?) return f;
+    final index = _myInvitations.indexWhere((i) => i.id == invitation.id);
+    final updated = Invitation(
+      id: invitation.id,
+      organizationId: invitation.organizationId,
+      invitedUserId: invitation.invitedUserId,
+      status: accept ? InvitationStatus.accepted : InvitationStatus.declined,
+      organizationName: invitation.organizationName,
+    );
+    _myInvitations[index] = updated;
+    if (accept) {
+      _organizations.add(
+        Organization(
+          id: invitation.organizationId,
+          name: invitation.organizationName ?? 'Org',
+          myRole: OrganizationRole.member,
+        ),
+      );
+    }
+    _notify();
+    return right(updated);
+  }
 
   void _notify() => _changes.add(null);
 

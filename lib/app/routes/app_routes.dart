@@ -34,6 +34,26 @@ final class AppRoutes {
   /// Account creation (email, password, username).
   static const String createAccount = '/create-account';
 
+  /// Joining an organization from an invite link (`battuta://join/<token>`).
+  ///
+  /// Path parameter: `token`.
+  static const String joinPath = '/join/:token';
+
+  /// Returns the concrete path that joins with [token].
+  static String join(String token) => '/join/${Uri.encodeComponent(token)}';
+
+  /// The token of a join [location], or `null` for any other location.
+  static String? joinTokenOf(String location) {
+    const prefix = '/join/';
+    if (!location.startsWith(prefix) || location.length == prefix.length) {
+      return null;
+    }
+    return Uri.decodeComponent(location.substring(prefix.length));
+  }
+
+  /// Notifications inbox and invitations addressed to me.
+  static const String inbox = '/inbox';
+
   /// Whether [location] belongs to the account entry flow.
   static bool isAccountEntry(String location) =>
       location == welcome || location == signIn || location == createAccount;

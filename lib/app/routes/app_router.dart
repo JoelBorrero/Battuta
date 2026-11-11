@@ -15,6 +15,10 @@ import 'package:battuta/features/auth/presentation/pages/welcome_page.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/app_entry_provider.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
+import 'package:battuta/features/organizations/domain/services/invite_link_parser.dart';
+import 'package:battuta/features/organizations/presentation/pages/inbox_page.dart';
+import 'package:battuta/features/organizations/presentation/pages/join_page.dart';
+import 'package:battuta/features/organizations/presentation/providers/pending_invite_provider.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/setlist_detail_page.dart';
@@ -43,17 +47,47 @@ GoRouter appRouter(Ref ref) {
   ref
     ..onDispose(refresh.dispose)
     ..listen(appEntryProvider, (_, _) => refresh.value++)
-    ..listen(accountNoticeProvider, (_, _) => refresh.value++);
+    ..listen(accountNoticeProvider, (_, _) => refresh.value++)
+    ..listen(pendingInviteTokenProvider, (_, _) => refresh.value++);
+
+  // The entry seen by the previous redirect. When a session ends while the
+  // join page is open, the redirect re-runs on that same `/join/<token>`
+  // location: the token belonged to the account that just left and must not
+  // be kept for whoever signs in next.
+  AppEntry? previousEntry;
 
   return GoRouter(
     initialLocation: AppRoutes.initial,
     debugLogDiagnostics: false,
     refreshListenable: refresh,
-    redirect: (context, state) => resolveAppRedirect(
-      entry: ref.read(appEntryProvider),
-      hasNotice: ref.read(accountNoticeProvider) != null,
-      location: state.uri.path,
-    ),
+    redirect: (context, state) {
+      // A `battuta://join/<token>` link arrives with the token as its path.
+      final linkToken = inviteTokenFromUri(state.uri);
+      final location = linkToken != null
+          ? AppRoutes.join(linkToken)
+          : state.uri.path;
+      final entry = ref.read(appEntryProvider);
+      final sessionJustEnded =
+          previousEntry == AppEntry.signedIn && entry != AppEntry.signedIn;
+      previousEntry = entry;
+      final joinToken = AppRoutes.joinTokenOf(location);
+      // Signed out: keep the token until an account exists.
+      if (joinToken != null &&
+          entry != null &&
+          entry != AppEntry.signedIn &&
+          !sessionJustEnded) {
+        Future(
+          () => ref.read(pendingInviteTokenProvider.notifier).set(joinToken),
+        );
+      }
+      final target = resolveAppRedirect(
+        entry: entry,
+        hasNotice: ref.read(accountNoticeProvider) != null,
+        location: location,
+        pendingInviteToken: ref.read(pendingInviteTokenProvider),
+      );
+      return target ?? (location != state.uri.path ? location : null);
+    },
     routes: [
       GoRoute(
         path: AppRoutes.welcome,
@@ -69,6 +103,18 @@ GoRouter appRouter(Ref ref) {
         path: AppRoutes.createAccount,
         name: 'createAccount',
         builder: (context, state) => const CreateAccountPage(),
+      ),
+
+      GoRoute(
+        path: AppRoutes.joinPath,
+        name: 'join',
+        builder: (context, state) =>
+            JoinPage(token: state.pathParameters['token']!),
+      ),
+      GoRoute(
+        path: AppRoutes.inbox,
+        name: 'inbox',
+        builder: (context, state) => const InboxPage(),
       ),
 
       // ── Shell for bottom navigation ────────────────────────────────

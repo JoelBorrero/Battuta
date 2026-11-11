@@ -8,6 +8,7 @@ import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
+import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
 import 'package:battuta/features/settings/presentation/widgets/account_section.dart';
@@ -41,7 +42,10 @@ class SettingsPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n?.settingsTitle ?? 'Settings')),
+      appBar: AppBar(
+        title: Text(l10n?.settingsTitle ?? 'Settings'),
+        actions: const [InboxButton()],
+      ),
       body: ListView(
         children: [
           // ── Appearance ──

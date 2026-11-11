@@ -520,11 +520,11 @@ class OrganizationRepositoryImpl
     String username, {
     String? bandId,
   }) => guardWrite(organizationId, (accountId) async {
-    final invitation = await remote.inviteUserByUsername(
+    final invitation = (await remote.inviteUserByUsername(
       organizationId,
       username.trim(),
       bandId: bandId,
-    );
+    )).withInvitee(username: username.trim());
     await _upsert(
       accountId,
       CacheKind.invitation,
