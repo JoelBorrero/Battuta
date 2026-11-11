@@ -10,9 +10,8 @@ rounds: 1 of 3 (+ main-session fixes)
 its own full sheet (lyrics + chords), always linked to one song. Songs are matched at creation, a misattached
 version can be moved, and merge is removed.
 
-> The migration, its pgTAP file and the integration tests were written and desk-checked but **not run**
-> (Docker down): see "Verify first" in `.pipeline/backlog.md`. The adversary's one major (a pgTAP step run
-> without a signed-in user) was fixed by the main session afterwards, together with three cheap minors.
+> The adversary's one major (a pgTAP step run without a signed-in user) was fixed by the main session
+> afterwards, together with three cheap minors. Verified against the local stack later the same day.
 
 ## What changed
 - **Server** (`supabase/migrations/20261111000100_song_linking.sql`, earlier migrations untouched):
@@ -61,4 +60,4 @@ version can be moved, and merge is removed.
 See `.pipeline/backlog.md` (010 section and "Verify first").
 
 ## Verification
-`flutter analyze`: 0 issues. `flutter test`: 1099 passed (integration files skipped). SQL desk-checked only.
+`flutter analyze`: 0 issues. `flutter test`: 1099 passed (integration files skipped). pgTAP 734/734 and integration 55/55 passed against the local stack (2026-11-11).

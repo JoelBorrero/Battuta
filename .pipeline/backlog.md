@@ -3,16 +3,6 @@
 Deferred findings that must not be forgotten. When a task closes, add anything it deferred here; when an
 item is fixed, delete it (the fixing task's summary records it).
 
-## ⚠ Verify first: 009 and 010 never ran against Supabase
-Docker hung during the 009 review and stayed down for 010 (2026-11-11). Restart Docker Desktop, then:
-1. `supabase start`, `supabase db reset` twice: the 010 migration
-   (`20261111000100_song_linking.sql`) has never been applied. Likely spots if it fails: `extensions.similarity`,
-   the `unique_violation or sqlstate 'P0001'` handler, the GIN expression index, the dedupe step.
-2. `supabase test db`: new `10_song_linking.test.sql` and the edited `01`, `06`, `08` files.
-3. `supabase db reset`, then `flutter test --tags supabase --run-skipped test/integration` (009 + 010 remote
-   queries: `or` with `referencedTable`, `songs!inner`, `find_or_create_song`, `search_songs`, move).
-Remove this section once all pass.
-
 ## From 001: harden transposer
 - Sharp/flat spelling on free-form keys: `b minor` +2 → `Db minor` instead of `C# minor`.
 - Hand-built custom labels that only look root-prefixed (`Cat` with root `C` → `Dat`).
@@ -128,3 +118,6 @@ Product / ops:
 - The song editor overflows below ~480 px (claimed pre-existing, not re-checked at base).
 - Version pushes through `find_or_create_song`, move and rename collision are covered only by the integration
   suite.
+
+## Ops
+- After a Docker Desktop restart the local stack can come back without `supabase_auth_Battuta`; `supabase status` then has no keys and every integration test is skipped. Fix: `supabase stop && supabase start`.

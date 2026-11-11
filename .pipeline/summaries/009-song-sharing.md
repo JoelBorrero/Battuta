@@ -45,4 +45,4 @@ See `.pipeline/backlog.md` (009 section). Fork and linking issues are planned in
 
 ## Verification
 `flutter analyze`: 0 issues. `flutter test`: 1089 passed (the adversary re-ran it). Integration: 53 passed in
-the implementer's run, **not confirmed by the review** (Docker hung).
+the implementer's run; confirmed after 010 (55/55 with 010's tests, 2026-11-11).
