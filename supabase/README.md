@@ -18,8 +18,8 @@ others. Inside an organization a musician can play in several bands.
 
 | Table | Purpose |
 | --- | --- |
-| `profiles` | One per account, created by trigger on sign-up. `username` (unique, case-insensitive, 3-30 chars of `[a-z0-9_.]`, stored lowercase), `display_name`, `avatar_url`, `deactivated_at`. No email. No foreign key to `auth.users`: a profile outlives its auth user. |
-| `organizations` | `name`, `created_by`, `archived_at`. |
+| `profiles` | One per account, created by trigger on sign-up. `username` (unique, case-insensitive, 3-30 chars of `[a-z0-9_.]`, stored lowercase), `display_name`, `avatar_path` (object path in the `avatars` bucket), `deactivated_at`. No email. No foreign key to `auth.users`: a profile outlives its auth user. |
+| `organizations` | `name`, `description` (at most 280 characters), `logo_path` (object path in the `organization-logos` bucket), `created_by`, `archived_at`. |
 | `organization_members` | `(organization_id, user_id)` unique, `role` (`admin` or `member`), per-organization musician profile (`instruments`, `min_pitch`, `max_pitch`, `notes`), `deactivated_at`. |
 | `organization_archive_requests`, `organization_archive_approvals` | Open archive request and the admins who approved it. |
 | `bands` / `band_members` | Bands of an organization; a member can be in several. Composite foreign keys make it impossible to link a band and a member of different organizations. |
@@ -36,6 +36,12 @@ others. Inside an organization a musician can play in several bands.
 | `member_absences` | Days a member is away (`starts_on`, `ends_on`, `note`). |
 | `notifications` | `recipient_id`, `organization_id?`, `type`, `payload`, `read_at`. Created only by triggers and RPCs. |
 | `workspace_quotas`, `workspace_usage` | Gemini credit and storage metering per organization. A quota row is only an override of the free default (`organization_quota(org)`). |
+
+**Storage.** Two public-read buckets (jpeg/png/webp, 2 MB): `avatars` (`<user id>/<file>`, written
+only by that active user) and `organization-logos` (`<organization id>/<file>`, written only by an admin
+of that non-archived organization). The tables keep the bucket-relative path, never a URL, so the app
+builds the URL from whichever project it talks to. A path in `profiles.avatar_path` /
+`organizations.logo_path` must live in the row's own folder (check constraint).
 
 Removed from the old schema: `teams`, `team_members`, `team_groups`, every `is_demo` column, demo seed
 data, the anonymous demo policies and the free-text `availability` column. Song, setlist and event ids
@@ -84,7 +90,7 @@ explicit confirmation.
 
 ### Deactivated accounts
 
-`deactivate_account()` sets `profiles.deactivated_at`, clears the avatar, keeps `username`/`display_name`,
+`deactivate_account()` sets `profiles.deactivated_at`, clears `avatar_path`, keeps `username`/`display_name`,
 marks every membership inactive (`organization_members.deactivated_at`), removes band memberships and future
 assignments, and cancels pending invitations to the user. Past assignments and everything authored stay.
 A last admin of an active organization with other active members is blocked (`last_admin`); a sole member

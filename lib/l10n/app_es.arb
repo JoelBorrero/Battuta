@@ -940,5 +940,166 @@
   "profileActiveOrganizationBadge": "Activa",
   "profileLeaveAdminHint": "Los administradores deben ceder el rol de administrador en los ajustes de la organización antes de salir.",
   "profileOrganizationOpenSettings": "Ajustes de la organización",
-  "profileMoreTooltip": "Más opciones"
+  "profileMoreTooltip": "Más opciones",
+  "photoSheetPersonTitle": "Foto de perfil",
+  "@photoSheetPersonTitle": {
+    "description": "Title of the change profile photo sheet"
+  },
+  "photoSheetPersonSubtitle": "La ven tus compañeros y aparece en tus canciones",
+  "@photoSheetPersonSubtitle": {
+    "description": "Subtitle of the change profile photo sheet"
+  },
+  "photoSheetLogoTitle": "Logo de la organización",
+  "@photoSheetLogoTitle": {
+    "description": "Title of the change organization logo sheet"
+  },
+  "photoSheetLogoSubtitle": "Lo ven todos los miembros de la organización",
+  "@photoSheetLogoSubtitle": {
+    "description": "Subtitle of the change organization logo sheet"
+  },
+  "photoSheetHintCircle": "Elige una foto y pellizca y arrastra para ajustarla al círculo",
+  "@photoSheetHintCircle": {
+    "description": "Hint under the preview of a round photo"
+  },
+  "photoSheetHintSquare": "Elige una foto y pellizca y arrastra para ajustarla al cuadrado",
+  "@photoSheetHintSquare": {
+    "description": "Hint under the preview of a logo"
+  },
+  "photoTakeAction": "Tomar foto",
+  "@photoTakeAction": {
+    "description": "Button that opens the camera"
+  },
+  "photoChooseAction": "Elegir foto",
+  "@photoChooseAction": {
+    "description": "Button that opens the photo library"
+  },
+  "photoSaveAction": "Guardar foto",
+  "@photoSaveAction": {
+    "description": "Button that uploads the chosen photo"
+  },
+  "photoRemoveAction": "Quitar foto",
+  "@photoRemoveAction": {
+    "description": "Button that removes the current photo"
+  },
+  "photoUpdated": "Foto actualizada",
+  "@photoUpdated": {
+    "description": "Snackbar after saving a photo or logo"
+  },
+  "photoRemoved": "Foto eliminada",
+  "@photoRemoved": {
+    "description": "Snackbar after removing a photo or logo"
+  },
+  "photoPickFailed": "No se pudo abrir la cámara ni la fototeca. Revisa los permisos de la app en Ajustes.",
+  "@photoPickFailed": {
+    "description": "Error when picking a photo fails"
+  },
+  "photoChangeTooltip": "Cambiar foto",
+  "@photoChangeTooltip": {
+    "description": "Tooltip of the camera button on the profile avatar"
+  },
+  "organizationLogoChangeTooltip": "Cambiar logo de la organización",
+  "@organizationLogoChangeTooltip": {
+    "description": "Tooltip of the camera button on the organization logo"
+  },
+  "backendErrorImageTooLarge": "Esa foto es demasiado grande. Elige una más pequeña.",
+  "@backendErrorImageTooLarge": {
+    "description": "Storage refused an upload for its size"
+  },
+  "profileStatOrganizations": "Organizaciones",
+  "@profileStatOrganizations": {
+    "description": "Stat tile on my profile"
+  },
+  "profileStatVersions": "Versiones",
+  "@profileStatVersions": {
+    "description": "Stat tile on my profile: song versions I own"
+  },
+  "profileStatUpcoming": "Próximos",
+  "@profileStatUpcoming": {
+    "description": "Stat tile on my profile: my upcoming assignments"
+  },
+  "profileAppSettings": "Ajustes de la app",
+  "@profileAppSettings": {
+    "description": "Row on my profile that opens the app settings"
+  },
+  "profileDeactivateHint": "Desactivar la cuenta está en el menú ⋯",
+  "@profileDeactivateHint": {
+    "description": "Hint at the bottom of my profile"
+  },
+  "profileSwitchToOrganization": "Cambiar a esta organización",
+  "@profileSwitchToOrganization": {
+    "description": "Menu item that makes an organization the active one"
+  },
+  "profileViewOrganization": "Ver organización",
+  "@profileViewOrganization": {
+    "description": "Menu item that opens the organization profile"
+  },
+  "organizationProfileTitle": "Organización",
+  "@organizationProfileTitle": {
+    "description": "Title of the organization profile page"
+  },
+  "organizationYouAreAdmin": "ERES ADMINISTRADOR",
+  "@organizationYouAreAdmin": {
+    "description": "Badge on the organization profile for admins"
+  },
+  "organizationAddDescription": "Añade una descripción",
+  "@organizationAddDescription": {
+    "description": "Placeholder for admins when the organization has no description"
+  },
+  "organizationStatMembers": "Miembros",
+  "@organizationStatMembers": {
+    "description": "Stat tile on the organization profile"
+  },
+  "organizationStatSongs": "Canciones",
+  "@organizationStatSongs": {
+    "description": "Stat tile on the organization profile"
+  },
+  "organizationManageAction": "Gestionar",
+  "@organizationManageAction": {
+    "description": "Link that opens the bands manager"
+  },
+  "organizationMembersHeading": "Miembros",
+  "@organizationMembersHeading": {
+    "description": "Heading of the members preview"
+  },
+  "organizationSeeAll": "Ver los {count}",
+  "@organizationSeeAll": {
+    "description": "Link to the full roster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "organizationNoBands": "Aún no hay bandas",
+  "@organizationNoBands": {
+    "description": "Empty state of the bands chips"
+  },
+  "organizationNextUp": "Próximo",
+  "@organizationNextUp": {
+    "description": "Heading of the next service card"
+  },
+  "organizationNoUpcoming": "No hay servicios próximos",
+  "@organizationNoUpcoming": {
+    "description": "Empty state of the next service card"
+  },
+  "organizationMemberDeactivated": "Cuenta desactivada",
+  "@organizationMemberDeactivated": {
+    "description": "Detail line of a deactivated member"
+  },
+  "organizationEditTitle": "Editar perfil de la organización",
+  "@organizationEditTitle": {
+    "description": "Title of the edit organization sheet"
+  },
+  "organizationDescriptionLabel": "Descripción",
+  "@organizationDescriptionLabel": {
+    "description": "Label of the description field"
+  },
+  "organizationProfileSaved": "Organización actualizada",
+  "@organizationProfileSaved": {
+    "description": "Snackbar after saving the organization profile"
+  },
+  "organizationNotFound": "Esta organización ya no está disponible.",
+  "@organizationNotFound": {
+    "description": "Shown when the organization profile cannot be found"
+  }
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
@@ -107,8 +108,9 @@ class FakeOrganizationRepository extends Fake
       _watch(() => [..._myInvitations]);
 
   @override
-  Future<Either<Failure, Unit>> refreshInvitations(String organizationId) async =>
-      right(unit);
+  Future<Either<Failure, Unit>> refreshInvitations(
+    String organizationId,
+  ) async => right(unit);
 
   @override
   Stream<List<AppNotification>> watchNotifications() =>
@@ -147,7 +149,8 @@ class FakeOrganizationRepository extends Fake
     final link = InviteLink(
       id: 'link-${_ids++}',
       organizationId: organizationId,
-      token: 'a1b2c3d4e5f60718293a4b5c6d7e8f90${_ids.toString().padLeft(4, '0')}',
+      token:
+          'a1b2c3d4e5f60718293a4b5c6d7e8f90${_ids.toString().padLeft(4, '0')}',
       expiresAt: DateTime.now().add(expiresIn),
       bandId: bandId,
       maxUses: maxUses,
@@ -587,10 +590,68 @@ class FakeOrganizationRepository extends Fake
   }
 
   @override
+  Future<Either<Failure, Organization>> updateOrganizationProfile(
+    String organizationId, {
+    required String name,
+    String? description,
+  }) async {
+    calls.add('updateOrganizationProfile:$organizationId:$name:$description');
+    if (_failed<Organization>() case final f?) return f;
+    final trimmed = description?.trim();
+    return right(
+      _replaceOrganization(
+        organizationId,
+        (o) => o.copyWith(
+          name: name.trim(),
+          description: trimmed == null || trimmed.isEmpty ? null : trimmed,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, Organization>> setOrganizationLogo(
+    String organizationId,
+    Uint8List jpeg,
+  ) async {
+    calls.add('setOrganizationLogo:$organizationId:${jpeg.length}');
+    if (offline) return left(_offlineFailure);
+    if (_failed<Organization>() case final f?) return f;
+    return right(
+      _replaceOrganization(
+        organizationId,
+        (o) => o.copyWith(logoPath: '$organizationId/new.jpg'),
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, Organization>> removeOrganizationLogo(
+    String organizationId,
+  ) async {
+    calls.add('removeOrganizationLogo:$organizationId');
+    if (offline) return left(_offlineFailure);
+    if (_failed<Organization>() case final f?) return f;
+    return right(
+      _replaceOrganization(organizationId, (o) => o.copyWith(logoPath: null)),
+    );
+  }
+
+  Organization _replaceOrganization(
+    String organizationId,
+    Organization Function(Organization) change,
+  ) {
+    final index = _organizations.indexWhere((o) => o.id == organizationId);
+    final updated = change(_organizations[index]);
+    _organizations[index] = updated;
+    _notify();
+    return updated;
+  }
+
+  @override
   Stream<ArchiveRequest?> watchArchiveRequest(String organizationId) =>
-      _watch<ArchiveRequest?>(
-        () => [_archiveRequests[organizationId]],
-      ).map((rows) => rows.firstOrNull);
+      _watch<ArchiveRequest?>(() => [_archiveRequests[organizationId]])
+          .map((rows) => rows.firstOrNull);
 
   @override
   Future<Either<Failure, Unit>> refreshArchiveRequest(
@@ -640,7 +701,10 @@ class FakeOrganizationRepository extends Fake
       organizationId: organizationId,
       requestedBy: request.requestedBy,
       requestedAt: request.requestedAt,
-      approvals: [...request.approvals, ArchiveApproval(userId: meId)],
+      approvals: [
+        ...request.approvals,
+        ArchiveApproval(userId: meId),
+      ],
     );
     return right(_archiveIfEveryAdminApproved(organizationId));
   }

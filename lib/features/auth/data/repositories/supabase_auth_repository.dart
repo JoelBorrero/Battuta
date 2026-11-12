@@ -4,6 +4,7 @@
 library;
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
@@ -262,6 +263,12 @@ class SupabaseAuthRepository implements AuthRepository {
     }
     await _profiles.updateMyProfile(displayName: name, username: normalized);
   }
+
+  @override
+  Future<void> setMyAvatar(Uint8List jpeg) => _profiles.setMyAvatar(jpeg);
+
+  @override
+  Future<void> removeMyAvatar() => _profiles.removeMyAvatar();
 
   @override
   Future<void> deactivateAccount() async {

@@ -68,6 +68,9 @@ enum BackendErrorCode {
   offline('offline', BackendErrorKind.other),
   notOwner('not_owner', BackendErrorKind.permission),
   notSignedIn('not_signed_in', BackendErrorKind.permission),
+
+  /// Storage refused an upload for its size (HTTP 413).
+  imageTooLarge('image_too_large', BackendErrorKind.input),
   unknown('unknown', BackendErrorKind.other);
 
   const BackendErrorCode(this.code, this.kind);
@@ -85,6 +88,7 @@ enum BackendErrorCode {
             c != conflict &&
             c != notOwner &&
             c != notSignedIn &&
+            c != imageTooLarge &&
             c != unknown,
       )
       .toList(growable: false);

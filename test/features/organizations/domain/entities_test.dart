@@ -12,7 +12,7 @@ void main() {
         'id': 'u1',
         'username': 'jane',
         'display_name': 'Jane',
-        'avatar_url': null,
+        'avatar_path': null,
         'deactivated_at': '2026-11-10T10:00:00+00:00',
       };
       final profile = UserProfile.fromJson(json);
@@ -38,6 +38,31 @@ void main() {
       expect(org.isArchived, isTrue);
       expect(org.isAdmin, isTrue);
       expect(Organization.fromJson(org.toJson()), org);
+    });
+
+    test('keeps the logo path and description through JSON', () {
+      final org = Organization.fromJson({
+        'id': 'o1',
+        'name': 'Grace',
+        'logo_path': 'o1/logo.jpg',
+        'description': 'Thursdays at 7 pm',
+      });
+      expect(org.logoPath, 'o1/logo.jpg');
+      expect(org.description, 'Thursdays at 7 pm');
+      expect(Organization.fromJson(org.toJson()), org);
+    });
+
+    test('copyWith can set the logo and description to null', () {
+      const org = Organization(
+        id: 'o1',
+        name: 'Grace',
+        logoPath: 'o1/logo.jpg',
+        description: 'About',
+      );
+      expect(org.copyWith(name: 'X').logoPath, 'o1/logo.jpg');
+      expect(org.copyWith(logoPath: null).logoPath, isNull);
+      expect(org.copyWith(logoPath: null).description, 'About');
+      expect(org.copyWith(description: null).description, isNull);
     });
 
     test('role defaults to unknown when the RPC row has none', () {
@@ -66,10 +91,11 @@ void main() {
         'profiles': {
           'username': 'jane',
           'display_name': 'Jane',
-          'avatar_url': null,
+          'avatar_path': 'u1/photo.jpg',
         },
       });
       expect(member.username, 'jane');
+      expect(member.avatarPath, 'u1/photo.jpg');
       expect(member.instruments, ['piano', 'voice']);
       expect(member.isActive, isTrue);
       expect(OrganizationMember.fromJson(member.toJson()), member);

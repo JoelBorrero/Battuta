@@ -4,6 +4,8 @@
 /// Band Directors and musicians following Clean Architecture.
 library;
 
+import 'dart:typed_data';
+
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 
@@ -44,6 +46,14 @@ abstract class AuthRepository {
     required String displayName,
     required String username,
   });
+
+  /// Sets my profile photo to the cropped JPEG [jpeg] (at most 2 MB). The old
+  /// photo is deleted afterwards. Fails with `offline`, `image_too_large` or
+  /// `permission_denied`; the old photo stays in that case.
+  Future<void> setMyAvatar(Uint8List jpeg);
+
+  /// Removes my profile photo.
+  Future<void> removeMyAvatar();
 
   /// Deactivates the account (kept as history) and signs out.
   Future<void> deactivateAccount();

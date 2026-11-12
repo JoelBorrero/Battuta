@@ -58,6 +58,16 @@ final class AppRoutes {
   /// Notifications inbox and invitations addressed to me.
   static const String inbox = '/inbox';
 
+  /// The profile of one organization: logo, description, bands, members and
+  /// the next service.
+  ///
+  /// Path parameter: `organizationId`.
+  static const String organizationPath = '/organizations/:organizationId';
+
+  /// Returns the concrete path of the profile of [organizationId].
+  static String organization(String organizationId) =>
+      '/organizations/${Uri.encodeComponent(organizationId)}';
+
   /// Settings of one organization (name, role, quota, leave, archive).
   ///
   /// Path parameter: `organizationId`.

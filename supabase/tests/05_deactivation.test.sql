@@ -103,7 +103,7 @@ insert into public.organization_members (organization_id, user_id, role) values
     (tests.org('Org A'), tests.uid('bob'), 'member'),
     (tests.org('Org D'), tests.uid('frank'), 'member'),
     (tests.org('Org E'), tests.uid('ivy'), 'member');
-update public.profiles set avatar_url = 'https://example.test/bob.png' where username = 'bob';
+update public.profiles set avatar_path = tests.uid('bob')::text || '/photo.jpg' where username = 'bob';
 insert into public.bands (id, organization_id, name) values
     ('00000000-0000-0000-0000-0000000000a1', tests.org('Org A'), 'Band A1');
 insert into public.band_members (organization_id, band_id, member_id) values
@@ -148,7 +148,7 @@ select tests.as_user('bob');
 select lives_ok($$ select public.deactivate_account() $$, 'a member deactivates their account');
 select tests.reset();
 select ok((select deactivated_at is not null from public.profiles where username = 'bob'), 'profile is marked deactivated');
-select is((select avatar_url from public.profiles where username = 'bob'), null, 'avatar is scrubbed');
+select is((select avatar_path from public.profiles where username = 'bob'), null, 'avatar is scrubbed');
 select is((select display_name from public.profiles where username = 'bob'), 'bob', 'display name is kept for history');
 select is((select count(*)::int from public.profiles where username = 'bob'), 1, 'username is kept');
 select ok((select deactivated_at is not null from public.organization_members where id = tests.member('Org A', 'bob')),

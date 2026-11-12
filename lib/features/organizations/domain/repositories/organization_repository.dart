@@ -5,6 +5,8 @@
 /// `Left` with `BackendErrorCode.offline`. Nothing here throws.
 library;
 
+import 'dart:typed_data';
+
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/organizations/domain/entities/invites.dart';
@@ -23,6 +25,25 @@ abstract interface class OrganizationRepository {
     String organizationId,
     String name,
   );
+
+  /// Admin: sets the name (1-100 characters) and the description (at most 280
+  /// characters; blank clears it).
+  Future<Result<Organization>> updateOrganizationProfile(
+    String organizationId, {
+    required String name,
+    String? description,
+  });
+
+  /// Admin: sets the logo to the cropped JPEG [jpeg] (at most 2 MB). The old
+  /// logo is deleted afterwards. Fails with `offline`, `image_too_large` or
+  /// `not_admin`; the old logo stays in that case.
+  Future<Result<Organization>> setOrganizationLogo(
+    String organizationId,
+    Uint8List jpeg,
+  );
+
+  /// Admin: removes the logo.
+  Future<Result<Organization>> removeOrganizationLogo(String organizationId);
   Future<Result<Unit>> leaveOrganization(String organizationId);
   Future<Result<OrganizationQuota>> getQuota(String organizationId);
 

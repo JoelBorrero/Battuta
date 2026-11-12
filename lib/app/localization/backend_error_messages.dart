@@ -46,6 +46,7 @@ String backendErrorMessage(AppLocalizations l10n, Object error) {
     BackendErrorCode.songNotFound => l10n.backendErrorSongNotFound,
     BackendErrorCode.notVersionOwner => l10n.backendErrorNotVersionOwner,
     BackendErrorCode.songExists => l10n.backendErrorSongExists,
+    BackendErrorCode.imageTooLarge => l10n.backendErrorImageTooLarge,
     BackendErrorCode.notSignedIn ||
     BackendErrorCode.notAuthenticated => l10n.backendErrorNotSignedIn,
     // Auth errors without a typed code (e.g. wrong password) carry GoTrue's

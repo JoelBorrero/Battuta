@@ -4,6 +4,8 @@
 /// session persistence, and login flows.
 library;
 
+import 'dart:typed_data';
+
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/services/supabase_config_service.dart';
@@ -124,6 +126,25 @@ class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
       await ref
           .read(authRepositoryProvider)
           .updateMyProfile(displayName: displayName, username: username);
+      ref.invalidate(myProfileProvider);
+      return right(unit);
+    } on Failure catch (failure) {
+      return left(failure);
+    } catch (e, st) {
+      return left(UnexpectedFailure(message: '$e', stackTrace: st));
+    }
+  }
+
+  /// Saves [jpeg] as my profile photo (`null` removes it) and refreshes
+  /// [myProfileProvider] so every avatar shows the change.
+  Future<Either<Failure, Unit>> setMyAvatar(Uint8List? jpeg) async {
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      if (jpeg == null) {
+        await repository.removeMyAvatar();
+      } else {
+        await repository.setMyAvatar(jpeg);
+      }
       ref.invalidate(myProfileProvider);
       return right(unit);
     } on Failure catch (failure) {

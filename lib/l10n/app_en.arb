@@ -3685,5 +3685,166 @@
   "profileMoreTooltip": "More options",
   "@profileMoreTooltip": {
     "description": "Tooltip of the profile app bar menu"
+  },
+  "photoSheetPersonTitle": "Profile photo",
+  "@photoSheetPersonTitle": {
+    "description": "Title of the change profile photo sheet"
+  },
+  "photoSheetPersonSubtitle": "Shown to your bandmates and on your songs",
+  "@photoSheetPersonSubtitle": {
+    "description": "Subtitle of the change profile photo sheet"
+  },
+  "photoSheetLogoTitle": "Organization logo",
+  "@photoSheetLogoTitle": {
+    "description": "Title of the change organization logo sheet"
+  },
+  "photoSheetLogoSubtitle": "Shown to every member of the organization",
+  "@photoSheetLogoSubtitle": {
+    "description": "Subtitle of the change organization logo sheet"
+  },
+  "photoSheetHintCircle": "Pick a photo, then pinch and drag to fit the circle",
+  "@photoSheetHintCircle": {
+    "description": "Hint under the preview of a round photo"
+  },
+  "photoSheetHintSquare": "Pick a photo, then pinch and drag to fit the square",
+  "@photoSheetHintSquare": {
+    "description": "Hint under the preview of a logo"
+  },
+  "photoTakeAction": "Take photo",
+  "@photoTakeAction": {
+    "description": "Button that opens the camera"
+  },
+  "photoChooseAction": "Choose photo",
+  "@photoChooseAction": {
+    "description": "Button that opens the photo library"
+  },
+  "photoSaveAction": "Save photo",
+  "@photoSaveAction": {
+    "description": "Button that uploads the chosen photo"
+  },
+  "photoRemoveAction": "Remove photo",
+  "@photoRemoveAction": {
+    "description": "Button that removes the current photo"
+  },
+  "photoUpdated": "Photo updated",
+  "@photoUpdated": {
+    "description": "Snackbar after saving a photo or logo"
+  },
+  "photoRemoved": "Photo removed",
+  "@photoRemoved": {
+    "description": "Snackbar after removing a photo or logo"
+  },
+  "photoPickFailed": "Couldn’t open the camera or the photo library. Check the app’s permissions in Settings.",
+  "@photoPickFailed": {
+    "description": "Error when picking a photo fails"
+  },
+  "photoChangeTooltip": "Change photo",
+  "@photoChangeTooltip": {
+    "description": "Tooltip of the camera button on the profile avatar"
+  },
+  "organizationLogoChangeTooltip": "Change organization logo",
+  "@organizationLogoChangeTooltip": {
+    "description": "Tooltip of the camera button on the organization logo"
+  },
+  "backendErrorImageTooLarge": "That photo is too large. Pick a smaller one.",
+  "@backendErrorImageTooLarge": {
+    "description": "Storage refused an upload for its size"
+  },
+  "profileStatOrganizations": "Organizations",
+  "@profileStatOrganizations": {
+    "description": "Stat tile on my profile"
+  },
+  "profileStatVersions": "Versions",
+  "@profileStatVersions": {
+    "description": "Stat tile on my profile: song versions I own"
+  },
+  "profileStatUpcoming": "Upcoming",
+  "@profileStatUpcoming": {
+    "description": "Stat tile on my profile: my upcoming assignments"
+  },
+  "profileAppSettings": "App settings",
+  "@profileAppSettings": {
+    "description": "Row on my profile that opens the app settings"
+  },
+  "profileDeactivateHint": "Deactivate account is in the ⋯ menu",
+  "@profileDeactivateHint": {
+    "description": "Hint at the bottom of my profile"
+  },
+  "profileSwitchToOrganization": "Switch to this organization",
+  "@profileSwitchToOrganization": {
+    "description": "Menu item that makes an organization the active one"
+  },
+  "profileViewOrganization": "View organization",
+  "@profileViewOrganization": {
+    "description": "Menu item that opens the organization profile"
+  },
+  "organizationProfileTitle": "Organization",
+  "@organizationProfileTitle": {
+    "description": "Title of the organization profile page"
+  },
+  "organizationYouAreAdmin": "YOU ARE ADMIN",
+  "@organizationYouAreAdmin": {
+    "description": "Badge on the organization profile for admins"
+  },
+  "organizationAddDescription": "Add a description",
+  "@organizationAddDescription": {
+    "description": "Placeholder for admins when the organization has no description"
+  },
+  "organizationStatMembers": "Members",
+  "@organizationStatMembers": {
+    "description": "Stat tile on the organization profile"
+  },
+  "organizationStatSongs": "Songs",
+  "@organizationStatSongs": {
+    "description": "Stat tile on the organization profile"
+  },
+  "organizationManageAction": "Manage",
+  "@organizationManageAction": {
+    "description": "Link that opens the bands manager"
+  },
+  "organizationMembersHeading": "Members",
+  "@organizationMembersHeading": {
+    "description": "Heading of the members preview"
+  },
+  "organizationSeeAll": "See all {count}",
+  "@organizationSeeAll": {
+    "description": "Link to the full roster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "organizationNoBands": "No bands yet",
+  "@organizationNoBands": {
+    "description": "Empty state of the bands chips"
+  },
+  "organizationNextUp": "Next up",
+  "@organizationNextUp": {
+    "description": "Heading of the next service card"
+  },
+  "organizationNoUpcoming": "No upcoming services",
+  "@organizationNoUpcoming": {
+    "description": "Empty state of the next service card"
+  },
+  "organizationMemberDeactivated": "Account deactivated",
+  "@organizationMemberDeactivated": {
+    "description": "Detail line of a deactivated member"
+  },
+  "organizationEditTitle": "Edit organization profile",
+  "@organizationEditTitle": {
+    "description": "Title of the edit organization sheet"
+  },
+  "organizationDescriptionLabel": "Description",
+  "@organizationDescriptionLabel": {
+    "description": "Label of the description field"
+  },
+  "organizationProfileSaved": "Organization updated",
+  "@organizationProfileSaved": {
+    "description": "Snackbar after saving the organization profile"
+  },
+  "organizationNotFound": "This organization is no longer available.",
+  "@organizationNotFound": {
+    "description": "Shown when the organization profile cannot be found"
   }
 }

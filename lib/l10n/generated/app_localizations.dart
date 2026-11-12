@@ -5615,6 +5615,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More options'**
   String get profileMoreTooltip;
+
+  /// Title of the change profile photo sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo'**
+  String get photoSheetPersonTitle;
+
+  /// Subtitle of the change profile photo sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Shown to your bandmates and on your songs'**
+  String get photoSheetPersonSubtitle;
+
+  /// Title of the change organization logo sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Organization logo'**
+  String get photoSheetLogoTitle;
+
+  /// Subtitle of the change organization logo sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Shown to every member of the organization'**
+  String get photoSheetLogoSubtitle;
+
+  /// Hint under the preview of a round photo
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a photo, then pinch and drag to fit the circle'**
+  String get photoSheetHintCircle;
+
+  /// Hint under the preview of a logo
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a photo, then pinch and drag to fit the square'**
+  String get photoSheetHintSquare;
+
+  /// Button that opens the camera
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get photoTakeAction;
+
+  /// Button that opens the photo library
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get photoChooseAction;
+
+  /// Button that uploads the chosen photo
+  ///
+  /// In en, this message translates to:
+  /// **'Save photo'**
+  String get photoSaveAction;
+
+  /// Button that removes the current photo
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get photoRemoveAction;
+
+  /// Snackbar after saving a photo or logo
+  ///
+  /// In en, this message translates to:
+  /// **'Photo updated'**
+  String get photoUpdated;
+
+  /// Snackbar after removing a photo or logo
+  ///
+  /// In en, this message translates to:
+  /// **'Photo removed'**
+  String get photoRemoved;
+
+  /// Error when picking a photo fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open the camera or the photo library. Check the app’s permissions in Settings.'**
+  String get photoPickFailed;
+
+  /// Tooltip of the camera button on the profile avatar
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get photoChangeTooltip;
+
+  /// Tooltip of the camera button on the organization logo
+  ///
+  /// In en, this message translates to:
+  /// **'Change organization logo'**
+  String get organizationLogoChangeTooltip;
+
+  /// Storage refused an upload for its size
+  ///
+  /// In en, this message translates to:
+  /// **'That photo is too large. Pick a smaller one.'**
+  String get backendErrorImageTooLarge;
+
+  /// Stat tile on my profile
+  ///
+  /// In en, this message translates to:
+  /// **'Organizations'**
+  String get profileStatOrganizations;
+
+  /// Stat tile on my profile: song versions I own
+  ///
+  /// In en, this message translates to:
+  /// **'Versions'**
+  String get profileStatVersions;
+
+  /// Stat tile on my profile: my upcoming assignments
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get profileStatUpcoming;
+
+  /// Row on my profile that opens the app settings
+  ///
+  /// In en, this message translates to:
+  /// **'App settings'**
+  String get profileAppSettings;
+
+  /// Hint at the bottom of my profile
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate account is in the ⋯ menu'**
+  String get profileDeactivateHint;
+
+  /// Menu item that makes an organization the active one
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to this organization'**
+  String get profileSwitchToOrganization;
+
+  /// Menu item that opens the organization profile
+  ///
+  /// In en, this message translates to:
+  /// **'View organization'**
+  String get profileViewOrganization;
+
+  /// Title of the organization profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get organizationProfileTitle;
+
+  /// Badge on the organization profile for admins
+  ///
+  /// In en, this message translates to:
+  /// **'YOU ARE ADMIN'**
+  String get organizationYouAreAdmin;
+
+  /// Placeholder for admins when the organization has no description
+  ///
+  /// In en, this message translates to:
+  /// **'Add a description'**
+  String get organizationAddDescription;
+
+  /// Stat tile on the organization profile
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get organizationStatMembers;
+
+  /// Stat tile on the organization profile
+  ///
+  /// In en, this message translates to:
+  /// **'Songs'**
+  String get organizationStatSongs;
+
+  /// Link that opens the bands manager
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get organizationManageAction;
+
+  /// Heading of the members preview
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get organizationMembersHeading;
+
+  /// Link to the full roster
+  ///
+  /// In en, this message translates to:
+  /// **'See all {count}'**
+  String organizationSeeAll(int count);
+
+  /// Empty state of the bands chips
+  ///
+  /// In en, this message translates to:
+  /// **'No bands yet'**
+  String get organizationNoBands;
+
+  /// Heading of the next service card
+  ///
+  /// In en, this message translates to:
+  /// **'Next up'**
+  String get organizationNextUp;
+
+  /// Empty state of the next service card
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming services'**
+  String get organizationNoUpcoming;
+
+  /// Detail line of a deactivated member
+  ///
+  /// In en, this message translates to:
+  /// **'Account deactivated'**
+  String get organizationMemberDeactivated;
+
+  /// Title of the edit organization sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Edit organization profile'**
+  String get organizationEditTitle;
+
+  /// Label of the description field
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get organizationDescriptionLabel;
+
+  /// Snackbar after saving the organization profile
+  ///
+  /// In en, this message translates to:
+  /// **'Organization updated'**
+  String get organizationProfileSaved;
+
+  /// Shown when the organization profile cannot be found
+  ///
+  /// In en, this message translates to:
+  /// **'This organization is no longer available.'**
+  String get organizationNotFound;
 }
 
 class _AppLocalizationsDelegate

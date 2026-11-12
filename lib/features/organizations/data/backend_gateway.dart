@@ -23,6 +23,30 @@ Failure mapBackendError(Object error, [StackTrace? stackTrace]) {
     );
     return code.failure(message: error.message, stackTrace: stackTrace);
   }
+  if (error is supa.StorageException) {
+    final status = int.tryParse(error.statusCode ?? '');
+    final lower = error.message.toLowerCase();
+    if (status == 413 || lower.contains('maximum allowed size')) {
+      return BackendErrorCode.imageTooLarge.failure(
+        message: error.message,
+        stackTrace: stackTrace,
+      );
+    }
+    if (status == 401 ||
+        status == 403 ||
+        lower.contains('row-level security') ||
+        lower.contains('unauthorized')) {
+      return BackendErrorCode.permissionDenied.failure(
+        message: error.message,
+        stackTrace: stackTrace,
+      );
+    }
+    return ServerFailure(
+      message: error.message,
+      statusCode: status,
+      stackTrace: stackTrace,
+    );
+  }
   if (error is supa.AuthException) {
     final code = BackendErrorCode.fromMessage(error.message);
     if (code != BackendErrorCode.unknown) {

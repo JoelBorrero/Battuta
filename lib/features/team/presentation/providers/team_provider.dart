@@ -24,6 +24,7 @@ TeamMember toTeamMember(
   id: member.id,
   userId: member.userId,
   username: member.username,
+  avatarPath: member.avatarPath,
   name: _displayName(member),
   instruments: member.instruments,
   minPitch: member.minPitch,

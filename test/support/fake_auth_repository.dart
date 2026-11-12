@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
@@ -15,6 +16,9 @@ class FakeAuthRepository implements AuthRepository {
   Object? signInError;
   Object? signUpError;
   Object? updateProfileError;
+
+  /// Thrown by the next `setMyAvatar` / `removeMyAvatar` (then cleared).
+  Object? avatarError;
   Set<String> takenUsernames = {};
   bool? availabilityOverride;
   bool deactivated = false;
@@ -85,8 +89,34 @@ class FakeAuthRepository implements AuthRepository {
       id: current?.id ?? user?.id ?? '',
       username: username,
       displayName: displayName,
-      avatarUrl: current?.avatarUrl,
+      avatarPath: current?.avatarPath,
     );
+  }
+
+  void _swapAvatar(String? path) {
+    if (avatarError case final error?) {
+      avatarError = null;
+      throw error;
+    }
+    final current = profile;
+    profile = UserProfile(
+      id: current?.id ?? user?.id ?? '',
+      username: current?.username ?? '',
+      displayName: current?.displayName ?? '',
+      avatarPath: path,
+    );
+  }
+
+  @override
+  Future<void> setMyAvatar(Uint8List jpeg) async {
+    calls.add('setAvatar:${jpeg.length}');
+    _swapAvatar('${user?.id ?? 'user'}/new.jpg');
+  }
+
+  @override
+  Future<void> removeMyAvatar() async {
+    calls.add('removeAvatar');
+    _swapAvatar(null);
   }
 
   @override

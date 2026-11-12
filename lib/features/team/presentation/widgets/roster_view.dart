@@ -9,6 +9,7 @@ import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/widgets/invite_sheet.dart';
 import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
+import 'package:battuta/features/profile/presentation/widgets/person_avatar.dart';
 import 'package:battuta/features/team/domain/entities/team_group.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
@@ -287,13 +288,6 @@ class _MemberCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
-    final initials = member.name
-        .split(' ')
-        .map((w) => w.isNotEmpty ? w[0] : '')
-        .take(2)
-        .join()
-        .toUpperCase();
-
     Widget tag(String text, Color color, {Key? key}) => DecoratedBox(
       key: key,
       decoration: BoxDecoration(
@@ -328,15 +322,11 @@ class _MemberCard extends StatelessWidget {
             horizontal: 12,
             vertical: 4,
           ),
-          leading: CircleAvatar(
-            backgroundColor: theme.colorScheme.primaryContainer,
-            child: Text(
-              initials.isEmpty ? '?' : initials,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
-            ),
+          leading: PersonAvatar(
+            name: member.name,
+            avatarPath: member.avatarPath,
+            size: 40,
+            ring: member.isAdmin,
           ),
           title: Text(
             member.name,

@@ -221,6 +221,58 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
+      for (final orgId in ['org-0', 'org-1']) {
+        testWidgets('organization profile of $orgId', (tester) async {
+          await at(
+            tester,
+            width,
+            profileApp(
+              auth: FakeAuthRepository(
+                user: meUser,
+                profile: const UserProfile(
+                  id: 'u-me',
+                  username: 'me',
+                  displayName: 'Me',
+                ),
+              ),
+              organizations: richRepo(),
+              initialLocation: AppRoutes.organization(orgId),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          await tester.drag(
+            find.byType(ListView).first,
+            const Offset(0, -2000),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        });
+      }
+
+      testWidgets('change photo sheet', (tester) async {
+        await at(
+          tester,
+          width,
+          profileApp(
+            auth: FakeAuthRepository(
+              user: meUser,
+              profile: const UserProfile(
+                id: 'u-me',
+                username: 'me',
+                displayName: 'Me',
+                avatarPath: 'u-me/a.jpg',
+              ),
+            ),
+            organizations: richRepo(),
+          ),
+          height: 640,
+        );
+        await tester.tap(find.byKey(const ValueKey('profile_photo_btn')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('photo_save_btn')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('tab app bars with the avatar, signed in and local', (
         tester,
       ) async {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/core/errors/backend_error_code.dart';
@@ -39,6 +40,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(const Band(id: 'x', organizationId: 'o', name: 'n'));
     registerFallbackValue(Duration.zero);
+    registerFallbackValue(Uint8List(0));
   });
 
   setUp(() {
@@ -185,6 +187,135 @@ void main() {
       await repo.leaveOrganization('oa');
       expect(await repo.watchOrganizations().first, isEmpty);
     });
+  });
+
+  group('logo and profile', () {
+    const admin = Organization(
+      id: 'oa',
+      name: 'Alpha',
+      myRole: OrganizationRole.admin,
+    );
+
+    test('setOrganizationLogo caches the new path and keeps my role', () async {
+      await seedOrg(admin);
+      final jpeg = Uint8List.fromList([1, 2, 3]);
+      when(() => remote.setOrganizationLogo('oa', jpeg)).thenAnswer(
+        (_) async =>
+            const Organization(id: 'oa', name: 'Alpha', logoPath: 'oa/new.jpg'),
+      );
+
+      final result = await repo.setOrganizationLogo('oa', jpeg);
+
+      expect(result.isRight(), isTrue);
+      final cached = (await repo.watchOrganizations().first).single;
+      expect(cached.logoPath, 'oa/new.jpg');
+      expect(cached.isAdmin, isTrue);
+    });
+
+    test('a refused upload leaves the cached logo alone', () async {
+      await seedOrg(admin.copyWith(logoPath: 'oa/old.jpg'));
+      final jpeg = Uint8List.fromList([1]);
+      when(() => remote.setOrganizationLogo('oa', jpeg))
+          .thenThrow(BackendErrorCode.notAdmin.failure(message: 'not_admin'));
+
+      final result = await repo.setOrganizationLogo('oa', jpeg);
+
+      expect(
+        result.fold((f) => f.errorCode, (_) => null),
+        BackendErrorCode.notAdmin,
+      );
+      expect(
+        (await repo.watchOrganizations().first).single.logoPath,
+        'oa/old.jpg',
+      );
+    });
+
+    test('removeOrganizationLogo clears the cached path', () async {
+      await seedOrg(admin.copyWith(logoPath: 'oa/old.jpg'));
+      when(() => remote.removeOrganizationLogo('oa'))
+          .thenAnswer((_) async => const Organization(id: 'oa', name: 'Alpha'));
+
+      await repo.removeOrganizationLogo('oa');
+
+      final cached = (await repo.watchOrganizations().first).single;
+      expect(cached.logoPath, isNull);
+      expect(cached.isAdmin, isTrue);
+    });
+
+    test(
+      'updateOrganizationProfile trims and clears a blank description',
+      () async {
+        await seedOrg(admin);
+        when(
+          () => remote.updateOrganizationProfile(
+            'oa',
+            name: 'Alpha 2',
+            description: null,
+          ),
+        ).thenAnswer(
+          (_) async => const Organization(id: 'oa', name: 'Alpha 2'),
+        );
+
+        final result = await repo.updateOrganizationProfile(
+          'oa',
+          name: ' Alpha 2 ',
+          description: '   ',
+        );
+
+        expect(result.isRight(), isTrue);
+        expect((await repo.watchOrganizations().first).single.name, 'Alpha 2');
+      },
+    );
+
+    test('updateOrganizationProfile sends the trimmed description', () async {
+      await seedOrg(admin);
+      when(
+        () => remote.updateOrganizationProfile(
+          'oa',
+          name: 'Alpha',
+          description: 'Thursdays',
+        ),
+      ).thenAnswer(
+        (_) async => const Organization(
+          id: 'oa',
+          name: 'Alpha',
+          description: 'Thursdays',
+        ),
+      );
+
+      await repo.updateOrganizationProfile(
+        'oa',
+        name: 'Alpha',
+        description: ' Thursdays ',
+      );
+
+      verify(
+        () => remote.updateOrganizationProfile(
+          'oa',
+          name: 'Alpha',
+          description: 'Thursdays',
+        ),
+      ).called(1);
+    });
+
+    test(
+      'logo and profile writes fail fast on an archived organization',
+      () async {
+        await seedOrg(admin.copyWith(archivedAt: DateTime.utc(2026)));
+        final results = [
+          await repo.setOrganizationLogo('oa', Uint8List(1)),
+          await repo.removeOrganizationLogo('oa'),
+          await repo.updateOrganizationProfile('oa', name: 'X'),
+        ];
+        for (final r in results) {
+          expect(
+            r.fold((f) => f.errorCode, (_) => null),
+            BackendErrorCode.organizationArchived,
+          );
+        }
+        verifyNever(() => remote.setOrganizationLogo(any(), any()));
+      },
+    );
   });
 
   group('archived organizations are read-only', () {

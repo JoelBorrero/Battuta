@@ -153,6 +153,7 @@ class TeamMember {
     required this.name,
     this.userId,
     this.username,
+    this.avatarPath,
     this.instruments = const [],
     this.minPitch,
     this.maxPitch,
@@ -171,6 +172,9 @@ class TeamMember {
   /// Account id of the person.
   final String? userId;
   final String? username;
+
+  /// Object path of the person's photo (see `UserProfile.avatarPath`).
+  final String? avatarPath;
 
   /// Instrument strings exactly as stored by the backend (including ones this
   /// app does not know, which are kept when roles are edited).
@@ -222,6 +226,7 @@ class TeamMember {
           name == other.name &&
           userId == other.userId &&
           username == other.username &&
+          avatarPath == other.avatarPath &&
           listEquals(instruments, other.instruments) &&
           listEquals(groupIds, other.groupIds) &&
           minPitch == other.minPitch &&
@@ -236,6 +241,7 @@ class TeamMember {
     name,
     userId,
     username,
+    avatarPath,
     Object.hashAll(instruments),
     Object.hashAll(groupIds),
     minPitch,

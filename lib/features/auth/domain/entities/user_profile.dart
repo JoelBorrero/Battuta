@@ -9,7 +9,7 @@ class UserProfile extends Equatable {
     required this.id,
     required this.username,
     required this.displayName,
-    this.avatarUrl,
+    this.avatarPath,
     this.deactivatedAt,
   });
 
@@ -17,14 +17,16 @@ class UserProfile extends Equatable {
     id: json['id'] as String,
     username: json['username'] as String,
     displayName: json['display_name'] as String,
-    avatarUrl: json['avatar_url'] as String?,
+    avatarPath: json['avatar_path'] as String?,
     deactivatedAt: parseTimestamp(json['deactivated_at']),
   );
 
   final String id;
   final String username;
   final String displayName;
-  final String? avatarUrl;
+
+  /// Object path of my photo in the `avatars` bucket (`<user id>/<file>`).
+  final String? avatarPath;
   final DateTime? deactivatedAt;
 
   /// Whether the account was deactivated (it can no longer use the backend).
@@ -34,10 +36,16 @@ class UserProfile extends Equatable {
     'id': id,
     'username': username,
     'display_name': displayName,
-    'avatar_url': avatarUrl,
+    'avatar_path': avatarPath,
     'deactivated_at': formatTimestamp(deactivatedAt),
   };
 
   @override
-  List<Object?> get props => [id, username, displayName, avatarUrl, deactivatedAt];
+  List<Object?> get props => [
+    id,
+    username,
+    displayName,
+    avatarPath,
+    deactivatedAt,
+  ];
 }

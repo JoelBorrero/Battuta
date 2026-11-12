@@ -85,5 +85,9 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Battuta uses the camera to take your profile photo, an organization logo or a photo of a lead sheet to scan.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Battuta reads the photo you choose for your profile, an organization logo or a lead sheet to scan.</string>
 </dict>
 </plist>

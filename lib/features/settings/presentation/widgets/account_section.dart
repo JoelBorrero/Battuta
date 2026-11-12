@@ -4,7 +4,7 @@ library;
 
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/auth/presentation/providers/auth_provider.dart';
-import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
+import 'package:battuta/features/profile/presentation/widgets/person_avatar.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,7 +45,12 @@ class AccountSection extends ConsumerWidget {
 
     return ListTile(
       key: const ValueKey('supabase_account_tile'),
-      leading: ProfileAvatar(name: displayName, size: 40),
+      leading: PersonAvatar(
+        name: displayName,
+        avatarPath: profile?.avatarPath,
+        size: 40,
+        ring: true,
+      ),
       title: Text(displayName, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         profile != null ? '@${profile.username}' : user.email,

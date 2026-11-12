@@ -3,13 +3,17 @@ import 'package:battuta/features/auth/domain/entities/auth_user.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/profile/presentation/pages/profile_page.dart';
+import 'package:battuta/features/profile/presentation/providers/photo_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/fake_auth_repository.dart';
 import '../../../support/fake_organization_repository.dart';
+import '../../../support/fake_profile_image_picker.dart';
 import '../../../support/profile_harness.dart';
 import '../../../support/team_fixtures.dart';
 
@@ -53,13 +57,18 @@ void main() {
   Future<ProviderContainer> pump(
     WidgetTester tester, {
     FakeOrganizationRepository? organizations,
+    List<Override> overrides = const [],
     double width = 800,
   }) async {
     tester.view.physicalSize = Size(width, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     await tester.pumpWidget(
-      profileApp(auth: auth, organizations: organizations ?? repo()),
+      profileApp(
+        auth: auth,
+        organizations: organizations ?? repo(),
+        overrides: overrides,
+      ),
     );
     await tester.pumpAndSettle();
     return ProviderScope.containerOf(tester.element(find.byType(ProfilePage)));
@@ -79,8 +88,66 @@ void main() {
 
       expect(find.text('ML'), findsOneWidget);
       expect(find.text('Maria Lopez'), findsOneWidget);
-      expect(find.text('@maria_l'), findsOneWidget);
-      expect(find.text('maria@example.com'), findsOneWidget);
+      expect(find.text('@maria_l · maria@example.com'), findsOneWidget);
+    });
+
+    testWidgets('instrument chips are the union across organizations', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      final chips = byKey('profile_instruments');
+      expect(chips, findsOneWidget);
+      expect(
+        find.descendant(of: chips, matching: find.text('Keys / Piano')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: chips, matching: find.text('Lead Vocalist')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: chips, matching: find.text('theremin')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('stat tiles count organizations, versions and upcoming', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      Finder value(String key) =>
+          find.descendant(of: byKey(key), matching: find.byType(Text));
+      expect(
+        tester.widget<Text>(value('profile_stat_organizations').first).data,
+        '2',
+      );
+      expect(
+        tester.widget<Text>(value('profile_stat_versions').first).data,
+        '0',
+      );
+      expect(
+        tester.widget<Text>(value('profile_stat_upcoming').first).data,
+        '0',
+      );
+    });
+
+    testWidgets('the deactivate hint points at the menu', (tester) async {
+      await pump(tester);
+      await tester.ensureVisible(byKey('profile_sign_out_btn'));
+
+      expect(find.text('Deactivate account is in the ⋯ menu'), findsOneWidget);
+    });
+
+    testWidgets('app settings row opens the settings tab', (tester) async {
+      await pump(tester);
+
+      await tester.ensureVisible(byKey('profile_app_settings_row'));
+      await tester.tap(byKey('profile_app_settings_row'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('app settings page'), findsOneWidget);
     });
 
     testWidgets('without a loaded profile: falls back to the email, no edit', (
@@ -94,12 +161,105 @@ void main() {
         tester.widget<Text>(byKey('profile_name')).data,
         'maria@example.com',
       );
-      expect(byKey('profile_username'), findsNothing);
+      expect(
+        tester.widget<Text>(byKey('profile_handle')).data,
+        'maria@example.com',
+      );
       expect(
         tester.widget<OutlinedButton>(byKey('profile_edit_btn')).onPressed,
         isNull,
       );
       expect(byKey('profile_edit_hint'), findsOneWidget);
+    });
+  });
+
+  group('profile photo', () {
+    late FakePicker picker;
+
+    setUp(() => picker = FakePicker()..result = pixel);
+
+    List<Override> withPicker() => [
+      profileImagePickerProvider.overrideWithValue(picker),
+    ];
+
+    testWidgets('the camera button opens the sheet; saving shows the photo', (
+      tester,
+    ) async {
+      await pump(tester, overrides: withPicker());
+
+      await tester.tap(byKey('profile_photo_btn'));
+      await tester.pumpAndSettle();
+      expect(find.text('Profile photo'), findsOneWidget);
+      // No photo yet: nothing to remove.
+      expect(byKey('photo_remove_btn'), findsNothing);
+
+      await tester.tap(byKey('photo_choose_btn'));
+      await tester.pumpAndSettle();
+      await tester.tap(byKey('photo_save_btn'));
+      await tester.pumpAndSettle();
+
+      expect(auth.calls, contains('setAvatar:${pixel.length}'));
+      expect(auth.profile?.avatarPath, 'u-me/new.jpg');
+      expect(find.text('Photo updated'), findsOneWidget);
+    });
+
+    testWidgets('tapping the avatar opens the sheet too', (tester) async {
+      await pump(tester, overrides: withPicker());
+
+      await tester.tap(byKey('profile_photo'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Profile photo'), findsOneWidget);
+    });
+
+    testWidgets('remove clears the photo', (tester) async {
+      auth.profile = const UserProfile(
+        id: 'u-me',
+        username: 'maria_l',
+        displayName: 'Maria Lopez',
+        avatarPath: 'u-me/old.jpg',
+      );
+      await pump(tester, overrides: withPicker());
+
+      await tester.tap(byKey('profile_photo_btn'));
+      await tester.pumpAndSettle();
+      await tester.tap(byKey('photo_remove_btn'));
+      await tester.pumpAndSettle();
+
+      expect(auth.calls, contains('removeAvatar'));
+      expect(auth.profile?.avatarPath, isNull);
+      expect(find.text('Photo removed'), findsOneWidget);
+    });
+
+    testWidgets('a failed upload keeps the old photo and says why', (
+      tester,
+    ) async {
+      auth.profile = const UserProfile(
+        id: 'u-me',
+        username: 'maria_l',
+        displayName: 'Maria Lopez',
+        avatarPath: 'u-me/old.jpg',
+      );
+      auth.avatarError = BackendErrorCode.offline.failure();
+      await pump(tester, overrides: withPicker());
+
+      await tester.tap(byKey('profile_photo_btn'));
+      await tester.pumpAndSettle();
+      await tester.tap(byKey('photo_choose_btn'));
+      await tester.pumpAndSettle();
+      await tester.tap(byKey('photo_save_btn'));
+      await tester.pumpAndSettle();
+
+      expect(byKey('photo_sheet_error'), findsOneWidget);
+      expect(auth.profile?.avatarPath, 'u-me/old.jpg');
+      expect(find.text('Photo updated'), findsNothing);
+    });
+
+    testWidgets('the camera button is at least 44 px', (tester) async {
+      await pump(tester);
+      final size = tester.getSize(byKey('profile_photo_btn'));
+      expect(size.width, greaterThanOrEqualTo(44));
+      expect(size.height, greaterThanOrEqualTo(44));
     });
   });
 
@@ -128,7 +288,7 @@ void main() {
       expect(byKey('profile_save_btn'), findsNothing);
       expect(find.text('Profile updated'), findsOneWidget);
       expect(find.text('Maria L. Perez'), findsOneWidget);
-      expect(find.text('@maria_p'), findsOneWidget);
+      expect(find.text('@maria_p · maria@example.com'), findsOneWidget);
     });
 
     testWidgets('my current username counts as available (no lookup)', (
@@ -223,26 +383,53 @@ void main() {
 
       expect(find.text('Grace Church'), findsOneWidget);
       expect(find.text('Youth Band'), findsOneWidget);
-      expect(find.text('Admin'), findsOneWidget);
-      expect(find.text('Member'), findsOneWidget);
-      // Known roles by short name, unknown instruments as stored.
-      expect(find.text('Keys'), findsOneWidget);
-      expect(find.text('Lead Vocals'), findsOneWidget);
-      expect(find.text('theremin'), findsOneWidget);
+      expect(find.text('ADMIN'), findsOneWidget);
+      expect(find.text('MEMBER'), findsOneWidget);
+      // Known roles by name, unknown instruments as stored.
+      expect(
+        find.text('Keys / Piano · Lead Vocalist · theremin'),
+        findsOneWidget,
+      );
       expect(find.text('No instruments yet'), findsOneWidget);
     });
 
-    testWidgets('tapping a row makes it the active organization', (
+    testWidgets('tapping a card opens the organization profile', (
       tester,
     ) async {
       await pump(tester);
-      expect(byKey('profile_org_active_org-1'), findsOneWidget);
 
       await tester.tap(byKey('profile_org_org-2'));
       await tester.pumpAndSettle();
 
-      expect(byKey('profile_org_active_org-2'), findsOneWidget);
-      expect(byKey('profile_org_active_org-1'), findsNothing);
+      expect(byKey('org_profile_name'), findsOneWidget);
+      expect(tester.widget<Text>(byKey('org_profile_name')).data, 'Youth Band');
+    });
+
+    testWidgets('the menu switches the active organization', (tester) async {
+      final container = await pump(tester);
+      expect(container.read(activeOrganizationProvider)?.id, 'org-1');
+
+      await openMenu(tester, 'org-2');
+      await tester.tap(find.text('Switch to this organization'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(activeOrganizationProvider)?.id, 'org-2');
+    });
+
+    testWidgets('the active organization has no switch item', (tester) async {
+      await pump(tester);
+
+      await openMenu(tester, 'org-1');
+      final disabled = find.byWidgetPredicate(
+        (w) => w is PopupMenuItem && !w.enabled,
+      );
+      expect(
+        find.descendant(
+          of: disabled,
+          matching: find.text('Switch to this organization'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('edit my instruments saves the chips and keeps unknown ones', (
@@ -268,8 +455,11 @@ void main() {
         ),
       );
       expect(find.text('Instruments updated'), findsOneWidget);
-      expect(find.text('Drums'), findsOneWidget);
-      expect(find.text('Keys'), findsNothing);
+      expect(
+        find.text('Lead Vocalist · Drums / Percussion · theremin'),
+        findsOneWidget,
+      );
+      expect(find.text('Keys / Piano'), findsNothing);
     });
 
     testWidgets('a failed instruments save keeps the sheet open', (

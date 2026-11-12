@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/organizations/data/cached_repository_support.dart';
@@ -154,6 +155,43 @@ class OrganizationRepositoryImpl
     await _upsertOrganization(accountId, org);
     return org;
   });
+
+  @override
+  Future<Result<Organization>> updateOrganizationProfile(
+    String organizationId, {
+    required String name,
+    String? description,
+  }) => guardWrite(organizationId, (accountId) async {
+    final trimmed = description?.trim();
+    final updated = await remote.updateOrganizationProfile(
+      organizationId,
+      name: name.trim(),
+      description: trimmed == null || trimmed.isEmpty ? null : trimmed,
+    );
+    final org = await _withCachedRole(accountId, updated);
+    await _upsertOrganization(accountId, org);
+    return org;
+  });
+
+  @override
+  Future<Result<Organization>> setOrganizationLogo(
+    String organizationId,
+    Uint8List jpeg,
+  ) => guardWrite(organizationId, (accountId) async {
+    final updated = await remote.setOrganizationLogo(organizationId, jpeg);
+    final org = await _withCachedRole(accountId, updated);
+    await _upsertOrganization(accountId, org);
+    return org;
+  });
+
+  @override
+  Future<Result<Organization>> removeOrganizationLogo(String organizationId) =>
+      guardWrite(organizationId, (accountId) async {
+        final updated = await remote.removeOrganizationLogo(organizationId);
+        final org = await _withCachedRole(accountId, updated);
+        await _upsertOrganization(accountId, org);
+        return org;
+      });
 
   @override
   Future<Result<Unit>> leaveOrganization(String organizationId) =>

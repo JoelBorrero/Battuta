@@ -6,6 +6,8 @@ import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/organization_data_providers.dart';
+import 'package:battuta/features/repertoire/presentation/providers/repertoire_scope_providers.dart';
+import 'package:battuta/features/team/presentation/providers/calendar_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart' hide Band;
 
@@ -25,6 +27,28 @@ final myMembershipProvider = StreamProvider.autoDispose
             return null;
           });
     });
+
+/// My instruments across all my organizations, without duplicates, in the
+/// order of my organizations.
+final myInstrumentsProvider = Provider<List<String>>((ref) {
+  final organizations = ref.watch(myOrganizationsProvider).value ?? const [];
+  final instruments = <String>{};
+  for (final organization in organizations) {
+    final member = ref.watch(myMembershipProvider(organization.id)).value;
+    if (member != null) instruments.addAll(member.instruments);
+  }
+  return instruments.toList(growable: false);
+});
+
+/// How many song versions are in my library.
+final myVersionCountProvider = Provider<int>(
+  (ref) => ref.watch(myLibraryProvider).value?.length ?? 0,
+);
+
+/// How many upcoming services I am assigned to (active organization).
+final myUpcomingCountProvider = Provider<int>(
+  (ref) => ref.watch(myServicesProvider).length,
+);
 
 /// The writes the Profile page makes about me.
 class ProfileActions {

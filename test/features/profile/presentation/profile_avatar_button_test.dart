@@ -1,6 +1,7 @@
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
+import 'package:battuta/features/profile/presentation/widgets/person_avatar.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,7 +61,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('profile_avatar_btn')));
     await tester.pumpAndSettle();
     expect(find.text('Profile'), findsOneWidget);
-    expect(find.text('maria@example.com'), findsOneWidget);
+    expect(find.text('@maria_l · maria@example.com'), findsOneWidget);
   });
 
   testWidgets('signed in without a profile: initials of the email', (

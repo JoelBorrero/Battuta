@@ -6,7 +6,10 @@
 library;
 
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:battuta/core/errors/backend_error_code.dart';
+import 'package:battuta/core/services/photo_storage.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/organizations/data/backend_gateway.dart';
 import 'package:battuta/features/organizations/domain/entities/invites.dart';
@@ -46,6 +49,23 @@ abstract interface class OrganizationsRemoteDataSource {
   Future<List<Organization>> myOrganizations({bool includeArchived = false});
   Future<Organization> createOrganization(String name);
   Future<Organization> renameOrganization(String organizationId, String name);
+
+  /// Sets the name and description (`null` clears it) in one write.
+  Future<Organization> updateOrganizationProfile(
+    String organizationId, {
+    required String name,
+    String? description,
+  });
+
+  /// Uploads [jpeg] as the logo, points the organization at it and deletes the
+  /// previous object (best effort).
+  Future<Organization> setOrganizationLogo(
+    String organizationId,
+    Uint8List jpeg,
+  );
+
+  /// Clears the logo and deletes its object (best effort).
+  Future<Organization> removeOrganizationLogo(String organizationId);
   Future<OrganizationQuota> organizationQuota(String organizationId);
   Future<void> leaveOrganization(String organizationId);
 
@@ -119,7 +139,7 @@ class SupabaseOrganizationsRemoteDataSource extends SupabaseGateway
   SupabaseOrganizationsRemoteDataSource(super.clientProvider);
 
   static const _memberSelect =
-      '*, profiles(username, display_name, avatar_url)';
+      '*, profiles(username, display_name, avatar_path)';
 
   static List<Map<String, dynamic>> _rows(Object? data) =>
       (data as List).cast<Map<String, dynamic>>();
@@ -158,6 +178,77 @@ class SupabaseOrganizationsRemoteDataSource extends SupabaseGateway
             .select()
             .single();
         return Organization.fromJson(data);
+      });
+
+  @override
+  Future<Organization> updateOrganizationProfile(
+    String organizationId, {
+    required String name,
+    String? description,
+  }) => run((c, _) async {
+    final data = await c
+        .from('organizations')
+        .update({'name': name, 'description': description})
+        .eq('id', organizationId)
+        .select()
+        .single();
+    return Organization.fromJson(data);
+  });
+
+  /// Points the logo at [path] (`null` clears it); returns the updated row
+  /// and the previous path.
+  Future<(Organization, String?)> _swapLogoPath(
+    supa.SupabaseClient c,
+    String organizationId,
+    String? path,
+  ) async {
+    final before = await c
+        .from('organizations')
+        .select('logo_path')
+        .eq('id', organizationId)
+        .maybeSingle();
+    final data = await c
+        .from('organizations')
+        .update({'logo_path': path})
+        .eq('id', organizationId)
+        .select()
+        .maybeSingle();
+    if (data == null) {
+      throw BackendErrorCode.notAdmin.failure(
+        message: 'Only an admin can change the logo.',
+      );
+    }
+    return (Organization.fromJson(data), before?['logo_path'] as String?);
+  }
+
+  @override
+  Future<Organization> setOrganizationLogo(
+    String organizationId,
+    Uint8List jpeg,
+  ) => run((c, _) async {
+    final path = await uploadPhoto(
+      c,
+      PhotoBucket.organizationLogos,
+      organizationId,
+      jpeg,
+    );
+    final (Organization, String?) swapped;
+    try {
+      swapped = await _swapLogoPath(c, organizationId, path);
+    } catch (_) {
+      await removePhotoQuietly(c, PhotoBucket.organizationLogos, path);
+      rethrow;
+    }
+    await removePhotoQuietly(c, PhotoBucket.organizationLogos, swapped.$2);
+    return swapped.$1;
+  });
+
+  @override
+  Future<Organization> removeOrganizationLogo(String organizationId) =>
+      run((c, _) async {
+        final swapped = await _swapLogoPath(c, organizationId, null);
+        await removePhotoQuietly(c, PhotoBucket.organizationLogos, swapped.$2);
+        return swapped.$1;
       });
 
   @override

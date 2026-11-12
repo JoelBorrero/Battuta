@@ -129,3 +129,16 @@ Product / ops:
   self-card Leave item is gone. Revisit if admins should leave while another admin remains.
 - Formatting churn: `test/features/auth/supabase_auth_repository_test.dart` was reflowed by `dart format`
   together with the new tests.
+
+## From 012: profile photos
+- Not yet tried on a device: take/choose, crop (Android `UCropActivity`), save, remove, and a logo as admin.
+- Scanner crop never runs: `cropStaffSnippet` passes `XFile.fromData(...).path` (not a real file), so the
+  cropper throws and the blanket catch returns the original bytes. Write the bytes to a temp file first.
+- Invite / Manage / See all / Next up on a non-active organization silently switch the active organization;
+  pass the organization id to those sheets, or tell the user with a snackbar.
+- A deactivated user's old photo object stays in Storage (unlinked, unguessable path); needs a server-side
+  cleanup job (with the email scrub from 002).
+- The logo folder check accepts any uuid text form (uppercase, braced), only under the admin's own
+  organization.
+- "Upcoming" counts only the active organization while the other tiles count across organizations.
+- A member demoted while the logo sheet is open sees the generic permission message, not "not admin".

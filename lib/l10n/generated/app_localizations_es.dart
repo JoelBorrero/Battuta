@@ -3222,4 +3222,129 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileMoreTooltip => 'Más opciones';
+
+  @override
+  String get photoSheetPersonTitle => 'Foto de perfil';
+
+  @override
+  String get photoSheetPersonSubtitle =>
+      'La ven tus compañeros y aparece en tus canciones';
+
+  @override
+  String get photoSheetLogoTitle => 'Logo de la organización';
+
+  @override
+  String get photoSheetLogoSubtitle =>
+      'Lo ven todos los miembros de la organización';
+
+  @override
+  String get photoSheetHintCircle =>
+      'Elige una foto y pellizca y arrastra para ajustarla al círculo';
+
+  @override
+  String get photoSheetHintSquare =>
+      'Elige una foto y pellizca y arrastra para ajustarla al cuadrado';
+
+  @override
+  String get photoTakeAction => 'Tomar foto';
+
+  @override
+  String get photoChooseAction => 'Elegir foto';
+
+  @override
+  String get photoSaveAction => 'Guardar foto';
+
+  @override
+  String get photoRemoveAction => 'Quitar foto';
+
+  @override
+  String get photoUpdated => 'Foto actualizada';
+
+  @override
+  String get photoRemoved => 'Foto eliminada';
+
+  @override
+  String get photoPickFailed =>
+      'No se pudo abrir la cámara ni la fototeca. Revisa los permisos de la app en Ajustes.';
+
+  @override
+  String get photoChangeTooltip => 'Cambiar foto';
+
+  @override
+  String get organizationLogoChangeTooltip => 'Cambiar logo de la organización';
+
+  @override
+  String get backendErrorImageTooLarge =>
+      'Esa foto es demasiado grande. Elige una más pequeña.';
+
+  @override
+  String get profileStatOrganizations => 'Organizaciones';
+
+  @override
+  String get profileStatVersions => 'Versiones';
+
+  @override
+  String get profileStatUpcoming => 'Próximos';
+
+  @override
+  String get profileAppSettings => 'Ajustes de la app';
+
+  @override
+  String get profileDeactivateHint => 'Desactivar la cuenta está en el menú ⋯';
+
+  @override
+  String get profileSwitchToOrganization => 'Cambiar a esta organización';
+
+  @override
+  String get profileViewOrganization => 'Ver organización';
+
+  @override
+  String get organizationProfileTitle => 'Organización';
+
+  @override
+  String get organizationYouAreAdmin => 'ERES ADMINISTRADOR';
+
+  @override
+  String get organizationAddDescription => 'Añade una descripción';
+
+  @override
+  String get organizationStatMembers => 'Miembros';
+
+  @override
+  String get organizationStatSongs => 'Canciones';
+
+  @override
+  String get organizationManageAction => 'Gestionar';
+
+  @override
+  String get organizationMembersHeading => 'Miembros';
+
+  @override
+  String organizationSeeAll(int count) {
+    return 'Ver los $count';
+  }
+
+  @override
+  String get organizationNoBands => 'Aún no hay bandas';
+
+  @override
+  String get organizationNextUp => 'Próximo';
+
+  @override
+  String get organizationNoUpcoming => 'No hay servicios próximos';
+
+  @override
+  String get organizationMemberDeactivated => 'Cuenta desactivada';
+
+  @override
+  String get organizationEditTitle => 'Editar perfil de la organización';
+
+  @override
+  String get organizationDescriptionLabel => 'Descripción';
+
+  @override
+  String get organizationProfileSaved => 'Organización actualizada';
+
+  @override
+  String get organizationNotFound => 'Esta organización ya no está disponible.';
 }

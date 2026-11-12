@@ -20,7 +20,16 @@ Organization org(
   String name, {
   OrganizationRole role = OrganizationRole.admin,
   DateTime? archivedAt,
-}) => Organization(id: id, name: name, myRole: role, archivedAt: archivedAt);
+  String? description,
+  String? logoPath,
+}) => Organization(
+  id: id,
+  name: name,
+  myRole: role,
+  archivedAt: archivedAt,
+  description: description,
+  logoPath: logoPath,
+);
 
 OrganizationMember member(
   String id,
@@ -33,6 +42,7 @@ OrganizationMember member(
   String? maxPitch,
   String? notes,
   DateTime? deactivatedAt,
+  String? avatarPath,
 }) => OrganizationMember(
   id: id,
   organizationId: orgId,
@@ -45,6 +55,7 @@ OrganizationMember member(
   username: name.toLowerCase().replaceAll(' ', '_'),
   displayName: name,
   deactivatedAt: deactivatedAt,
+  avatarPath: avatarPath,
 );
 
 class _FixedSetlists extends SetlistsNotifier {

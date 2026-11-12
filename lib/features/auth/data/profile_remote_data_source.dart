@@ -1,9 +1,13 @@
 /// Supabase calls about the signed-in account's profile.
 library;
 
+import 'dart:typed_data';
+
 import 'package:battuta/core/errors/backend_error_code.dart';
+import 'package:battuta/core/services/photo_storage.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/organizations/data/backend_gateway.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 abstract interface class ProfileRemoteDataSource {
   /// The signed-in user's profile, or `null` when there is none.
@@ -20,6 +24,13 @@ abstract interface class ProfileRemoteDataSource {
     required String displayName,
     required String username,
   });
+
+  /// Uploads [jpeg] as my photo, points my profile at it and deletes the
+  /// previous object (best effort).
+  Future<void> setMyAvatar(Uint8List jpeg);
+
+  /// Clears my photo and deletes its object (best effort).
+  Future<void> removeMyAvatar();
 }
 
 class SupabaseProfileRemoteDataSource extends SupabaseGateway
@@ -76,5 +87,49 @@ class SupabaseProfileRemoteDataSource extends SupabaseGateway
         message: 'Your profile could not be updated.',
       );
     }
+  });
+
+  /// Points my profile at [path] (`null` clears it) and returns the previous
+  /// path. Fails with `permission_denied` when nothing was updated.
+  Future<String?> _swapAvatarPath(
+    supa.SupabaseClient c,
+    String uid,
+    String? path,
+  ) async {
+    final before = await c
+        .from('profiles')
+        .select('avatar_path')
+        .eq('id', uid)
+        .maybeSingle();
+    final List<dynamic> updated = await c
+        .from('profiles')
+        .update({'avatar_path': path})
+        .eq('id', uid)
+        .select('id');
+    if (updated.isEmpty) {
+      throw BackendErrorCode.permissionDenied.failure(
+        message: 'Your profile could not be updated.',
+      );
+    }
+    return before?['avatar_path'] as String?;
+  }
+
+  @override
+  Future<void> setMyAvatar(Uint8List jpeg) => run((c, uid) async {
+    final path = await uploadPhoto(c, PhotoBucket.avatars, uid, jpeg);
+    final String? previous;
+    try {
+      previous = await _swapAvatarPath(c, uid, path);
+    } catch (_) {
+      await removePhotoQuietly(c, PhotoBucket.avatars, path);
+      rethrow;
+    }
+    await removePhotoQuietly(c, PhotoBucket.avatars, previous);
+  });
+
+  @override
+  Future<void> removeMyAvatar() => run((c, uid) async {
+    final previous = await _swapAvatarPath(c, uid, null);
+    await removePhotoQuietly(c, PhotoBucket.avatars, previous);
   });
 }

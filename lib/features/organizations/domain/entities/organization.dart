@@ -20,6 +20,8 @@ class Organization extends Equatable {
     this.archivedAt,
     this.createdAt,
     this.myRole,
+    this.logoPath,
+    this.description,
   });
 
   /// [json] is a row of `organizations`; `my_role` is added by the
@@ -33,6 +35,8 @@ class Organization extends Equatable {
     myRole: json['my_role'] == null
         ? null
         : OrganizationRole.parse(json['my_role']),
+    logoPath: json['logo_path'] as String?,
+    description: json['description'] as String?,
   );
 
   final String id;
@@ -44,13 +48,24 @@ class Organization extends Equatable {
   /// The signed-in user's role in this organization, when known.
   final OrganizationRole? myRole;
 
+  /// Object path of the logo in the `organization-logos` bucket
+  /// (`<organization id>/<file>`).
+  final String? logoPath;
+
+  /// What the organization is about (at most 280 characters).
+  final String? description;
+
   bool get isArchived => archivedAt != null;
   bool get isAdmin => myRole == OrganizationRole.admin;
 
+  /// A copy with the given fields replaced. [logoPath] and [description] can
+  /// be set to `null` explicitly (removing the logo).
   Organization copyWith({
     String? name,
     DateTime? archivedAt,
     OrganizationRole? myRole,
+    Object? logoPath = _keep,
+    Object? description = _keep,
   }) => Organization(
     id: id,
     name: name ?? this.name,
@@ -58,7 +73,13 @@ class Organization extends Equatable {
     archivedAt: archivedAt ?? this.archivedAt,
     createdAt: createdAt,
     myRole: myRole ?? this.myRole,
+    logoPath: identical(logoPath, _keep) ? this.logoPath : logoPath as String?,
+    description: identical(description, _keep)
+        ? this.description
+        : description as String?,
   );
+
+  static const Object _keep = Object();
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -67,6 +88,8 @@ class Organization extends Equatable {
     'archived_at': formatTimestamp(archivedAt),
     'created_at': formatTimestamp(createdAt),
     'my_role': myRole?.name,
+    'logo_path': logoPath,
+    'description': description,
   };
 
   @override
@@ -77,6 +100,8 @@ class Organization extends Equatable {
     archivedAt,
     createdAt,
     myRole,
+    logoPath,
+    description,
   ];
 }
 
@@ -117,7 +142,7 @@ class OrganizationMember extends Equatable {
     this.deactivatedAt,
     this.username,
     this.displayName,
-    this.avatarUrl,
+    this.avatarPath,
   });
 
   /// [json] is a row of `organization_members`, optionally with the joined
@@ -138,7 +163,7 @@ class OrganizationMember extends Equatable {
       deactivatedAt: parseTimestamp(json['deactivated_at']),
       username: profile['username'] as String?,
       displayName: profile['display_name'] as String?,
-      avatarUrl: profile['avatar_url'] as String?,
+      avatarPath: profile['avatar_path'] as String?,
     );
   }
 
@@ -155,7 +180,7 @@ class OrganizationMember extends Equatable {
   // Joined profile (not part of the member row itself).
   final String? username;
   final String? displayName;
-  final String? avatarUrl;
+  final String? avatarPath;
 
   bool get isActive => deactivatedAt == null;
   bool get isAdmin => role == OrganizationRole.admin;
@@ -174,7 +199,7 @@ class OrganizationMember extends Equatable {
       deactivatedAt: deactivatedAt,
       username: other.username,
       displayName: other.displayName,
-      avatarUrl: other.avatarUrl,
+      avatarPath: other.avatarPath,
     );
   }
 
@@ -190,7 +215,7 @@ class OrganizationMember extends Equatable {
     'deactivated_at': formatTimestamp(deactivatedAt),
     'username': username,
     'display_name': displayName,
-    'avatar_url': avatarUrl,
+    'avatar_path': avatarPath,
   };
 
   @override
@@ -206,7 +231,7 @@ class OrganizationMember extends Equatable {
     deactivatedAt,
     username,
     displayName,
-    avatarUrl,
+    avatarPath,
   ];
 }
 

@@ -1,6 +1,7 @@
 /// "My organizations" on the Profile page: every organization I belong to
-/// with my role and instruments, and a menu per row (edit my instruments,
-/// organization settings, leave).
+/// with my role and instruments. Tapping a card opens the organization
+/// profile; a menu per card switches to it, edits my instruments, opens its
+/// settings or leaves it.
 library;
 
 import 'package:battuta/app/localization/backend_error_messages.dart';
@@ -11,13 +12,14 @@ import 'package:battuta/features/organizations/presentation/providers/active_org
 import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
 import 'package:battuta/features/profile/presentation/providers/profile_providers.dart';
 import 'package:battuta/features/profile/presentation/widgets/instruments_editor_sheet.dart';
+import 'package:battuta/features/profile/presentation/widgets/organization_logo.dart';
 import 'package:battuta/features/team/domain/entities/team_member.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-enum _OrganizationAction { instruments, settings, leave }
+enum _OrganizationAction { switchTo, instruments, settings, leave }
 
 class MyOrganizationsSection extends ConsumerWidget {
   const MyOrganizationsSection({super.key});
@@ -34,16 +36,42 @@ class MyOrganizationsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            l10n.profileMyOrganizations,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: brand.inkMuted,
-            ),
+        // The heading and the link share a line when they fit, and stack
+        // when the window is narrow or the translation is long.
+        LayoutBuilder(
+          builder: (context, constraints) => Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                child: Text(
+                  l10n.profileMyOrganizations,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (list.isNotEmpty)
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                  child: TextButton(
+                    key: const ValueKey('profile_join_link_btn'),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(44, 44),
+                      foregroundColor: brand.accentInk,
+                    ),
+                    onPressed: () => joinWithPastedInvite(context),
+                    child: Text(
+                      l10n.joinWithLinkAction,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
+        const SizedBox(height: 6),
         if (list.isEmpty && !organizations.isLoading)
           DecoratedBox(
             key: const ValueKey('profile_no_organizations'),
@@ -80,7 +108,7 @@ class MyOrganizationsSection extends ConsumerWidget {
           ),
         for (final organization in list)
           Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 8),
             child: _OrganizationCard(
               organization: organization,
               isActive: organization.id == active?.id,
@@ -112,6 +140,10 @@ class _OrganizationCard extends ConsumerWidget {
   ) async {
     if (!_stillMine(ref)) return;
     switch (action) {
+      case _OrganizationAction.switchTo:
+        await ref
+            .read(activeOrganizationSelectionProvider.notifier)
+            .select(organization.id);
       case _OrganizationAction.instruments:
         if (membership == null) return;
         final saved = await showInstrumentsEditorSheet(
@@ -174,135 +206,129 @@ class _OrganizationCard extends ConsumerWidget {
     final brand = BattutaBrand.of(context);
     final membership = ref.watch(myMembershipProvider(organization.id)).value;
     final instruments = membership?.instruments ?? const <String>[];
+    final instrumentsText = instruments.isEmpty
+        ? l10n.profileNoInstruments
+        : instruments
+              .map(
+                (i) => TeamRole.fromInstrument(i)?.localizedName(context) ?? i,
+              )
+              .join(' · ');
 
-    return Container(
-      key: ValueKey('profile_org_${organization.id}'),
-      decoration: brand.cardDecoration(selected: isActive),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => ref
-              .read(activeOrganizationSelectionProvider.notifier)
-              .select(organization.id),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          organization.name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 4,
-                          children: [
-                            _Tag(
-                              organization.isAdmin
-                                  ? l10n.adminRole
-                                  : l10n.memberRoleLabel,
-                              color: organization.isAdmin
-                                  ? brand.accentInk
-                                  : brand.inkMuted,
-                              highlighted: organization.isAdmin,
-                            ),
-                            if (isActive)
-                              _Tag(
-                                l10n.profileActiveOrganizationBadge,
-                                key: ValueKey(
-                                  'profile_org_active_${organization.id}',
-                                ),
-                                color: brand.accentInk,
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        if (instruments.isEmpty)
-                          Text(
-                            l10n.profileNoInstruments,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: brand.inkMuted,
-                            ),
-                          )
-                        else
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: [
-                              for (final instrument in instruments)
-                                _Tag(
-                                  TeamRole.fromInstrument(instrument)
-                                          ?.localizedShortName(context) ??
-                                      instrument,
-                                  color: brand.inkMuted,
-                                ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                PopupMenuButton<_OrganizationAction>(
-                  key: ValueKey('profile_org_menu_${organization.id}'),
-                  tooltip: l10n.profileOrganizationOptionsTooltip,
-                  icon: const Icon(Icons.more_vert, size: 20),
-                  constraints: const BoxConstraints(
-                    minWidth: 44,
-                    minHeight: 44,
-                    maxWidth: 280,
-                  ),
-                  onSelected: (action) =>
-                      _onAction(context, ref, action, membership),
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: _OrganizationAction.instruments,
-                      enabled: membership != null,
-                      child: Text(l10n.profileEditInstruments),
-                    ),
-                    if (organization.isAdmin)
-                      PopupMenuItem(
-                        value: _OrganizationAction.settings,
-                        child: Text(l10n.profileOrganizationOpenSettings),
-                      ),
-                    PopupMenuItem(
-                      value: _OrganizationAction.leave,
-                      enabled: !organization.isAdmin,
+    return Semantics(
+      selected: isActive,
+      child: Container(
+        key: ValueKey('profile_org_${organization.id}'),
+        decoration: brand.cardDecoration(selected: isActive),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => context.push(AppRoutes.organization(organization.id)),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 72),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
+                child: Row(
+                  children: [
+                    OrganizationLogo(logoPath: organization.logoPath),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l10n.leaveOrganizationAction,
-                            style: organization.isAdmin
-                                ? null
-                                : TextStyle(color: theme.colorScheme.error),
-                          ),
-                          if (organization.isAdmin)
-                            Text(
-                              l10n.profileLeaveAdminHint,
-                              key: ValueKey(
-                                'profile_leave_hint_${organization.id}',
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  organization.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
-                              style: const TextStyle(fontSize: 12),
+                              const SizedBox(width: 8),
+                              _Tag(
+                                organization.isAdmin
+                                    ? l10n.adminRole.toUpperCase()
+                                    : l10n.memberRoleLabel.toUpperCase(),
+                                color: organization.isAdmin
+                                    ? brand.accentInk
+                                    : brand.inkMuted,
+                                highlighted: organization.isAdmin,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            instrumentsText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: brand.inkMuted,
                             ),
+                          ),
                         ],
                       ),
                     ),
+                    PopupMenuButton<_OrganizationAction>(
+                      key: ValueKey('profile_org_menu_${organization.id}'),
+                      tooltip: l10n.profileOrganizationOptionsTooltip,
+                      icon: const Icon(Icons.more_vert, size: 20),
+                      constraints: const BoxConstraints(
+                        minWidth: 44,
+                        minHeight: 44,
+                        maxWidth: 280,
+                      ),
+                      onSelected: (action) =>
+                          _onAction(context, ref, action, membership),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: _OrganizationAction.switchTo,
+                          enabled: !isActive,
+                          child: Text(l10n.profileSwitchToOrganization),
+                        ),
+                        PopupMenuItem(
+                          value: _OrganizationAction.instruments,
+                          enabled: membership != null,
+                          child: Text(l10n.profileEditInstruments),
+                        ),
+                        if (organization.isAdmin)
+                          PopupMenuItem(
+                            value: _OrganizationAction.settings,
+                            child: Text(l10n.profileOrganizationOpenSettings),
+                          ),
+                        PopupMenuItem(
+                          value: _OrganizationAction.leave,
+                          enabled: !organization.isAdmin,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.leaveOrganizationAction,
+                                style: organization.isAdmin
+                                    ? null
+                                    : TextStyle(color: theme.colorScheme.error),
+                              ),
+                              if (organization.isAdmin)
+                                Text(
+                                  l10n.profileLeaveAdminHint,
+                                  key: ValueKey(
+                                    'profile_leave_hint_${organization.id}',
+                                  ),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -312,12 +338,7 @@ class _OrganizationCard extends ConsumerWidget {
 }
 
 class _Tag extends StatelessWidget {
-  const _Tag(
-    this.text, {
-    required this.color,
-    this.highlighted = false,
-    super.key,
-  });
+  const _Tag(this.text, {required this.color, this.highlighted = false});
 
   final String text;
   final Color color;

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
@@ -26,6 +28,12 @@ class _RecordingProfiles implements ProfileRemoteDataSource {
     required String displayName,
     required String username,
   }) async => updates.add('$displayName:$username');
+
+  @override
+  Future<void> setMyAvatar(Uint8List jpeg) async {}
+
+  @override
+  Future<void> removeMyAvatar() async {}
 }
 
 void main() {

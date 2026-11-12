@@ -8,6 +8,7 @@ import 'package:battuta/features/organizations/domain/entities/organization.dart
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/organization_data_providers.dart';
 import 'package:battuta/features/organizations/presentation/widgets/paste_invite_dialog.dart';
+import 'package:battuta/features/profile/presentation/widgets/organization_logo.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,13 +95,12 @@ class _SwitcherSheet extends ConsumerWidget {
                 key: ValueKey('org_item_${organization.id}'),
                 minVerticalPadding: 8,
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  organization.id == active?.id
-                      ? Icons.check_circle
-                      : Icons.circle_outlined,
-                  color: organization.id == active?.id
-                      ? BattutaBrand.of(context).accentInk
-                      : null,
+                selected: organization.id == active?.id,
+                selectedColor: BattutaBrand.of(context).ink,
+                leading: OrganizationLogo(
+                  logoPath: organization.logoPath,
+                  size: 40,
+                  ring: organization.id == active?.id,
                 ),
                 title: Text(
                   organization.name,
