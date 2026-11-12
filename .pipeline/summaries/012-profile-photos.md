@@ -55,5 +55,7 @@ See `.pipeline/backlog.md` (012 section).
 
 ## Verification
 `flutter analyze`: 0 issues. `flutter test`: 1235 passed. `supabase db reset` ×2, then `supabase test db`:
-11 files, 761 tests, PASS. Integration suite after a reset: 70 passed (profile photos 10/10). The debug APK
-builds and installs; the camera/crop/upload path was not yet exercised on a device.
+11 files, 761 tests, PASS. Integration suite after a reset: 70 passed (profile photos 10/10). On an Android phone
+(Galaxy A36) against the local stack: sign-up, choose → crop (UCrop, circle) → save, replace (old object
+deleted), remove, organization creation, logo (square crop) and description all worked. Follow-up fixes from
+that run: a localized crop screen title and full-contrast organization names on the cards.

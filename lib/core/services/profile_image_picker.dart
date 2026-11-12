@@ -19,7 +19,11 @@ enum PhotoShape { circle, square }
 abstract interface class ProfileImagePicker {
   /// Lets the user pick from [source] and crop. Returns the 512x512 JPEG
   /// bytes, or `null` when the user cancelled the pick or the crop.
-  Future<Uint8List?> pick(PhotoSource source, {required PhotoShape shape});
+  Future<Uint8List?> pick(
+    PhotoSource source, {
+    required PhotoShape shape,
+    String? cropTitle,
+  });
 }
 
 class DefaultProfileImagePicker implements ProfileImagePicker {
@@ -40,6 +44,7 @@ class DefaultProfileImagePicker implements ProfileImagePicker {
   Future<Uint8List?> pick(
     PhotoSource source, {
     required PhotoShape shape,
+    String? cropTitle,
   }) async {
     final file = await _picker.pickImage(
       source: source == PhotoSource.camera
@@ -61,6 +66,7 @@ class DefaultProfileImagePicker implements ProfileImagePicker {
         compressQuality: quality,
         uiSettings: [
           AndroidUiSettings(
+            toolbarTitle: cropTitle,
             lockAspectRatio: true,
             hideBottomControls: true,
             cropStyle: shape == PhotoShape.circle
@@ -74,6 +80,7 @@ class DefaultProfileImagePicker implements ProfileImagePicker {
             cropFrameColor: const Color(0xFFE5A93C),
           ),
           IOSUiSettings(
+            title: cropTitle,
             aspectRatioLockEnabled: true,
             resetAspectRatioEnabled: false,
             aspectRatioPickerButtonHidden: true,

@@ -5849,6 +5849,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This organization is no longer available.'**
   String get organizationNotFound;
+
+  /// Title of the native crop screen for profile photos and logos
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust photo'**
+  String get photoCropTitle;
 }
 
 class _AppLocalizationsDelegate

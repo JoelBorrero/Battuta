@@ -246,6 +246,7 @@ class _OrganizationCard extends ConsumerWidget {
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                 ),
                               ),

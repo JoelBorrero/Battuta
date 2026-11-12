@@ -3846,5 +3846,9 @@
   "organizationNotFound": "This organization is no longer available.",
   "@organizationNotFound": {
     "description": "Shown when the organization profile cannot be found"
+  },
+  "photoCropTitle": "Adjust photo",
+  "@photoCropTitle": {
+    "description": "Title of the native crop screen for profile photos and logos"
   }
 }

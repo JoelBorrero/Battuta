@@ -3322,4 +3322,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get organizationNotFound =>
       'This organization is no longer available.';
+
+  @override
+  String get photoCropTitle => 'Adjust photo';
 }

@@ -3347,4 +3347,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get organizationNotFound => 'Esta organización ya no está disponible.';
+
+  @override
+  String get photoCropTitle => 'Ajustar foto';
 }

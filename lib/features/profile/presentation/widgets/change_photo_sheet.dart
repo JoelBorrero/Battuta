@@ -99,7 +99,11 @@ class _ChangePhotoSheetState extends ConsumerState<ChangePhotoSheet> {
     try {
       final bytes = await ref
           .read(profileImagePickerProvider)
-          .pick(source, shape: widget.shape);
+          .pick(
+            source,
+            shape: widget.shape,
+            cropTitle: AppLocalizations.of(context)?.photoCropTitle,
+          );
       if (!mounted) return;
       setState(() {
         _picking = false;

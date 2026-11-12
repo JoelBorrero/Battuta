@@ -131,7 +131,11 @@ Product / ops:
   together with the new tests.
 
 ## From 012: profile photos
-- Not yet tried on a device: take/choose, crop (Android `UCropActivity`), save, remove, and a logo as admin.
+- Not tried on a device: "Take photo" (camera) and iOS. Choose → crop → save / replace / remove and the logo
+  were verified on Android.
+- A session whose user no longer exists (e.g. after `supabase db reset`) stays "signed in": the profile says
+  "connect to the internet" instead of signing out. Treat a missing profile for a signed-in user as signed out.
+- "Versions" on My profile counts local-mode songs too, so a brand-new account shows the device's songs.
 - Scanner crop never runs: `cropStaffSnippet` passes `XFile.fromData(...).path` (not a real file), so the
   cropper throws and the blanket catch returns the original bytes. Write the bytes to a temp file first.
 - Invite / Manage / See all / Next up on a non-active organization silently switch the active organization;

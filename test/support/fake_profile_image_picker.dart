@@ -22,6 +22,7 @@ class FakePicker implements ProfileImagePicker {
   Future<Uint8List?> pick(
     PhotoSource source, {
     required PhotoShape shape,
+    String? cropTitle,
   }) async {
     picks.add((source, shape));
     if (error case final e?) throw e;
