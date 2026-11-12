@@ -109,6 +109,9 @@ abstract final class AppTheme {
   /// Stage blue for informational / data badges.
   static const Color stageBlue = Color(0xFF42A5F5);
 
+  /// Stage orange for warnings and offline / degraded states.
+  static const Color stageOrange = Color(0xFFFF9800);
+
   // ── 2. Typography Constants ──────────────────────────────────────────
 
   static const String primaryFontFamily = 'SF Pro Display';
@@ -457,11 +460,12 @@ abstract final class AppTheme {
           disabledForegroundColor: textDim,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             letterSpacing: 0.1,
           ),
         ),
@@ -476,11 +480,12 @@ abstract final class AppTheme {
           foregroundColor: obsidianText,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -493,11 +498,12 @@ abstract final class AppTheme {
           side: const BorderSide(color: slateBorder, width: 1),
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -578,13 +584,14 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 56,
         backgroundColor: slateBackground,
         foregroundColor: textOffWhite,
         surfaceTintColor: Colors.transparent,
-        shape: const Border(bottom: BorderSide(color: slateBorder, width: 1)),
         titleTextStyle: typography.titleLarge?.copyWith(
           color: textOffWhite,
-          fontWeight: FontWeight.w500,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
         ),
         iconTheme: const IconThemeData(color: textOffWhite, size: 22),
       ),
@@ -748,7 +755,9 @@ abstract final class AppTheme {
         backgroundColor: amberAccent,
         foregroundColor: obsidianText,
         splashColor: Colors.transparent,
-        shape: StadiumBorder(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
         extendedTextStyle: TextStyle(
           fontFamily: primaryFontFamily,
           fontSize: 14,
@@ -827,11 +836,12 @@ abstract final class AppTheme {
           disabledForegroundColor: charcoalDim,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             letterSpacing: 0.1,
           ),
         ),
@@ -846,11 +856,12 @@ abstract final class AppTheme {
           foregroundColor: obsidianText,
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -863,11 +874,12 @@ abstract final class AppTheme {
           side: const BorderSide(color: pearlBorder, width: 1),
           splashFactory: NoSplash.splashFactory,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(
             fontFamily: primaryFontFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -950,13 +962,14 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 56,
         backgroundColor: pearlBackground,
         foregroundColor: charcoalText,
         surfaceTintColor: Colors.transparent,
-        shape: const Border(bottom: BorderSide(color: pearlBorder, width: 1)),
         titleTextStyle: typography.titleLarge?.copyWith(
           color: charcoalText,
-          fontWeight: FontWeight.w500,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
         ),
         iconTheme: const IconThemeData(color: charcoalText, size: 22),
       ),
@@ -1120,7 +1133,9 @@ abstract final class AppTheme {
         backgroundColor: amberAccent,
         foregroundColor: obsidianText,
         splashColor: Colors.transparent,
-        shape: StadiumBorder(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
         extendedTextStyle: TextStyle(
           fontFamily: primaryFontFamily,
           fontSize: 14,
