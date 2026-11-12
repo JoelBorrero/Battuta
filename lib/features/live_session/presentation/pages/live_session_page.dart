@@ -8,6 +8,7 @@ library;
 
 import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
+import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/sync/domain/services/live_sync_service.dart';
 import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
 import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
@@ -117,6 +118,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
               ],
             ),
           ),
+          const ProfileAvatarButton(),
         ],
       ),
       body: Column(

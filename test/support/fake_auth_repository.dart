@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
 import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/auth/domain/repositories/auth_repository.dart';
@@ -13,6 +14,7 @@ class FakeAuthRepository implements AuthRepository {
   UserProfile? profile;
   Object? signInError;
   Object? signUpError;
+  Object? updateProfileError;
   Set<String> takenUsernames = {};
   bool? availabilityOverride;
   bool deactivated = false;
@@ -65,6 +67,27 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Future<UserProfile?> fetchMyProfile() async => user == null ? null : profile;
+
+  @override
+  Future<void> updateMyProfile({
+    required String displayName,
+    required String username,
+  }) async {
+    calls.add('updateProfile:$displayName:$username');
+    if (updateProfileError case final error?) throw error;
+    final current = profile;
+    if (current != null &&
+        current.username != username &&
+        takenUsernames.contains(username)) {
+      throw BackendErrorCode.usernameTaken.failure();
+    }
+    profile = UserProfile(
+      id: current?.id ?? user?.id ?? '',
+      username: username,
+      displayName: displayName,
+      avatarUrl: current?.avatarUrl,
+    );
+  }
 
   @override
   Future<void> deactivateAccount() async {

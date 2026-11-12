@@ -9,7 +9,6 @@ import 'package:battuta/features/auth/presentation/providers/auth_provider.dart'
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/organization_data_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/pending_invite_provider.dart';
-import 'package:battuta/features/settings/presentation/widgets/account_section.dart';
 import 'package:battuta/features/team/presentation/providers/team_tab_request_provider.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';

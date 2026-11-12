@@ -923,5 +923,22 @@
   "supabaseUnreachable": "No se pudo conectar con {host}. Revisa la URL, la clave y tu red.",
   "supabaseConnectedTo": "Conectado a {host}",
   "supabaseSavedRestart": "Guardado. Cierra y vuelve a abrir Battuta para conectarte a {host}.",
-  "authAccountCreatedConfirmThenSignIn": "¡Cuenta creada! Confírmala desde el correo que te enviamos y luego inicia sesión aquí."
+  "authAccountCreatedConfirmThenSignIn": "¡Cuenta creada! Confírmala desde el correo que te enviamos y luego inicia sesión aquí.",
+  "profileTitle": "Perfil",
+  "profileAvatarTooltip": "Perfil",
+  "profileEditAction": "Editar perfil",
+  "profileDisplayNameLabel": "Nombre",
+  "profileDisplayNameInvalid": "Escribe un nombre de hasta 80 caracteres.",
+  "profileSaved": "Perfil actualizado",
+  "profileLoadingEditHint": "Tu perfil aún no se ha cargado. Conéctate a internet para editarlo.",
+  "profileMyOrganizations": "Mis organizaciones",
+  "profileNoInstruments": "Aún sin instrumentos",
+  "profileOrganizationOptionsTooltip": "Opciones de la organización",
+  "profileEditInstruments": "Editar mis instrumentos",
+  "profileInstrumentsIn": "Mis instrumentos en {organization}",
+  "profileInstrumentsSaved": "Instrumentos actualizados",
+  "profileActiveOrganizationBadge": "Activa",
+  "profileLeaveAdminHint": "Los administradores deben ceder el rol de administrador en los ajustes de la organización antes de salir.",
+  "profileOrganizationOpenSettings": "Ajustes de la organización",
+  "profileMoreTooltip": "Más opciones"
 }

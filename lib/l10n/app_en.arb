@@ -3612,5 +3612,78 @@
   "authAccountCreatedConfirmThenSignIn": "Account created! Confirm it from the email we sent you, then sign in here.",
   "@authAccountCreatedConfirmThenSignIn": {
     "description": "Shown on the sign-in page right after creating an account that needs email confirmation"
+  },
+  "profileTitle": "Profile",
+  "@profileTitle": {
+    "description": "Profile page title"
+  },
+  "profileAvatarTooltip": "Profile",
+  "@profileAvatarTooltip": {
+    "description": "Tooltip of the avatar button in the top bar"
+  },
+  "profileEditAction": "Edit profile",
+  "@profileEditAction": {
+    "description": "Edit profile button and sheet title"
+  },
+  "profileDisplayNameLabel": "Name",
+  "@profileDisplayNameLabel": {
+    "description": "Display name field label"
+  },
+  "profileDisplayNameInvalid": "Enter a name of up to 80 characters.",
+  "@profileDisplayNameInvalid": {
+    "description": "Display name validation error"
+  },
+  "profileSaved": "Profile updated",
+  "@profileSaved": {
+    "description": "Snackbar after saving the profile"
+  },
+  "profileLoadingEditHint": "Your profile is not loaded yet. Connect to the internet to edit it.",
+  "@profileLoadingEditHint": {
+    "description": "Shown when the profile cannot be edited yet"
+  },
+  "profileMyOrganizations": "My organizations",
+  "@profileMyOrganizations": {
+    "description": "Section title of the organizations I belong to"
+  },
+  "profileNoInstruments": "No instruments yet",
+  "@profileNoInstruments": {
+    "description": "Shown when I have no instruments in an organization"
+  },
+  "profileOrganizationOptionsTooltip": "Organization options",
+  "@profileOrganizationOptionsTooltip": {
+    "description": "Tooltip of the menu of one organization row"
+  },
+  "profileEditInstruments": "Edit my instruments",
+  "@profileEditInstruments": {
+    "description": "Menu item and sheet title"
+  },
+  "profileInstrumentsIn": "My instruments in {organization}",
+  "@profileInstrumentsIn": {
+    "description": "Instruments sheet title",
+    "placeholders": {
+      "organization": {
+        "type": "String"
+      }
+    }
+  },
+  "profileInstrumentsSaved": "Instruments updated",
+  "@profileInstrumentsSaved": {
+    "description": "Snackbar after saving my instruments"
+  },
+  "profileActiveOrganizationBadge": "Active",
+  "@profileActiveOrganizationBadge": {
+    "description": "Badge of the active organization"
+  },
+  "profileLeaveAdminHint": "Admins must hand over admin rights in organization settings before leaving.",
+  "@profileLeaveAdminHint": {
+    "description": "Hint under the disabled leave item for admins"
+  },
+  "profileOrganizationOpenSettings": "Organization settings",
+  "@profileOrganizationOpenSettings": {
+    "description": "Menu item that opens the organization settings"
+  },
+  "profileMoreTooltip": "More options",
+  "@profileMoreTooltip": {
+    "description": "Tooltip of the profile app bar menu"
   }
 }

@@ -244,6 +244,26 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> updateMyProfile({
+    required String displayName,
+    required String username,
+  }) async {
+    final name = displayName.trim();
+    if (name.isEmpty || name.length > 80) {
+      throw BackendErrorCode.invalidName.failure(
+        message: 'The name must be 1-80 characters.',
+      );
+    }
+    final normalized = username.trim().toLowerCase();
+    if (!usernamePattern.hasMatch(normalized)) {
+      throw BackendErrorCode.invalidUsername.failure(
+        message: 'Username must be 3-30 characters: letters, numbers, _ or .',
+      );
+    }
+    await _profiles.updateMyProfile(displayName: name, username: normalized);
+  }
+
+  @override
   Future<void> deactivateAccount() async {
     await _profiles.deactivateAccount();
     await signOut();

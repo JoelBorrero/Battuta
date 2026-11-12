@@ -70,6 +70,17 @@ void main() {
     });
   });
 
+  group('profile page', () {
+    test('needs an account', () {
+      expect(redirect(AppEntry.offline, AppRoutes.profile), AppRoutes.signIn);
+      expect(
+        redirect(AppEntry.firstLaunch, AppRoutes.profile),
+        AppRoutes.welcome,
+      );
+      expect(redirect(AppEntry.signedIn, AppRoutes.profile), isNull);
+    });
+  });
+
   group('signed in', () {
     test('goes straight to the app', () {
       expect(redirect(AppEntry.signedIn, AppRoutes.team), isNull);

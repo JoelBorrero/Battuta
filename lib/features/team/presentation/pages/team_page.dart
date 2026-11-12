@@ -9,6 +9,7 @@ import 'package:battuta/features/organizations/presentation/providers/active_org
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/organizations/presentation/widgets/invitation_card.dart';
 import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
+import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/team/presentation/providers/calendar_providers.dart';
 import 'package:battuta/features/team/presentation/providers/team_provider.dart';
 import 'package:battuta/features/team/presentation/providers/team_tab_request_provider.dart';
@@ -93,6 +94,7 @@ class _TeamPageState extends ConsumerState<TeamPage> {
                 );
               },
             ),
+          const ProfileAvatarButton(),
         ],
       ),
       body: Column(

@@ -51,6 +51,10 @@ final class AppRoutes {
     return Uri.decodeComponent(location.substring(prefix.length));
   }
 
+  /// My profile: account details, my organizations, sign out. Needs an
+  /// account (signed-out access is sent to the sign-in page).
+  static const String profile = '/profile';
+
   /// Notifications inbox and invitations addressed to me.
   static const String inbox = '/inbox';
 

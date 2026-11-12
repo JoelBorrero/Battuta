@@ -3166,4 +3166,60 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get authAccountCreatedConfirmThenSignIn =>
       '¡Cuenta creada! Confírmala desde el correo que te enviamos y luego inicia sesión aquí.';
+
+  @override
+  String get profileTitle => 'Perfil';
+
+  @override
+  String get profileAvatarTooltip => 'Perfil';
+
+  @override
+  String get profileEditAction => 'Editar perfil';
+
+  @override
+  String get profileDisplayNameLabel => 'Nombre';
+
+  @override
+  String get profileDisplayNameInvalid =>
+      'Escribe un nombre de hasta 80 caracteres.';
+
+  @override
+  String get profileSaved => 'Perfil actualizado';
+
+  @override
+  String get profileLoadingEditHint =>
+      'Tu perfil aún no se ha cargado. Conéctate a internet para editarlo.';
+
+  @override
+  String get profileMyOrganizations => 'Mis organizaciones';
+
+  @override
+  String get profileNoInstruments => 'Aún sin instrumentos';
+
+  @override
+  String get profileOrganizationOptionsTooltip => 'Opciones de la organización';
+
+  @override
+  String get profileEditInstruments => 'Editar mis instrumentos';
+
+  @override
+  String profileInstrumentsIn(String organization) {
+    return 'Mis instrumentos en $organization';
+  }
+
+  @override
+  String get profileInstrumentsSaved => 'Instrumentos actualizados';
+
+  @override
+  String get profileActiveOrganizationBadge => 'Activa';
+
+  @override
+  String get profileLeaveAdminHint =>
+      'Los administradores deben ceder el rol de administrador en los ajustes de la organización antes de salir.';
+
+  @override
+  String get profileOrganizationOpenSettings => 'Ajustes de la organización';
+
+  @override
+  String get profileMoreTooltip => 'Más opciones';
 }

@@ -22,6 +22,7 @@ import 'package:battuta/features/organizations/presentation/pages/join_page.dart
 import 'package:battuta/features/organizations/presentation/pages/organization_settings_page.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/providers/pending_invite_provider.dart';
+import 'package:battuta/features/profile/presentation/pages/profile_page.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/pages/setlist_detail_page.dart';
@@ -141,6 +142,11 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => OrganizationSettingsPage(
           organizationId: state.pathParameters['organizationId']!,
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
       ),
       GoRoute(
         path: AppRoutes.inbox,

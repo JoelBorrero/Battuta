@@ -3140,4 +3140,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authAccountCreatedConfirmThenSignIn =>
       'Account created! Confirm it from the email we sent you, then sign in here.';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileAvatarTooltip => 'Profile';
+
+  @override
+  String get profileEditAction => 'Edit profile';
+
+  @override
+  String get profileDisplayNameLabel => 'Name';
+
+  @override
+  String get profileDisplayNameInvalid =>
+      'Enter a name of up to 80 characters.';
+
+  @override
+  String get profileSaved => 'Profile updated';
+
+  @override
+  String get profileLoadingEditHint =>
+      'Your profile is not loaded yet. Connect to the internet to edit it.';
+
+  @override
+  String get profileMyOrganizations => 'My organizations';
+
+  @override
+  String get profileNoInstruments => 'No instruments yet';
+
+  @override
+  String get profileOrganizationOptionsTooltip => 'Organization options';
+
+  @override
+  String get profileEditInstruments => 'Edit my instruments';
+
+  @override
+  String profileInstrumentsIn(String organization) {
+    return 'My instruments in $organization';
+  }
+
+  @override
+  String get profileInstrumentsSaved => 'Instruments updated';
+
+  @override
+  String get profileActiveOrganizationBadge => 'Active';
+
+  @override
+  String get profileLeaveAdminHint =>
+      'Admins must hand over admin rights in organization settings before leaving.';
+
+  @override
+  String get profileOrganizationOpenSettings => 'Organization settings';
+
+  @override
+  String get profileMoreTooltip => 'More options';
 }

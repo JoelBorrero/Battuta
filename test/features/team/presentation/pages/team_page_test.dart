@@ -123,7 +123,7 @@ void main() {
 
       expect(find.byKey(const ValueKey('invite_btn')), findsNothing);
       expect(find.byKey(const ValueKey('manage_bands_btn')), findsNothing);
-      expect(find.byKey(const ValueKey('leave_org_btn')), findsOneWidget);
+      expect(find.byKey(const ValueKey('leave_org_btn')), findsNothing);
     });
 
     testWidgets('filters by category chips', (tester) async {
@@ -361,19 +361,6 @@ void main() {
 
       expect(repository.calls, contains('removeMember:m-raul'));
       expect(find.text('Raul Diaz'), findsNothing);
-    });
-
-    testWidgets('a member leaves the organization', (tester) async {
-      final repository = repo(myRole: OrganizationRole.member);
-      await pump(tester, repository);
-
-      await tester.tap(find.byKey(const ValueKey('leave_org_btn')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('confirm_leave_org_btn')));
-      await tester.pumpAndSettle();
-
-      expect(repository.calls, contains('leaveOrganization:org-1'));
-      expect(find.text('No organization yet'), findsOneWidget);
     });
 
     testWidgets('only admins manage bands: create, rename, delete', (

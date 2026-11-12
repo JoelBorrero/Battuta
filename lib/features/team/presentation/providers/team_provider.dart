@@ -190,14 +190,6 @@ class RosterActions {
         .removeMember(organizationId, member.id);
   }
 
-  Future<Either<Failure, Unit>> leaveOrganization() async {
-    final organizationId = _organizationId;
-    if (organizationId == null) return _noOrganization();
-    return _ref
-        .read(organizationRepositoryProvider)
-        .leaveOrganization(organizationId);
-  }
-
   Future<Either<Failure, Unit>> createBand(
     String name, {
     String? description,

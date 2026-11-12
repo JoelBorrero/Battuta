@@ -11,6 +11,7 @@ import 'package:battuta/features/auth/presentation/providers/app_entry_provider.
 /// * [AppEntry.offline]: the app, plus the sign-in pages (opened from
 ///   Settings or the Team tab); the welcome page again when [hasNotice]
 ///   (e.g. the account was deactivated); the account pages stay reachable.
+///   The profile page needs an account: it leads to the sign-in page.
 /// * [AppEntry.signedIn]: the app; entry pages lead back into it.
 ///
 /// Invite links: a join location (`/join/<token>`) needs an account, so
@@ -31,7 +32,7 @@ String? resolveAppRedirect({
       return inEntryFlow ? null : AppRoutes.welcome;
     case AppEntry.offline:
       if (hasNotice) return inEntryFlow ? null : AppRoutes.welcome;
-      if (isJoin) return AppRoutes.signIn;
+      if (isJoin || location == AppRoutes.profile) return AppRoutes.signIn;
       return location == AppRoutes.welcome ? AppRoutes.initial : null;
     case AppEntry.signedIn:
       if (pendingInviteToken != null && !isJoin) {

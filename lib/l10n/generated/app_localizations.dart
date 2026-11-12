@@ -5513,6 +5513,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account created! Confirm it from the email we sent you, then sign in here.'**
   String get authAccountCreatedConfirmThenSignIn;
+
+  /// Profile page title
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// Tooltip of the avatar button in the top bar
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileAvatarTooltip;
+
+  /// Edit profile button and sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEditAction;
+
+  /// Display name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get profileDisplayNameLabel;
+
+  /// Display name validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name of up to 80 characters.'**
+  String get profileDisplayNameInvalid;
+
+  /// Snackbar after saving the profile
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get profileSaved;
+
+  /// Shown when the profile cannot be edited yet
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is not loaded yet. Connect to the internet to edit it.'**
+  String get profileLoadingEditHint;
+
+  /// Section title of the organizations I belong to
+  ///
+  /// In en, this message translates to:
+  /// **'My organizations'**
+  String get profileMyOrganizations;
+
+  /// Shown when I have no instruments in an organization
+  ///
+  /// In en, this message translates to:
+  /// **'No instruments yet'**
+  String get profileNoInstruments;
+
+  /// Tooltip of the menu of one organization row
+  ///
+  /// In en, this message translates to:
+  /// **'Organization options'**
+  String get profileOrganizationOptionsTooltip;
+
+  /// Menu item and sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit my instruments'**
+  String get profileEditInstruments;
+
+  /// Instruments sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'My instruments in {organization}'**
+  String profileInstrumentsIn(String organization);
+
+  /// Snackbar after saving my instruments
+  ///
+  /// In en, this message translates to:
+  /// **'Instruments updated'**
+  String get profileInstrumentsSaved;
+
+  /// Badge of the active organization
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get profileActiveOrganizationBadge;
+
+  /// Hint under the disabled leave item for admins
+  ///
+  /// In en, this message translates to:
+  /// **'Admins must hand over admin rights in organization settings before leaving.'**
+  String get profileLeaveAdminHint;
+
+  /// Menu item that opens the organization settings
+  ///
+  /// In en, this message translates to:
+  /// **'Organization settings'**
+  String get profileOrganizationOpenSettings;
+
+  /// Tooltip of the profile app bar menu
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get profileMoreTooltip;
 }
 
 class _AppLocalizationsDelegate

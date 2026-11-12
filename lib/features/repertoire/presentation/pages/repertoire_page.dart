@@ -11,6 +11,7 @@ import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/organizations/domain/entities/repertoire.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
+import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
@@ -200,11 +201,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     ScanFlowModal.show(
       context,
       onScoreExtracted: (Score score) async {
-        final linked = await linkSongBeforeSave(
-          context,
-          ref,
-          score.toSong(),
-        );
+        final linked = await linkSongBeforeSave(context, ref, score.toSong());
         if (linked == null) return;
         final song = linked;
         await ref.read(repertoireProvider.notifier).addSong(song);
@@ -343,6 +340,8 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               0);
     final setlistCount = setlistsAsync.value?.length ?? 0;
 
+    final compactBar = MediaQuery.sizeOf(context).width < 480;
+
     return Scaffold(
       appBar: AppBar(
         // A tab's root page: never a back arrow (it would also squeeze the
@@ -375,7 +374,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               onPressed: () =>
                   context.push(AppRoutes.organizationSettings(organization.id)),
             ),
-          if (organization == null) ...[
+          // On a phone these two live in the overflow menu: the app bar has
+          // to fit the avatar as well.
+          if (organization == null && !compactBar) ...[
             IconButton(
               icon: const Icon(Icons.file_download_outlined),
               tooltip: 'Import song or lead sheet',
@@ -399,6 +400,8 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               onSelected: (value) async {
                 if (value == 'import') {
                   SongImportModal.show(context);
+                } else if (value == 'scan') {
+                  _openScannerDirect(context);
                 } else if (value == 'export_all') {
                   final songs = library.value ?? [];
                   if (songs.isEmpty) {
@@ -425,6 +428,21 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 }
               },
               itemBuilder: (context) => [
+                if (compactBar)
+                  PopupMenuItem(
+                    value: 'scan',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.document_scanner_outlined, size: 20),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const PopupMenuItem(
                   value: 'import',
                   child: Row(
@@ -447,6 +465,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 ),
               ],
             ),
+          const ProfileAvatarButton(),
         ],
       ),
       body: Column(

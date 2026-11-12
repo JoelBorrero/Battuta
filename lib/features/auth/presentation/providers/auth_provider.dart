@@ -4,13 +4,16 @@
 /// session persistence, and login flows.
 library;
 
+import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/services/supabase_config_service.dart';
 import 'package:battuta/features/auth/data/repositories/supabase_auth_repository.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
+import 'package:battuta/features/auth/domain/entities/user_profile.dart';
 import 'package:battuta/features/auth/domain/repositories/auth_repository.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 
 final supabaseConfigServiceProvider = Provider<SupabaseConfigService>((ref) {
   return SupabaseConfigService();
@@ -45,6 +48,16 @@ final currentUserProvider = Provider<AuthUser?>((ref) {
 
 final isAuthenticatedProvider = Provider<bool>((ref) {
   return ref.watch(currentUserProvider) != null;
+});
+
+/// The signed-in account's public profile (`null` offline or signed out).
+final myProfileProvider = FutureProvider.autoDispose<UserProfile?>((ref) async {
+  if (ref.watch(currentUserProvider.select((u) => u?.id)) == null) return null;
+  try {
+    return await ref.watch(authRepositoryProvider).fetchMyProfile();
+  } catch (_) {
+    return null;
+  }
 });
 
 class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
@@ -98,6 +111,25 @@ class AuthControllerNotifier extends Notifier<AsyncValue<void>> {
           .isUsernameAvailable(username);
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Saves my display name and username; refreshes [myProfileProvider] on
+  /// success so Settings, the roster and Profile show the new values.
+  Future<Either<Failure, Unit>> updateMyProfile({
+    required String displayName,
+    required String username,
+  }) async {
+    try {
+      await ref
+          .read(authRepositoryProvider)
+          .updateMyProfile(displayName: displayName, username: username);
+      ref.invalidate(myProfileProvider);
+      return right(unit);
+    } on Failure catch (failure) {
+      return left(failure);
+    } catch (e, st) {
+      return left(UnexpectedFailure(message: '$e', stackTrace: st));
     }
   }
 

@@ -37,6 +37,14 @@ abstract class AuthRepository {
   /// The profile of the signed-in account, or `null` when signed out.
   Future<UserProfile?> fetchMyProfile();
 
+  /// Updates my display name (1-80 characters) and username (3-30 characters
+  /// of `a-z0-9_.`, case-insensitive; stored lower case). Fails with
+  /// `invalid_username`, `invalid_name`, `username_taken` or `offline`.
+  Future<void> updateMyProfile({
+    required String displayName,
+    required String username,
+  });
+
   /// Deactivates the account (kept as history) and signs out.
   Future<void> deactivateAccount();
 

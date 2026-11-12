@@ -64,31 +64,6 @@ class _RosterViewState extends ConsumerState<RosterView> {
     _report(result, l10n.removedMemberSuccess(member.name));
   }
 
-  Future<void> _leave() async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.leaveOrganizationAction),
-        content: Text(l10n.leaveOrganizationConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            key: const ValueKey('confirm_leave_org_btn'),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.leaveOrganizationAction),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-    final result = await ref.read(rosterActionsProvider).leaveOrganization();
-    _report(result, null);
-  }
-
   void _report(Either<Failure, Unit> result, String? success) {
     final l10n = AppLocalizations.of(context)!;
     final message = result.fold(
@@ -222,16 +197,6 @@ class _RosterViewState extends ConsumerState<RosterView> {
                 label: Text(l10n.manageBandsAction),
                 onPressed: () => showBandsSheet(context),
               ),
-            if (!isAdmin)
-              OutlinedButton.icon(
-                key: const ValueKey('leave_org_btn'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(44, 44),
-                ),
-                icon: const Icon(Icons.logout, size: 18),
-                label: Text(l10n.leaveOrganizationAction),
-                onPressed: _leave,
-              ),
           ],
         ),
         const SizedBox(height: 12),
@@ -286,7 +251,6 @@ class _RosterViewState extends ConsumerState<RosterView> {
               groupMap: groupMap,
               canEdit: isAdmin || member.isMe,
               canRemove: isAdmin && !member.isMe,
-              canLeave: isAdmin && member.isMe,
               onEdit: () => MemberEditDialog.show(
                 context,
                 member: member,
@@ -294,7 +258,6 @@ class _RosterViewState extends ConsumerState<RosterView> {
                 isAdmin: isAdmin,
               ),
               onRemove: () => _remove(member),
-              onLeave: _leave,
             ),
         const SizedBox(height: 64),
       ],
@@ -308,20 +271,16 @@ class _MemberCard extends StatelessWidget {
     required this.groupMap,
     required this.canEdit,
     required this.canRemove,
-    required this.canLeave,
     required this.onEdit,
     required this.onRemove,
-    required this.onLeave,
   });
 
   final TeamMember member;
   final Map<String, TeamGroup> groupMap;
   final bool canEdit;
   final bool canRemove;
-  final bool canLeave;
   final VoidCallback onEdit;
   final VoidCallback onRemove;
-  final VoidCallback onLeave;
 
   @override
   Widget build(BuildContext context) {
@@ -355,7 +314,7 @@ class _MemberCard extends StatelessWidget {
       ),
     );
 
-    final hasMenu = canEdit || canRemove || canLeave;
+    final hasMenu = canEdit || canRemove;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -445,7 +404,6 @@ class _MemberCard extends StatelessWidget {
                   onSelected: (value) => switch (value) {
                     'edit' => onEdit(),
                     'remove' => onRemove(),
-                    'leave' => onLeave(),
                     _ => null,
                   },
                   itemBuilder: (_) => [
@@ -463,11 +421,6 @@ class _MemberCard extends StatelessWidget {
                             color: Theme.of(context).colorScheme.error,
                           ),
                         ),
-                      ),
-                    if (canLeave)
-                      PopupMenuItem(
-                        value: 'leave',
-                        child: Text(l10n.leaveOrganizationAction),
                       ),
                   ],
                 )

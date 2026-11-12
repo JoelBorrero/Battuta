@@ -121,3 +121,11 @@ Product / ops:
 
 ## Ops
 - After a Docker Desktop restart the local stack can come back without `supabase_auth_Battuta`; `supabase status` then has no keys and every integration test is skipped. Fix: `supabase stop && supabase start`.
+
+## From 011: profile view
+- Repertoire body overflows by 52 px at 320–375 × 700 when signed in with an organization repertoire (header
+  column not scrollable). Pre-existing; the responsive test runs at height 900 and hides it.
+- Admins cannot leave an organization from the app (they must give up admin rights first); the old roster
+  self-card Leave item is gone. Revisit if admins should leave while another admin remains.
+- Formatting churn: `test/features/auth/supabase_auth_repository_test.dart` was reflowed by `dart format`
+  together with the new tests.
