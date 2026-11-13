@@ -157,3 +157,10 @@ Product / ops:
   static demo with a hard-coded song (`way-maker`). When Live can open a given song / setlist, add the
   mockups' "Go live" (Song detail, primary in the action bar) and "Start live session" (Setlist detail).
   Both were left out of 014/015 so no button promises something it can't do.
+
+## From 015: setlist detail redesign
+- The setlist date stamp shows month / day only (the old chip showed m/d/yyyy). Show the year when it is not
+  the current year, in the stamp or the meta line.
+- `eventDate` is shown with `toLocal()`. If a date picker is added that stores a calendar day as UTC
+  midnight, store it as local noon or a date-only value, or users west of UTC see the previous day.
+- Removing a song from a setlist has no confirmation or undo; consider an undo snackbar.

@@ -1211,8 +1211,38 @@ abstract class AppLocalizations {
   /// Hint instructing user how to add songs to setlist
   ///
   /// In en, this message translates to:
-  /// **'Tap \"Add Song\" below to build your set.'**
+  /// **'Tap + to add songs and build your set.'**
   String get tapAddSongHint;
+
+  /// Caption of the song-count stat tile on the setlist detail
+  ///
+  /// In en, this message translates to:
+  /// **'Songs'**
+  String get setlistStatSongs;
+
+  /// Caption of the average-tempo stat tile on the setlist detail
+  ///
+  /// In en, this message translates to:
+  /// **'Avg BPM'**
+  String get setlistStatAvgBpm;
+
+  /// Section header above the ordered songs of a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get setlistOrderHeader;
+
+  /// Hint next to the Order header on an editable setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder'**
+  String get setlistDragHint;
+
+  /// Rehearsal note line of a setlist song
+  ///
+  /// In en, this message translates to:
+  /// **'Note: {note}'**
+  String setlistItemNote(String note);
 
   /// Tooltip for removing song from setlist
   ///

@@ -618,7 +618,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setlistEmpty => 'This setlist has no songs yet.';
 
   @override
-  String get tapAddSongHint => 'Tap \"Add Song\" below to build your set.';
+  String get tapAddSongHint => 'Tap + to add songs and build your set.';
+
+  @override
+  String get setlistStatSongs => 'Songs';
+
+  @override
+  String get setlistStatAvgBpm => 'Avg BPM';
+
+  @override
+  String get setlistOrderHeader => 'Order';
+
+  @override
+  String get setlistDragHint => 'Drag to reorder';
+
+  @override
+  String setlistItemNote(String note) {
+    return 'Note: $note';
+  }
 
   @override
   String get removeFromSetlistTooltip => 'Remove from setlist';

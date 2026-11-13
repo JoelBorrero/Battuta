@@ -22,6 +22,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_sc
 import 'package:battuta/features/repertoire/presentation/widgets/add_to_repertoire_sheet.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/org_repertoire_view.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/repertoire_scope_bar.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/setlist_date_stamp.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_card.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/song_import_modal.dart';
 import 'package:battuta/features/scanner/presentation/widgets/scan_flow_modal.dart';
@@ -33,7 +34,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 /// The primary repertoire and setlists list page.
 class RepertoirePage extends ConsumerStatefulWidget {
@@ -883,7 +883,7 @@ class _SetlistCard extends StatelessWidget {
       child: Row(
         children: [
           if (date != null)
-            _DateStamp(date: date)
+            SetlistDateStamp(date: date)
           else
             Container(
               width: 52,
@@ -939,57 +939,6 @@ class _SetlistCard extends StatelessWidget {
               child: Icon(Icons.chevron_right, size: 20, color: brand.inkDim),
             ),
         ],
-      ),
-    );
-  }
-}
-
-/// Month over day, the way a calendar page shows the service date.
-class _DateStamp extends StatelessWidget {
-  const _DateStamp({required this.date});
-
-  final DateTime date;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final brand = BattutaBrand.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final month = DateFormat.MMM(locale).format(date).toUpperCase();
-
-    return Container(
-      width: 52,
-      height: 52,
-      padding: const EdgeInsets.all(BattutaSpace.xs),
-      decoration: BoxDecoration(
-        color: brand.accentWash,
-        borderRadius: BattutaRadius.smAll,
-        border: Border.all(color: brand.accent.withValues(alpha: 0.35)),
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              month,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: brand.accentInk,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
-                height: 1.1,
-              ),
-            ),
-            Text(
-              '${date.day}',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: brand.accentInk,
-                fontWeight: FontWeight.w800,
-                height: 1.1,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

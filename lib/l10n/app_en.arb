@@ -868,9 +868,34 @@
   "@setlistEmpty": {
     "description": "Empty state for setlist without songs"
   },
-  "tapAddSongHint": "Tap \"Add Song\" below to build your set.",
+  "tapAddSongHint": "Tap + to add songs and build your set.",
   "@tapAddSongHint": {
     "description": "Hint instructing user how to add songs to setlist"
+  },
+  "setlistStatSongs": "Songs",
+  "@setlistStatSongs": {
+    "description": "Caption of the song-count stat tile on the setlist detail"
+  },
+  "setlistStatAvgBpm": "Avg BPM",
+  "@setlistStatAvgBpm": {
+    "description": "Caption of the average-tempo stat tile on the setlist detail"
+  },
+  "setlistOrderHeader": "Order",
+  "@setlistOrderHeader": {
+    "description": "Section header above the ordered songs of a setlist"
+  },
+  "setlistDragHint": "Drag to reorder",
+  "@setlistDragHint": {
+    "description": "Hint next to the Order header on an editable setlist"
+  },
+  "setlistItemNote": "Note: {note}",
+  "@setlistItemNote": {
+    "description": "Rehearsal note line of a setlist song",
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
   },
   "removeFromSetlistTooltip": "Remove from setlist",
   "@removeFromSetlistTooltip": {
