@@ -779,6 +779,7 @@
   "repertoireScopeMyLibrary": "Mi biblioteca",
   "repertoireScopeOrganization": "Repertorio de {name}",
   "repertoireScopeLabel": "Repertorio a mostrar",
+  "repertoireSearchHint": "Buscar título, artista o etiqueta",
   "orgSettingsTooltip": "Ajustes de la organización",
   "orgRepertoireEmptyTitle": "Este repertorio aún no tiene canciones",
   "orgRepertoireEmptyAdminHint": "Añade versiones compartidas con esta organización, o públicas.",

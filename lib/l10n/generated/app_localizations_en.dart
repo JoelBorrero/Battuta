@@ -2615,6 +2615,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repertoireScopeLabel => 'Repertoire to show';
 
   @override
+  String get repertoireSearchHint => 'Search title, artist or tag';
+
+  @override
   String get orgSettingsTooltip => 'Organization settings';
 
   @override

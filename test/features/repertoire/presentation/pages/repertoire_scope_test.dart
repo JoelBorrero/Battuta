@@ -61,7 +61,13 @@ void main() {
         org('org-2', 'Youth Band', role: OrganizationRole.member),
       ],
       members: [
-        member('m1', 'u-me', 'Me', orgId: 'org-1', role: OrganizationRole.admin),
+        member(
+          'm1',
+          'u-me',
+          'Me',
+          orgId: 'org-1',
+          role: OrganizationRole.admin,
+        ),
         member('m2', 'u-me', 'Me', orgId: 'org-2'),
       ],
     );
@@ -161,7 +167,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openPicker(WidgetTester tester) async {
+    await tester.tap(find.byKey(const ValueKey('scope_picker')));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> selectOrg(WidgetTester tester, String id) async {
+    await openPicker(tester);
     await tester.tap(find.byKey(ValueKey('scope_org_$id')));
     await tester.pumpAndSettle();
   }
@@ -177,7 +189,26 @@ void main() {
   group('scope switcher', () {
     testWidgets('is hidden without organizations', (tester) async {
       await pump(tester, signedIn: false);
+      expect(find.byKey(const ValueKey('scope_picker')), findsNothing);
+    });
+
+    testWidgets('a pill names the shown repertoire and opens the choices', (
+      tester,
+    ) async {
+      await pump(tester);
+      expect(find.text('My library'), findsOneWidget);
+      expect(find.text('Grace Church repertoire'), findsNothing);
+
+      await openPicker(tester);
+      expect(find.byKey(const ValueKey('scope_mine')), findsOneWidget);
+      expect(find.text('Grace Church repertoire'), findsOneWidget);
+      expect(find.text('Youth Band repertoire'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('scope_org_org-2')));
+      await tester.pumpAndSettle();
+      // The sheet closed and the pill follows the choice.
       expect(find.byKey(const ValueKey('scope_mine')), findsNothing);
+      expect(find.text('Youth Band repertoire'), findsOneWidget);
     });
 
     testWidgets('my library holds what I own, not other users\' versions', (
@@ -185,14 +216,12 @@ void main() {
     ) async {
       await pump(tester);
 
-      expect(find.byKey(const ValueKey('scope_mine')), findsOneWidget);
-      expect(find.text('Grace Church repertoire'), findsOneWidget);
-      expect(find.text('Youth Band repertoire'), findsOneWidget);
+      expect(find.byKey(const ValueKey('scope_picker')), findsOneWidget);
       expect(find.text('My Own Song'), findsOneWidget);
       expect(find.text('Local Song'), findsOneWidget);
       expect(find.text('Cached From Org'), findsNothing);
       // The library is mine to edit whatever my role is.
-      expect(find.text('New Song'), findsOneWidget);
+      expect(find.byTooltip('Add Song'), findsOneWidget);
     });
 
     testWidgets('an organization shows its repertoire with owner labels', (
@@ -214,20 +243,23 @@ void main() {
       expect(find.textContaining('Songs (2)'), findsOneWidget);
     });
 
-    testWidgets('an organization I can no longer see falls back to my library', (
-      tester,
-    ) async {
-      await pump(tester);
-      await selectOrg(tester, 'org-1');
-      expect(find.text('Amazing Grace'), findsOneWidget);
+    testWidgets(
+      'an organization I can no longer see falls back to my library',
+      (tester) async {
+        await pump(tester);
+        await selectOrg(tester, 'org-1');
+        expect(find.text('Amazing Grace'), findsOneWidget);
 
-      orgs.setOrganizations([org('org-2', 'Youth Band', role: OrganizationRole.member)]);
-      await tester.pumpAndSettle();
+        orgs.setOrganizations([
+          org('org-2', 'Youth Band', role: OrganizationRole.member),
+        ]);
+        await tester.pumpAndSettle();
 
-      expect(container(tester).read(scopeOrganizationProvider), isNull);
-      expect(find.text('Amazing Grace'), findsNothing);
-      expect(find.text('My Own Song'), findsOneWidget);
-    });
+        expect(container(tester).read(scopeOrganizationProvider), isNull);
+        expect(find.text('Amazing Grace'), findsNothing);
+        expect(find.text('My Own Song'), findsOneWidget);
+      },
+    );
   });
 
   group('versions not on this device yet', () {
@@ -236,10 +268,7 @@ void main() {
       await selectOrg(tester, 'org-1');
 
       // v1 and v2 are in the repertoire but not in the local songs.
-      expect(
-        find.byKey(const ValueKey('entry_pending_v1')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const ValueKey('entry_pending_v1')), findsOneWidget);
       expect(find.text('Available after the next sync'), findsNWidgets(2));
 
       await tester.tap(find.text('Amazing Grace'));
@@ -265,7 +294,10 @@ void main() {
       await selectOrg(tester, 'org-1');
 
       expect(find.text('Cached From Org'), findsOneWidget);
-      expect(find.byKey(const ValueKey('entry_pending_s-foreign')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('entry_pending_s-foreign')),
+        findsNothing,
+      );
     });
   });
 
@@ -303,7 +335,9 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('remove_entry_v1')));
       await tester.pumpAndSettle();
       expect(find.text('Remove from repertoire?'), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('confirm_remove_from_repertoire')));
+      await tester.tap(
+        find.byKey(const ValueKey('confirm_remove_from_repertoire')),
+      );
       await tester.pumpAndSettle();
 
       expect(repertoire.calls, contains('remove:org-1:v1'));
@@ -331,7 +365,9 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('remove_entry_v1')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('confirm_remove_from_repertoire')));
+      await tester.tap(
+        find.byKey(const ValueKey('confirm_remove_from_repertoire')),
+      );
       await tester.pumpAndSettle();
 
       expect(find.textContaining('admin'), findsWidgets);
@@ -359,9 +395,9 @@ void main() {
       expect(find.text('Added'), findsOneWidget);
       // The added version is pulled so that it can be opened.
       expect(
-        (container(tester).read(cloudSyncServiceProvider)
-                as FakeCloudSyncService)
-            .syncs,
+        (container(
+          tester,
+        ).read(cloudSyncServiceProvider) as FakeCloudSyncService).syncs,
         1,
       );
     });
@@ -480,7 +516,10 @@ void main() {
       await tester.pumpAndSettle();
 
       final saved = (await setlists.getAllSetlists()).getOrElse((_) => []);
-      expect(saved.firstWhere((s) => s.title == 'Easter').organizationId, 'org-1');
+      expect(
+        saved.firstWhere((s) => s.title == 'Easter').organizationId,
+        'org-1',
+      );
       expect(find.text('Easter'), findsOneWidget);
     });
 
@@ -526,11 +565,56 @@ void main() {
       await tester.pumpAndSettle();
 
       final saved = (await setlists.getAllSetlists()).getOrElse((_) => []);
-      expect(saved.firstWhere((s) => s.title == 'Rehearsal').organizationId, isNull);
+      expect(
+        saved.firstWhere((s) => s.title == 'Rehearsal').organizationId,
+        isNull,
+      );
     });
   });
 
   group('layout', () {
+    testWidgets('an organization at 320 x 700 scrolls instead of overflowing', (
+      tester,
+    ) async {
+      await pump(tester, width: 320);
+      tester.view.physicalSize = const Size(320, 700);
+      await tester.pumpAndSettle();
+      await selectOrg(tester, 'org-1');
+      expect(tester.takeException(), isNull);
+
+      // The header scrolls away with the list: the last row is reachable.
+      repertoire.setEntries([
+        for (var i = 0; i < 8; i++) entry('v$i', 'Song number $i'),
+      ]);
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Song number 7'), findsOneWidget);
+    });
+
+    testWidgets('setlists show a date stamp, or a list tile without a date', (
+      tester,
+    ) async {
+      await setlists.saveSetlist(
+        Setlist(
+          id: 'dated',
+          title: 'Dated Set',
+          eventDate: DateTime(2026, 3, 15),
+          createdAt: DateTime(2026),
+          updatedAt: DateTime(2026),
+        ),
+      );
+      await pump(tester);
+      await openSetlists(tester);
+
+      expect(find.text('Dated Set'), findsOneWidget);
+      expect(find.text('MAR'), findsOneWidget);
+      expect(find.text('15'), findsOneWidget);
+      // "My Personal Set" has no date.
+      expect(find.byIcon(Icons.format_list_bulleted), findsOneWidget);
+    });
+
     for (final width in [320.0, 375.0, 768.0, 1024.0, 1440.0]) {
       testWidgets('has no overflow at ${width.toInt()} px', (tester) async {
         orgs = FakeOrganizationRepository(
@@ -558,7 +642,10 @@ void main() {
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
-        expect(find.byKey(const ValueKey('picker_search_field')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('picker_search_field')),
+          findsOneWidget,
+        );
       });
     }
   });

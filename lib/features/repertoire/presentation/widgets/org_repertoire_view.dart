@@ -1,4 +1,7 @@
 /// The repertoire of one organization: members read it, admins curate it.
+///
+/// [OrgRepertoireView] is a sliver: the Repertoire page scrolls it together
+/// with its header.
 library;
 
 import 'dart:async';
@@ -19,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// A sliver listing the repertoire of [organization].
 class OrgRepertoireView extends ConsumerWidget {
   const OrgRepertoireView({required this.organization, super.key});
 
@@ -105,61 +109,78 @@ class OrgRepertoireView extends ConsumerWidget {
     final isAdmin = organization.isAdmin;
 
     return entriesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => StageEmptyState(
-        icon: Icons.error_outline,
-        tone: theme.colorScheme.error,
-        title: l10n.failedToLoadRepertoire,
-        message: backendErrorMessage(l10n, error),
-        actions: [
-          FilledButton.icon(
-            onPressed: () =>
-                ref.invalidate(organizationRepertoireProvider(organization.id)),
-            icon: const Icon(Icons.refresh),
-            label: Text(l10n.retry),
-          ),
-        ],
+      loading: () => const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => SliverFillRemaining(
+        hasScrollBody: false,
+        child: StageEmptyState(
+          icon: Icons.error_outline,
+          tone: theme.colorScheme.error,
+          title: l10n.failedToLoadRepertoire,
+          message: backendErrorMessage(l10n, error),
+          actions: [
+            FilledButton.icon(
+              onPressed: () => ref.invalidate(
+                organizationRepertoireProvider(organization.id),
+              ),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.retry),
+            ),
+          ],
+        ),
       ),
       data: (entries) {
         if (entries.isEmpty) {
-          return StageEmptyState(
-            icon: Icons.library_music_outlined,
-            title: l10n.orgRepertoireEmptyTitle,
-            message: isAdmin
-                ? l10n.orgRepertoireEmptyAdminHint
-                : l10n.orgRepertoireEmptyMemberHint,
-            actions: [
-              if (isAdmin)
-                FilledButton.icon(
-                  key: const ValueKey('empty_add_to_repertoire'),
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.addToRepertoireAction),
-                  onPressed: () =>
-                      showAddToRepertoireSheet(context, organization),
-                ),
-            ],
+          return SliverFillRemaining(
+            hasScrollBody: false,
+            child: StageEmptyState(
+              icon: Icons.library_music_outlined,
+              title: l10n.orgRepertoireEmptyTitle,
+              message: isAdmin
+                  ? l10n.orgRepertoireEmptyAdminHint
+                  : l10n.orgRepertoireEmptyMemberHint,
+              actions: [
+                if (isAdmin)
+                  FilledButton.icon(
+                    key: const ValueKey('empty_add_to_repertoire'),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.addToRepertoireAction),
+                    onPressed: () =>
+                        showAddToRepertoireSheet(context, organization),
+                  ),
+              ],
+            ),
           );
         }
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: entries.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final entry = entries[index];
-            return BattutaEntrance(
-              index: index,
-              child: _EntryCard(
-                key: ValueKey('repertoire_entry_${entry.versionId}'),
-                entry: entry,
-                isLocal: localIds.contains(entry.versionId),
-                syncing: syncing,
-                onOpen: () => _open(context, ref, entry),
-                onRemove: isAdmin
-                    ? () => _confirmRemove(context, ref, entry)
-                    : null,
-              ),
-            );
-          },
+        return SliverPadding(
+          padding: const EdgeInsets.fromLTRB(
+            BattutaSpace.lg,
+            BattutaSpace.md,
+            BattutaSpace.lg,
+            96,
+          ),
+          sliver: SliverList.separated(
+            itemCount: entries.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              return BattutaEntrance(
+                index: index,
+                child: _EntryCard(
+                  key: ValueKey('repertoire_entry_${entry.versionId}'),
+                  entry: entry,
+                  isLocal: localIds.contains(entry.versionId),
+                  syncing: syncing,
+                  onOpen: () => _open(context, ref, entry),
+                  onRemove: isAdmin
+                      ? () => _confirmRemove(context, ref, entry)
+                      : null,
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -191,124 +212,81 @@ class _EntryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
 
-    return BattutaPressable(
+    return StageCard(
       onTap: onOpen,
-      builder: (context, pressed) => AnimatedContainer(
-        duration: BattutaMotion.resolve(context, BattutaMotion.tick),
-        curve: BattutaMotion.downbeat,
-        decoration: brand.cardDecoration(pressed: pressed),
-        padding: const EdgeInsets.fromLTRB(
-          BattutaSpace.md,
-          BattutaSpace.md,
-          BattutaSpace.xs,
-          BattutaSpace.md,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: brand.accentWash,
-                borderRadius: BattutaRadius.smAll,
-                border: Border.all(color: brand.accent.withValues(alpha: 0.35)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: BattutaSpace.xs,
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    entry.key,
-                    maxLines: 1,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: brand.accentInk,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
-                    ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: BattutaSpace.md,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: brand.ink,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: BattutaSpace.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                if (entry.artist.isNotEmpty) ...[
+                  const SizedBox(height: BattutaSpace.xxs),
                   Text(
-                    entry.title,
+                    entry.artist,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: brand.ink,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  if (entry.artist.isNotEmpty) ...[
-                    const SizedBox(height: BattutaSpace.xxs),
-                    Text(
-                      entry.artist,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: brand.inkMuted,
-                        fontSize: 12.5,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: BattutaSpace.xs),
-                  Text(
-                    '${entry.label} · ${ownedByText(l10n, entry)}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: brand.inkMuted,
+                      fontSize: 13,
                     ),
                   ),
-                  if (!isLocal)
-                    Padding(
-                      padding: const EdgeInsets.only(top: BattutaSpace.xxs),
-                      child: Text(
-                        syncing
-                            ? l10n.repertoireEntrySyncing
-                            : l10n.repertoireEntryAfterSync,
-                        key: ValueKey('entry_pending_${entry.versionId}'),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: brand.accentInk,
-                        ),
+                ],
+                const SizedBox(height: BattutaSpace.xs),
+                Text(
+                  '${entry.label} · ${ownedByText(l10n, entry)}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: brand.inkMuted,
+                  ),
+                ),
+                if (!isLocal)
+                  Padding(
+                    padding: const EdgeInsets.only(top: BattutaSpace.xxs),
+                    child: Text(
+                      syncing
+                          ? l10n.repertoireEntrySyncing
+                          : l10n.repertoireEntryAfterSync,
+                      key: ValueKey('entry_pending_${entry.versionId}'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: brand.accentInk,
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-            if (onRemove != null)
-              IconButton(
-                key: ValueKey('remove_entry_${entry.versionId}'),
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                icon: Icon(
-                  Icons.remove_circle_outline,
-                  size: 20,
-                  color: theme.colorScheme.error,
-                ),
-                tooltip: l10n.removeFromRepertoireAction,
-                onPressed: onRemove,
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: BattutaSpace.md,
-                  right: BattutaSpace.sm,
-                ),
-                child: Icon(Icons.chevron_right, size: 20, color: brand.inkDim),
+          ),
+          const SizedBox(width: BattutaSpace.md),
+          StageKeyPill(entry.key),
+          if (onRemove != null)
+            IconButton(
+              key: ValueKey('remove_entry_${entry.versionId}'),
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              icon: Icon(
+                Icons.remove_circle_outline,
+                size: 20,
+                color: brand.danger,
               ),
-          ],
-        ),
+              tooltip: l10n.removeFromRepertoireAction,
+              onPressed: onRemove,
+            ),
+        ],
       ),
     );
   }

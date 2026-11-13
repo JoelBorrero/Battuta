@@ -4644,6 +4644,12 @@ abstract class AppLocalizations {
   /// **'Repertoire to show'**
   String get repertoireScopeLabel;
 
+  /// Search field on the Repertoire page; opens the song search
+  ///
+  /// In en, this message translates to:
+  /// **'Search title, artist or tag'**
+  String get repertoireSearchHint;
+
   /// orgSettingsTooltip
   ///
   /// In en, this message translates to:

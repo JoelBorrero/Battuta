@@ -10,6 +10,7 @@ import 'package:battuta/app/localization/backend_error_messages.dart';
 import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
 import 'package:battuta/features/organizations/domain/entities/repertoire.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
@@ -32,6 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 /// The primary repertoire and setlists list page.
 class RepertoirePage extends ConsumerStatefulWidget {
@@ -163,7 +165,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
             child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppTheme.stageRed),
+            style: FilledButton.styleFrom(
+              backgroundColor: BattutaBrand.of(ctx).danger,
+            ),
             onPressed: () async {
               final scaffoldMessenger = ScaffoldMessenger.of(context);
               Navigator.of(ctx).pop();
@@ -208,7 +212,7 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              backgroundColor: AppTheme.stageGreen,
+              backgroundColor: BattutaBrand.of(context).success,
               content: Text('Added "${song.title}" to Repertoire!'),
             ),
           );
@@ -220,7 +224,21 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
 
   void _showAddSongOptions(BuildContext context) {
     final theme = Theme.of(context);
+    final brand = BattutaBrand.of(context);
     final l10n = AppLocalizations.of(context);
+
+    Widget option({
+      required IconData icon,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap,
+      Color? tone,
+    }) => ListTile(
+      leading: StageIconTile(icon: icon, size: 40, tone: tone),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(subtitle),
+      onTap: onTap,
+    );
 
     showModalBottomSheet<void>(
       context: context,
@@ -240,75 +258,46 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0x22E5A93C),
-                  child: Icon(Icons.link, color: AppTheme.stageAmber),
-                ),
-                title: Text(
-                  l10n?.importByWebUrl ?? 'Import by Web URL',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  l10n?.importByWebUrlSubtitle ?? 'Scrape chords & lyrics from Cifra Club, LaCuerda, or web link',
-                ),
+              option(
+                icon: Icons.link,
+                title: l10n?.importByWebUrl ?? 'Import by Web URL',
+                subtitle: l10n?.importByWebUrlSubtitle ?? 'Scrape chords & lyrics from Cifra Club, LaCuerda, or web link',
                 onTap: () {
                   Navigator.of(ctx).pop();
                   SongImportModal.show(context, initialTab: SongImportTab.url);
                 },
               ),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0x222E86DE),
-                  child: Icon(
-                    Icons.document_scanner_outlined,
-                    color: AppTheme.stageBlue,
-                  ),
-                ),
-                title: Text(
-                  l10n?.scanWithGemini ?? 'Scan with Gemini AI (OMR)',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  l10n?.scanWithGeminiSubtitle ??
-                      'Scan printed sheet music from camera or photos',
-                ),
+              option(
+                icon: Icons.document_scanner_outlined,
+                tone: brand.info,
+                title: l10n?.scanWithGemini ?? 'Scan with Gemini AI (OMR)',
+                subtitle:
+                    l10n?.scanWithGeminiSubtitle ??
+                    'Scan printed sheet music from camera or photos',
                 onTap: () {
                   Navigator.of(ctx).pop();
                   _openScannerDirect(context);
                 },
               ),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0x2210B981),
-                  child: Icon(Icons.edit_note, color: AppTheme.stageGreen),
-                ),
-                title: Text(
-                  l10n?.writeInSongEditor ?? 'Write in Song Editor',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  l10n?.writeInSongEditorSubtitle ??
-                      'Create a blank lead sheet and enter sections manually',
-                ),
+              option(
+                icon: Icons.edit_note,
+                tone: brand.success,
+                title: l10n?.writeInSongEditor ?? 'Write in Song Editor',
+                subtitle:
+                    l10n?.writeInSongEditorSubtitle ??
+                    'Create a blank lead sheet and enter sections manually',
                 onTap: () {
                   Navigator.of(ctx).pop();
                   context.push('/repertoire/new');
                 },
               ),
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0x229C27B0),
-                  child: Icon(Icons.content_paste, color: Colors.purple),
-                ),
-                title: Text(
-                  l10n?.pasteTextBackup ?? 'Paste Text / Backup',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  l10n?.pasteTextBackupSubtitle ??
-                      'Paste ChordPro text, plain lead sheets, or JSON backups',
-                ),
+              option(
+                icon: Icons.content_paste,
+                tone: brand.warning,
+                title: l10n?.pasteTextBackup ?? 'Paste Text / Backup',
+                subtitle:
+                    l10n?.pasteTextBackupSubtitle ??
+                    'Paste ChordPro text, plain lead sheets, or JSON backups',
                 onTap: () {
                   Navigator.of(ctx).pop();
                   SongImportModal.show(context, initialTab: SongImportTab.text);
@@ -321,6 +310,32 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     );
   }
 
+  Future<void> _onMenuSelected(String value) async {
+    if (value == 'import') {
+      SongImportModal.show(context);
+    } else if (value == 'scan') {
+      _openScannerDirect(context);
+    } else if (value == 'export_all') {
+      final songs = ref.read(myLibraryProvider).value ?? [];
+      if (songs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No songs in repertoire to export')),
+        );
+        return;
+      }
+      final jsonStr = SongImportExportService.exportRepertoireToJson(songs);
+      await Clipboard.setData(ClipboardData(text: jsonStr));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: BattutaBrand.of(context).success,
+            content: Text('Exported ${songs.length} songs to clipboard (JSON)'),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -329,6 +344,9 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     // My library is mine to edit; an organization is curated by its admins.
     final organization = ref.watch(scopeOrganizationProvider);
     final canManage = ref.watch(canManageScopeProvider);
+    final signedIn = ref.watch(currentAccountIdProvider) != null;
+    final hasOrganizations =
+        (ref.watch(myOrganizationsProvider).value ?? const []).isNotEmpty;
     final l10n = AppLocalizations.of(context);
 
     final songCount = organization == null
@@ -340,202 +358,119 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
               0);
     final setlistCount = setlistsAsync.value?.length ?? 0;
 
-    final compactBar = MediaQuery.sizeOf(context).width < 480;
-
     return Scaffold(
-      appBar: AppBar(
-        // A tab's root page: never a back arrow (it would also squeeze the
-        // logo and title).
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (MediaQuery.sizeOf(context).width < BattutaBreakpoints.rail) ...[
-              const BattutaMark(size: 22),
-              const SizedBox(width: BattutaSpace.sm),
-            ],
-            Flexible(
-              child: Text(
-                l10n?.repertoireTitle ?? 'Repertoire',
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+      appBar: StageAppBar.large(
+        title: l10n?.repertoireTitle ?? 'Repertoire',
         actions: [
-          const CloudSyncStatusIndicator(compact: true),
-          const InboxButton(),
-          if (organization != null)
+          if (signedIn)
             IconButton(
-              key: const ValueKey('org_settings_btn'),
+              key: const ValueKey('discover_chip'),
               constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-              icon: const Icon(Icons.tune),
-              tooltip: l10n?.orgSettingsTooltip ?? 'Organization settings',
-              onPressed: () =>
-                  context.push(AppRoutes.organizationSettings(organization.id)),
+              icon: const Icon(Icons.explore_outlined),
+              tooltip: l10n?.discoverTooltip ?? 'Discover public songs',
+              onPressed: () => context.push(AppRoutes.discover),
             ),
-          // On a phone these two live in the overflow menu: the app bar has
-          // to fit the avatar as well.
-          if (organization == null && !compactBar) ...[
-            IconButton(
-              icon: const Icon(Icons.file_download_outlined),
-              tooltip: 'Import song or lead sheet',
-              onPressed: () => SongImportModal.show(context),
-            ),
-            IconButton(
-              icon: const Icon(Icons.document_scanner_outlined),
-              tooltip: l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
-              onPressed: () => _openScannerDirect(context),
-            ),
-          ],
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: l10n?.searchSongsTooltip ?? 'Search songs',
-            onPressed: () => _showSearch(context, ref, organization),
-          ),
-          if (organization == null)
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
-              tooltip: 'More options',
-              onSelected: (value) async {
-                if (value == 'import') {
-                  SongImportModal.show(context);
-                } else if (value == 'scan') {
-                  _openScannerDirect(context);
-                } else if (value == 'export_all') {
-                  final songs = library.value ?? [];
-                  if (songs.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No songs in repertoire to export'),
-                      ),
-                    );
-                    return;
-                  }
-                  final jsonStr =
-                      SongImportExportService.exportRepertoireToJson(songs);
-                  await Clipboard.setData(ClipboardData(text: jsonStr));
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: AppTheme.stageGreen,
-                        content: Text(
-                          'Exported ${songs.length} songs to clipboard (JSON)',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              itemBuilder: (context) => [
-                if (compactBar)
-                  PopupMenuItem(
-                    value: 'scan',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.document_scanner_outlined, size: 20),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            l10n?.scanSheetMusicTooltip ?? 'Scan sheet music',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                const PopupMenuItem(
-                  value: 'import',
-                  child: Row(
-                    children: [
-                      Icon(Icons.file_download_outlined, size: 20),
-                      SizedBox(width: 10),
-                      Text('Import Song / Leadsheet'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'export_all',
-                  child: Row(
-                    children: [
-                      Icon(Icons.file_upload_outlined, size: 20),
-                      SizedBox(width: 10),
-                      Text('Export Repertoire (JSON Backup)'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          const InboxButton(),
           const ProfileAvatarButton(),
         ],
       ),
-      body: Column(
-        children: [
-          // ── Scope: my library or an organization's repertoire ──
-          const RepertoireScopeBar(),
+      body: CustomScrollView(
+        slivers: [
+          // The header scrolls with the list, so a short window still
+          // reaches every row.
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                BattutaSpace.lg,
+                BattutaSpace.xs,
+                BattutaSpace.lg,
+                0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Scope: my library or an organization's repertoire ──
+                  if (hasOrganizations) ...[
+                    Row(
+                      children: [
+                        const Expanded(child: RepertoireScopeBar()),
+                        if (organization != null)
+                          IconButton(
+                            key: const ValueKey('org_settings_btn'),
+                            constraints: const BoxConstraints(
+                              minWidth: 44,
+                              minHeight: 44,
+                            ),
+                            icon: const Icon(Icons.tune),
+                            tooltip:
+                                l10n?.orgSettingsTooltip ??
+                                'Organization settings',
+                            onPressed: () => context.push(
+                              AppRoutes.organizationSettings(organization.id),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: BattutaSpace.sm),
+                  ],
 
-          // ── View Mode Switcher: Songs vs Setlists ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: SegmentedButton<int>(
-              segments: [
-                ButtonSegment(
-                  value: 0,
-                  icon: const Icon(Icons.music_note),
-                  label: Text(
-                    l10n?.songsTab(songCount) ?? 'Songs ($songCount)',
+                  // ── Search, sync and the import / export menu ──
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SearchField(
+                          hint:
+                              l10n?.repertoireSearchHint ??
+                              'Search title, artist or tag',
+                          onTap: () => _showSearch(context, ref, organization),
+                        ),
+                      ),
+                      const CloudSyncStatusIndicator(compact: true),
+                      if (organization == null) _buildMoreMenu(l10n),
+                    ],
                   ),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  icon: const Icon(Icons.playlist_play),
-                  label: Text(
-                    l10n?.setlistsTab(setlistCount) ??
-                        'Setlists ($setlistCount)',
+                  const SizedBox(height: BattutaSpace.md),
+
+                  // ── View Mode Switcher: Songs vs Setlists ──
+                  StageSegmentedControl<int>(
+                    segments: [
+                      StageSegment(
+                        value: 0,
+                        label:
+                            l10n?.songsTab(songCount) ?? 'Songs ($songCount)',
+                      ),
+                      StageSegment(
+                        value: 1,
+                        label:
+                            l10n?.setlistsTab(setlistCount) ??
+                            'Setlists ($setlistCount)',
+                      ),
+                    ],
+                    selected: _selectedTabIndex,
+                    onChanged: (value) =>
+                        setState(() => _selectedTabIndex = value),
                   ),
-                ),
-              ],
-              selected: {_selectedTabIndex},
-              onSelectionChanged: (vals) {
-                setState(() => _selectedTabIndex = vals.first);
-              },
+                ],
+              ),
             ),
           ),
 
           // ── Content Area ──
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: BattutaMotion.resolve(context, BattutaMotion.beat),
-              switchInCurve: BattutaMotion.downbeat,
-              switchOutCurve: BattutaMotion.upbeat,
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.015),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              ),
-              child: KeyedSubtree(
-                key: ValueKey(_selectedTabIndex),
-                child: _selectedTabIndex == 0
-                    ? (organization == null
-                          ? _buildSongsView(library, theme)
-                          : OrgRepertoireView(organization: organization))
-                    : _buildSetlistsView(
-                        setlistsAsync,
-                        theme,
-                        organization: organization,
-                        canManage: canManage,
-                      ),
-              ),
+          if (_selectedTabIndex == 0)
+            (organization == null
+                ? _buildSongsView(library, theme)
+                : OrgRepertoireView(organization: organization))
+          else
+            _buildSetlistsView(
+              setlistsAsync,
+              theme,
+              organization: organization,
+              canManage: canManage,
             ),
-          ),
         ],
       ),
       floatingActionButton: canManage
-          ? FloatingActionButton.extended(
+          ? FloatingActionButton(
               tooltip: _selectedTabIndex == 0
                   ? (organization == null
                         ? (l10n?.addSong ?? 'Add song')
@@ -546,100 +481,134 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
                         ? () => _showAddSongOptions(context)
                         : () => showAddToRepertoireSheet(context, organization))
                   : _showCreateSetlistDialog,
-              icon: const Icon(Icons.add),
-              label: AnimatedSwitcher(
-                duration: BattutaMotion.resolve(context, BattutaMotion.beat),
-                switchInCurve: BattutaMotion.downbeat,
-                switchOutCurve: BattutaMotion.upbeat,
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: SizeTransition(
-                    sizeFactor: animation,
-                    axis: Axis.horizontal,
-                    child: child,
-                  ),
-                ),
-                child: Text(
-                  _selectedTabIndex == 0
-                      ? (organization == null
-                            ? (l10n?.newSong ?? 'New Song')
-                            : (l10n?.addToRepertoireAction ??
-                                  'Add to repertoire'))
-                      : (l10n?.newSetlist ?? 'New Setlist'),
-                  key: ValueKey(_selectedTabIndex),
-                ),
-              ),
+              child: const Icon(Icons.add),
             )
           : null,
     );
   }
 
+  Widget _buildMoreMenu(AppLocalizations? l10n) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      tooltip: 'More options',
+      onSelected: _onMenuSelected,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'scan',
+          child: Row(
+            children: [
+              const Icon(Icons.document_scanner_outlined, size: 20),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(l10n?.scanSheetMusicTooltip ?? 'Scan sheet music'),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'import',
+          child: Row(
+            children: [
+              Icon(Icons.file_download_outlined, size: 20),
+              SizedBox(width: 10),
+              Flexible(child: Text('Import Song / Leadsheet')),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'export_all',
+          child: Row(
+            children: [
+              Icon(Icons.file_upload_outlined, size: 20),
+              SizedBox(width: 10),
+              Flexible(child: Text('Export Repertoire (JSON Backup)')),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSongsView(AsyncValue<List<Song>> repertoire, ThemeData theme) {
     final l10n = AppLocalizations.of(context);
+    final brand = BattutaBrand.of(context);
     return repertoire.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => StageEmptyState(
-        icon: Icons.error_outline,
-        tone: theme.colorScheme.error,
-        title: l10n?.failedToLoadRepertoire ?? 'Failed to load repertoire',
-        message: error.toString(),
-        actions: [
-          FilledButton.icon(
-            onPressed: () => ref.invalidate(repertoireProvider),
-            icon: const Icon(Icons.refresh),
-            label: Text(l10n?.retry ?? 'Retry'),
-          ),
-        ],
+      loading: () => const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => SliverFillRemaining(
+        hasScrollBody: false,
+        child: StageEmptyState(
+          icon: Icons.error_outline,
+          tone: theme.colorScheme.error,
+          title: l10n?.failedToLoadRepertoire ?? 'Failed to load repertoire',
+          message: error.toString(),
+          actions: [
+            FilledButton.icon(
+              onPressed: () => ref.invalidate(repertoireProvider),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n?.retry ?? 'Retry'),
+            ),
+          ],
+        ),
       ),
       data: (songs) {
         if (songs.isEmpty) {
-          return StageEmptyState(
-            icon: Icons.library_music_outlined,
-            title: l10n?.repertoireEmpty ?? 'Your repertoire is empty',
-            message:
-                l10n?.repertoireEmptyAdminHint ??
-                'Tap the + button to add your first song',
-            actions: [
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.amberAccent,
-                  foregroundColor: AppTheme.obsidianText,
+          return SliverFillRemaining(
+            hasScrollBody: false,
+            child: StageEmptyState(
+              icon: Icons.library_music_outlined,
+              title: l10n?.repertoireEmpty ?? 'Your repertoire is empty',
+              message:
+                  l10n?.repertoireEmptyAdminHint ??
+                  'Tap the + button to add your first song',
+              actions: [
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: brand.accent,
+                    foregroundColor: brand.onAccent,
+                  ),
+                  icon: const Icon(Icons.auto_awesome),
+                  label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
+                  onPressed: () async {
+                    await ref
+                        .read(repertoireProvider.notifier)
+                        .seedSampleData();
+                  },
                 ),
-                icon: const Icon(Icons.auto_awesome),
-                label: Text(l10n?.loadSampleSongs ?? 'Load Sample Songs'),
-                onPressed: () async {
-                  await ref.read(repertoireProvider.notifier).seedSampleData();
-                },
-              ),
-              FilledButton.icon(
-                icon: const Icon(Icons.add),
-                label: Text(l10n?.addSong ?? 'Add Song'),
-                onPressed: () => _showAddSongOptions(context),
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.link),
-                label: const Text('Import by URL'),
-                onPressed: () => SongImportModal.show(
-                  context,
-                  initialTab: SongImportTab.url,
+                FilledButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n?.addSong ?? 'Add Song'),
+                  onPressed: () => _showAddSongOptions(context),
                 ),
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.document_scanner_outlined),
-                label: Text(l10n?.scanScore ?? 'Scan Score'),
-                onPressed: () => _openScannerDirect(context),
-              ),
-            ],
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.link),
+                  label: const Text('Import by URL'),
+                  onPressed: () => SongImportModal.show(
+                    context,
+                    initialTab: SongImportTab.url,
+                  ),
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.document_scanner_outlined),
+                  label: Text(l10n?.scanScore ?? 'Scan Score'),
+                  onPressed: () => _openScannerDirect(context),
+                ),
+              ],
+            ),
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: songs.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
-          itemBuilder: (context, index) => BattutaEntrance(
-            index: index,
-            child: SongCard(song: songs[index]),
+        return SliverPadding(
+          padding: _listPadding,
+          sliver: SliverList.separated(
+            itemCount: songs.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) => BattutaEntrance(
+              index: index,
+              child: SongCard(song: songs[index]),
+            ),
           ),
         );
       },
@@ -653,78 +622,99 @@ class _RepertoirePageState extends ConsumerState<RepertoirePage> {
     required bool canManage,
   }) {
     final l10n = AppLocalizations.of(context);
+    final brand = BattutaBrand.of(context);
     return setlistsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(
-        child: Text(
-          '${l10n?.failedToLoadRepertoire ?? "Error loading setlists"}: $e',
+      loading: () => const SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Text(
+            '${l10n?.failedToLoadRepertoire ?? "Error loading setlists"}: $e',
+          ),
         ),
       ),
       data: (setlists) {
         if (setlists.isEmpty) {
-          return StageEmptyState(
-            icon: Icons.playlist_play,
-            title: l10n?.noSetlistsYet ?? 'No Setlists Yet',
-            message: organization != null
-                ? (canManage
-                      ? (l10n?.orgSetlistsEmptyAdminHint ??
-                            'Create a setlist for this organization.')
-                      : (l10n?.orgSetlistsEmptyMemberHint ??
-                            'No setlists yet. Your admins publish them here.'))
-                : (l10n?.setlistsEmptyAdminHint ??
-                      'Create an ordered setlist for Sunday services or rehearsals.'),
-            actions: [
-              if (canManage) ...[
-                if (organization == null)
+          return SliverFillRemaining(
+            hasScrollBody: false,
+            child: StageEmptyState(
+              icon: Icons.playlist_play,
+              title: l10n?.noSetlistsYet ?? 'No Setlists Yet',
+              message: organization != null
+                  ? (canManage
+                        ? (l10n?.orgSetlistsEmptyAdminHint ??
+                              'Create a setlist for this organization.')
+                        : (l10n?.orgSetlistsEmptyMemberHint ??
+                              'No setlists yet. Your admins publish them here.'))
+                  : (l10n?.setlistsEmptyAdminHint ??
+                        'Create an ordered setlist for Sunday services or rehearsals.'),
+              actions: [
+                if (canManage) ...[
+                  if (organization == null)
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: brand.accent,
+                        foregroundColor: brand.onAccent,
+                      ),
+                      icon: const Icon(Icons.auto_awesome),
+                      label: Text(
+                        l10n?.loadSampleSetlist ?? 'Load Sample Setlist',
+                      ),
+                      onPressed: () async {
+                        await ref
+                            .read(repertoireProvider.notifier)
+                            .seedSampleData();
+                      },
+                    ),
                   FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.amberAccent,
-                      foregroundColor: AppTheme.obsidianText,
-                    ),
-                    icon: const Icon(Icons.auto_awesome),
-                    label: Text(
-                      l10n?.loadSampleSetlist ?? 'Load Sample Setlist',
-                    ),
-                    onPressed: () async {
-                      await ref
-                          .read(repertoireProvider.notifier)
-                          .seedSampleData();
-                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n?.createSetlist ?? 'Create Setlist'),
+                    onPressed: _showCreateSetlistDialog,
                   ),
-                FilledButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n?.createSetlist ?? 'Create Setlist'),
-                  onPressed: _showCreateSetlistDialog,
-                ),
+                ],
               ],
-            ],
+            ),
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: setlists.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final setlist = setlists[index];
-            return BattutaEntrance(
-              index: index,
-              child: _SetlistCard(
-                setlist: setlist,
-                subtitle:
-                    '${l10n?.setlistSongsCount(setlist.songCount) ?? "${setlist.songCount} songs"} • ${setlist.description ?? (l10n?.upcomingService ?? "Upcoming service")}',
-                onTap: () => context.push(AppRoutes.setlistDetail(setlist.id)),
-                onDelete: canManage
-                    ? () => _confirmDeleteSetlist(context, setlist)
-                    : null,
-                deleteTooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
-              ),
-            );
-          },
+        return SliverPadding(
+          padding: _listPadding,
+          sliver: SliverList.separated(
+            itemCount: setlists.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final setlist = setlists[index];
+              return BattutaEntrance(
+                index: index,
+                child: _SetlistCard(
+                  setlist: setlist,
+                  subtitle:
+                      '${l10n?.setlistSongsCount(setlist.songCount) ?? "${setlist.songCount} songs"} • ${setlist.description ?? (l10n?.upcomingService ?? "Upcoming service")}',
+                  onTap: () =>
+                      context.push(AppRoutes.setlistDetail(setlist.id)),
+                  onDelete: canManage
+                      ? () => _confirmDeleteSetlist(context, setlist)
+                      : null,
+                  deleteTooltip: l10n?.deleteSetlistTooltip ?? 'Delete setlist',
+                ),
+              );
+            },
+          ),
         );
       },
     );
   }
+
+  /// Leaves room under the last row for the add button.
+  static const _listPadding = EdgeInsets.fromLTRB(
+    BattutaSpace.lg,
+    BattutaSpace.md,
+    BattutaSpace.lg,
+    96,
+  );
 
   /// Opens a search delegate to filter songs by query.
   void _showSearch(
@@ -859,7 +849,8 @@ class _SongSearchDelegate extends SearchDelegate<String> {
 // Setlist card
 // ---------------------------------------------------------------------------
 
-/// Stage card for a [Setlist], matching the [SongCard] visual language.
+/// Stage card for a [Setlist]: a month / day stamp (or a neutral list tile
+/// without a date), the title and a meta line.
 class _SetlistCard extends StatelessWidget {
   const _SetlistCard({
     required this.setlist,
@@ -879,87 +870,167 @@ class _SetlistCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
+    final date = setlist.eventDate;
 
-    return BattutaPressable(
+    return StageCard(
       onTap: onTap,
-      builder: (context, pressed) => AnimatedContainer(
-        duration: BattutaMotion.resolve(context, BattutaMotion.tick),
-        curve: BattutaMotion.downbeat,
-        decoration: brand.cardDecoration(pressed: pressed),
-        padding: const EdgeInsets.fromLTRB(
-          BattutaSpace.md,
-          BattutaSpace.md,
-          BattutaSpace.xs,
-          BattutaSpace.md,
-        ),
-        child: Row(
-          children: [
+      padding: const EdgeInsetsDirectional.only(
+        start: BattutaSpace.md,
+        top: BattutaSpace.md,
+        end: BattutaSpace.xs,
+        bottom: BattutaSpace.md,
+      ),
+      child: Row(
+        children: [
+          if (date != null)
+            _DateStamp(date: date)
+          else
             Container(
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: brand.accentWash,
+                color: brand.cardRaised,
                 borderRadius: BattutaRadius.smAll,
-                border: Border.all(color: brand.accent.withValues(alpha: 0.35)),
+                border: Border.all(color: brand.border),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.playlist_play, size: 20, color: brand.accentInk),
-                  Text(
-                    '${setlist.songCount}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: brand.accentInk,
-                      fontWeight: FontWeight.w700,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
+              child: Icon(
+                Icons.format_list_bulleted,
+                size: 22,
+                color: brand.inkMuted,
               ),
             ),
-            const SizedBox(width: BattutaSpace.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    setlist.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: brand.ink,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
-                    ),
+          const SizedBox(width: BattutaSpace.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  setlist.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: brand.ink,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: BattutaSpace.xxs),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: brand.inkMuted,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (onDelete != null)
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  size: 20,
-                  color: AppTheme.stageRed,
                 ),
-                tooltip: deleteTooltip,
-                onPressed: onDelete,
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.only(right: BattutaSpace.sm),
-                child: Icon(Icons.chevron_right, size: 20, color: brand.inkDim),
+                const SizedBox(height: BattutaSpace.xxs),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: brand.inkMuted,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onDelete != null)
+            IconButton(
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              icon: Icon(Icons.delete_outline, size: 20, color: brand.danger),
+              tooltip: deleteTooltip,
+              onPressed: onDelete,
+            )
+          else
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: BattutaSpace.sm),
+              child: Icon(Icons.chevron_right, size: 20, color: brand.inkDim),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Month over day, the way a calendar page shows the service date.
+class _DateStamp extends StatelessWidget {
+  const _DateStamp({required this.date});
+
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = BattutaBrand.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final month = DateFormat.MMM(locale).format(date).toUpperCase();
+
+    return Container(
+      width: 52,
+      height: 52,
+      padding: const EdgeInsets.all(BattutaSpace.xs),
+      decoration: BoxDecoration(
+        color: brand.accentWash,
+        borderRadius: BattutaRadius.smAll,
+        border: Border.all(color: brand.accent.withValues(alpha: 0.35)),
+      ),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              month,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: brand.accentInk,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+                height: 1.1,
               ),
+            ),
+            Text(
+              '${date.day}',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: brand.accentInk,
+                fontWeight: FontWeight.w800,
+                height: 1.1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The inline search field: a tappable bar that opens the song search.
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.hint, required this.onTap});
+
+  final String hint;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = BattutaBrand.of(context);
+    return BattutaPressable(
+      key: const ValueKey('repertoire_search_field'),
+      onTap: onTap,
+      semanticLabel: hint,
+      pressedScale: 0.99,
+      child: Container(
+        height: 46,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: brand.card,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: brand.border),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.search, size: 18, color: brand.inkMuted),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                hint,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: brand.inkMuted, fontSize: 15),
+              ),
+            ),
           ],
         ),
       ),

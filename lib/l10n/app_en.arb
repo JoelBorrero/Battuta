@@ -3299,6 +3299,8 @@
   "@repertoireScopeOrganization": {"description": "repertoireScopeOrganization", "placeholders": {"name": {"type": "String"}}},
   "repertoireScopeLabel": "Repertoire to show",
   "@repertoireScopeLabel": {"description": "repertoireScopeLabel"},
+  "repertoireSearchHint": "Search title, artist or tag",
+  "@repertoireSearchHint": {"description": "Search field on the Repertoire page; opens the song search"},
   "orgSettingsTooltip": "Organization settings",
   "@orgSettingsTooltip": {"description": "orgSettingsTooltip"},
   "orgRepertoireEmptyTitle": "No songs in this repertoire yet",

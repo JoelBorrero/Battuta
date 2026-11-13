@@ -42,19 +42,28 @@ void main() {
     return MaterialApp.router(theme: AppTheme.dark, routerConfig: router);
   }
 
-  testWidgets('shows key tile, title, artist, tempo, meter and tags', (
+  testWidgets('shows title, artist · tempo · meter line, key pill and tags', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
 
-    expect(find.text('G'), findsOneWidget);
+    expect(find.widgetWithText(StageKeyPill, 'G'), findsOneWidget);
     expect(find.text('Amazing Grace'), findsOneWidget);
-    expect(find.text('John Newton'), findsOneWidget);
-    expect(find.text(song.tempoLabel), findsOneWidget);
-    expect(find.text(song.timeSignatureLabel), findsOneWidget);
+    expect(find.text('John Newton · 72 BPM · 3/4'), findsOneWidget);
     expect(find.text('Hymn'), findsOneWidget);
     expect(find.text('Classic'), findsOneWidget);
+  });
+
+  testWidgets('omits the 4/4 meter and skips missing parts', (tester) async {
+    expect(
+      SongCard.metaLine(song.copyWith(timeSignature: (4, 4))),
+      'John Newton · 72 BPM',
+    );
+    expect(
+      SongCard.metaLine(song.copyWith(artist: '', timeSignature: (6, 8))),
+      '72 BPM · 6/8',
+    );
   });
 
   testWidgets('navigates to song detail on tap', (tester) async {

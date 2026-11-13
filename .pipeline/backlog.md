@@ -123,8 +123,6 @@ Product / ops:
 - After a Docker Desktop restart the local stack can come back without `supabase_auth_Battuta`; `supabase status` then has no keys and every integration test is skipped. Fix: `supabase stop && supabase start`.
 
 ## From 011: profile view
-- Repertoire body overflows by 52 px at 320–375 × 700 when signed in with an organization repertoire (header
-  column not scrollable). Pre-existing; the responsive test runs at height 900 and hides it.
 - Admins cannot leave an organization from the app (they must give up admin rights first); the old roster
   self-card Leave item is gone. Revisit if admins should leave while another admin remains.
 - Formatting churn: `test/features/auth/supabase_auth_repository_test.dart` was reflowed by `dart format`
@@ -146,3 +144,12 @@ Product / ops:
   organization.
 - "Upcoming" counts only the active organization while the other tiles count across organizations.
 - A member demoted while the logo sheet is open sees the generic permission message, not "not admin".
+
+## From 013: repertoire redesign
+- The Repertoire ⋮ menu labels are hard-coded English ('More options', 'Import Song / Leadsheet',
+  'Export Repertoire...'); move them to l10n.
+- `song_import_modal.dart` still has a `Color(0x222E86DE)` literal; replace with a brand role.
+- Wide windows lost the one-tap import / scan icons (now in the ⋮ menu); show them in the search row at
+  ≥ 480 pt if users miss them.
+- Live performance view (song N of M, beat meter, lyric prompter, Previous / Cue / Next) is planned as its
+  own task after the redesign series; it needs new session state (see 019).

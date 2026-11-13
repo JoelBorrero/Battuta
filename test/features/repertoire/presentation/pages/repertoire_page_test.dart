@@ -1,3 +1,4 @@
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
@@ -45,7 +46,9 @@ void main() {
       expect(find.text('Repertoire'), findsOneWidget);
       expect(find.byIcon(Icons.search), findsOneWidget);
       expect(find.text('Amazing Grace'), findsOneWidget);
-      expect(find.text('John Newton'), findsOneWidget);
+      expect(find.text('John Newton · 72 BPM · 3/4'), findsOneWidget);
+      expect(find.widgetWithText(StageKeyPill, 'G'), findsOneWidget);
+      expect(find.text('Search title, artist or tag'), findsOneWidget);
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
@@ -101,7 +104,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(FloatingActionButton), findsOneWidget);
-        expect(find.text('New Song'), findsOneWidget);
+        // The add button is icon only; its tooltip names it.
+        expect(find.byTooltip('Add song'), findsOneWidget);
 
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
@@ -138,5 +142,39 @@ void main() {
         );
       },
     );
+  });
+
+  group('layout', () {
+    for (final size in [
+      const Size(320, 700),
+      const Size(375, 700),
+      const Size(1180, 820),
+    ]) {
+      testWidgets('has no overflow at ${size.width.toInt()} x '
+          '${size.height.toInt()}', (tester) async {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        repository = InMemorySongRepository(
+          initialSongs: [
+            for (var i = 0; i < 12; i++)
+              sampleSongs.first.copyWith(
+                id: 'song-$i',
+                title: 'A very long song title that has to be ellipsized $i',
+                artist: 'An artist with a really rather long name number $i',
+                tags: const ['Hymn', 'Classic', 'Communion', 'Slow'],
+              ),
+          ],
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.textContaining('Setlists ('));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }
