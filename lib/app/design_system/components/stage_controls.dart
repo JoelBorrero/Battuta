@@ -308,12 +308,18 @@ class StageFilterPill extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                   ],
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                      color: selected ? brand.accentInk : brand.ink,
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        color: selected ? brand.accentInk : brand.ink,
+                      ),
                     ),
                   ),
                 ],

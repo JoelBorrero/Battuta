@@ -179,3 +179,7 @@ Product / ops:
   releases the lock while Live is still showing. Count holders when that route gets used.
 - Settings sync status card overflows (~13 px) at 320 pt with 160% system text scale (pre-existing).
 - Stage preference reads run one after another; `Future.wait` would load them together.
+
+## From 018: team and calendar redesign
+- The calendar's "follows today" selection moves at the next rebuild after midnight; add a midnight timer (or
+  rebuild on app resume) if the app is often left open overnight.

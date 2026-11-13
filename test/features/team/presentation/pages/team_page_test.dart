@@ -90,7 +90,7 @@ void main() {
       expect(find.text('Raul Diaz'), findsOneWidget);
       expect(find.text('Ana Cruz'), findsOneWidget);
       expect(find.text('Gone Person'), findsNothing);
-      expect(find.text('Total Roster'), findsOneWidget);
+      expect(find.text('EVERYONE · 3'), findsOneWidget);
       expect(find.textContaining('Team Roster (3)'), findsOneWidget);
     });
 
@@ -114,8 +114,8 @@ void main() {
       expect(find.byIcon(Icons.person_add), findsNothing);
       final invite = find.byKey(const ValueKey('invite_btn'));
       expect(invite, findsOneWidget);
-      expect(find.text('Invite'), findsOneWidget);
-      expect(tester.widget<OutlinedButton>(invite).onPressed, isNotNull);
+      expect(find.byTooltip('Invite'), findsOneWidget);
+      expect(tester.widget<IconButton>(invite).onPressed, isNotNull);
     });
 
     testWidgets('members do not see Invite or Manage bands', (tester) async {
@@ -143,10 +143,10 @@ void main() {
     testWidgets('filters by band and shows band badges', (tester) async {
       await pump(tester, repo());
 
-      expect(
-        find.byKey(const ValueKey('member_group_badge_m-raul_band-1')),
-        findsOneWidget,
+      final bands = tester.widget<Text>(
+        find.byKey(const ValueKey('member_bands_m-raul')),
       );
+      expect(bands.data, 'Ensamble 1');
 
       await tester.tap(find.byKey(const ValueKey('filter_chip_group_band-2')));
       await tester.pumpAndSettle();
@@ -195,7 +195,7 @@ void main() {
         ),
       );
       expect(find.text('Edit Team Member'), findsNothing);
-      expect(find.text('Lead Vocalist'), findsWidgets);
+      expect(find.textContaining('Lead Vocals, Acoustic'), findsOneWidget);
       expect(find.text('Plays fingerstyle'), findsOneWidget);
     });
 
@@ -319,7 +319,10 @@ void main() {
       await pump(tester, repository);
 
       // Someone else's card does nothing.
-      await tester.tap(find.byKey(const ValueKey('member_card_m-raul')));
+      await tester.tap(
+        find.byKey(const ValueKey('member_card_m-raul')),
+        warnIfMissed: false,
+      );
       await tester.pumpAndSettle();
       expect(find.text('Edit Team Member'), findsNothing);
       expect(find.byKey(const ValueKey('member_menu_m-raul')), findsNothing);
@@ -430,6 +433,14 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Maria Lopez'), findsOneWidget);
+    });
+
+    testWidgets('renders the roster at iPad landscape width', (tester) async {
+      await pump(tester, repo(), size: const Size(1180, 820));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Maria Lopez'), findsOneWidget);
+      expect(find.byKey(const ValueKey('manage_bands_btn')), findsOneWidget);
     });
 
     testWidgets('shows a sign in prompt in local mode', (tester) async {

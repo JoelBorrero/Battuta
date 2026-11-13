@@ -1131,5 +1131,10 @@
   "syncLastSyncedAt": "Última sincronización: {time}",
   "chartTextSizeLabel": "Tamaño del texto de la partitura",
   "preferFlatsLabel": "Preferir bemoles al transportar",
-  "keepScreenAwakeLabel": "Mantener la pantalla encendida en el escenario"
+  "keepScreenAwakeLabel": "Mantener la pantalla encendida en el escenario",
+  "teamTitle": "Equipo",
+  "rosterEveryone": "Todos",
+  "previousMonthTooltip": "Mes anterior",
+  "nextMonthTooltip": "Mes siguiente",
+  "noServicesOnDay": "No hay servicios este día."
 }

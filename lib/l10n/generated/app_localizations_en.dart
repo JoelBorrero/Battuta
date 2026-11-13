@@ -3421,4 +3421,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keepScreenAwakeLabel => 'Keep screen awake on stage';
+
+  @override
+  String get teamTitle => 'Team';
+
+  @override
+  String get rosterEveryone => 'Everyone';
+
+  @override
+  String get previousMonthTooltip => 'Previous month';
+
+  @override
+  String get nextMonthTooltip => 'Next month';
+
+  @override
+  String get noServicesOnDay => 'No services on this day.';
 }

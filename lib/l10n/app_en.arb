@@ -3985,5 +3985,25 @@
   "keepScreenAwakeLabel": "Keep screen awake on stage",
   "@keepScreenAwakeLabel": {
     "description": "Settings: switch to keep the screen on in the Live view"
+  },
+  "teamTitle": "Team",
+  "@teamTitle": {
+    "description": "Title of the Team tab"
+  },
+  "rosterEveryone": "Everyone",
+  "@rosterEveryone": {
+    "description": "Roster group title when no band is selected"
+  },
+  "previousMonthTooltip": "Previous month",
+  "@previousMonthTooltip": {
+    "description": "Calendar: go to the previous month"
+  },
+  "nextMonthTooltip": "Next month",
+  "@nextMonthTooltip": {
+    "description": "Calendar: go to the next month"
+  },
+  "noServicesOnDay": "No services on this day.",
+  "@noServicesOnDay": {
+    "description": "Calendar: the selected day has no services"
   }
 }

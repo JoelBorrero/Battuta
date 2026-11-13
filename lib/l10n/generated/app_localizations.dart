@@ -6029,6 +6029,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep screen awake on stage'**
   String get keepScreenAwakeLabel;
+
+  /// Title of the Team tab
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get teamTitle;
+
+  /// Roster group title when no band is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get rosterEveryone;
+
+  /// Calendar: go to the previous month
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get previousMonthTooltip;
+
+  /// Calendar: go to the next month
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get nextMonthTooltip;
+
+  /// Calendar: the selected day has no services
+  ///
+  /// In en, this message translates to:
+  /// **'No services on this day.'**
+  String get noServicesOnDay;
 }
 
 class _AppLocalizationsDelegate
