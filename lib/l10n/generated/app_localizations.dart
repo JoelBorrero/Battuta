@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// Sync now action button
   ///
   /// In en, this message translates to:
-  /// **'Sync Now'**
+  /// **'Sync now'**
   String get syncNow;
 
   /// Sign out action button
@@ -5957,6 +5957,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More options'**
   String get moreOptions;
+
+  /// General settings group header
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get generalSection;
+
+  /// Dark theme option, named for the stage
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get themeStage;
+
+  /// Light theme option, named for the rehearsal room
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal'**
+  String get themeRehearsal;
+
+  /// Language option that follows the device language
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get languageSystemDefault;
+
+  /// Settings group header for account, server and sync
+  ///
+  /// In en, this message translates to:
+  /// **'Account and sync'**
+  String get accountSyncSection;
+
+  /// Row that opens the cloud server configuration
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get serverLabel;
+
+  /// Sync status card title when the device is offline
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get syncOfflineTitle;
+
+  /// Sync status card note when idle
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is also saved on this device'**
+  String get syncSavedOnDevice;
+
+  /// Sync status card note with the time of the last sync
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced at {time}'**
+  String syncLastSyncedAt(String time);
 }
 
 class _AppLocalizationsDelegate

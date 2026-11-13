@@ -1119,5 +1119,14 @@
   "addToSetlistEmpty": "Aún no hay listas donde añadir esta canción. Crea una en la pestaña Listas.",
   "addedToSetlist": "Añadida a {setlist}",
   "alreadyInSetlist": "Ya añadida",
-  "moreOptions": "Más opciones"
+  "moreOptions": "Más opciones",
+  "generalSection": "General",
+  "themeStage": "Escenario",
+  "themeRehearsal": "Ensayo",
+  "languageSystemDefault": "Sistema",
+  "accountSyncSection": "Cuenta y sincronización",
+  "serverLabel": "Servidor",
+  "syncOfflineTitle": "Sin conexión",
+  "syncSavedOnDevice": "Todo se guarda también en este dispositivo",
+  "syncLastSyncedAt": "Última sincronización: {time}"
 }

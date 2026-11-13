@@ -30,9 +30,7 @@ void main() {
   Widget buildSubject({_FakeLocaleStorage? storage}) {
     final fakeStorage = storage ?? _FakeLocaleStorage();
     return ProviderScope(
-      overrides: [
-        localeStorageProvider.overrideWithValue(fakeStorage),
-      ],
+      overrides: [localeStorageProvider.overrideWithValue(fakeStorage)],
       child: Consumer(
         builder: (context, ref, _) {
           final locale = ref.watch(appLocaleProvider);
@@ -47,39 +45,45 @@ void main() {
     );
   }
 
-  testWidgets('renders language selector and switches live between English and Spanish', (tester) async {
-    tester.view.physicalSize = const Size(1024, 2048);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+  testWidgets(
+    'renders language selector and switches live between English and Spanish',
+    (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-    final storage = _FakeLocaleStorage();
-    await tester.pumpWidget(buildSubject(storage: storage));
-    await tester.pumpAndSettle();
+      final storage = _FakeLocaleStorage();
+      await tester.pumpWidget(buildSubject(storage: storage));
+      await tester.pumpAndSettle();
 
-    // Verify initial render (English by default when system is English)
-    expect(find.byKey(const ValueKey('language_tile')), findsOneWidget);
-    expect(find.byKey(const ValueKey('language_segmented_btn')), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Theme'), findsOneWidget);
+      // Verify initial render (English by default when system is English)
+      expect(find.byKey(const ValueKey('language_tile')), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
 
-    // Tap Español
-    await tester.tap(find.text('Español'));
-    await tester.pumpAndSettle();
+      // Open the picker and choose Español
+      await tester.tap(find.byKey(const ValueKey('language_tile')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('language_option_spanish')));
+      await tester.pumpAndSettle();
 
-    // Verify live update to Spanish
-    expect(find.text('Ajustes'), findsOneWidget);
-    expect(find.text('Tema'), findsOneWidget);
-    expect(find.text('Idioma de la aplicación'), findsOneWidget);
-    expect(find.text('Sincronizar'), findsOneWidget);
+      // Verify live update to Spanish
+      expect(find.text('Ajustes'), findsOneWidget);
+      expect(find.text('Tema'), findsOneWidget);
+      expect(find.text('Idioma de la aplicación'), findsOneWidget);
+      expect(find.text('Sincronizar'), findsOneWidget);
 
-    // Tap English
-    await tester.tap(find.text('English'));
-    await tester.pumpAndSettle();
+      // Open the picker and choose English
+      await tester.tap(find.byKey(const ValueKey('language_tile')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('language_option_english')));
+      await tester.pumpAndSettle();
 
-    // Verify live update back to English
-    expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Theme'), findsOneWidget);
-    expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Sync Now'), findsOneWidget);
-  });
+      // Verify live update back to English
+      expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Sync now'), findsOneWidget);
+    },
+  );
 }

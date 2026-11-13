@@ -73,16 +73,18 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Verify Cloud Synchronization section
-      expect(find.text('Cloud Synchronization (Supabase)'), findsOneWidget);
-      expect(find.text('Account'), findsOneWidget);
+      expect(find.text('ACCOUNT AND SYNC'), findsOneWidget);
       expect(find.text('Sign in'), findsOneWidget);
       expect(
         find.text('Not signed in — Offline SQLite active'),
         findsOneWidget,
       );
-      await tester.scrollUntilVisible(find.text('Sync Status'), 200);
-      expect(find.text('Supabase Connection'), findsOneWidget);
-      expect(find.text('Sync Status'), findsOneWidget);
+      expect(find.text('Server'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('supabase_sync_status_tile')),
+        findsOneWidget,
+      );
+      expect(find.text('Ready to sync'), findsOneWidget);
       expect(find.byKey(const ValueKey('sync_now_btn')), findsOneWidget);
 
       // Tap Sync Now

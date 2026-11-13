@@ -32,7 +32,6 @@ void main() {
     expect(find.text('Cloud Storage'), findsOneWidget);
 
     // Developer options remain, and there is no demo mode toggle anymore.
-    expect(find.text('API Configuration'), findsOneWidget);
     expect(find.byKey(const ValueKey('supabase_config_tile')), findsOneWidget);
     expect(find.byKey(const ValueKey('gemini_api_key_tile')), findsOneWidget);
     expect(find.byKey(const ValueKey('demo_mode_switch')), findsNothing);

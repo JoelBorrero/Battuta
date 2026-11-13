@@ -164,3 +164,10 @@ Product / ops:
 - `eventDate` is shown with `toLocal()`. If a date picker is added that stores a calendar day as UTC
   midnight, store it as local noon or a date-only value, or users west of UTC see the previous day.
 - Removing a song from a setlist has no confirmation or undo; consider an undo snackbar.
+
+## From 016: settings redesign
+- Settings → Server shows "Configure Project URL & Anon Key" instead of the active server. The host is
+  available through `SupabaseConfigService.getActiveUrl()` (`supabaseConfigServiceProvider`); add a small
+  `FutureProvider` and show the host (or "Battuta cloud" for the default).
+- No widget test covers the sync status card states (ready, syncing, last synced at, offline, error).
+- The footer's "♪" (U+266A) relies on the platform font; consider an inline icon.

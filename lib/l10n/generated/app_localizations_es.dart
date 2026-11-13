@@ -3407,4 +3407,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get moreOptions => 'Más opciones';
+
+  @override
+  String get generalSection => 'General';
+
+  @override
+  String get themeStage => 'Escenario';
+
+  @override
+  String get themeRehearsal => 'Ensayo';
+
+  @override
+  String get languageSystemDefault => 'Sistema';
+
+  @override
+  String get accountSyncSection => 'Cuenta y sincronización';
+
+  @override
+  String get serverLabel => 'Servidor';
+
+  @override
+  String get syncOfflineTitle => 'Sin conexión';
+
+  @override
+  String get syncSavedOnDevice => 'Todo se guarda también en este dispositivo';
+
+  @override
+  String syncLastSyncedAt(String time) {
+    return 'Última sincronización: $time';
+  }
 }

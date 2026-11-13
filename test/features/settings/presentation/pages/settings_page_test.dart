@@ -1,3 +1,4 @@
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/core/services/api_key_storage.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/settings/presentation/pages/settings_page.dart';
@@ -51,25 +52,19 @@ void main() {
 
       // Verify sections and items
       expect(find.text('Settings'), findsOneWidget);
-      expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('APPEARANCE'), findsOneWidget);
       expect(find.text('Theme'), findsOneWidget);
-      expect(find.text('Choose light, dark, or system mode'), findsOneWidget);
 
-      // Verify SegmentedButton options
-      expect(find.text('Light'), findsOneWidget);
-      expect(find.text('Dark'), findsOneWidget);
-      expect(find.text('System'), findsOneWidget);
+      // Verify theme options
+      expect(find.text('Stage'), findsOneWidget);
+      expect(find.text('Rehearsal'), findsOneWidget);
+      expect(find.text('System'), findsNWidgets(2)); // theme + language value
 
       // Verify Language section
       expect(find.byKey(const ValueKey('language_tile')), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('language_segmented_btn')),
-        findsOneWidget,
-      );
 
-      // Verify API Configuration section
+      // Verify the admin rows
       await tester.scrollUntilVisible(find.text('Gemini API Key'), 100);
-      expect(find.text('API Configuration'), findsOneWidget);
       expect(find.text('Gemini API Key'), findsOneWidget);
 
       expect(tester.takeException(), isNull);
@@ -130,14 +125,25 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Tap 'Dark'
-    await tester.tap(find.text('Dark'));
+    // Tap 'Stage' (dark)
+    await tester.tap(find.text('Stage'));
     await tester.pumpAndSettle();
 
-    final segmentedBtn = tester.widget<SegmentedButton<ThemeMode>>(
-      find.byType(SegmentedButton<ThemeMode>),
+    final control = tester.widget<StageSegmentedControl<ThemeMode>>(
+      find.byType(StageSegmentedControl<ThemeMode>),
     );
-    expect(segmentedBtn.selected, equals({ThemeMode.dark}));
+    expect(control.selected, ThemeMode.dark);
+
+    await tester.tap(find.text('Rehearsal'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<StageSegmentedControl<ThemeMode>>(
+            find.byType(StageSegmentedControl<ThemeMode>),
+          )
+          .selected,
+      ThemeMode.light,
+    );
   });
 
   testWidgets('Non-admin user cannot see or access Gemini API Key section', (
@@ -162,11 +168,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Appearance and other non-admin sections exist
-    expect(find.text('Appearance'), findsOneWidget);
+    expect(find.text('APPEARANCE'), findsOneWidget);
     expect(find.text('Theme'), findsOneWidget);
 
     // Verify API Configuration section and Gemini API Key tile are NOT rendered
-    expect(find.text('API Configuration'), findsNothing);
     expect(find.byKey(const ValueKey('gemini_api_key_tile')), findsNothing);
     expect(find.byKey(const ValueKey('omr_debug_logs_tile')), findsNothing);
   });

@@ -140,7 +140,7 @@
   "@syncStatusLabel": {
     "description": "Sync status tile label"
   },
-  "syncNow": "Sync Now",
+  "syncNow": "Sync now",
   "@syncNow": {
     "description": "Sync now action button"
   },
@@ -3931,5 +3931,47 @@
   "moreOptions": "More options",
   "@moreOptions": {
     "description": "Tooltip of the overflow menu"
+  },
+  "generalSection": "General",
+  "@generalSection": {
+    "description": "General settings group header"
+  },
+  "themeStage": "Stage",
+  "@themeStage": {
+    "description": "Dark theme option, named for the stage"
+  },
+  "themeRehearsal": "Rehearsal",
+  "@themeRehearsal": {
+    "description": "Light theme option, named for the rehearsal room"
+  },
+  "languageSystemDefault": "System",
+  "@languageSystemDefault": {
+    "description": "Language option that follows the device language"
+  },
+  "accountSyncSection": "Account and sync",
+  "@accountSyncSection": {
+    "description": "Settings group header for account, server and sync"
+  },
+  "serverLabel": "Server",
+  "@serverLabel": {
+    "description": "Row that opens the cloud server configuration"
+  },
+  "syncOfflineTitle": "Offline",
+  "@syncOfflineTitle": {
+    "description": "Sync status card title when the device is offline"
+  },
+  "syncSavedOnDevice": "Everything is also saved on this device",
+  "@syncSavedOnDevice": {
+    "description": "Sync status card note when idle"
+  },
+  "syncLastSyncedAt": "Last synced at {time}",
+  "@syncLastSyncedAt": {
+    "description": "Sync status card note with the time of the last sync",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "14:30"
+      }
+    }
   }
 }

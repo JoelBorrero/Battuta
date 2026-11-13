@@ -112,7 +112,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncStatusLabel => 'Sync Status';
 
   @override
-  String get syncNow => 'Sync Now';
+  String get syncNow => 'Sync now';
 
   @override
   String get signOut => 'Sign Out';
@@ -3383,4 +3383,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreOptions => 'More options';
+
+  @override
+  String get generalSection => 'General';
+
+  @override
+  String get themeStage => 'Stage';
+
+  @override
+  String get themeRehearsal => 'Rehearsal';
+
+  @override
+  String get languageSystemDefault => 'System';
+
+  @override
+  String get accountSyncSection => 'Account and sync';
+
+  @override
+  String get serverLabel => 'Server';
+
+  @override
+  String get syncOfflineTitle => 'Offline';
+
+  @override
+  String get syncSavedOnDevice => 'Everything is also saved on this device';
+
+  @override
+  String syncLastSyncedAt(String time) {
+    return 'Last synced at $time';
+  }
 }
