@@ -3973,5 +3973,17 @@
         "example": "14:30"
       }
     }
+  },
+  "chartTextSizeLabel": "Chart text size",
+  "@chartTextSizeLabel": {
+    "description": "Settings: slider label for the chord chart text size"
+  },
+  "preferFlatsLabel": "Prefer flats when transposing",
+  "@preferFlatsLabel": {
+    "description": "Settings: switch to spell transposed notes with flats"
+  },
+  "keepScreenAwakeLabel": "Keep screen awake on stage",
+  "@keepScreenAwakeLabel": {
+    "description": "Settings: switch to keep the screen on in the Live view"
   }
 }

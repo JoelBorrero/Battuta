@@ -6011,6 +6011,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last synced at {time}'**
   String syncLastSyncedAt(String time);
+
+  /// Settings: slider label for the chord chart text size
+  ///
+  /// In en, this message translates to:
+  /// **'Chart text size'**
+  String get chartTextSizeLabel;
+
+  /// Settings: switch to spell transposed notes with flats
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer flats when transposing'**
+  String get preferFlatsLabel;
+
+  /// Settings: switch to keep the screen on in the Live view
+  ///
+  /// In en, this message translates to:
+  /// **'Keep screen awake on stage'**
+  String get keepScreenAwakeLabel;
 }
 
 class _AppLocalizationsDelegate

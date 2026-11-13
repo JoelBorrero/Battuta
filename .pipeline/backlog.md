@@ -171,3 +171,11 @@ Product / ops:
   `FutureProvider` and show the host (or "Battuta cloud" for the default).
 - No widget test covers the sync status card states (ready, syncing, last synced at, offline, error).
 - The footer's "♪" (U+266A) relies on the platform font; consider an inline icon.
+
+## From 017: stage preferences
+- Chart text size and prefer flats have no Live consumer yet (Live renders no chart); wire them into the Live
+  performance view.
+- `ScreenWakeLock` is not reference-counted: if `/live/:sessionId` is ever pushed over `/live`, popping it
+  releases the lock while Live is still showing. Count holders when that route gets used.
+- Settings sync status card overflows (~13 px) at 320 pt with 160% system text scale (pre-existing).
+- Stage preference reads run one after another; `Future.wait` would load them together.

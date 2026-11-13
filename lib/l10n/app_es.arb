@@ -1128,5 +1128,8 @@
   "serverLabel": "Servidor",
   "syncOfflineTitle": "Sin conexión",
   "syncSavedOnDevice": "Todo se guarda también en este dispositivo",
-  "syncLastSyncedAt": "Última sincronización: {time}"
+  "syncLastSyncedAt": "Última sincronización: {time}",
+  "chartTextSizeLabel": "Tamaño del texto de la partitura",
+  "preferFlatsLabel": "Preferir bemoles al transportar",
+  "keepScreenAwakeLabel": "Mantener la pantalla encendida en el escenario"
 }

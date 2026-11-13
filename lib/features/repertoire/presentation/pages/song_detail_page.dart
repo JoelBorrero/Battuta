@@ -23,6 +23,8 @@ import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
+import 'package:battuta/features/settings/domain/stage_preferences.dart';
+import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
 import 'package:battuta/features/sharing/presentation/widgets/song_sharing_actions.dart';
 import 'package:battuta/features/sharing/presentation/widgets/song_versions_section.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -63,6 +65,11 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     ).showSnackBar(SnackBar(content: Text(backendErrorMessage(l10n, failure))));
   }
 
+  /// Flats are an explicit choice; otherwise the spelling follows the target
+  /// key (`null`).
+  bool? _preferSharps(StagePreferences prefs) =>
+      prefs.preferFlats ? false : null;
+
   /// Writes the previewed transposition back to the song (owner only).
   Future<void> _saveTransposition(Song song) async {
     if (_transpositionSemitones == 0 ||
@@ -72,6 +79,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     final transposed = SongTransposer.transposeSong(
       song,
       _transpositionSemitones,
+      preferSharps: _preferSharps(ref.read(stagePreferencesProvider)),
     );
     final failure = await ref
         .read(repertoireProvider.notifier)
@@ -299,9 +307,14 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
         // Only the owner edits a version; for anybody else this is a viewer.
         final canEdit = song.isEditableBy(ref.watch(currentAccountIdProvider));
 
+        final prefs = ref.watch(stagePreferencesProvider);
         final activeSong = _transpositionSemitones == 0
             ? song
-            : SongTransposer.transposeSong(song, _transpositionSemitones);
+            : SongTransposer.transposeSong(
+                song,
+                _transpositionSemitones,
+                preferSharps: _preferSharps(prefs),
+              );
 
         final subtitle = [
           if (song.artist.trim().isNotEmpty) song.artist.trim(),
@@ -602,6 +615,8 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   // activeSong is already transposed; the view must not shift it again.
                   transpositionSemitones: 0,
                   viewMode: _selectedViewMode,
+                  chartTextScale: prefs.chartTextScale,
+                  preferSharps: !prefs.preferFlats,
                   // A transposed preview is not stored: editing the alignment
                   // of it would persist the shifted chords on top of the preview.
                   onSongUpdated: canEdit && _transpositionSemitones == 0

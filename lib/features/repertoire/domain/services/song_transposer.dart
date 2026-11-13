@@ -157,7 +157,11 @@ class SongTransposer {
   /// Transposes an entire [Song] by [semitones].
   ///
   /// Adjusts the song's root key and every chord in all sections.
-  static Song transposeSong(Song song, int semitones) {
+  ///
+  /// [preferSharps] forces sharp (`true`) or flat (`false`) spelling for the
+  /// new key and every chord. When `null`, the spelling follows the target
+  /// key's signature (e.g. Bb major spells flats).
+  static Song transposeSong(Song song, int semitones, {bool? preferSharps}) {
     if (semitones == 0) return song;
 
     MusicalKey? currentKey;
@@ -169,20 +173,22 @@ class SongTransposer {
     }
 
     final targetKey = currentKey?.transpose(semitones);
-    final preferSharps = targetKey?.useSharps ?? !song.key.contains('b');
-    final newKeyName =
-        targetKey?.name ??
-        _transposeLooseKey(song.key, semitones, preferSharps: preferSharps);
+    final useSharps =
+        preferSharps ?? targetKey?.useSharps ?? !song.key.contains('b');
+    // An explicit spelling choice also decides the key name (Db vs C#).
+    final newKeyName = preferSharps == null && targetKey != null
+        ? targetKey.name
+        : _transposeLooseKey(song.key, semitones, preferSharps: useSharps);
 
     final updatedSections = song.sections.map((section) {
       final updatedChords = section.chords
-          .map((c) => transposeChord(c, semitones, preferSharps: preferSharps))
+          .map((c) => transposeChord(c, semitones, preferSharps: useSharps))
           .toList();
       final updatedLyrics = section.lyrics != null
           ? transposeChordProText(
               section.lyrics!,
               semitones,
-              preferSharps: preferSharps,
+              preferSharps: useSharps,
             )
           : null;
       return section.copyWith(chords: updatedChords, lyrics: updatedLyrics);

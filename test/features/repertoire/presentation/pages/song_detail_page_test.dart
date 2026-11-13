@@ -1,6 +1,7 @@
 import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/core/errors/failures.dart';
+import 'package:battuta/core/services/device_preferences_storage.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/repertoire/data/repositories/in_memory_setlist_repository.dart';
 import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
@@ -20,6 +21,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../support/memory_storage.dart';
 
 /// Saves a setlist only after a delay, like a slow disk or network.
 class _SlowSetlistRepository extends InMemorySetlistRepository {
@@ -172,6 +175,64 @@ void main() {
       await tester.tap(find.byTooltip('Down 1 semitone'));
       await tester.pumpAndSettle();
       expect(find.text('-1'), findsOneWidget);
+    });
+
+    for (final flats in [false, true]) {
+      testWidgets('transposing C up 1 spells ${flats ? 'Db' : 'C#'} '
+          'with prefer flats ${flats ? 'on' : 'off'}', (tester) async {
+        tester.view.physicalSize = const Size(1024, 2048);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(
+          buildSubject(
+            songId: 'song-detail-1',
+            extraOverrides: [
+              devicePreferencesStorageProvider.overrideWithValue(
+                MemoryStorage({'battuta_prefer_flats': flats.toString()}),
+              ),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Up 1 semitone'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('stat_key')),
+            matching: find.text(flats ? 'Db' : 'C#'),
+          ),
+          findsOneWidget,
+        );
+        await tester.tap(find.text('Chords Only'));
+        await tester.pumpAndSettle();
+        expect(find.text(flats ? 'Bbm7' : 'A#m7'), findsOneWidget);
+      });
+    }
+
+    testWidgets('the saved chart text size scales the chart', (tester) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      Future<double> lyricWidth(String scale) async {
+        await tester.pumpWidget(
+          buildSubject(
+            songId: 'song-detail-1',
+            extraOverrides: [
+              devicePreferencesStorageProvider.overrideWithValue(
+                MemoryStorage({'battuta_chart_text_scale': scale}),
+              ),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+        return tester.getSize(find.text('Fly')).width;
+      }
+
+      final base = await lyricWidth('1.0');
+      final big = await lyricWidth('1.5');
+      expect(big, closeTo(base * 1.5, 1.0));
     });
 
     test('stepper wraps past 11 semitones', () {

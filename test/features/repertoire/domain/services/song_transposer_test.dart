@@ -182,6 +182,31 @@ void main() {
       );
     });
 
+    test('transposeSong spells flats or sharps when asked (C +1)', () {
+      const chords = [ChordCell(root: 'C', quality: ChordQuality.major)];
+      final song = songWith(key: 'C', chords: chords);
+
+      final flats = SongTransposer.transposeSong(song, 1, preferSharps: false);
+      expect(flats.key, 'Db');
+      expect(flats.sections.first.chords.first.root, 'Db');
+
+      final sharps = SongTransposer.transposeSong(song, 1, preferSharps: true);
+      expect(sharps.key, 'C#');
+      expect(sharps.sections.first.chords.first.root, 'C#');
+
+      // Unspecified keeps following the target key's signature.
+      expect(SongTransposer.transposeSong(song, 1).key, 'C#');
+      expect(SongTransposer.transposeSong(song, 10).key, 'Bb');
+    });
+
+    test('transposeSong with flats keeps minor keys minor (Am +1)', () {
+      final song = songWith(key: 'Am');
+      expect(
+        SongTransposer.transposeSong(song, 1, preferSharps: false).key,
+        'Bbm',
+      );
+    });
+
     test('transposeSong survives unparseable keys', () {
       for (final key in ['', 'D minor', 'am', 'Dm', 'garbage']) {
         final t = SongTransposer.transposeSong(

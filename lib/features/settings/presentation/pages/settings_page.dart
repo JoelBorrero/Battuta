@@ -11,7 +11,9 @@ import 'package:battuta/features/organizations/presentation/providers/active_org
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/scanner/presentation/widgets/omr_log_viewer_modal.dart';
+import 'package:battuta/features/settings/domain/stage_preferences.dart';
 import 'package:battuta/features/settings/presentation/providers/api_key_provider.dart';
+import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
 import 'package:battuta/features/settings/presentation/widgets/account_section.dart';
 import 'package:battuta/features/settings/presentation/widgets/api_key_dialog.dart';
 import 'package:battuta/features/settings/presentation/widgets/supabase_config_dialog.dart';
@@ -35,6 +37,8 @@ class SettingsPage extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final languageOption = ref.watch(appLanguageOptionProvider);
     final isAdmin = ref.watch(isCurrentUserAdminProvider);
+    final prefs = ref.watch(stagePreferencesProvider);
+    final prefsNotifier = ref.read(stagePreferencesProvider.notifier);
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -83,6 +87,12 @@ class SettingsPage extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: BattutaSpace.lg),
+                    _ChartTextSizeSlider(
+                      scale: prefs.chartTextScale,
+                      label: l10n?.chartTextSizeLabel ?? 'Chart text size',
+                      onChanged: prefsNotifier.setChartTextScale,
+                    ),
                   ],
                 ),
               ),
@@ -99,6 +109,22 @@ class SettingsPage extends ConsumerWidget {
                 label: l10n?.languageLabel ?? 'Language',
                 value: _languageName(languageOption, l10n),
                 onTap: () => _showLanguageSheet(context),
+              ),
+              _SwitchRow(
+                key: const ValueKey('prefer_flats_row'),
+                icon: Icons.music_note_outlined,
+                label:
+                    l10n?.preferFlatsLabel ?? 'Prefer flats when transposing',
+                value: prefs.preferFlats,
+                onChanged: prefsNotifier.setPreferFlats,
+              ),
+              _SwitchRow(
+                key: const ValueKey('keep_awake_row'),
+                icon: Icons.stay_current_portrait_outlined,
+                label:
+                    l10n?.keepScreenAwakeLabel ?? 'Keep screen awake on stage',
+                value: prefs.keepScreenAwake,
+                onChanged: prefsNotifier.setKeepScreenAwake,
               ),
             ],
           ),
@@ -217,6 +243,125 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Chart text size: label and percent above a themed slider (0.8 to 1.6).
+class _ChartTextSizeSlider extends StatelessWidget {
+  const _ChartTextSizeSlider({
+    required this.scale,
+    required this.label,
+    required this.onChanged,
+  });
+
+  final double scale;
+  final String label;
+  final ValueChanged<double> onChanged;
+
+  static String _percent(double v) => '${(v * 100).round()}%';
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = BattutaBrand.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: brand.ink,
+                ),
+              ),
+            ),
+            const SizedBox(width: BattutaSpace.sm),
+            Text(
+              _percent(scale),
+              key: const ValueKey('chart_text_size_value'),
+              style: TextStyle(fontSize: 15, color: brand.inkMuted),
+            ),
+          ],
+        ),
+        SliderTheme(
+          data: SliderThemeData(
+            trackHeight: 4,
+            activeTrackColor: brand.accent,
+            inactiveTrackColor: brand.border,
+            thumbColor: brand.ink,
+            overlayColor: Colors.transparent,
+            overlayShape: SliderComponentShape.noOverlay,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 12,
+              elevation: 0,
+              pressedElevation: 0,
+            ),
+            tickMarkShape: SliderTickMarkShape.noTickMark,
+            showValueIndicator: ShowValueIndicator.never,
+          ),
+          child: Slider(
+            key: const ValueKey('chart_text_size_slider'),
+            value: scale,
+            min: StagePreferences.minChartTextScale,
+            max: StagePreferences.maxChartTextScale,
+            divisions: StagePreferences.chartTextScaleDivisions,
+            semanticFormatterCallback: (v) => '$label ${_percent(v)}',
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A [StageRow] with an on/off switch; the whole 52 pt row toggles it.
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    super.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = BattutaBrand.of(context);
+    return MergeSemantics(
+      child: Semantics(
+        toggled: value,
+        child: StageRow(
+          icon: icon,
+          label: label,
+          onTap: () => onChanged(!value),
+          trailing: ExcludeSemantics(
+            child: IgnorePointer(
+              child: Switch(
+                value: value,
+                onChanged: (_) {},
+                activeThumbColor: brand.onAccent,
+                activeTrackColor: brand.accent,
+                inactiveThumbColor: brand.inkMuted,
+                inactiveTrackColor: brand.card,
+                trackOutlineColor: WidgetStatePropertyAll(
+                  value ? brand.accent : brand.border,
+                ),
+                overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

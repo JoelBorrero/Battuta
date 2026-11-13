@@ -3412,4 +3412,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncLastSyncedAt(String time) {
     return 'Last synced at $time';
   }
+
+  @override
+  String get chartTextSizeLabel => 'Chart text size';
+
+  @override
+  String get preferFlatsLabel => 'Prefer flats when transposing';
+
+  @override
+  String get keepScreenAwakeLabel => 'Keep screen awake on stage';
 }

@@ -7,8 +7,10 @@
 library;
 
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/core/platform/screen_wake_lock.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
+import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
 import 'package:battuta/features/sync/domain/services/live_sync_service.dart';
 import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
 import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
@@ -28,8 +30,38 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
   final _portController = TextEditingController(text: '8080');
   static const int _currentMeasure = 14;
 
+  late final ScreenWakeLock _wakeLock;
+  // Wake lock calls run one after the other so a late enable can never
+  // outlive a later disable.
+  Future<void> _wakeLockCalls = Future<void>.value();
+  bool _disposed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _wakeLock = ref.read(screenWakeLockProvider);
+    _setWakeLock(ref.read(stagePreferencesProvider).keepScreenAwake);
+  }
+
+  void _setWakeLock(bool on) {
+    _wakeLockCalls = _wakeLockCalls.then((_) async {
+      try {
+        // Disposed meanwhile: never take the lock, always release it.
+        if (on && !_disposed) {
+          await _wakeLock.enable();
+        } else {
+          await _wakeLock.disable();
+        }
+      } catch (_) {
+        // A missing plugin must not break the Live page.
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _disposed = true;
+    _setWakeLock(false);
     _hostController.dispose();
     _portController.dispose();
     super.dispose();
@@ -48,6 +80,10 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      stagePreferencesProvider.select((p) => p.keepScreenAwake),
+      (_, on) => _setWakeLock(on),
+    );
     final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final syncState = ref.watch(liveSyncControllerProvider);
@@ -102,8 +138,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                 Text(
                   syncState.isConnected
                       ? (syncState.isDirector
-                          ? (l10n?.hostingStatus ?? 'HOSTING')
-                          : (l10n?.syncedStatus ?? 'SYNCED'))
+                            ? (l10n?.hostingStatus ?? 'HOSTING')
+                            : (l10n?.syncedStatus ?? 'SYNCED'))
                       : (l10n?.standaloneStatus ?? 'STANDALONE'),
                   style: TextStyle(
                     fontSize: 11,
@@ -212,7 +248,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    l10n?.musicianFollower ?? 'Musician (Follower)',
+                                    l10n?.musicianFollower ??
+                                        'Musician (Follower)',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
@@ -367,9 +404,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                         Text(
                           syncState.isDirector
                               ? (l10n?.localLanDirectorServer ??
-                                  'LOCAL LAN DIRECTOR SERVER')
+                                    'LOCAL LAN DIRECTOR SERVER')
                               : (l10n?.connectToDirectorDevice ??
-                                  'CONNECT TO DIRECTOR DEVICE'),
+                                    'CONNECT TO DIRECTOR DEVICE'),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -384,10 +421,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                           Text(
                             syncState.isConnected
                                 ? (l10n?.serverRunningOnPort(
-                                        syncState.serverPort ?? 0) ??
-                                    'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.')
+                                        syncState.serverPort ?? 0,
+                                      ) ??
+                                      'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.')
                                 : (l10n?.startZeroConfigServer ??
-                                    'Start a zero-configuration local WebSocket server so all band members follow your live cues.'),
+                                      'Start a zero-configuration local WebSocket server so all band members follow your live cues.'),
                             style: const TextStyle(fontSize: 13),
                           ),
                           const SizedBox(height: 14),
@@ -413,9 +451,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 label: Text(
                                   syncState.isConnected
                                       ? (l10n?.stopHostServer ??
-                                          'Stop Host Server')
+                                            'Stop Host Server')
                                       : (l10n?.startLanHost ??
-                                          'Start LAN Host'),
+                                            'Start LAN Host'),
                                 ),
                                 onPressed: () async {
                                   if (syncState.isConnected) {
@@ -434,7 +472,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 icon: const Icon(
                                   Icons.notifications_active_outlined,
                                 ),
-                                label: Text(l10n?.triggerTestCue ?? 'Trigger Test Cue'),
+                                label: Text(
+                                  l10n?.triggerTestCue ?? 'Trigger Test Cue',
+                                ),
                                 onPressed: _triggerSampleCue,
                               ),
                             ],
@@ -447,7 +487,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 child: TextField(
                                   controller: _hostController,
                                   decoration: InputDecoration(
-                                    labelText: l10n?.directorHostIp ??
+                                    labelText:
+                                        l10n?.directorHostIp ??
                                         'Director Host IP',
                                     hintText: '192.168.1.X',
                                     border: const OutlineInputBorder(),
@@ -491,7 +532,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                               syncState.isConnected
                                   ? (l10n?.disconnect ?? 'Disconnect')
                                   : (l10n?.connectAsFollower ??
-                                      'Connect as Follower'),
+                                        'Connect as Follower'),
                             ),
                             onPressed: () async {
                               if (syncState.isConnected) {
@@ -509,7 +550,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                       SnackBar(
                                         content: Text(
                                           l10n?.connectionFailed(
-                                                  e.toString()) ??
+                                                e.toString(),
+                                              ) ??
                                               'Connection failed: $e',
                                         ),
                                       ),
@@ -583,7 +625,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                     req.currentSectionId,
                                   );
                                 },
-                                child: Text(l10n?.approveJump ?? 'Approve Jump'),
+                                child: Text(
+                                  l10n?.approveJump ?? 'Approve Jump',
+                                ),
                               ),
                             ),
                         ],

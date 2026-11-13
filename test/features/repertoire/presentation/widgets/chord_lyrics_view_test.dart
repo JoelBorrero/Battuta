@@ -44,6 +44,8 @@ void main() {
     int transpositionSemitones = 0,
     SongViewMode viewMode = SongViewMode.both,
     ValueChanged<Song>? onSongUpdated,
+    double chartTextScale = 1.0,
+    bool preferSharps = true,
   }) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -54,6 +56,8 @@ void main() {
             song: song,
             transpositionSemitones: transpositionSemitones,
             viewMode: viewMode,
+            chartTextScale: chartTextScale,
+            preferSharps: preferSharps,
             onSongUpdated: onSongUpdated ?? (_) {},
           ),
         ),
@@ -248,5 +252,55 @@ void main() {
         expect(modalWordText.style?.color, equals(const Color(0xFFF2F2F2)));
       },
     );
+
+    testWidgets('chartTextScale scales chord and lyric text', (tester) async {
+      await tester.pumpWidget(buildSubject(song: testSong));
+      await tester.pumpAndSettle();
+      final lyric = find.text('Amazing');
+      final chord = find.text('G').first;
+      final lyricBase = tester.getSize(lyric).width;
+      final chordBase = tester.getSize(chord).width;
+
+      await tester.pumpWidget(
+        buildSubject(song: testSong, chartTextScale: 1.5),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getSize(lyric).width, closeTo(lyricBase * 1.5, 1.0));
+      expect(tester.getSize(chord).width, closeTo(chordBase * 1.5, 1.0));
+    });
+
+    testWidgets('1.6 scale does not overflow at 320 wide', (tester) async {
+      tester.view.physicalSize = const Size(320, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      for (final mode in SongViewMode.values) {
+        await tester.pumpWidget(
+          buildSubject(song: testSong, chartTextScale: 1.6, viewMode: mode),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: '$mode');
+      }
+    });
+
+    testWidgets('preferSharps false spells a transposed chart with flats', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          song: testSong,
+          transpositionSemitones: 1,
+          preferSharps: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Ab'), findsWidgets);
+      expect(find.text('G#'), findsNothing);
+
+      await tester.pumpWidget(
+        buildSubject(song: testSong, transpositionSemitones: 1),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('G#'), findsWidgets);
+    });
   });
 }

@@ -151,7 +151,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // Scroll to make sure tile is visible
-    await tester.drag(find.byType(ListView), const Offset(0, -100));
+    await tester.drag(find.byType(ListView), const Offset(0, -250));
     await tester.pump();
 
     // Tap Supabase Connection tile

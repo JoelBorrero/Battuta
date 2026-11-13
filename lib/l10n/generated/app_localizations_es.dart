@@ -3436,4 +3436,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String syncLastSyncedAt(String time) {
     return 'Última sincronización: $time';
   }
+
+  @override
+  String get chartTextSizeLabel => 'Tamaño del texto de la partitura';
+
+  @override
+  String get preferFlatsLabel => 'Preferir bemoles al transportar';
+
+  @override
+  String get keepScreenAwakeLabel =>
+      'Mantener la pantalla encendida en el escenario';
 }
