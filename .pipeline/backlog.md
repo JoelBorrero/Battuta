@@ -199,3 +199,44 @@ Product / ops:
 - Tag and chord `Chip` delete icons in the song editor are well under 44 pt.
 - Tap tempo calls `DateTime.now()` directly; add a clock seam so the test can assert the exact BPM.
 - The editor's Duplicate and Copy-from section icons look alike.
+
+## From 021: audit of screens built on main against Battuta Screens
+Effort: S small, M medium, L needs data / backend. Shared fixes first, they recur across screens.
+- **Shared:** `titleSmall` is muted in the theme, so card titles render grey (Discover, Recurring schedules) (S).
+  `OrganizationLogo` has no initials fallback (music note instead) (S). A banner + hanging-logo header and
+  labelled 52 pt input fields recur across screens: build them once as shared widgets (M).
+- **Welcome — needs redesign** (`welcome_page.dart`): 300 pt hero card with amber bars, mark tile and
+  "BATTUTA" missing; left-aligned 32/800 title; 52 pt buttons pinned to the bottom (M).
+- **Sign in — needs redesign** (`sign_in_page.dart`, `account_form.dart`): back-only header with a 30/800
+  title and subtitle in the body; labels above 52 pt inputs; "Username or email" (needs username sign-in) and
+  the "Server / Change" card (L); footer "New to Battuta? Create account" (S).
+- **Create account — needs redesign** (same files): "Add a photo" step (M); labelled inputs; "Available" in
+  green; password rule says 8 characters in the mockup, the code accepts 6 (decide); labels "Name" / "Email" (S).
+- **Join — needs redesign** (`join_page.dart`): invite preview (organization banner and logo, inviter,
+  counts, "Joining as", note) needs an invite-preview API (L); close (×) header, "Back to Battuta",
+  full-width Join (S).
+- **Inbox — minor** (`inbox_page.dart`, `invitation_card.dart`): updates as one bordered list with the
+  organization in the meta line; invitation card with organization tile, inviter subtitle, equal-width
+  buttons and "Join"; amber "Mark all as read"; uppercase section headers; "You are all caught up" footer (S–M).
+- **Discover — minor** (`discover_page.dart`): grey result titles (shared fix); filter pills (needs query
+  support, M); "N PUBLIC SONGS" count; versions count and "Shared by" row; bordered "+" add tile (S).
+- **Profile — minor** (`profile_page.dart`, `my_organizations_section.dart`): instrument chips stretch to
+  full width (bug: `Container` with alignment inside a `Wrap`) and lack icons (S); "ACTIVE" tag with the role
+  in the subtitle; initials logos; `InkWell` → `BattutaPressable`; `StageStatTile` / `StageGroup`; hint copy
+  "⋮ menu above" (S).
+- **Organization profile — needs redesign** (`organization_profile_page.dart`): banner with centred hanging
+  logo and name and one "Manage" button; separate stat tiles ordered Members / Songs / Bands; Members section
+  first with an "N more members" avatar stack; Next-up date tile with month on amber wash (M).
+- **Organization settings — needs redesign** (`organization_settings_page.dart`): section headers; Invite
+  People block with copy link / new link (repository already supports it, M); usage bars and renewal date
+  (need backend data, L); Membership as a grouped list with "Members and roles" and a red "Leave" row;
+  archive approvals with avatars, green "Approved", outlined "Approve archive" (S–M).
+- **Recurring schedules — needs redesign** (`recurring_schedules_sheet.dart`): a full page with back instead
+  of a bottom sheet (M); grey titles (shared fix); "Active" uses `AppTheme.stageGreen`
+  (`calendar_support.dart:37`) instead of `brand.success` (S); four short actions on one row; dashed hint
+  footer and "· next N services" summary (S).
+- **Repeating service form — needs redesign** (`service_form_dialog.dart`): full-screen form with Cancel /
+  Create in the header and service type as pills instead of an `AlertDialog` (M); the Repeats card (Once /
+  Weekly / Monthly, interval, weekday chips, monthly by weekday or date, lookahead, next-dates summary) needs
+  data-model and backend work: schedules store only fixed patterns today (L); sentence-case copy and the
+  footnote (S).

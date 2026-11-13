@@ -174,19 +174,20 @@ for keys and chords.
 
 | Screen | Status |
 |---|---|
-| Repertoire | ✅ Matches design (search field, segmented, song rows with key pill) |
-| Song detail | ✅ Matches design (stats, inline transpose, action bar) + existing extras (practice audio, view modes, tags) |
-| Setlist detail | ✅ Matches design (date stamp, stats, order card, start live) — *Length/Players* stats replaced by *Avg BPM* (no duration/player data yet) |
-| Settings | ✅ Matches design structure + existing extras (workspace quota, demo mode, licences) |
+| Repertoire | ✅ Matches design (scope pill, inline search, segmented, song rows with key pill, setlist date stamps) |
+| Song detail | ✅ Matches design (stats, inline transpose, Add to setlist) + existing extras (sharing, practice audio, view modes, tags). No *Go live* until Live can open a song |
+| Setlist detail | ✅ Matches design (date stamp, stats, order card) — *Avg BPM* replaces *Length/Players* (no data); no *Start live session* until Live can open a setlist |
+| Settings | ✅ Matches design, including chart text size, prefer flats and keep screen awake; + workspace quota and licences |
 | Team roster / Band calendar | ✅ Matches design (filters, grouped members, month grid) + existing scheduling features |
-| Live | ◐ Header and section chips match; the design's setlist-driven performance view is not built yet |
-| Song editor, Scanner, Recurring schedules | ◐ Tokenized; not yet laid out to their designs |
-| Welcome, Sign in, Create account, Join, Inbox, Discover, Profile, Organization pages | ✗ New features — not built |
+| Live | ◐ Header, LIVE badge, End and section chips match; the setlist-driven performance view is not built yet |
+| Song editor, Scanner | ✅ Laid out to their designs (editor keeps dropdowns / stepper and expanded sections; scanner has no scan history) |
+| Inbox, Discover, Profile | ◐ Built; minor differences (see `.pipeline/backlog.md`, "From 021") |
+| Welcome, Sign in, Create account, Join, Organization profile / settings, Recurring schedules, Repeating service | ◐ Built; not yet laid out to their designs (see `.pipeline/backlog.md`, "From 021") |
 
 ### Design features not yet in the app
-- Settings: chart text size, prefer flats, keep screen awake.
-- Live: song N of M, beat meter, lyrics prompter, Previous / Cue / Next.
-- Header shortcuts to Inbox, Discover and Profile on root screens.
+- Live: song N of M, beat meter, lyrics prompter, Previous / Cue / Next; Go live / Start live session entries.
+- Join: invite preview; Sign in: username sign-in and server choice; Organization settings: usage bars.
+- Repeating service: interval, weekday set and monthly-by-date rules.
 - Lyrics in Merriweather (not bundled yet).
 
 ## 9. Previous adoption log
