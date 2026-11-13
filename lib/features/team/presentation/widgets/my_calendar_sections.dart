@@ -308,9 +308,10 @@ class _AbsenceDialog extends ConsumerStatefulWidget {
 }
 
 class _AbsenceDialogState extends ConsumerState<_AbsenceDialog> {
+  /// "Now" from the calendar's clock, so a pinned clock pins the dialog too.
+  late final DateTime _now = ref.read(calendarClockProvider)();
   late DateTime _start =
-      widget.existing?.startsOn ??
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      widget.existing?.startsOn ?? DateTime(_now.year, _now.month, _now.day);
   late DateTime _end = widget.existing?.endsOn ?? _start;
   late final TextEditingController _note = TextEditingController(
     text: widget.existing?.note ?? '',
@@ -327,8 +328,8 @@ class _AbsenceDialogState extends ConsumerState<_AbsenceDialog> {
   Future<DateTime?> _pick(DateTime initial) => showDatePicker(
     context: context,
     initialDate: initial,
-    firstDate: DateTime.now().subtract(const Duration(days: 365)),
-    lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
+    firstDate: _now.subtract(const Duration(days: 365)),
+    lastDate: _now.add(const Duration(days: 365 * 3)),
   );
 
   Future<void> _save() async {
