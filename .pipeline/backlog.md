@@ -183,3 +183,12 @@ Product / ops:
 ## From 018: team and calendar redesign
 - The calendar's "follows today" selection moves at the next rebuild after midnight; add a midnight timer (or
   rebuild on app resume) if the app is often left open overnight.
+
+## From 019: live redesign
+- Cues never light the "· NEXT" chip: `SyncCuePayload` carries only a free-text label ("NEXT: CORO GLORIOSO"),
+  never a section id. Add a section id to the cue payload and match on it.
+- `activeSectionId` / `queuedSectionLabel` are not cleared on disconnect, so a stale chip state shows after End.
+- Active chip matches case-sensitively, queued chip case-insensitively; use one rule.
+- End duplicates "Stop Host Server" / "Disconnect"; keep one when the performance view lands.
+- The Live End test binds a real loopback socket with fixed 100 ms delays; poll for the state (or fake the
+  `LanWebSocketSyncService`) to avoid CI flakiness.

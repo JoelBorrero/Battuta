@@ -3436,4 +3436,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noServicesOnDay => 'No services on this day.';
+
+  @override
+  String get liveBadge => 'LIVE';
+
+  @override
+  String get endSessionAction => 'End';
+
+  @override
+  String get sectionChipNext => 'NEXT';
+
+  @override
+  String get endSessionConfirmTitle => 'End the live session?';
+
+  @override
+  String get endSessionConfirmBody =>
+      'Everyone following this session will be disconnected.';
 }

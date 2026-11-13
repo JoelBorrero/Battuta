@@ -1136,5 +1136,10 @@
   "rosterEveryone": "Todos",
   "previousMonthTooltip": "Mes anterior",
   "nextMonthTooltip": "Mes siguiente",
-  "noServicesOnDay": "No hay servicios este día."
+  "noServicesOnDay": "No hay servicios este día.",
+  "liveBadge": "EN VIVO",
+  "endSessionAction": "Terminar",
+  "sectionChipNext": "SIGUIENTE",
+  "endSessionConfirmTitle": "¿Terminar la sesión en vivo?",
+  "endSessionConfirmBody": "Todos los que siguen esta sesión se desconectarán."
 }

@@ -3461,4 +3461,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noServicesOnDay => 'No hay servicios este día.';
+
+  @override
+  String get liveBadge => 'EN VIVO';
+
+  @override
+  String get endSessionAction => 'Terminar';
+
+  @override
+  String get sectionChipNext => 'SIGUIENTE';
+
+  @override
+  String get endSessionConfirmTitle => '¿Terminar la sesión en vivo?';
+
+  @override
+  String get endSessionConfirmBody =>
+      'Todos los que siguen esta sesión se desconectarán.';
 }

@@ -6059,6 +6059,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No services on this day.'**
   String get noServicesOnDay;
+
+  /// Live session badge shown while a sync session is connected
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get liveBadge;
+
+  /// Ends the live sync session (stops hosting or disconnects)
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get endSessionAction;
+
+  /// Suffix on the queued section chip, after a middle dot
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get sectionChipNext;
+
+  /// Title of the dialog confirming End on the Live page
+  ///
+  /// In en, this message translates to:
+  /// **'End the live session?'**
+  String get endSessionConfirmTitle;
+
+  /// Body of the dialog confirming End on the Live page
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone following this session will be disconnected.'**
+  String get endSessionConfirmBody;
 }
 
 class _AppLocalizationsDelegate

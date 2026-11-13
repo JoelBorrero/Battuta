@@ -4005,5 +4005,25 @@
   "noServicesOnDay": "No services on this day.",
   "@noServicesOnDay": {
     "description": "Calendar: the selected day has no services"
+  },
+  "liveBadge": "LIVE",
+  "@liveBadge": {
+    "description": "Live session badge shown while a sync session is connected"
+  },
+  "endSessionAction": "End",
+  "@endSessionAction": {
+    "description": "Ends the live sync session (stops hosting or disconnects)"
+  },
+  "sectionChipNext": "NEXT",
+  "@sectionChipNext": {
+    "description": "Suffix on the queued section chip, after a middle dot"
+  },
+  "endSessionConfirmTitle": "End the live session?",
+  "@endSessionConfirmTitle": {
+    "description": "Title of the dialog confirming End on the Live page"
+  },
+  "endSessionConfirmBody": "Everyone following this session will be disconnected.",
+  "@endSessionConfirmBody": {
+    "description": "Body of the dialog confirming End on the Live page"
   }
 }

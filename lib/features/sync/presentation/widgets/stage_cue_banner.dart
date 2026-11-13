@@ -1,18 +1,20 @@
 /// Battuta — Live Stage Sync Banner & Director Control Bar.
 ///
-/// High-contrast Anti-Material stage cue banner designed for iPadOS split-screen
-/// and macOS prompter displays. Adheres strictly to Battuta visual invariants:
-/// - Amber accent (`#E5A93C`) flush 1.5px border
-/// - Dark mode (`#121316`) & Light mode (`#F8F9FA` / `#FFFFFF`)
-/// - Zero Material drop shadows or elevations
+/// High-contrast stage cue banner designed for iPadOS split-screen and macOS
+/// prompter displays, built from the Battuta Screens design language:
+/// - Flush card surface with an amber 1.5px border and a one-shot arrival flare
+/// - Section chips: active solid amber, queued amber outline, others muted
+/// - Zero Material drop shadows, elevations or ink ripples
 /// - Flexible layout with zero RenderFlex overflow down to 320pt width
 /// - >= 44x44 pt interactive touch targets
 library;
 
+import 'package:battuta/app/design_system/motion/pressable.dart';
+import 'package:battuta/app/theme/battuta_brand.dart';
+import 'package:battuta/app/theme/battuta_tokens.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_theme.dart';
 import '../../domain/models/sync_cue_payload.dart';
 
 class StageCueBanner extends StatelessWidget {
@@ -43,13 +45,7 @@ class StageCueBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final backgroundColor = isDark
-        ? AppTheme.obsidian
-        : AppTheme.pureWhiteSurface;
-
-    final textColor = isDark ? AppTheme.textOffWhite : AppTheme.charcoalText;
+    final brand = BattutaBrand.of(context);
 
     final barsRemaining =
         (currentMeasure != null && cue.triggerMeasureIndex > currentMeasure!)
@@ -60,28 +56,36 @@ class StageCueBanner extends StatelessWidget {
         ? 'in $barsRemaining ${barsRemaining == 1 ? "bar" : "bars"} (Bar ${cue.triggerMeasureIndex})'
         : 'at Bar ${cue.triggerMeasureIndex}';
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(color: AppTheme.amberAccent, width: 1.5),
-        borderRadius: BorderRadius.circular(8),
+    // One-shot arrival flare: the surface starts as an amber wash and settles
+    // onto the card colour. Finite, and instant under Reduce Motion.
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(begin: brand.accentWash, end: brand.card),
+      duration: BattutaMotion.resolve(context, BattutaMotion.phrase),
+      curve: BattutaMotion.downbeat,
+      builder: (context, surface, child) => Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: surface,
+          border: Border.all(color: brand.accent, width: 1.5),
+          borderRadius: BattutaRadius.mdAll,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: child,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          // Flashing/Amber stage beacon icon
+          // Stage beacon.
           Container(
             width: 10,
             height: 10,
-            decoration: const BoxDecoration(
-              color: AppTheme.amberAccent,
+            decoration: BoxDecoration(
+              color: brand.accent,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 10),
 
-          // Cue title & measure subtitle (Flexible to prevent narrow overflows)
+          // Cue title & measure subtitle (Expanded to prevent narrow overflows)
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -91,8 +95,8 @@ class StageCueBanner extends StatelessWidget {
                   cue.nextSectionLabel.toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppTheme.amberAccent,
+                  style: TextStyle(
+                    color: brand.accentInk,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -103,7 +107,7 @@ class StageCueBanner extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: textColor.withValues(alpha: 0.75),
+                    color: brand.inkMuted,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -115,23 +119,26 @@ class StageCueBanner extends StatelessWidget {
 
           // Jump Now action (if provided)
           if (onJumpNow != null)
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-              child: TextButton(
-                key: const ValueKey('stage_cue_jump_button'),
-                onPressed: onJumpNow,
-                style: TextButton.styleFrom(
-                  backgroundColor: AppTheme.amberAccent,
-                  foregroundColor: AppTheme.obsidianText,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  minimumSize: const Size(44, 44),
+            BattutaPressable(
+              key: const ValueKey('stage_cue_jump_button'),
+              onTap: onJumpNow,
+              semanticLabel: l10n?.jumpAction ?? 'JUMP',
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: brand.accent,
+                  borderRadius: BorderRadius.circular(BattutaRadius.sm),
                 ),
                 child: Text(
                   l10n?.jumpAction ?? 'JUMP',
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    letterSpacing: 0.6,
+                    color: brand.onAccent,
+                  ),
                 ),
               ),
             ),
@@ -140,18 +147,15 @@ class StageCueBanner extends StatelessWidget {
 
           // Dismiss action (if provided)
           if (onDismiss != null)
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-              child: IconButton(
-                key: const ValueKey('stage_cue_dismiss_button'),
-                icon: Icon(
-                  Icons.close,
-                  size: 20,
-                  color: isDark ? AppTheme.textMuted : AppTheme.charcoalMuted,
-                ),
-                onPressed: onDismiss,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+            BattutaPressable(
+              key: const ValueKey('stage_cue_dismiss_button'),
+              onTap: onDismiss,
+              semanticLabel: MaterialLocalizations.of(context)
+                  .closeButtonTooltip,
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Icon(Icons.close, size: 20, color: brand.inkMuted),
               ),
             ),
         ],
@@ -160,7 +164,11 @@ class StageCueBanner extends StatelessWidget {
   }
 }
 
-/// Floating Director Control Bar allowing instant stage section transitions and cue triggers.
+/// Pinned Director Control Bar: section chips for instant stage transitions.
+///
+/// Chips read as uppercase labels. The active section is solid amber, the
+/// queued one an amber outline followed by "· NEXT", the rest muted. Tapping a
+/// chip queues it; the bolt jumps to it now.
 class DirectorControlBar extends StatelessWidget {
   const DirectorControlBar({
     super.key,
@@ -168,11 +176,15 @@ class DirectorControlBar extends StatelessWidget {
     required this.activeSectionId,
     required this.onQueueSection,
     required this.onJumpSection,
+    this.queuedSectionId,
     this.onClearQueue,
   });
 
   final List<String> sections;
   final String? activeSectionId;
+
+  /// The section waiting to go live next, matched case-insensitively.
+  final String? queuedSectionId;
   final ValueChanged<String> onQueueSection;
   final ValueChanged<String> onJumpSection;
   final VoidCallback? onClearQueue;
@@ -180,19 +192,14 @@ class DirectorControlBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final backgroundColor = isDark
-        ? AppTheme.slateSurface
-        : AppTheme.pureWhiteSurface;
-
-    final borderColor = isDark ? AppTheme.slateBorder : AppTheme.pearlBorder;
+    final brand = BattutaBrand.of(context);
+    final queued = queuedSectionId?.toLowerCase();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border(top: BorderSide(color: borderColor, width: 1)),
+        color: brand.card,
+        border: Border(top: BorderSide(color: brand.border)),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -202,23 +209,35 @@ class DirectorControlBar extends StatelessWidget {
               _DirectorSectionChip(
                 label: section,
                 isActive: section == activeSectionId,
+                isQueued:
+                    section != activeSectionId &&
+                    queued != null &&
+                    section.toLowerCase() == queued,
+                nextLabel: l10n?.sectionChipNext ?? 'NEXT',
                 onQueue: () => onQueueSection(section),
                 onJump: () => onJumpSection(section),
               ),
               const SizedBox(width: 8),
             ],
             if (onClearQueue != null)
-              ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                child: TextButton(
-                  onPressed: onClearQueue,
-                  style: TextButton.styleFrom(
-                    foregroundColor: isDark
-                        ? AppTheme.textMuted
-                        : AppTheme.charcoalMuted,
-                    minimumSize: const Size(44, 44),
+              BattutaPressable(
+                onTap: onClearQueue,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
                   ),
-                  child: Text(l10n?.clearQueueAction ?? 'CLEAR QUEUE'),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  alignment: Alignment.center,
+                  child: Text(
+                    l10n?.clearQueueAction ?? 'CLEAR QUEUE',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                      color: brand.inkMuted,
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -232,76 +251,76 @@ class _DirectorSectionChip extends StatelessWidget {
   const _DirectorSectionChip({
     required this.label,
     required this.isActive,
+    required this.isQueued,
+    required this.nextLabel,
     required this.onQueue,
     required this.onJump,
   });
 
   final String label;
   final bool isActive;
+  final bool isQueued;
+  final String nextLabel;
   final VoidCallback onQueue;
   final VoidCallback onJump;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brand = BattutaBrand.of(context);
+    final textColor = isActive
+        ? brand.onAccent
+        : (isQueued ? brand.accentInk : brand.inkMuted);
+    final text = isQueued
+        ? '${label.toUpperCase()} · $nextLabel'
+        : label.toUpperCase();
 
     return Container(
       constraints: const BoxConstraints(minHeight: 44),
       decoration: BoxDecoration(
-        color: isActive
-            ? AppTheme.amberAccent
-            : (isDark
-                  ? AppTheme.slateSurfaceLight
-                  : AppTheme.pearlSurfaceLight),
-        borderRadius: BorderRadius.circular(6),
+        color: isActive ? brand.accent : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isActive
-              ? AppTheme.amberAccent
-              : (isDark ? AppTheme.slateBorder : AppTheme.pearlBorder),
-          width: 1,
+          color: isActive || isQueued ? brand.accent : brand.border,
+          width: isQueued ? 1.5 : 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          InkWell(
+          BattutaPressable(
             onTap: onQueue,
+            semanticLabel: label,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
               child: Text(
-                label,
+                text,
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: isActive
-                      ? AppTheme.obsidianText
-                      : (isDark
-                            ? AppTheme.textOffWhite
-                            : AppTheme.charcoalText),
+                  fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+                  fontSize: 12,
+                  letterSpacing: 0.6,
+                  color: textColor,
                 ),
               ),
             ),
           ),
-          InkWell(
+          BattutaPressable(
             onTap: onJump,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
                     color: isActive
-                        ? AppTheme.obsidianText.withValues(alpha: 0.2)
-                        : (isDark
-                              ? AppTheme.slateBorder
-                              : AppTheme.pearlBorder),
-                    width: 1,
+                        ? brand.onAccent.withValues(alpha: 0.2)
+                        : brand.border,
                   ),
                 ),
               ),
               child: Icon(
                 Icons.bolt,
                 size: 16,
-                color: isActive ? AppTheme.obsidianText : AppTheme.amberAccent,
+                color: isActive ? brand.onAccent : brand.accentInk,
               ),
             ),
           ),
