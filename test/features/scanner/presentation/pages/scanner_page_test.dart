@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/features/repertoire/data/repositories/in_memory_song_repository.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/scanner/data/services/image_capture_service.dart';
@@ -124,22 +125,49 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('OMR Scanner'), findsOneWidget);
+      expect(find.text('Turn paper into charts'), findsOneWidget);
       expect(find.byKey(const Key('open_camera_button')), findsOneWidget);
       expect(find.byKey(const Key('choose_gallery_button')), findsOneWidget);
 
-      final cameraBtn = tester.widget<FilledButton>(
-        find.byKey(const Key('open_camera_button')),
+      final cameraBtn = tester.widget<StageCard>(
+        find.descendant(
+          of: find.byKey(const Key('open_camera_button')),
+          matching: find.byType(StageCard),
+        ),
       );
-      final galleryBtn = tester.widget<OutlinedButton>(
-        find.byKey(const Key('choose_gallery_button')),
+      final galleryBtn = tester.widget<StageCard>(
+        find.descendant(
+          of: find.byKey(const Key('choose_gallery_button')),
+          matching: find.byType(StageCard),
+        ),
       );
 
-      expect(cameraBtn.onPressed, isNotNull);
-      expect(galleryBtn.onPressed, isNotNull);
+      expect(cameraBtn.onTap, isNotNull);
+      expect(galleryBtn.onTap, isNotNull);
     });
 
-    testWidgets('tapping Open Camera launches scan flow modal', (tester) async {
+    for (final width in [320.0, 1180.0]) {
+      testWidgets('lays out without overflow at ${width.toInt()} wide', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        for (final key in ['open_camera_button', 'choose_gallery_button']) {
+          final size = tester.getSize(find.byKey(Key(key)));
+          expect(size.height, greaterThanOrEqualTo(44));
+        }
+      });
+    }
+
+    testWidgets('tapping Capture from camera launches scan flow modal', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -151,7 +179,7 @@ void main() {
     });
 
     testWidgets(
-      'tapping Choose from Library launches scan flow modal with gallery picker',
+      'tapping Choose from photos launches scan flow modal with gallery picker',
       (tester) async {
         await tester.pumpWidget(buildSubject());
         await tester.pumpAndSettle();
@@ -186,7 +214,9 @@ void main() {
             GoRoute(
               path: '/repertoire/:songId',
               builder: (context, state) => Scaffold(
-                body: Text('Navigated to Song ${state.pathParameters['songId']}'),
+                body: Text(
+                  'Navigated to Song ${state.pathParameters['songId']}',
+                ),
               ),
             ),
           ],
@@ -199,9 +229,7 @@ void main() {
               omrRepositoryProvider.overrideWithValue(mockOmrRepo),
               songRepositoryProvider.overrideWithValue(inMemoryRepo),
             ],
-            child: MaterialApp.router(
-              routerConfig: router,
-            ),
+            child: MaterialApp.router(routerConfig: router),
           ),
         );
         await tester.pumpAndSettle();
@@ -214,9 +242,14 @@ void main() {
         await tester.tap(find.byKey(const Key('scan_analyze_btn')));
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const ValueKey('open_in_repertoire_btn')), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('open_in_repertoire_btn')),
+          findsOneWidget,
+        );
 
-        await tester.ensureVisible(find.byKey(const ValueKey('open_in_repertoire_btn')));
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('open_in_repertoire_btn')),
+        );
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(const ValueKey('open_in_repertoire_btn')));

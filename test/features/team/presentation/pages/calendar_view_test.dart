@@ -3,6 +3,7 @@ import 'package:battuta/features/organizations/domain/entities/organization.dart
 import 'package:battuta/features/organizations/domain/entities/schedule.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/team/presentation/pages/team_page.dart';
+import 'package:battuta/features/team/presentation/providers/calendar_providers.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +24,13 @@ void main() {
   }) => FakeOrganizationRepository(
     organizations: [org('org-1', 'Grace Church', role: myRole)],
     members: [
-      member('m-me', 'u-me', 'Maria Lopez', role: myRole, instruments: ['keys']),
+      member(
+        'm-me',
+        'u-me',
+        'Maria Lopez',
+        role: myRole,
+        instruments: ['keys'],
+      ),
       member('m-raul', 'u-raul', 'Raul Diaz', instruments: ['acousticGuitar']),
       member('m-ana', 'u-ana', 'Ana Cruz', instruments: ['acousticGuitar']),
     ],
@@ -69,17 +76,21 @@ void main() {
     FakeScheduleRepository? schedules,
     Size size = const Size(1024, 2400),
     String? band,
+    DateTime Function()? clock,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: signedInOverrides(
-          repository ?? orgRepo(),
-          schedules: schedules,
-          now: now,
-        ),
+        overrides:
+            signedInOverrides(
+              repository ?? orgRepo(),
+              schedules: schedules,
+              now: clock == null ? now : null,
+            )..addAll([
+              if (clock != null) calendarClockProvider.overrideWithValue(clock),
+            ]),
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -136,8 +147,119 @@ void main() {
       expect(find.text('Sunday Worship'), findsNWidgets(2));
       expect(find.textContaining('Band Calendar (3)'), findsOneWidget);
       final rehearsalY = tester.getTopLeft(find.text('Friday Rehearsal')).dy;
-      final firstSundayY = tester.getTopLeft(find.text('Sunday Worship').first).dy;
+      final firstSundayY = tester
+          .getTopLeft(find.text('Sunday Worship').first)
+          .dy;
       expect(rehearsalY, lessThan(firstSundayY));
+    });
+
+    testWidgets('the month grid marks days with services and selects days', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        schedules: FakeScheduleRepository(
+          events: [rehearsal()],
+          schedules: [sunday(lookahead: 5)],
+        ),
+      );
+
+      expect(find.text('November 2026'), findsOneWidget);
+      // Fri 13 (rehearsal) and the Sundays 15 and 22 carry a dot.
+      for (final day in ['2026-11-13', '2026-11-15', '2026-11-22']) {
+        expect(key('month_dot_$day'), findsOneWidget);
+      }
+      expect(key('month_dot_2026-11-14'), findsNothing);
+      // Today has no service: the list says so.
+      expect(key('no_services_on_day'), findsOneWidget);
+
+      await tester.tap(key('month_day_2026-11-15'));
+      await tester.pumpAndSettle();
+      expect(key('no_services_on_day'), findsNothing);
+      expect(find.text('SUNDAY, NOVEMBER 15, 2026'), findsOneWidget);
+
+      await tester.tap(key('month_next_btn'));
+      await tester.pumpAndSettle();
+      expect(find.text('December 2026'), findsOneWidget);
+      expect(key('month_dot_2026-12-06'), findsOneWidget);
+    });
+
+    testWidgets('tapping a day far down a long list brings it into view', (
+      tester,
+    ) async {
+      // Two services a day from Nov 12 to Nov 30: 38 cards.
+      final events = [
+        for (var day = 12; day <= 30; day++)
+          for (final hour in [10, 18])
+            CalendarEvent(
+              id: 'evt-$day-$hour',
+              organizationId: 'org-1',
+              title: 'Service $day/$hour',
+              dateTime: DateTime(2026, 11, day, hour),
+            ),
+      ];
+      await pump(
+        tester,
+        schedules: FakeScheduleRepository(events: events),
+        size: const Size(390, 700),
+      );
+
+      final grid = key('month_day_2026-11-30');
+      await tester.ensureVisible(grid);
+      await tester.pumpAndSettle();
+      await tester.tap(grid);
+      await tester.pumpAndSettle();
+
+      final header = find.text('MONDAY, NOVEMBER 30, 2026');
+      expect(header, findsOneWidget);
+      final y = tester.getTopLeft(header).dy;
+      expect(y, greaterThanOrEqualTo(0));
+      expect(y, lessThan(700));
+
+      // A day without services shows the message; the grid is still above.
+      await tester.ensureVisible(key('month_day_2026-11-11'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('month_day_2026-11-11'));
+      await tester.pumpAndSettle();
+      expect(key('no_services_on_day'), findsOneWidget);
+      expect(key('month_day_2026-11-11'), findsOneWidget);
+    });
+
+    testWidgets('the selected day follows today until a day is picked', (
+      tester,
+    ) async {
+      var clock = DateTime(2026, 11, 11, 23, 30);
+      await pump(
+        tester,
+        schedules: FakeScheduleRepository(
+          events: [rehearsal()],
+          schedules: [sunday(lookahead: 5)],
+        ),
+        clock: () => clock,
+      );
+      expect(key('no_services_on_day'), findsOneWidget);
+      expect(find.text('WEDNESDAY, NOVEMBER 11, 2026'), findsOneWidget);
+
+      // Past midnight: Friday 13 (the rehearsal) becomes today and selected.
+      clock = DateTime(2026, 11, 13, 0, 5);
+      await tester.tap(key('month_next_btn'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('month_prev_btn'));
+      await tester.pumpAndSettle();
+      expect(key('no_services_on_day'), findsNothing);
+      expect(find.text('WEDNESDAY, NOVEMBER 11, 2026'), findsNothing);
+
+      // A picked day stays when the clock moves on.
+      await tester.tap(key('month_day_2026-11-20'));
+      await tester.pumpAndSettle();
+      expect(key('no_services_on_day'), findsOneWidget);
+      clock = DateTime(2026, 11, 14, 9);
+      await tester.tap(key('month_next_btn'));
+      await tester.pumpAndSettle();
+      await tester.tap(key('month_prev_btn'));
+      await tester.pumpAndSettle();
+      expect(key('no_services_on_day'), findsOneWidget);
+      expect(find.text('FRIDAY, NOVEMBER 20, 2026'), findsOneWidget);
     });
 
     testWidgets('admin creates a one-off service', (tester) async {
@@ -234,9 +356,15 @@ void main() {
       await pump(tester, schedules: schedules);
 
       expect(key('schedule_alerts_banner'), findsOneWidget);
-      expect(find.textContaining('Declined — missing cover for Acoustic'), findsOneWidget);
+      expect(
+        find.textContaining('Declined — missing cover for Acoustic'),
+        findsOneWidget,
+      );
       expect(find.textContaining('Reason: Sick'), findsWidgets);
-      expect(find.text('1'), findsOneWidget); // bell badge
+      expect(
+        find.descendant(of: find.byType(Badge), matching: find.text('1')),
+        findsOneWidget,
+      ); // bell badge
 
       await tapKey(tester, 'alert_cover_as-1');
       // Available members who play the instrument: Ana is away, Maria plays keys.
@@ -376,24 +504,25 @@ void main() {
       expect(find.text('Other Band Night'), findsNothing);
     });
 
-    testWidgets('an offline write shows the offline message and applies nothing', (
-      tester,
-    ) async {
-      final schedules = FakeScheduleRepository();
-      await pump(tester, schedules: schedules);
+    testWidgets(
+      'an offline write shows the offline message and applies nothing',
+      (tester) async {
+        final schedules = FakeScheduleRepository();
+        await pump(tester, schedules: schedules);
 
-      schedules.nextFailure = BackendErrorCode.offline.failure();
-      await tapKey(tester, 'new_service_btn');
-      await tester.enterText(key('service_title_field'), 'Youth Night');
-      await tapKey(tester, 'service_save_btn');
+        schedules.nextFailure = BackendErrorCode.offline.failure();
+        await tapKey(tester, 'new_service_btn');
+        await tester.enterText(key('service_title_field'), 'Youth Night');
+        await tapKey(tester, 'service_save_btn');
 
-      expect(
-        find.text('You\'re offline. Connect to the internet and try again.'),
-        findsOneWidget,
-      );
-      expect(schedules.events, isEmpty);
-      expect(key('service_save_btn'), findsOneWidget);
-    });
+        expect(
+          find.text('You\'re offline. Connect to the internet and try again.'),
+          findsOneWidget,
+        );
+        expect(schedules.events, isEmpty);
+        expect(key('service_save_btn'), findsOneWidget);
+      },
+    );
 
     testWidgets('a server refusal on a lineup change shows a message', (
       tester,
@@ -457,7 +586,10 @@ void main() {
       await tapKey(tester, 'confirm_decline_btn');
 
       expect(schedules.calls.last, 'respond:as-1:declined:Out of town');
-      expect(schedules.assignments.single.response, AssignmentResponse.declined);
+      expect(
+        schedules.assignments.single.response,
+        AssignmentResponse.declined,
+      );
       expect(key('decline_btn_as-1'), findsNothing);
       expect(key('accept_btn_as-1'), findsOneWidget);
     });
@@ -481,7 +613,10 @@ void main() {
       final schedules = FakeScheduleRepository();
       await pump(tester, repository: memberRepo(), schedules: schedules);
 
-      expect(find.text('No absences. Add the days you cannot play.'), findsOneWidget);
+      expect(
+        find.text('No absences. Add the days you cannot play.'),
+        findsOneWidget,
+      );
       await tapKey(tester, 'add_absence_btn');
       await tester.enterText(key('absence_note_field'), 'Holiday');
       await tapKey(tester, 'absence_save_btn');
@@ -560,7 +695,7 @@ void main() {
   });
 
   group('Calendar layout', () {
-    for (final width in [320.0, 375.0, 768.0, 1024.0, 1440.0]) {
+    for (final width in [320.0, 375.0, 768.0, 1024.0, 1180.0, 1440.0]) {
       testWidgets('has no overflow at ${width.toInt()} px (admin)', (
         tester,
       ) async {

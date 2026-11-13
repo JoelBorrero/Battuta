@@ -1,3 +1,4 @@
+import 'package:battuta/features/repertoire/presentation/pages/repertoire_page.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/repertoire_scope_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,27 +10,29 @@ void main() {
     tester,
   ) async {
     final h = SharingHarness(organizations: const []);
-    await h.pump(tester, const Scaffold(body: RepertoireScopeBar()));
+    await h.pump(tester, const RepertoirePage());
 
     expect(find.byKey(const ValueKey('discover_chip')), findsOneWidget);
-    expect(find.byKey(const ValueKey('scope_mine')), findsNothing);
+    expect(find.byKey(const ValueKey('scope_picker')), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('discover_chip')));
     await tester.pumpAndSettle();
     expect(h.location, 'discover');
   });
 
-  testWidgets('with organizations it sits next to the scopes', (tester) async {
+  testWidgets('with organizations it sits next to the scope picker', (
+    tester,
+  ) async {
     final h = SharingHarness();
-    await h.pump(tester, const Scaffold(body: RepertoireScopeBar()));
+    await h.pump(tester, const RepertoirePage());
 
-    expect(find.byKey(const ValueKey('scope_mine')), findsOneWidget);
+    expect(find.byKey(const ValueKey('scope_picker')), findsOneWidget);
     expect(find.byKey(const ValueKey('discover_chip')), findsOneWidget);
   });
 
   testWidgets('signed out there is nothing to discover', (tester) async {
     final h = SharingHarness(signedIn: false);
-    await h.pump(tester, const Scaffold(body: RepertoireScopeBar()));
+    await h.pump(tester, const RepertoirePage());
     expect(find.byKey(const ValueKey('discover_chip')), findsNothing);
   });
 

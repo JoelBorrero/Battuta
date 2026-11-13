@@ -5,7 +5,9 @@
 library;
 
 import 'dart:ui';
+
 import 'package:battuta/core/services/api_key_storage.dart';
+import 'package:battuta/core/services/device_preferences_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -57,15 +59,16 @@ abstract final class LocaleStorageKeys {
   static const String selectedLanguage = 'battuta_selected_language';
 }
 
-/// Provider for local storage used by the locale notifier.
-final localeStorageProvider = Provider<ApiKeyStorage>((ref) {
-  return SecureApiKeyStorage();
-});
+/// Local storage used by the locale notifier: the shared device storage.
+final localeStorageProvider = devicePreferencesStorageProvider;
 
 /// Notifier managing active language selection.
 class LocaleNotifier extends Notifier<AppLanguageOption> {
+  bool _userChose = false;
+
   @override
   AppLanguageOption build() {
+    _userChose = false;
     final storage = ref.watch(localeStorageProvider);
     _loadPersistedLanguage(storage);
     return AppLanguageOption.system;
@@ -74,7 +77,8 @@ class LocaleNotifier extends Notifier<AppLanguageOption> {
   Future<void> _loadPersistedLanguage(ApiKeyStorage storage) async {
     try {
       final code = await storage.read(LocaleStorageKeys.selectedLanguage);
-      if (code != null) {
+      // A choice made while loading wins over the saved one.
+      if (code != null && ref.mounted && !_userChose) {
         state = AppLanguageOption.fromStorageCode(code);
       }
     } catch (_) {
@@ -84,13 +88,17 @@ class LocaleNotifier extends Notifier<AppLanguageOption> {
 
   /// Updates and persists the user language preference.
   Future<void> setLanguage(AppLanguageOption option) async {
+    _userChose = true;
     state = option;
     final storage = ref.read(localeStorageProvider);
     try {
       if (option == AppLanguageOption.system) {
         await storage.delete(LocaleStorageKeys.selectedLanguage);
       } else {
-        await storage.write(LocaleStorageKeys.selectedLanguage, option.storageCode);
+        await storage.write(
+          LocaleStorageKeys.selectedLanguage,
+          option.storageCode,
+        );
       }
     } catch (_) {
       // In-memory state remains updated even if persistence fails
@@ -107,7 +115,8 @@ final appLanguageOptionProvider =
 final appLocaleProvider = Provider<Locale?>((ref) {
   final option = ref.watch(appLanguageOptionProvider);
   final loc = option.toLocale();
-  Intl.defaultLocale = loc?.languageCode ??
+  Intl.defaultLocale =
+      loc?.languageCode ??
       (PlatformDispatcher.instance.locales.firstOrNull?.languageCode ?? 'en');
   return loc;
 });

@@ -26,8 +26,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final destinations = [
       StageDestination(
-        icon: Icons.library_music_outlined,
-        selectedIcon: Icons.library_music,
+        icon: Icons.music_note_outlined,
+        selectedIcon: Icons.music_note,
         label: l10n?.navRepertoire ?? 'Repertoire',
       ),
       StageDestination(
@@ -36,13 +36,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
         label: l10n?.navTeam ?? 'Team',
       ),
       StageDestination(
-        icon: Icons.cell_tower_outlined,
-        selectedIcon: Icons.cell_tower,
+        icon: Icons.sensors,
+        selectedIcon: Icons.sensors,
         label: l10n?.navLive ?? 'Live',
       ),
       StageDestination(
-        icon: Icons.settings_outlined,
-        selectedIcon: Icons.settings,
+        icon: Icons.tune,
+        selectedIcon: Icons.tune,
         label: l10n?.navSettings ?? 'Settings',
       ),
     ];

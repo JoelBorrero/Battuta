@@ -27,6 +27,8 @@ class ChordLyricsView extends StatelessWidget {
     required this.song,
     required this.transpositionSemitones,
     this.viewMode = SongViewMode.both,
+    this.chartTextScale = 1.0,
+    this.preferSharps = true,
     super.key,
     this.onSongUpdated,
   });
@@ -39,6 +41,12 @@ class ChordLyricsView extends StatelessWidget {
 
   /// Current display mode (both, lyricsOnly, or chordsOnly).
   final SongViewMode viewMode;
+
+  /// Multiplier for chord and lyric text (the stage "chart text size").
+  final double chartTextScale;
+
+  /// Spelling of transposed notes: sharps (`true`) or flats (`false`).
+  final bool preferSharps;
 
   /// Callback when a section's chord alignment is edited and saved.
   final ValueChanged<Song>? onSongUpdated;
@@ -71,7 +79,13 @@ class ChordLyricsView extends StatelessWidget {
             section: section,
             transpositionSemitones: transpositionSemitones,
             viewMode: viewMode,
-            onEditAlignment: () => _openAlignmentModal(context, section),
+            chartTextScale: chartTextScale,
+            preferSharps: preferSharps,
+            // No editor when edits cannot be saved (e.g. while a transposition
+            // is only being previewed), so nothing is silently discarded.
+            onEditAlignment: onSongUpdated == null
+                ? null
+                : () => _openAlignmentModal(context, section),
           ),
       ],
     );
@@ -82,10 +96,8 @@ class ChordLyricsView extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => KaraokeChordAlignmentModal(
-        song: song,
-        section: section,
-      ),
+      builder: (sheetContext) =>
+          KaraokeChordAlignmentModal(song: song, section: section),
     ).then((updatedSection) {
       if (updatedSection != null && onSongUpdated != null) {
         final updatedSections = song.sections.map((s) {
@@ -109,14 +121,18 @@ class _SectionChordLyricsCard extends StatelessWidget {
     required this.section,
     required this.transpositionSemitones,
     required this.viewMode,
-    required this.onEditAlignment,
+    required this.chartTextScale,
+    required this.preferSharps,
+    this.onEditAlignment,
     super.key,
   });
 
   final SongSection section;
   final int transpositionSemitones;
   final SongViewMode viewMode;
-  final VoidCallback onEditAlignment;
+  final double chartTextScale;
+  final bool preferSharps;
+  final VoidCallback? onEditAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -125,29 +141,32 @@ class _SectionChordLyricsCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // Transpose lyrics if transposed
-    final effectiveLyrics = transpositionSemitones != 0 && section.lyrics != null
+    final effectiveLyrics =
+        transpositionSemitones != 0 && section.lyrics != null
         ? SongTransposer.transposeChordProText(
             section.lyrics!,
             transpositionSemitones,
+            preferSharps: preferSharps,
           )
         : (section.lyrics ?? '');
 
     // Transpose section chord cells if transposed
     final effectiveChords = transpositionSemitones != 0
         ? section.chords
-            .map(
-              (c) => SongTransposer.transposeChord(
-                c,
-                transpositionSemitones,
-                preferSharps: true,
-              ),
-            )
-            .toList()
+              .map(
+                (c) => SongTransposer.transposeChord(
+                  c,
+                  transpositionSemitones,
+                  preferSharps: preferSharps,
+                ),
+              )
+              .toList()
         : section.chords;
 
     final parsedLines = ChordLyricsParser.parse(effectiveLyrics);
     final hasLyricsContent =
-        parsedLines.isNotEmpty && parsedLines.any((l) => l.rawLyrics.isNotEmpty);
+        parsedLines.isNotEmpty &&
+        parsedLines.any((l) => l.rawLyrics.isNotEmpty);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -171,10 +190,13 @@ class _SectionChordLyricsCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      Text(
-                        section.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          section.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       if (section.repeatCount > 1) ...[
@@ -188,7 +210,9 @@ class _SectionChordLyricsCard extends StatelessWidget {
                             color: AppTheme.amberAccent.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: AppTheme.amberAccent.withValues(alpha: 0.4),
+                              color: AppTheme.amberAccent.withValues(
+                                alpha: 0.4,
+                              ),
                             ),
                           ),
                           child: Text(
@@ -207,7 +231,7 @@ class _SectionChordLyricsCard extends StatelessWidget {
                 ),
 
                 // Karaoke / Align Chords Button (only in Both mode)
-                if (viewMode == SongViewMode.both)
+                if (viewMode == SongViewMode.both && onEditAlignment != null)
                   OutlinedButton.icon(
                     key: ValueKey('align_chords_btn_${section.id}'),
                     style: OutlinedButton.styleFrom(
@@ -253,27 +277,31 @@ class _SectionChordLyricsCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // ── Mode-Specific Body ──
-            if (viewMode == SongViewMode.lyricsOnly)
-              _buildLyricsOnlyBody(
-                context,
-                parsedLines,
-                hasLyricsContent,
-                isDark,
-              )
-            else if (viewMode == SongViewMode.chordsOnly)
-              _buildChordsOnlyBody(
-                context,
-                effectiveChords,
-                effectiveLyrics,
-                isDark,
-              )
-            else
-              _buildBothBody(
-                context,
-                parsedLines,
-                effectiveChords,
-                isDark,
+            _ChartTextScale(
+              scale: chartTextScale,
+              child: Builder(
+                builder: (context) => switch (viewMode) {
+                  SongViewMode.lyricsOnly => _buildLyricsOnlyBody(
+                    context,
+                    parsedLines,
+                    hasLyricsContent,
+                    isDark,
+                  ),
+                  SongViewMode.chordsOnly => _buildChordsOnlyBody(
+                    context,
+                    effectiveChords,
+                    effectiveLyrics,
+                    isDark,
+                  ),
+                  _ => _buildBothBody(
+                    context,
+                    parsedLines,
+                    effectiveChords,
+                    isDark,
+                  ),
+                },
               ),
+            ),
           ],
         ),
       ),
@@ -302,18 +330,16 @@ class _SectionChordLyricsCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.music_note,
-              size: 18,
-              color: AppTheme.amberAccent,
-            ),
+            const Icon(Icons.music_note, size: 18, color: AppTheme.amberAccent),
             const SizedBox(width: 8),
-            Text(
-              l10n?.instrumentalSection ?? 'Instrumental (No lyrics)',
-              style: TextStyle(
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-                color: theme.colorScheme.onSurfaceVariant,
+            Expanded(
+              child: Text(
+                l10n?.instrumentalSection ?? 'Instrumental (No lyrics)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -378,11 +404,7 @@ class _SectionChordLyricsCard extends StatelessWidget {
         runSpacing: 8,
         children: [
           for (final chord in extractedChords)
-            _ChordBlockCard(
-              chordLabel: chord,
-              beats: null,
-              isDark: isDark,
-            ),
+            _ChordBlockCard(chordLabel: chord, beats: null, isDark: isDark),
         ],
       );
     }
@@ -392,9 +414,7 @@ class _SectionChordLyricsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppTheme.slateSurfaceLight
-            : AppTheme.pearlSurfaceLight,
+        color: isDark ? AppTheme.slateSurfaceLight : AppTheme.pearlSurfaceLight,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -405,12 +425,14 @@ class _SectionChordLyricsCard extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),
           const SizedBox(width: 8),
-          Text(
-            l10n?.noChordsForSection ?? 'No chords entered for this section.',
-            style: TextStyle(
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-              color: theme.colorScheme.onSurfaceVariant,
+          Expanded(
+            child: Text(
+              l10n?.noChordsForSection ?? 'No chords entered for this section.',
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -480,14 +502,14 @@ class _SectionChordLyricsCard extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                icon: const Icon(Icons.add, size: 16),
-                label: Text(
-                  l10n?.alignChordsAction ?? 'Align Chords',
+              if (onEditAlignment != null) ...[
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  icon: const Icon(Icons.add, size: 16),
+                  label: Text(l10n?.alignChordsAction ?? 'Align Chords'),
+                  onPressed: onEditAlignment,
                 ),
-                onPressed: onEditAlignment,
-              ),
+              ],
             ],
           ),
         ),
@@ -543,9 +565,7 @@ class _ChordBlockCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppTheme.slateSurfaceLight
-            : AppTheme.pearlSurfaceLight,
+        color: isDark ? AppTheme.slateSurfaceLight : AppTheme.pearlSurfaceLight,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppTheme.amberAccent.withValues(alpha: 0.5),
@@ -640,7 +660,7 @@ class _ChordWordPair extends StatelessWidget {
           // Chord floating above
           if (reserveChordSpace)
             SizedBox(
-              height: 20,
+              height: MediaQuery.textScalerOf(context).scale(20),
               child: hasChord
                   ? Text(
                       chord,
@@ -667,6 +687,27 @@ class _ChordWordPair extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Scales the chart's chord and lyric text by [scale] on top of the system
+/// text scale.
+class _ChartTextScale extends StatelessWidget {
+  const _ChartTextScale({required this.scale, required this.child});
+
+  final double scale;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (scale == 1.0) return child;
+    final media = MediaQuery.of(context);
+    return MediaQuery(
+      data: media.copyWith(
+        textScaler: TextScaler.linear(media.textScaler.scale(1) * scale),
+      ),
+      child: child,
     );
   }
 }

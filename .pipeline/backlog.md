@@ -123,8 +123,6 @@ Product / ops:
 - After a Docker Desktop restart the local stack can come back without `supabase_auth_Battuta`; `supabase status` then has no keys and every integration test is skipped. Fix: `supabase stop && supabase start`.
 
 ## From 011: profile view
-- Repertoire body overflows by 52 px at 320–375 × 700 when signed in with an organization repertoire (header
-  column not scrollable). Pre-existing; the responsive test runs at height 900 and hides it.
 - Admins cannot leave an organization from the app (they must give up admin rights first); the old roster
   self-card Leave item is gone. Revisit if admins should leave while another admin remains.
 - Formatting churn: `test/features/auth/supabase_auth_repository_test.dart` was reflowed by `dart format`
@@ -146,3 +144,99 @@ Product / ops:
   organization.
 - "Upcoming" counts only the active organization while the other tiles count across organizations.
 - A member demoted while the logo sheet is open sees the generic permission message, not "not admin".
+
+## From 013: repertoire redesign
+- The Repertoire ⋮ menu labels are hard-coded English ('More options', 'Import Song / Leadsheet',
+  'Export Repertoire...'); move them to l10n.
+  Same for the Song detail ⋮ export labels (ChordPro / JSON copy, PDF / MIDI export).
+- `song_import_modal.dart` still has a `Color(0x222E86DE)` literal; replace with a brand role.
+- Wide windows lost the one-tap import / scan icons (now in the ⋮ menu); show them in the search row at
+  ≥ 480 pt if users miss them.
+- Live performance view (song N of M, beat meter, lyric prompter, Previous / Cue / Next) is planned as its
+  own task after the redesign series; it needs new session state (see 019). `LiveSessionPage` today is a
+  static demo with a hard-coded song (`way-maker`). When Live can open a given song / setlist, add the
+  mockups' "Go live" (Song detail, primary in the action bar) and "Start live session" (Setlist detail).
+  Both were left out of 014/015 so no button promises something it can't do.
+
+## From 015: setlist detail redesign
+- The setlist date stamp shows month / day only (the old chip showed m/d/yyyy). Show the year when it is not
+  the current year, in the stamp or the meta line.
+- `eventDate` is shown with `toLocal()`. If a date picker is added that stores a calendar day as UTC
+  midnight, store it as local noon or a date-only value, or users west of UTC see the previous day.
+- Removing a song from a setlist has no confirmation or undo; consider an undo snackbar.
+
+## From 016: settings redesign
+- Settings → Server shows "Configure Project URL & Anon Key" instead of the active server. The host is
+  available through `SupabaseConfigService.getActiveUrl()` (`supabaseConfigServiceProvider`); add a small
+  `FutureProvider` and show the host (or "Battuta cloud" for the default).
+- No widget test covers the sync status card states (ready, syncing, last synced at, offline, error).
+- The footer's "♪" (U+266A) relies on the platform font; consider an inline icon.
+
+## From 017: stage preferences
+- Chart text size and prefer flats have no Live consumer yet (Live renders no chart); wire them into the Live
+  performance view.
+- `ScreenWakeLock` is not reference-counted: if `/live/:sessionId` is ever pushed over `/live`, popping it
+  releases the lock while Live is still showing. Count holders when that route gets used.
+- Settings sync status card overflows (~13 px) at 320 pt with 160% system text scale (pre-existing).
+- Stage preference reads run one after another; `Future.wait` would load them together.
+
+## From 018: team and calendar redesign
+- The calendar's "follows today" selection moves at the next rebuild after midnight; add a midnight timer (or
+  rebuild on app resume) if the app is often left open overnight.
+
+## From 019: live redesign
+- Cues never light the "· NEXT" chip: `SyncCuePayload` carries only a free-text label ("NEXT: CORO GLORIOSO"),
+  never a section id. Add a section id to the cue payload and match on it.
+- `activeSectionId` / `queuedSectionLabel` are not cleared on disconnect, so a stale chip state shows after End.
+- Active chip matches case-sensitively, queued chip case-insensitively; use one rule.
+- End duplicates "Stop Host Server" / "Disconnect"; keep one when the performance view lands.
+- The Live End test binds a real loopback socket with fixed 100 ms delays; poll for the state (or fake the
+  `LanWebSocketSyncService`) to avoid CI flakiness.
+
+## From 020: editor and scanner layout
+- Song editor tap-tempo beat dots stay lit while idle (pruning runs only on the next tap), contradicting the
+  "wait 3 seconds to start over" hint; prune with a timer.
+- Tag and chord `Chip` delete icons in the song editor are well under 44 pt.
+- Tap tempo calls `DateTime.now()` directly; add a clock seam so the test can assert the exact BPM.
+- The editor's Duplicate and Copy-from section icons look alike.
+
+## From 021: audit of screens built on main against Battuta Screens
+Effort: S small, M medium, L needs data / backend. Shared fixes first, they recur across screens.
+- **Shared:** `titleSmall` is muted in the theme, so card titles render grey (Discover, Recurring schedules) (S).
+  `OrganizationLogo` has no initials fallback (music note instead) (S). A banner + hanging-logo header and
+  labelled 52 pt input fields recur across screens: build them once as shared widgets (M).
+- **Welcome — needs redesign** (`welcome_page.dart`): 300 pt hero card with amber bars, mark tile and
+  "BATTUTA" missing; left-aligned 32/800 title; 52 pt buttons pinned to the bottom (M).
+- **Sign in — needs redesign** (`sign_in_page.dart`, `account_form.dart`): back-only header with a 30/800
+  title and subtitle in the body; labels above 52 pt inputs; "Username or email" (needs username sign-in) and
+  the "Server / Change" card (L); footer "New to Battuta? Create account" (S).
+- **Create account — needs redesign** (same files): "Add a photo" step (M); labelled inputs; "Available" in
+  green; password rule says 8 characters in the mockup, the code accepts 6 (decide); labels "Name" / "Email" (S).
+- **Join — needs redesign** (`join_page.dart`): invite preview (organization banner and logo, inviter,
+  counts, "Joining as", note) needs an invite-preview API (L); close (×) header, "Back to Battuta",
+  full-width Join (S).
+- **Inbox — minor** (`inbox_page.dart`, `invitation_card.dart`): updates as one bordered list with the
+  organization in the meta line; invitation card with organization tile, inviter subtitle, equal-width
+  buttons and "Join"; amber "Mark all as read"; uppercase section headers; "You are all caught up" footer (S–M).
+- **Discover — minor** (`discover_page.dart`): grey result titles (shared fix); filter pills (needs query
+  support, M); "N PUBLIC SONGS" count; versions count and "Shared by" row; bordered "+" add tile (S).
+- **Profile — minor** (`profile_page.dart`, `my_organizations_section.dart`): instrument chips stretch to
+  full width (bug: `Container` with alignment inside a `Wrap`) and lack icons (S); "ACTIVE" tag with the role
+  in the subtitle; initials logos; `InkWell` → `BattutaPressable`; `StageStatTile` / `StageGroup`; hint copy
+  "⋮ menu above" (S).
+- **Organization profile — needs redesign** (`organization_profile_page.dart`): banner with centred hanging
+  logo and name and one "Manage" button; separate stat tiles ordered Members / Songs / Bands; Members section
+  first with an "N more members" avatar stack; Next-up date tile with month on amber wash (M).
+- **Organization settings — needs redesign** (`organization_settings_page.dart`): section headers; Invite
+  People block with copy link / new link (repository already supports it, M); usage bars and renewal date
+  (need backend data, L); Membership as a grouped list with "Members and roles" and a red "Leave" row;
+  archive approvals with avatars, green "Approved", outlined "Approve archive" (S–M).
+- **Recurring schedules — needs redesign** (`recurring_schedules_sheet.dart`): a full page with back instead
+  of a bottom sheet (M); grey titles (shared fix); "Active" uses `AppTheme.stageGreen`
+  (`calendar_support.dart:37`) instead of `brand.success` (S); four short actions on one row; dashed hint
+  footer and "· next N services" summary (S).
+- **Repeating service form — needs redesign** (`service_form_dialog.dart`): full-screen form with Cancel /
+  Create in the header and service type as pills instead of an `AlertDialog` (M); the Repeats card (Once /
+  Weekly / Monthly, interval, weekday chips, monthly by weekday or date, lookahead, next-dates summary) needs
+  data-model and backend work: schedules store only fixed patterns today (L); sentence-case copy and the
+  footnote (S).

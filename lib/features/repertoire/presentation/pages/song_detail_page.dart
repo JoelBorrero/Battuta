@@ -5,10 +5,8 @@
 /// MIDI generation, and direct navigation to edit or delete.
 library;
 
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/localization/backend_error_messages.dart';
-import 'package:battuta/app/theme/app_theme.dart';
-import 'package:battuta/app/theme/battuta_brand.dart';
-import 'package:battuta/app/theme/battuta_tokens.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
@@ -17,12 +15,16 @@ import 'package:battuta/features/repertoire/domain/services/song_import_export_s
 import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_scope_providers.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/add_to_setlist_sheet.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/chord_lyrics_view.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/transpose_stepper_card.dart';
 import 'package:battuta/features/repertoire/presentation/widgets/version_owner_text.dart';
 import 'package:battuta/features/score/data/services/midi_file_exporter.dart';
 import 'package:battuta/features/score/data/services/pdf_lead_sheet_generator.dart';
 import 'package:battuta/features/score/presentation/services/tone_synthesizer.dart';
 import 'package:battuta/features/score/presentation/widgets/staff_canvas.dart';
+import 'package:battuta/features/settings/domain/stage_preferences.dart';
+import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
 import 'package:battuta/features/sharing/presentation/widgets/song_sharing_actions.dart';
 import 'package:battuta/features/sharing/presentation/widgets/song_versions_section.dart';
 import 'package:battuta/l10n/generated/app_localizations.dart';
@@ -63,143 +65,67 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
     ).showSnackBar(SnackBar(content: Text(backendErrorMessage(l10n, failure))));
   }
 
-  void _showTransposeDialog(Song originalSong) {
-    final l10n = AppLocalizations.of(context);
-    // Only the owner may write the new key back; others transpose locally.
-    final canSave = originalSong.isEditableBy(
-      ref.read(currentAccountIdProvider),
-    );
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (modalCtx, setModalState) {
-            final transposedSong = SongTransposer.transposeSong(
-              originalSong,
-              _transpositionSemitones,
-            );
+  /// Flats are an explicit choice; otherwise the spelling follows the target
+  /// key (`null`).
+  bool? _preferSharps(StagePreferences prefs) =>
+      prefs.preferFlats ? false : null;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        l10n?.transposeSong ?? 'Transpose Song',
-                        style: Theme.of(modalCtx).textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      TextButton(
-                        onPressed: _transpositionSemitones == 0
-                            ? null
-                            : () {
-                                setModalState(
-                                  () => _transpositionSemitones = 0,
-                                );
-                                setState(() {});
-                              },
-                        child: Text(l10n?.reset ?? 'Reset'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(modalCtx).colorScheme.primaryContainer
-                            .withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            transposedSong.key,
-                            style: Theme.of(modalCtx).textTheme.displaySmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(modalCtx)
-                                      .colorScheme
-                                      .onPrimaryContainer,
-                                ),
-                          ),
-                          Text(
-                            _transpositionSemitones == 0
-                                ? (l10n?.originalKey ?? 'Original Key')
-                                : (l10n?.semitonesCount(
-                                        _transpositionSemitones > 0 ? '+' : '',
-                                        _transpositionSemitones,
-                                      ) ??
-                                      '${_transpositionSemitones > 0 ? '+' : ''}$_transpositionSemitones semitones'),
-                            style: Theme.of(modalCtx).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.remove),
-                        tooltip: l10n?.downOneSemitone ?? 'Down 1 semitone',
-                        onPressed: () {
-                          setModalState(() => _transpositionSemitones--);
-                          setState(() {});
-                        },
-                      ),
-                      const SizedBox(width: 24),
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.add),
-                        tooltip: l10n?.upOneSemitone ?? 'Up 1 semitone',
-                        onPressed: () {
-                          setModalState(() => _transpositionSemitones++);
-                          setState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: () async {
-                      if (canSave && _transpositionSemitones != 0) {
-                        final failure = await ref
-                            .read(repertoireProvider.notifier)
-                            .updateSong(transposedSong);
-                        if (failure != null) {
-                          _showFailure(failure);
-                        } else {
-                          setModalState(() => _transpositionSemitones = 0);
-                          setState(() {});
-                        }
-                      }
-                      if (modalCtx.mounted) {
-                        Navigator.of(modalCtx).pop();
-                      }
-                    },
-                    child: Text(
-                      _transpositionSemitones == 0 || !canSave
-                          ? (l10n?.done ?? 'Done')
-                          : (l10n?.saveTransposedKey(transposedSong.key) ??
-                                'Save Transposed Key (${transposedSong.key}) to Song'),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              ),
-            );
-          },
-        );
-      },
+  /// Writes the previewed transposition back to the song (owner only).
+  Future<void> _saveTransposition(Song song) async {
+    if (_transpositionSemitones == 0 ||
+        !song.isEditableBy(ref.read(currentAccountIdProvider))) {
+      return;
+    }
+    final transposed = SongTransposer.transposeSong(
+      song,
+      _transpositionSemitones,
+      preferSharps: _preferSharps(ref.read(stagePreferencesProvider)),
     );
+    final failure = await ref
+        .read(repertoireProvider.notifier)
+        .updateSong(transposed);
+    if (failure != null) {
+      _showFailure(failure);
+    } else if (mounted) {
+      setState(() => _transpositionSemitones = 0);
+    }
+  }
+
+  Future<void> _copyToClipboard(String text, String message) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: BattutaBrand.of(context).success,
+          content: Text(message),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onMenuSelected(String value, Song song, Song activeSong) async {
+    switch (value) {
+      case 'transpose':
+        await _saveTransposition(song);
+      case 'notation':
+        context.push('/repertoire/${song.id}/notation');
+      case 'text':
+        await _copyToClipboard(
+          SongImportExportService.exportSongToPlainText(activeSong),
+          'Song lead sheet copied to clipboard (ChordPro)',
+        );
+      case 'json':
+        await _copyToClipboard(
+          SongImportExportService.exportSongToJson(activeSong),
+          'Song JSON copied to clipboard',
+        );
+      case 'pdf':
+        await _exportPdf(activeSong);
+      case 'midi':
+        await _exportMidi(activeSong);
+      case 'delete':
+        await _deleteSong(song);
+    }
   }
 
   Future<void> _exportPdf(Song song) async {
@@ -304,6 +230,7 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final brand = BattutaBrand.of(context);
     final songAsync = ref.watch(songByIdProvider(widget.songId));
     final l10n = AppLocalizations.of(context);
 
@@ -380,27 +307,35 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
         // Only the owner edits a version; for anybody else this is a viewer.
         final canEdit = song.isEditableBy(ref.watch(currentAccountIdProvider));
 
+        final prefs = ref.watch(stagePreferencesProvider);
         final activeSong = _transpositionSemitones == 0
             ? song
-            : SongTransposer.transposeSong(song, _transpositionSemitones);
+            : SongTransposer.transposeSong(
+                song,
+                _transpositionSemitones,
+                preferSharps: _preferSharps(prefs),
+              );
+
+        final subtitle = [
+          if (song.artist.trim().isNotEmpty) song.artist.trim(),
+          '${l10n?.songOriginalKey(song.key) ?? 'Original: ${song.key}'}'
+              '${song.tempo > 0 ? ' (${song.tempoLabel})' : ''}',
+        ].join(' · ');
+        final canTransposeAndSave = canEdit && _transpositionSemitones != 0;
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(activeSong.title),
+            title: Text(l10n?.songScreenTitle ?? 'Song'),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.tune),
-                tooltip: l10n?.transposeKeyTooltip ?? 'Transpose Key',
-                onPressed: () => _showTransposeDialog(song),
-              ),
               if (canEdit)
                 IconButton(
-                  icon: const Icon(Icons.queue_music),
-                  tooltip: l10n?.notationEditorTooltip ?? 'Notation Editor',
-                  onPressed: () =>
-                      context.push('/repertoire/${song.id}/notation'),
+                  key: const ValueKey('song_edit'),
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: l10n?.editSong ?? 'Edit Song',
+                  onPressed: () => context.push('/repertoire/${song.id}/edit'),
                 ),
               PopupMenuButton<String>(
+                key: const ValueKey('song_menu'),
                 enabled: !_isExporting,
                 icon: _isExporting
                     ? const SizedBox(
@@ -408,187 +343,149 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.share_outlined),
-                tooltip: 'Export & Share',
-                onSelected: (val) async {
-                  if (val == 'text') {
-                    final textStr =
-                        SongImportExportService.exportSongToPlainText(
-                          activeSong,
-                        );
-                    await Clipboard.setData(ClipboardData(text: textStr));
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: AppTheme.stageGreen,
-                          content: Text(
-                            'Song lead sheet copied to clipboard (ChordPro)',
-                          ),
-                        ),
-                      );
-                    }
-                  } else if (val == 'json') {
-                    final jsonStr = SongImportExportService.exportSongToJson(
-                      activeSong,
-                    );
-                    await Clipboard.setData(ClipboardData(text: jsonStr));
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: AppTheme.stageGreen,
-                          content: Text('Song JSON copied to clipboard'),
-                        ),
-                      );
-                    }
-                  } else if (val == 'pdf') {
-                    _exportPdf(activeSong);
-                  } else if (val == 'midi') {
-                    _exportMidi(activeSong);
-                  }
-                },
+                    : const Icon(Icons.more_vert),
+                tooltip: l10n?.moreOptions ?? 'More options',
+                onSelected: (value) => _onMenuSelected(value, song, activeSong),
                 itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'transpose',
+                    enabled: canTransposeAndSave,
+                    child: _MenuRow(
+                      icon: Icons.tune,
+                      label: l10n?.transposeAndSave ?? 'Transpose & save',
+                    ),
+                  ),
+                  if (canEdit)
+                    PopupMenuItem(
+                      value: 'notation',
+                      child: _MenuRow(
+                        icon: Icons.queue_music,
+                        label: l10n?.notationEditorTooltip ?? 'Notation Editor',
+                      ),
+                    ),
+                  const PopupMenuDivider(),
                   const PopupMenuItem(
                     value: 'text',
-                    child: Row(
-                      children: [
-                        Icon(Icons.notes, size: 20),
-                        SizedBox(width: 10),
-                        Text('Copy Plain Text / ChordPro'),
-                      ],
+                    child: _MenuRow(
+                      icon: Icons.notes,
+                      label: 'Copy Plain Text / ChordPro',
                     ),
                   ),
                   const PopupMenuItem(
                     value: 'json',
-                    child: Row(
-                      children: [
-                        Icon(Icons.data_object, size: 20),
-                        SizedBox(width: 10),
-                        Text('Copy JSON'),
-                      ],
+                    child: _MenuRow(
+                      icon: Icons.data_object,
+                      label: 'Copy JSON',
                     ),
                   ),
-                  const PopupMenuDivider(),
                   const PopupMenuItem(
                     value: 'pdf',
-                    child: Row(
-                      children: [
-                        Icon(Icons.picture_as_pdf_outlined, size: 20),
-                        SizedBox(width: 10),
-                        Text('Export PDF Lead Sheet'),
-                      ],
+                    child: _MenuRow(
+                      icon: Icons.picture_as_pdf_outlined,
+                      label: 'Export PDF Lead Sheet',
                     ),
                   ),
                   const PopupMenuItem(
                     value: 'midi',
-                    child: Row(
-                      children: [
-                        Icon(Icons.audiotrack_outlined, size: 20),
-                        SizedBox(width: 10),
-                        Text('Export MIDI File'),
-                      ],
+                    child: _MenuRow(
+                      icon: Icons.audiotrack_outlined,
+                      label: 'Export MIDI File',
                     ),
                   ),
+                  if (canEdit) ...[
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: _MenuRow(
+                        icon: Icons.delete_outline,
+                        label: l10n?.deleteSong ?? 'Delete Song',
+                        color: brand.danger,
+                      ),
+                    ),
+                  ],
                 ],
               ),
-              if (canEdit) ...[
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: l10n?.editSong ?? 'Edit Song',
-                  onPressed: () => context.push('/repertoire/${song.id}/edit'),
+            ],
+          ),
+          bottomNavigationBar: StageActionBar(
+            children: [
+              FilledButton(
+                key: const ValueKey('add_to_setlist'),
+                style: StageActionBar.primary(),
+                onPressed: () => showAddToSetlistSheet(context, song),
+                child: Text(
+                  l10n?.addToSetlist ?? 'Add to setlist',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: l10n?.deleteSong ?? 'Delete Song',
-                  onPressed: () => _deleteSong(song),
-                ),
-              ],
+              ),
             ],
           ),
           body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(
+              BattutaSpace.lg,
+              BattutaSpace.xs,
+              BattutaSpace.lg,
+              BattutaSpace.xl,
+            ),
             children: [
               if (!canEdit) _ReadOnlyVersionBanner(songId: song.id),
-              SongSharingActions(song: song),
 
-              // ── Header Metadata Card ──
-              Card(
-                elevation: 0,
-                color: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.5,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        activeSong.title,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        activeSong.artist,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _MetaBadge(
-                            icon: Icons.music_note,
-                            label:
-                                l10n?.songKeyBadge(activeSong.key) ??
-                                'Key: ${activeSong.key}',
-                            highlight: _transpositionSemitones != 0,
-                          ),
-                          _MetaBadge(
-                            icon: Icons.speed,
-                            label: activeSong.tempoLabel,
-                          ),
-                          _MetaBadge(
-                            icon: Icons.timer_outlined,
-                            label: activeSong.timeSignatureLabel,
-                          ),
-                          for (final tag in activeSong.tags)
-                            Chip(
-                              label: Text(tag),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                        ],
-                      ),
-                      if (activeSong.notes != null &&
-                          activeSong.notes!.isNotEmpty) ...[
-                        const Divider(height: 24),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 18,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                activeSong.notes!,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
+              // ── Title and subtitle ──
+              Text(
+                activeSong.title,
+                style: TextStyle(
+                  fontFamily: AppTheme.primaryFontFamily,
+                  fontFamilyFallback: AppTheme.fontFamilyFallbacks,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                  color: brand.ink,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: BattutaSpace.xs),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: brand.inkMuted,
+                ),
+              ),
+              const SizedBox(height: BattutaSpace.lg),
+
+              // ── Key / BPM / Time ──
+              StageStatRow(
+                children: [
+                  StageStatTile(
+                    key: const ValueKey('stat_key'),
+                    value: activeSong.key,
+                    label: l10n?.keyLabel ?? 'Key',
+                    mono: true,
+                    accent: true,
+                  ),
+                  StageStatTile(
+                    key: const ValueKey('stat_bpm'),
+                    value: activeSong.tempo > 0 ? '${activeSong.tempo}' : '–',
+                    label: l10n?.songStatBpm ?? 'BPM',
+                  ),
+                  StageStatTile(
+                    key: const ValueKey('stat_time'),
+                    value: activeSong.timeSignatureLabel,
+                    label: l10n?.songStatTime ?? 'Time',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // ── Transpose preview ──
+              TransposeStepperCard(
+                semitones: _transpositionSemitones,
+                onChanged: (value) =>
+                    setState(() => _transpositionSemitones = value),
+              ),
+              const SizedBox(height: BattutaSpace.md),
+
+              // ── Sharing, fork and move ──
+              SongSharingActions(song: song),
 
               // ── Other versions of this song ──
               if (song.songWorkId != null) ...[
@@ -597,110 +494,132 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                   currentVersionId: song.id,
                   title: l10n?.versionsOtherTitle ?? 'Other versions',
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: BattutaSpace.md),
               ],
 
-              // ── Practice Audio Player Bar ──
+              // ── Practice audio ──
               PracticePlayerBar(song: activeSong),
-              const SizedBox(height: 12),
+              const SizedBox(height: BattutaSpace.md),
 
-              // ── View Mode Selector (Both vs Lyrics Only vs Chords Only vs Staff Notation) ──
-              Center(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SegmentedButton<SongViewMode>(
-                    showSelectedIcon: false,
-                    segments: [
-                      ButtonSegment(
-                        value: SongViewMode.both,
-                        icon: const Icon(Icons.library_music),
-                        label: Text(l10n?.viewModeBoth ?? 'Both'),
+              // ── Tags and notes ──
+              if (activeSong.tags.isNotEmpty) ...[
+                Wrap(
+                  spacing: BattutaSpace.sm,
+                  runSpacing: BattutaSpace.sm,
+                  children: [
+                    for (final tag in activeSong.tags) _TagPill(label: tag),
+                  ],
+                ),
+                const SizedBox(height: BattutaSpace.md),
+              ],
+              if (activeSong.notes != null && activeSong.notes!.isNotEmpty) ...[
+                StageCard(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 18,
+                        color: brand.accentInk,
                       ),
-                      ButtonSegment(
-                        value: SongViewMode.lyricsOnly,
-                        icon: const Icon(Icons.article_outlined),
-                        label: Text(l10n?.viewModeLyricsOnly ?? 'Lyrics Only'),
-                      ),
-                      ButtonSegment(
-                        value: SongViewMode.chordsOnly,
-                        icon: const Icon(Icons.grid_view),
-                        label: Text(l10n?.viewModeChordsOnly ?? 'Chords Only'),
-                      ),
-                      ButtonSegment(
-                        value: SongViewMode.staff,
-                        icon: const Icon(Icons.queue_music),
-                        label: Text(l10n?.musicalStaff ?? 'Musical Staff'),
+                      const SizedBox(width: BattutaSpace.sm),
+                      Expanded(
+                        child: Text(
+                          activeSong.notes!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: brand.ink,
+                          ),
+                        ),
                       ),
                     ],
-                    selected: {_selectedViewMode},
-                    onSelectionChanged: (modes) {
-                      setState(() => _selectedViewMode = modes.first);
-                    },
                   ),
                 ),
+                const SizedBox(height: BattutaSpace.md),
+              ],
+
+              // ── View modes ──
+              Wrap(
+                spacing: BattutaSpace.sm,
+                runSpacing: BattutaSpace.sm,
+                children: [
+                  for (final (mode, label) in [
+                    (SongViewMode.both, l10n?.viewModeBoth ?? 'Both'),
+                    (
+                      SongViewMode.lyricsOnly,
+                      l10n?.viewModeLyricsOnly ?? 'Lyrics Only',
+                    ),
+                    (
+                      SongViewMode.chordsOnly,
+                      l10n?.viewModeChordsOnly ?? 'Chords Only',
+                    ),
+                    (SongViewMode.staff, l10n?.musicalStaff ?? 'Musical Staff'),
+                  ])
+                    StageFilterPill(
+                      label: label,
+                      selected: _selectedViewMode == mode,
+                      onTap: () => setState(() => _selectedViewMode = mode),
+                    ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: BattutaSpace.lg),
 
               // ── Main Content: Both / Lyrics Only / Chords Only / Staff Notation ──
               if (_selectedViewMode == SongViewMode.staff)
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Wrap(
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            Text(
-                              l10n?.interactiveNotationView ??
-                                  'Interactive Notation View',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
+                StageCard(
+                  padding: const EdgeInsets.all(BattutaSpace.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: BattutaSpace.sm,
+                        runSpacing: BattutaSpace.sm,
+                        children: [
+                          Text(
+                            l10n?.interactiveNotationView ??
+                                'Interactive Notation View',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (canEdit)
+                            FilledButton.tonalIcon(
+                              icon: const Icon(Icons.edit, size: 16),
+                              label: Text(
+                                l10n?.editInNotationEditor ??
+                                    'Edit in Notation Editor',
+                              ),
+                              onPressed: () => context.push(
+                                '/repertoire/${song.id}/notation',
                               ),
                             ),
-                            if (canEdit)
-                              FilledButton.tonalIcon(
-                                style: FilledButton.styleFrom(
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                                icon: const Icon(Icons.edit, size: 16),
-                                label: Text(
-                                  l10n?.editInNotationEditor ??
-                                      'Edit in Notation Editor',
-                                ),
-                                onPressed: () => context.push(
-                                  '/repertoire/${song.id}/notation',
-                                ),
-                              ),
-                          ],
+                        ],
+                      ),
+                      const SizedBox(height: BattutaSpace.md),
+                      SizedBox(
+                        height: 380,
+                        child: StaffCanvas(
+                          score: activeSong.toScore(),
+                          onNoteTapped: (note) =>
+                              _toneSynthesizer.playPitch(note.pitch),
                         ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 380,
-                          child: StaffCanvas(
-                            score: activeSong.toScore(),
-                            onNoteTapped: (note) =>
-                                _toneSynthesizer.playPitch(note.pitch),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 )
               else
                 ChordLyricsView(
                   song: activeSong,
-                  transpositionSemitones: _transpositionSemitones,
+                  // activeSong is already transposed; the view must not shift it again.
+                  transpositionSemitones: 0,
                   viewMode: _selectedViewMode,
-                  onSongUpdated: canEdit
+                  chartTextScale: prefs.chartTextScale,
+                  preferSharps: !prefs.preferFlats,
+                  // A transposed preview is not stored: editing the alignment
+                  // of it would persist the shifted chords on top of the preview.
+                  onSongUpdated: canEdit && _transpositionSemitones == 0
                       ? (updatedSong) {
                           ref
                               .read(repertoireProvider.notifier)
@@ -711,12 +630,60 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
                         }
                       : null,
                 ),
-
-              const SizedBox(height: 32),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// One row of the overflow menu: icon and label.
+class _MenuRow extends StatelessWidget {
+  const _MenuRow({required this.icon, required this.label, this.color});
+
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20, color: color),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(label, style: TextStyle(color: color)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small outlined tag pill.
+class _TagPill extends StatelessWidget {
+  const _TagPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = BattutaBrand.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BattutaSpace.sm,
+        vertical: BattutaSpace.xxs,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(BattutaRadius.pill),
+        border: Border.all(color: brand.border),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium
+            ?.copyWith(color: brand.inkMuted),
+      ),
     );
   }
 }
@@ -769,53 +736,6 @@ class _ReadOnlyVersionBanner extends ConsumerWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetaBadge extends StatelessWidget {
-  const _MetaBadge({
-    required this.icon,
-    required this.label,
-    this.highlight = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool highlight;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: highlight
-            ? colorScheme.primary
-            : colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: highlight ? colorScheme.onPrimary : colorScheme.onSurface,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: highlight ? colorScheme.onPrimary : colorScheme.onSurface,
             ),
           ),
         ],

@@ -6,9 +6,11 @@
 /// - Integrated [StageCueBanner] and [DirectorControlBar].
 library;
 
-import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/app/design_system/design_system.dart';
+import 'package:battuta/core/platform/screen_wake_lock.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
+import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
 import 'package:battuta/features/sync/domain/services/live_sync_service.dart';
 import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
 import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
@@ -24,12 +26,73 @@ class LiveSessionPage extends ConsumerStatefulWidget {
 }
 
 class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
+  /// End stops the band's session, so a stray tap mid-song must not do it.
+  Future<void> _confirmEnd(
+    BuildContext context,
+    Future<void> Function() end,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n?.endSessionConfirmTitle ?? 'End the live session?'),
+        content: Text(
+          l10n?.endSessionConfirmBody ??
+              'Everyone following this session will be disconnected.',
+        ),
+        actions: [
+          TextButton(
+            key: const ValueKey('live_end_cancel'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancel'),
+          ),
+          TextButton(
+            key: const ValueKey('live_end_confirm'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n?.endSessionAction ?? 'End'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await end();
+  }
+
   final _hostController = TextEditingController(text: '127.0.0.1');
   final _portController = TextEditingController(text: '8080');
   static const int _currentMeasure = 14;
 
+  late final ScreenWakeLock _wakeLock;
+  // Wake lock calls run one after the other so a late enable can never
+  // outlive a later disable.
+  Future<void> _wakeLockCalls = Future<void>.value();
+  bool _disposed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _wakeLock = ref.read(screenWakeLockProvider);
+    _setWakeLock(ref.read(stagePreferencesProvider).keepScreenAwake);
+  }
+
+  void _setWakeLock(bool on) {
+    _wakeLockCalls = _wakeLockCalls.then((_) async {
+      try {
+        // Disposed meanwhile: never take the lock, always release it.
+        if (on && !_disposed) {
+          await _wakeLock.enable();
+        } else {
+          await _wakeLock.disable();
+        }
+      } catch (_) {
+        // A missing plugin must not break the Live page.
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _disposed = true;
+    _setWakeLock(false);
     _hostController.dispose();
     _portController.dispose();
     super.dispose();
@@ -48,8 +111,12 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      stagePreferencesProvider.select((p) => p.keepScreenAwake),
+      (_, on) => _setWakeLock(on),
+    );
     final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brand = BattutaBrand.of(context);
     final syncState = ref.watch(liveSyncControllerProvider);
     final syncNotifier = ref.read(liveSyncControllerProvider.notifier);
 
@@ -62,64 +129,28 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
       'Final',
     ];
 
+    final connectionLabel = syncState.isConnected
+        ? (syncState.isDirector
+              ? (l10n?.hostingStatus ?? 'HOSTING')
+              : (l10n?.syncedStatus ?? 'SYNCED'))
+        : (l10n?.standaloneStatus ?? 'STANDALONE');
+
+    final stopStyle = FilledButton.styleFrom(
+      backgroundColor: brand.wash(brand.danger),
+      foregroundColor: brand.danger,
+      minimumSize: const Size(44, 44),
+      side: BorderSide(color: brand.danger.withValues(alpha: 0.6)),
+    );
+    final startStyle = FilledButton.styleFrom(
+      backgroundColor: brand.accent,
+      foregroundColor: brand.onAccent,
+      minimumSize: const Size(44, 44),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n?.liveStageSync ?? 'Live Stage Sync'),
-        actions: [
-          const InboxButton(),
-          // Connection Status Pill
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: syncState.isConnected
-                  ? AppTheme.stageGreen.withValues(alpha: 0.2)
-                  : (isDark
-                        ? AppTheme.slateSurfaceLight
-                        : AppTheme.pearlSurfaceLight),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: syncState.isConnected
-                    ? AppTheme.stageGreen
-                    : (isDark ? AppTheme.slateBorder : AppTheme.pearlBorder),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: syncState.isConnected
-                        ? AppTheme.stageGreen
-                        : Colors.grey,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  syncState.isConnected
-                      ? (syncState.isDirector
-                          ? (l10n?.hostingStatus ?? 'HOSTING')
-                          : (l10n?.syncedStatus ?? 'SYNCED'))
-                      : (l10n?.standaloneStatus ?? 'STANDALONE'),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: syncState.isConnected
-                        ? AppTheme.stageGreen
-                        : (isDark
-                              ? AppTheme.textMuted
-                              : AppTheme.charcoalMuted),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const ProfileAvatarButton(),
-        ],
+        actions: const [InboxButton(), ProfileAvatarButton()],
       ),
       body: Column(
         children: [
@@ -129,107 +160,80 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Mode Switcher (Director vs Follower) ──
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppTheme.slateSurface
-                          : AppTheme.pearlSurfaceLight,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isDark
-                            ? AppTheme.slateBorder
-                            : AppTheme.pearlBorder,
-                        width: 1,
+                  // ── Session header: LIVE badge, connection, End ──
+                  Row(
+                    key: const ValueKey('live_session_header'),
+                    children: [
+                      StageStatusPill(
+                        label: l10n?.liveBadge ?? 'LIVE',
+                        active: syncState.isConnected,
+                        tone: brand.accent,
                       ),
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () =>
-                                syncNotifier.setSyncMode(LiveSyncMode.director),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: syncState.isDirector
-                                    ? AppTheme.amberAccent
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.cell_tower,
-                                    size: 18,
-                                    color: syncState.isDirector
-                                        ? AppTheme.obsidianText
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    l10n?.directorHost ?? 'Director (Host)',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: syncState.isDirector
-                                          ? AppTheme.obsidianText
-                                          : (isDark
-                                                ? AppTheme.textOffWhite
-                                                : AppTheme.charcoalText),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          connectionLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.6,
+                            color: syncState.isConnected
+                                ? brand.success
+                                : brand.inkMuted,
                           ),
                         ),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () =>
-                                syncNotifier.setSyncMode(LiveSyncMode.follower),
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                color: !syncState.isDirector
-                                    ? AppTheme.amberAccent
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.group,
-                                    size: 18,
-                                    color: !syncState.isDirector
-                                        ? AppTheme.obsidianText
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    l10n?.musicianFollower ?? 'Musician (Follower)',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: !syncState.isDirector
-                                          ? AppTheme.obsidianText
-                                          : (isDark
-                                                ? AppTheme.textOffWhite
-                                                : AppTheme.charcoalText),
-                                    ),
-                                  ),
-                                ],
+                      ),
+                      if (syncState.isConnected) ...[
+                        const SizedBox(width: 8),
+                        BattutaPressable(
+                          key: const ValueKey('live_end_button'),
+                          onTap: () =>
+                              _confirmEnd(context, syncNotifier.disconnect),
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              minWidth: 64,
+                              minHeight: 44,
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: brand.border),
+                            ),
+                            child: Text(
+                              l10n?.endSessionAction ?? 'End',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: brand.ink,
                               ),
                             ),
                           ),
                         ),
                       ],
-                    ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Mode Switcher (Director vs Follower) ──
+                  StageSegmentedControl<LiveSyncMode>(
+                    selected: syncState.mode,
+                    onChanged: syncNotifier.setSyncMode,
+                    segments: [
+                      StageSegment(
+                        value: LiveSyncMode.director,
+                        label: l10n?.directorHost ?? 'Director (Host)',
+                        icon: Icons.cell_tower,
+                      ),
+                      StageSegment(
+                        value: LiveSyncMode.follower,
+                        label: l10n?.musicianFollower ?? 'Musician (Follower)',
+                        icon: Icons.group,
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 14),
@@ -237,6 +241,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                   // ── Live Stage Cue Banner (If Active Cue Present) ──
                   if (syncState.activeCue != null) ...[
                     StageCueBanner(
+                      key: ValueKey(syncState.activeCue!.sequenceNumber),
                       cue: syncState.activeCue!,
                       currentMeasure: _currentMeasure,
                       onDismiss: syncNotifier.dismissCue,
@@ -251,32 +256,18 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                   ],
 
                   // ── Current Live Stage Section Prompter ──
-                  Container(
+                  StageCard(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppTheme.slateSurface
-                          : AppTheme.pureWhiteSurface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark
-                            ? AppTheme.slateBorder
-                            : AppTheme.pearlBorder,
-                        width: 1,
-                      ),
-                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           l10n?.onStageNow ?? 'ON STAGE NOW',
                           style: TextStyle(
-                            fontSize: 11,
-                            letterSpacing: 1.2,
+                            fontSize: 12,
+                            letterSpacing: 0.6,
                             fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppTheme.textMuted
-                                : AppTheme.charcoalMuted,
+                            color: brand.inkMuted,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -285,8 +276,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                             Container(
                               width: 12,
                               height: 12,
-                              decoration: const BoxDecoration(
-                                color: AppTheme.amberAccent,
+                              decoration: BoxDecoration(
+                                color: brand.accent,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -295,46 +286,48 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                               child: Text(
                                 syncState.activeSectionId ??
                                     (l10n?.introPreRoll ?? 'INTRO / PRE-ROLL'),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 28,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
-                                  color: AppTheme.amberAccent,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.3,
+                                  color: brand.accentInk,
                                 ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Row(
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
                               l10n?.queuedNext ?? 'Queued Next:',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: isDark
-                                    ? AppTheme.textMuted
-                                    : AppTheme.charcoalMuted,
+                                color: brand.inkMuted,
                               ),
                             ),
-                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.amberMuted,
-                                borderRadius: BorderRadius.circular(6),
+                                color: brand.accentWash,
+                                borderRadius: BorderRadius.circular(
+                                  BattutaRadius.xs,
+                                ),
                               ),
                               child: Text(
                                 syncState.queuedSectionLabel ??
                                     (l10n?.waitingForCue ??
                                         'None (Waiting for cue)'),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: AppTheme.amberAccent,
+                                  color: brand.accentInk,
                                 ),
                               ),
                             ),
@@ -347,36 +340,22 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                   const SizedBox(height: 14),
 
                   // ── Network Setup & Connection Card ──
-                  Container(
+                  StageCard(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppTheme.slateSurface
-                          : AppTheme.pureWhiteSurface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark
-                            ? AppTheme.slateBorder
-                            : AppTheme.pearlBorder,
-                        width: 1,
-                      ),
-                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           syncState.isDirector
                               ? (l10n?.localLanDirectorServer ??
-                                  'LOCAL LAN DIRECTOR SERVER')
+                                    'LOCAL LAN DIRECTOR SERVER')
                               : (l10n?.connectToDirectorDevice ??
-                                  'CONNECT TO DIRECTOR DEVICE'),
+                                    'CONNECT TO DIRECTOR DEVICE'),
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.8,
-                            color: isDark
-                                ? AppTheme.textMuted
-                                : AppTheme.charcoalMuted,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.6,
+                            color: brand.inkMuted,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -384,10 +363,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                           Text(
                             syncState.isConnected
                                 ? (l10n?.serverRunningOnPort(
-                                        syncState.serverPort ?? 0) ??
-                                    'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.')
+                                        syncState.serverPort ?? 0,
+                                      ) ??
+                                      'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.')
                                 : (l10n?.startZeroConfigServer ??
-                                    'Start a zero-configuration local WebSocket server so all band members follow your live cues.'),
+                                      'Start a zero-configuration local WebSocket server so all band members follow your live cues.'),
                             style: const TextStyle(fontSize: 13),
                           ),
                           const SizedBox(height: 14),
@@ -396,15 +376,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                             runSpacing: 10,
                             children: [
                               FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: syncState.isConnected
-                                      ? AppTheme.stageRed
-                                      : AppTheme.amberAccent,
-                                  foregroundColor: syncState.isConnected
-                                      ? Colors.white
-                                      : AppTheme.obsidianText,
-                                  minimumSize: const Size(44, 44),
-                                ),
+                                style: syncState.isConnected
+                                    ? stopStyle
+                                    : startStyle,
                                 icon: Icon(
                                   syncState.isConnected
                                       ? Icons.stop
@@ -413,9 +387,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 label: Text(
                                   syncState.isConnected
                                       ? (l10n?.stopHostServer ??
-                                          'Stop Host Server')
+                                            'Stop Host Server')
                                       : (l10n?.startLanHost ??
-                                          'Start LAN Host'),
+                                            'Start LAN Host'),
                                 ),
                                 onPressed: () async {
                                   if (syncState.isConnected) {
@@ -434,7 +408,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 icon: const Icon(
                                   Icons.notifications_active_outlined,
                                 ),
-                                label: Text(l10n?.triggerTestCue ?? 'Trigger Test Cue'),
+                                label: Text(
+                                  l10n?.triggerTestCue ?? 'Trigger Test Cue',
+                                ),
                                 onPressed: _triggerSampleCue,
                               ),
                             ],
@@ -447,7 +423,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                 child: TextField(
                                   controller: _hostController,
                                   decoration: InputDecoration(
-                                    labelText: l10n?.directorHostIp ??
+                                    labelText:
+                                        l10n?.directorHostIp ??
                                         'Director Host IP',
                                     hintText: '192.168.1.X',
                                     border: const OutlineInputBorder(),
@@ -473,15 +450,9 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                           ),
                           const SizedBox(height: 12),
                           FilledButton.icon(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: syncState.isConnected
-                                  ? AppTheme.stageRed
-                                  : AppTheme.amberAccent,
-                              foregroundColor: syncState.isConnected
-                                  ? Colors.white
-                                  : AppTheme.obsidianText,
-                              minimumSize: const Size(44, 44),
-                            ),
+                            style: syncState.isConnected
+                                ? stopStyle
+                                : startStyle,
                             icon: Icon(
                               syncState.isConnected
                                   ? Icons.link_off
@@ -491,7 +462,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                               syncState.isConnected
                                   ? (l10n?.disconnect ?? 'Disconnect')
                                   : (l10n?.connectAsFollower ??
-                                      'Connect as Follower'),
+                                        'Connect as Follower'),
                             ),
                             onPressed: () async {
                               if (syncState.isConnected) {
@@ -509,7 +480,8 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                       SnackBar(
                                         content: Text(
                                           l10n?.connectionFailed(
-                                                  e.toString()) ??
+                                                e.toString(),
+                                              ) ??
                                               'Connection failed: $e',
                                         ),
                                       ),
@@ -528,35 +500,27 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                   if (syncState.isDirector &&
                       syncState.pendingRequests.isNotEmpty) ...[
                     const SizedBox(height: 14),
-                    Container(
+                    StageCard(
+                      selected: true,
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppTheme.slateSurface
-                            : AppTheme.pureWhiteSurface,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: AppTheme.amberAccent,
-                          width: 1,
-                        ),
-                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.shield,
-                                color: AppTheme.amberAccent,
+                                color: brand.accentInk,
                                 size: 18,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                l10n?.leaderLockRequestsTitle ??
-                                    'LeaderLock: Musician Transition Requests',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                              Expanded(
+                                child: Text(
+                                  l10n?.leaderLockRequestsTitle ?? 'LeaderLock: Musician Transition Requests',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -565,6 +529,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                           for (final req in syncState.pendingRequests)
                             ListTile(
                               dense: true,
+                              contentPadding: EdgeInsets.zero,
                               title: Text(
                                 l10n?.requestPrefix(req.currentSectionId) ??
                                     'Request: ${req.currentSectionId}',
@@ -574,16 +539,15 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                                     'Follower requested section change',
                               ),
                               trailing: FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: AppTheme.amberAccent,
-                                  foregroundColor: AppTheme.obsidianText,
-                                ),
+                                style: startStyle,
                                 onPressed: () {
                                   syncNotifier.jumpNowSection(
                                     req.currentSectionId,
                                   );
                                 },
-                                child: Text(l10n?.approveJump ?? 'Approve Jump'),
+                                child: Text(
+                                  l10n?.approveJump ?? 'Approve Jump',
+                                ),
                               ),
                             ),
                         ],
@@ -599,6 +563,7 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
           DirectorControlBar(
             sections: activeSections,
             activeSectionId: syncState.activeSectionId,
+            queuedSectionId: syncState.queuedSectionLabel,
             onQueueSection: (section) {
               syncNotifier.queueNextSection(section);
             },

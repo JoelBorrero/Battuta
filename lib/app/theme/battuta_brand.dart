@@ -118,6 +118,23 @@ class BattutaBrand extends ThemeExtension<BattutaBrand> {
 
   bool get isDark => brightness == Brightness.dark;
 
+  // ── Status roles (shared across brightness) ───────────────────────────
+
+  /// Connected, saved, in-time.
+  Color get success => AppTheme.stageGreen;
+
+  /// Offline, degraded, needs attention.
+  Color get warning => AppTheme.stageOrange;
+
+  /// Informational / data.
+  Color get info => AppTheme.stageBlue;
+
+  /// Destructive / error.
+  Color get danger => AppTheme.stageRed;
+
+  /// A translucent wash of [tone] for status chips and banners.
+  Color wash(Color tone) => tone.withValues(alpha: isDark ? 0.16 : 0.12);
+
   /// A soft amber "stage light" glow used behind the brand mark and active
   /// cues. Flat (no blur shadow) to respect the anti-material invariant.
   RadialGradient get stageLight => RadialGradient(

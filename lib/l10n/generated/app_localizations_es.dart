@@ -485,6 +485,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tapTempo => 'Pulsar Tempo';
 
   @override
+  String get tapTempoHint =>
+      'Pulsa al ritmo del tempo. Espera 3 segundos para empezar de nuevo.';
+
+  @override
+  String get tapButtonLabel => 'TAP';
+
+  @override
+  String get chordEntryHint =>
+      'Escribe los acordes como símbolos separados por espacios o barras, como C G/B Am F.';
+
+  @override
   String get addTag => 'Añadir Etiqueta';
 
   @override
@@ -620,8 +631,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setlistEmpty => 'Esta lista aún no tiene canciones.';
 
   @override
-  String get tapAddSongHint =>
-      'Toca \"Añadir Canción a la Lista\" abajo para armar tu lista.';
+  String get tapAddSongHint => 'Toca + para añadir canciones y armar tu lista.';
+
+  @override
+  String get setlistStatSongs => 'Canciones';
+
+  @override
+  String get setlistStatAvgBpm => 'BPM medio';
+
+  @override
+  String get setlistOrderHeader => 'Orden';
+
+  @override
+  String get setlistDragHint => 'Arrastra para reordenar';
+
+  @override
+  String setlistItemNote(String note) {
+    return 'Nota: $note';
+  }
 
   @override
   String get removeFromSetlistTooltip => 'Quitar de la lista';
@@ -638,20 +665,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get editSetlistInfoTooltip => 'Editar información de la lista';
 
   @override
-  String get scanLeadSheet => 'Escanear Partitura';
+  String get scanLeadSheet => 'Escanear partitura';
 
   @override
-  String get omrScannerTitle => 'Escáner OMR';
+  String get omrScannerTitle => 'Convierte el papel en partituras';
 
   @override
   String get omrScannerSubtitle =>
-      'Apunta la cámara a una partitura o elige una imagen para extraer\nacordes, melodía y estructura con Gemini AI.';
+      'Escanea una partitura impresa o un cifrado. Los acordes, la melodía y la estructura se extraen con Gemini AI.';
 
   @override
-  String get openCamera => 'Abrir Cámara';
+  String get openCamera => 'Capturar con la cámara';
 
   @override
-  String get chooseFromLibrary => 'Elegir de la Galería';
+  String get chooseFromLibrary => 'Elegir de las fotos';
+
+  @override
+  String get openCameraCaption => 'Fotografía una página en el atril';
+
+  @override
+  String get chooseFromLibraryCaption => 'Una imagen de este dispositivo';
 
   @override
   String addedToRepertoireSuccess(String title) {
@@ -2635,6 +2668,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get repertoireScopeLabel => 'Repertorio a mostrar';
 
   @override
+  String get repertoireSearchHint => 'Buscar título, artista o etiqueta';
+
+  @override
   String get orgSettingsTooltip => 'Ajustes de la organización';
 
   @override
@@ -3350,4 +3386,112 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get photoCropTitle => 'Ajustar foto';
+
+  @override
+  String get songScreenTitle => 'Canción';
+
+  @override
+  String songOriginalKey(String key) {
+    return 'Original: $key';
+  }
+
+  @override
+  String get songStatBpm => 'BPM';
+
+  @override
+  String get songStatTime => 'Compás';
+
+  @override
+  String get transposeLabel => 'Transponer';
+
+  @override
+  String get transposeAndSave => 'Transponer y guardar';
+
+  @override
+  String get addToSetlist => 'Añadir a lista';
+
+  @override
+  String get addToSetlistEmpty =>
+      'Aún no hay listas donde añadir esta canción. Crea una en la pestaña Listas.';
+
+  @override
+  String addedToSetlist(String setlist) {
+    return 'Añadida a $setlist';
+  }
+
+  @override
+  String get alreadyInSetlist => 'Ya añadida';
+
+  @override
+  String get moreOptions => 'Más opciones';
+
+  @override
+  String get generalSection => 'General';
+
+  @override
+  String get themeStage => 'Escenario';
+
+  @override
+  String get themeRehearsal => 'Ensayo';
+
+  @override
+  String get languageSystemDefault => 'Sistema';
+
+  @override
+  String get accountSyncSection => 'Cuenta y sincronización';
+
+  @override
+  String get serverLabel => 'Servidor';
+
+  @override
+  String get syncOfflineTitle => 'Sin conexión';
+
+  @override
+  String get syncSavedOnDevice => 'Todo se guarda también en este dispositivo';
+
+  @override
+  String syncLastSyncedAt(String time) {
+    return 'Última sincronización: $time';
+  }
+
+  @override
+  String get chartTextSizeLabel => 'Tamaño del texto de la partitura';
+
+  @override
+  String get preferFlatsLabel => 'Preferir bemoles al transportar';
+
+  @override
+  String get keepScreenAwakeLabel =>
+      'Mantener la pantalla encendida en el escenario';
+
+  @override
+  String get teamTitle => 'Equipo';
+
+  @override
+  String get rosterEveryone => 'Todos';
+
+  @override
+  String get previousMonthTooltip => 'Mes anterior';
+
+  @override
+  String get nextMonthTooltip => 'Mes siguiente';
+
+  @override
+  String get noServicesOnDay => 'No hay servicios este día.';
+
+  @override
+  String get liveBadge => 'EN VIVO';
+
+  @override
+  String get endSessionAction => 'Terminar';
+
+  @override
+  String get sectionChipNext => 'SIGUIENTE';
+
+  @override
+  String get endSessionConfirmTitle => '¿Terminar la sesión en vivo?';
+
+  @override
+  String get endSessionConfirmBody =>
+      'Todos los que siguen esta sesión se desconectarán.';
 }

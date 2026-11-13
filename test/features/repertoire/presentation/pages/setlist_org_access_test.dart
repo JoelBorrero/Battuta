@@ -78,7 +78,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          ...signedInOverrides(orgs, repertoire: repertoire, fixedSetlists: false),
+          ...signedInOverrides(
+            orgs,
+            repertoire: repertoire,
+            fixedSetlists: false,
+          ),
           songRepositoryProvider.overrideWithValue(
             InMemorySongRepository(
               initialSongs: [
@@ -107,32 +111,40 @@ void main() {
   ) async {
     await pump(tester, 'admin-set');
 
-    expect(find.byTooltip('Edit setlist info'), findsOneWidget);
-    expect(find.byTooltip('Delete setlist'), findsOneWidget);
-    expect(find.text('Add Song to Setlist'), findsOneWidget);
-    expect(find.byTooltip('Remove from setlist'), findsOneWidget);
-    expect(find.byKey(const ValueKey('setlist_read_only_notice')), findsNothing);
-  });
-
-  testWidgets('the picker of an organization setlist offers its repertoire only', (
-    tester,
-  ) async {
-    await pump(tester, 'admin-set');
-
-    await tester.tap(find.text('Add Song to Setlist'));
+    await tester.tap(find.byKey(const ValueKey('setlist_menu')));
     await tester.pumpAndSettle();
-
-    // song-1 is already in the setlist; song-3 is not in the repertoire.
-    expect(find.text('Way Maker'), findsOneWidget);
-    expect(find.text('Not In Repertoire'), findsNothing);
+    expect(find.text('Edit setlist info'), findsOneWidget);
+    expect(find.text('Delete setlist'), findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Add Song to Setlist'), findsOneWidget);
+    expect(find.byTooltip('Remove from setlist'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('setlist_read_only_notice')),
+      findsNothing,
+    );
   });
+
+  testWidgets(
+    'the picker of an organization setlist offers its repertoire only',
+    (tester) async {
+      await pump(tester, 'admin-set');
+
+      await tester.tap(find.byTooltip('Add Song to Setlist'));
+      await tester.pumpAndSettle();
+
+      // song-1 is already in the setlist; song-3 is not in the repertoire.
+      expect(find.text('Way Maker'), findsOneWidget);
+      expect(find.text('Not In Repertoire'), findsNothing);
+    },
+  );
 
   testWidgets('the picker of a personal setlist offers my library only', (
     tester,
   ) async {
     await pump(tester, 'personal');
 
-    await tester.tap(find.text('Add Song to Setlist'));
+    await tester.tap(find.byTooltip('Add Song to Setlist'));
     await tester.pumpAndSettle();
 
     // song-2 and song-3 are cached versions of somebody else (u-x); only my
@@ -149,12 +161,14 @@ void main() {
     await pump(tester, 'member-set');
 
     expect(find.text('Amazing Grace'), findsOneWidget);
-    expect(find.byTooltip('Edit setlist info'), findsNothing);
-    expect(find.byTooltip('Delete setlist'), findsNothing);
+    expect(find.byKey(const ValueKey('setlist_menu')), findsNothing);
     expect(find.byTooltip('Remove from setlist'), findsNothing);
-    expect(find.text('Add Song to Setlist'), findsNothing);
+    expect(find.byTooltip('Add Song to Setlist'), findsNothing);
     expect(find.byIcon(Icons.drag_handle), findsNothing);
-    expect(find.byKey(const ValueKey('setlist_read_only_notice')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('setlist_read_only_notice')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('personal setlists stay editable whatever the role', (
@@ -165,22 +179,25 @@ void main() {
     ]);
     await pump(tester, 'personal');
 
-    expect(find.byTooltip('Edit setlist info'), findsOneWidget);
-    expect(find.text('Add Song to Setlist'), findsOneWidget);
+    expect(find.byKey(const ValueKey('setlist_menu')), findsOneWidget);
+    expect(find.byTooltip('Add Song to Setlist'), findsOneWidget);
   });
 
   testWidgets('an admin demoted while the page is open loses the actions', (
     tester,
   ) async {
     await pump(tester, 'admin-set');
-    expect(find.text('Add Song to Setlist'), findsOneWidget);
+    expect(find.byTooltip('Add Song to Setlist'), findsOneWidget);
 
     orgs.setOrganizations([
       org('org-admin', 'Admin Org', role: OrganizationRole.member),
     ]);
     await tester.pumpAndSettle();
 
-    expect(find.text('Add Song to Setlist'), findsNothing);
-    expect(find.byKey(const ValueKey('setlist_read_only_notice')), findsOneWidget);
+    expect(find.byTooltip('Add Song to Setlist'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('setlist_read_only_notice')),
+      findsOneWidget,
+    );
   });
 }

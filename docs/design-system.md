@@ -1,5 +1,9 @@
 # Battuta Design System
 
+> **Source of truth:** the *Battuta Screens* designs
+> (claude.ai artifact "Battuta Screens"). This system implements their
+> language in Flutter; when the two disagree, the designs win.
+
 > **Brand idea — The Ictus.** *A battuta* is the score marking that tells
 > musicians to return to strict time, following the conductor. The **ictus** is
 > the exact instant a conductor's beat lands. Battuta's identity is built on
@@ -111,6 +115,33 @@ A flush `card` surface with a 1 px `border` and radius `md`.
 the icon in a bordered circular spot, and title, message and actions rising in
 tempo. Pass `tone: colorScheme.error` for error states.
 
+### Stage surfaces
+| Widget | Use |
+|---|---|
+| `StageCard(onTap:, selected:, padding:)` | Every card. Flush `card` surface with a 1 px border. Pressable when `onTap` is set; `selected` draws the amber border (e.g. the next service). |
+| `StageGroup(title:, children:, footer:)` | iOS-style inset group: a section header plus one bordered card with hairline-separated rows (Settings). |
+| `StageSectionHeader(title:)` | Small bold tracked label. Copy is rendered **as written**, never force-uppercased, so localized strings stay correct. |
+| `StageIconTile(icon:/label:, caption:, tone:, size:)` | Tinted anchor tile: song key, setlist count, running-order number, settings row icon. |
+
+### Stage controls
+| Widget | Use |
+|---|---|
+| `StageSegmentedControl<T>` | Mutually exclusive **modes** (Director / Follower). A solid amber thumb glides on `downbeat`; 52 pt tall (3 pt inset, so each segment is a 44 pt hit area). Material `SegmentedButton` stays for filters and settings (themed amber). |
+| `StageStatusPill(label:, active:, tone:)` | Connection or live state. The dot pings **once** when it becomes active, with no infinite pulse. |
+
+### Status roles
+`brand.success` (stageGreen) · `brand.warning` (stageOrange `#FF9800`) ·
+`brand.info` (stageBlue) · `brand.danger` (stageRed). `brand.wash(tone)` gives
+the matching translucent fill for pills and banners.
+
+### Signature moments
+- **Prompter roll** (Live): the on-stage section rises into place as the
+  previous one lifts away (`bar`, `downbeat` / `upbeat`).
+- **Cue arrival**: a stage cue drops in with a one-shot amber flare.
+- **Rolling stats** (Team): roster counts roll up once on appearance.
+- **Animated key tile** (Song detail): the key springs in on `rebound`
+  when you transpose.
+
 ## 6. Do / Don't
 
 | ✅ Do | ❌ Don't |
@@ -121,15 +152,53 @@ tempo. Pass `tone: colorScheme.error` for error states.
 | Keep amber for primary action, selection and live cues | Use amber as decoration |
 | Wrap flexible children (`Expanded`, `Wrap`) | Use fixed-width rows that can overflow |
 
-## 7. Adoption status
+## 7. Battuta Screens components
+
+| Design element | Widget |
+|---|---|
+| Large root title (28/800, steps down to 22 before ellipsizing; 60pt header) | `StageAppBar.large(title:)` |
+| Detail header (56pt, 20/700, no rule) | theme `appBarTheme` |
+| Section label (13/700, tracked, uppercase) | `StageSectionHeader` (semantics keep original casing) |
+| Grouped rows (52pt, full-width dividers) | `StageGroup` + `StageRow` |
+| Key badge (amber wash, JetBrains Mono) | `StageKeyPill` |
+| Stat tiles (22/800 value, 13 muted label, r16) | `StageStatTile` / `StageStatRow` |
+| Segmented control (r12, thumb r9) | `StageSegmentedControl` |
+| Filter pill (amber outline + wash when selected; 36 pt pill, 44 pt hit area) | `StageFilterPill` |
+| Bottom action bar (52pt, r14 buttons) | `StageActionBar` (+ `.primary()` / `.secondary()`) |
+| Add button (56pt, r16, icon only) | theme `floatingActionButtonTheme` + `FloatingActionButton` |
+
+Fonts: Inter-style system sans (SF Pro on Apple), **JetBrains Mono** bundled
+for keys and chords.
+
+## 8. Adoption status
+
+| Screen | Status |
+|---|---|
+| Repertoire | ✅ Matches design (scope pill, inline search, segmented, song rows with key pill, setlist date stamps) |
+| Song detail | ✅ Matches design (stats, inline transpose, Add to setlist) + existing extras (sharing, practice audio, view modes, tags). No *Go live* until Live can open a song |
+| Setlist detail | ✅ Matches design (date stamp, stats, order card) — *Avg BPM* replaces *Length/Players* (no data); no *Start live session* until Live can open a setlist |
+| Settings | ✅ Matches design, including chart text size, prefer flats and keep screen awake; + workspace quota and licences |
+| Team roster / Band calendar | ✅ Matches design (filters, grouped members, month grid) + existing scheduling features |
+| Live | ◐ Header, LIVE badge, End and section chips match; the setlist-driven performance view is not built yet |
+| Song editor, Scanner | ✅ Laid out to their designs (editor keeps dropdowns / stepper and expanded sections; scanner has no scan history) |
+| Inbox, Discover, Profile | ◐ Built; minor differences (see `.pipeline/backlog.md`, "From 021") |
+| Welcome, Sign in, Create account, Join, Organization profile / settings, Recurring schedules, Repeating service | ◐ Built; not yet laid out to their designs (see `.pipeline/backlog.md`, "From 021") |
+
+### Design features not yet in the app
+- Live: song N of M, beat meter, lyrics prompter, Previous / Cue / Next; Go live / Start live session entries.
+- Join: invite preview; Sign in: username sign-in and server choice; Organization settings: usage bars.
+- Repeating service: interval, weekday set and monthly-by-date rules.
+- Lyrics in Merriweather (not bundled yet).
+
+## 9. Previous adoption log
 
 | Area | Status |
 |---|---|
-| Theme, tokens, brand extension | ✅ |
-| App shell (bar / rail), tab and page transitions, launch intro | ✅ |
-| Repertoire (cards, empty states, staggered lists) | ✅ |
-| Song detail / editor, Setlist detail, Team, Live, Settings | ⏳ Inherit theme and transitions; migrate custom widgets to `BattutaPressable`, `StageEmptyState` and `brand.*` roles next |
-
-The pre-existing codebase has ~80 raw hex colors, ~110 `Colors.*` uses and
-~180 literal font sizes outside the theme. Migrate them to tokens as screens
-are touched.
+| Theme, tokens, brand extension, status roles | ✅ |
+| Shell (bar / rail), transitions, launch intro | ✅ |
+| Repertoire list, song detail, setlist detail | ✅ |
+| Settings (inset groups) | ✅ |
+| Live stage sync, stage cue banner, sync indicator | ✅ |
+| Team roster and band calendar | ✅ |
+| Song editor, scanner, notation toolbars, import / karaoke modals | ✅ Tokenized, no elevations |
+| Music-notation painters (`staff_metrics`, `notehead_painter`) | Intentionally keep dedicated notation colors |

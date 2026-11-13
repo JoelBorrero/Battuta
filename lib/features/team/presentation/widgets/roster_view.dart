@@ -1,13 +1,11 @@
 /// The Roster tab: members and bands of the active organization.
 library;
 
-import 'package:battuta/app/design_system/components/stage_empty_state.dart';
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/localization/backend_error_messages.dart';
 import 'package:battuta/app/routes/app_routes.dart';
-import 'package:battuta/app/theme/battuta_brand.dart';
 import 'package:battuta/core/errors/failures.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
-import 'package:battuta/features/organizations/presentation/widgets/invite_sheet.dart';
 import 'package:battuta/features/organizations/presentation/widgets/organization_switcher.dart';
 import 'package:battuta/features/profile/presentation/widgets/person_avatar.dart';
 import 'package:battuta/features/team/domain/entities/team_group.dart';
@@ -79,7 +77,6 @@ class _RosterViewState extends ConsumerState<RosterView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
     final signedIn = ref.watch(currentAccountIdProvider) != null;
     final organization = ref.watch(activeOrganizationProvider);
@@ -138,96 +135,52 @@ class _RosterViewState extends ConsumerState<RosterView> {
     }).toList();
 
     final groupMap = {for (final g in groups) g.id: g};
+    final activeGroup = groupMap[activeBandId];
+    final groupTitle =
+        '${activeGroup?.name ?? l10n.rosterEveryone} · ${visible.length}';
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
       children: [
-        DecoratedBox(
-          decoration: brand.cardDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SummaryStat(
-                    count: '${members.length}',
-                    label: l10n.totalRoster,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                Expanded(
-                  child: _SummaryStat(
-                    count: '${members.where((m) => m.isAdmin).length}',
-                    label: l10n.adminsLabel,
-                    color: brand.accentInk,
-                  ),
-                ),
-                Expanded(
-                  child: _SummaryStat(
-                    count: '${groups.length}',
-                    label: l10n.bandsLabel,
-                    color: theme.colorScheme.secondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
         Wrap(
           spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (isAdmin)
-              OutlinedButton.icon(
-                key: const ValueKey('invite_btn'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(44, 44),
-                ),
-                icon: const Icon(Icons.person_add_alt_outlined, size: 18),
-                label: Text(l10n.inviteAction),
-                onPressed: () => showInviteSheet(context),
-              ),
-            if (isAdmin)
-              OutlinedButton.icon(
-                key: const ValueKey('manage_bands_btn'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(44, 44),
-                ),
-                icon: const Icon(Icons.layers_outlined, size: 18),
-                label: Text(l10n.manageBandsAction),
-                onPressed: () => showBandsSheet(context),
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
           children: [
             for (final filter in _RosterFilter.values)
-              FilterChip(
+              StageFilterPill(
                 key: ValueKey('filter_chip_${filter.name}'),
-                label: Text(_filterLabel(filter, l10n)),
+                label: _filterLabel(filter, l10n),
                 selected: _filter == filter,
-                onSelected: (_) => setState(() => _filter = filter),
+                onTap: () => setState(() => _filter = filter),
               ),
             for (final group in groups)
-              FilterChip(
+              StageFilterPill(
                 key: ValueKey('filter_chip_group_${group.id}'),
-                avatar: CircleAvatar(
-                  radius: 5,
-                  backgroundColor: Color(group.colorValue),
-                ),
-                label: Text(group.name),
+                label: group.name,
+                dot: Color(group.colorValue),
                 selected: activeBandId == group.id,
-                onSelected: (on) => ref
+                onTap: () => ref
                     .read(activeBandIdProvider.notifier)
-                    .select(on ? group.id : null),
+                    .select(activeBandId == group.id ? null : group.id),
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        StageSectionHeader(
+          title: groupTitle,
+          padding: const EdgeInsets.fromLTRB(0, 10, 0, 8),
+          trailing: isAdmin
+              ? IconButton(
+                  key: const ValueKey('manage_bands_btn'),
+                  constraints: const BoxConstraints(
+                    minWidth: BattutaSpace.minTouchTarget,
+                    minHeight: BattutaSpace.minTouchTarget,
+                  ),
+                  color: brand.accentInk,
+                  icon: const Icon(Icons.layers_outlined, size: 20),
+                  tooltip: l10n.manageBandsAction,
+                  onPressed: () => showBandsSheet(context),
+                )
+              : null,
+        ),
         if (members.isEmpty)
           Padding(
             padding: const EdgeInsets.all(32),
@@ -246,28 +199,32 @@ class _RosterViewState extends ConsumerState<RosterView> {
             child: Center(child: Text(l10n.noMembersMatchFilter)),
           )
         else
-          for (final member in visible)
-            _MemberCard(
-              member: member,
-              groupMap: groupMap,
-              canEdit: isAdmin || member.isMe,
-              canRemove: isAdmin && !member.isMe,
-              onEdit: () => MemberEditDialog.show(
-                context,
-                member: member,
-                groups: groups,
-                isAdmin: isAdmin,
-              ),
-              onRemove: () => _remove(member),
-            ),
-        const SizedBox(height: 64),
+          StageGroup(
+            margin: EdgeInsets.zero,
+            children: [
+              for (final member in visible)
+                _MemberRow(
+                  member: member,
+                  groupMap: groupMap,
+                  canEdit: isAdmin || member.isMe,
+                  canRemove: isAdmin && !member.isMe,
+                  onEdit: () => MemberEditDialog.show(
+                    context,
+                    member: member,
+                    groups: groups,
+                    isAdmin: isAdmin,
+                  ),
+                  onRemove: () => _remove(member),
+                ),
+            ],
+          ),
       ],
     );
   }
 }
 
-class _MemberCard extends StatelessWidget {
-  const _MemberCard({
+class _MemberRow extends StatelessWidget {
+  const _MemberRow({
     required this.member,
     required this.groupMap,
     required this.canEdit,
@@ -286,172 +243,146 @@ class _MemberCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
-    Widget tag(String text, Color color, {Key? key}) => DecoratedBox(
-      key: key,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: color,
-          ),
-        ),
-      ),
-    );
-
     final hasMenu = canEdit || canRemove;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: brand.cardDecoration(),
-      child: Material(
-        type: MaterialType.transparency,
-        child: ListTile(
-          key: ValueKey('member_card_${member.id}'),
-          onTap: canEdit ? onEdit : null,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
-          leading: PersonAvatar(
-            name: member.name,
-            avatarPath: member.avatarPath,
-            size: 40,
-            ring: member.isAdmin,
-          ),
-          title: Text(
-            member.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (member.username != null)
-                Text(
-                  '@${member.username}',
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: brand.inkMuted, fontSize: 12),
-                ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
+    final instruments = [
+      for (final role in member.roles) role.localizedShortName(context),
+      if (member.vocalRange != VocalTessitura.none)
+        member.vocalRange.rangeLabel,
+    ].join(', ');
+    final bands = [
+      for (final id in member.groupIds)
+        if (groupMap[id] case final group?) group.name,
+    ].join(', ');
+    final notes = member.notes;
+
+    Widget muted(String text, {Key? key, int maxLines = 1}) => Text(
+      text,
+      key: key,
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(fontSize: 13, color: brand.inkMuted),
+    );
+
+    final content = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 60),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
+        child: Row(
+          children: [
+            PersonAvatar(
+              name: member.name,
+              avatarPath: member.avatarPath,
+              size: 40,
+              ring: member.isMe,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (member.isMe)
-                    tag(
-                      l10n.youBadge,
-                      theme.colorScheme.primary,
-                      key: ValueKey('you_badge_${member.id}'),
-                    ),
-                  if (member.isAdmin)
-                    tag(
-                      l10n.adminRole,
-                      brand.accentInk,
-                      key: ValueKey('admin_badge_${member.id}'),
-                    ),
-                  for (final role in member.roles)
-                    tag(role.localizedName(context), brand.inkMuted),
-                  if (member.vocalRange != VocalTessitura.none)
-                    tag(member.vocalRange.rangeLabel, brand.accentInk),
-                  for (final groupId in member.groupIds)
-                    if (groupMap[groupId] case final group?)
-                      tag(
-                        group.name,
-                        Color(group.colorValue),
-                        key: ValueKey(
-                          'member_group_badge_${member.id}_$groupId',
-                        ),
-                      ),
-                ],
-              ),
-              if (member.notes != null && member.notes!.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  member.notes!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: brand.inkMuted),
-                ),
-              ],
-            ],
-          ),
-          trailing: hasMenu
-              ? PopupMenuButton<String>(
-                  key: ValueKey('member_menu_${member.id}'),
-                  icon: const Icon(Icons.more_vert, size: 20),
-                  tooltip: l10n.memberOptionsTooltip,
-                  onSelected: (value) => switch (value) {
-                    'edit' => onEdit(),
-                    'remove' => onRemove(),
-                    _ => null,
-                  },
-                  itemBuilder: (_) => [
-                    if (canEdit)
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Text(l10n.editMember),
-                      ),
-                    if (canRemove)
-                      PopupMenuItem(
-                        value: 'remove',
+                  Row(
+                    children: [
+                      Flexible(
                         child: Text(
-                          l10n.removeMember,
+                          member.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: brand.ink,
                           ),
                         ),
                       ),
-                  ],
-                )
-              : null,
+                      if (member.isMe) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          '(${l10n.youBadge})',
+                          key: ValueKey('you_badge_${member.id}'),
+                          style: TextStyle(fontSize: 13, color: brand.inkMuted),
+                        ),
+                      ],
+                      if (member.isAdmin) ...[
+                        const SizedBox(width: 8),
+                        DecoratedBox(
+                          key: ValueKey('admin_badge_${member.id}'),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: brand.accent.withValues(alpha: 0.45),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 1,
+                            ),
+                            child: Text(
+                              l10n.adminRole.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                                color: brand.accentInk,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (instruments.isNotEmpty) muted(instruments),
+                  if (bands.isNotEmpty)
+                    muted(bands, key: ValueKey('member_bands_${member.id}')),
+                  if (notes != null && notes.isNotEmpty)
+                    muted(notes, maxLines: 2),
+                ],
+              ),
+            ),
+            if (hasMenu)
+              PopupMenuButton<String>(
+                key: ValueKey('member_menu_${member.id}'),
+                constraints: const BoxConstraints(minWidth: 44),
+                padding: EdgeInsets.zero,
+                icon: Icon(Icons.more_vert, size: 20, color: brand.inkMuted),
+                tooltip: l10n.memberOptionsTooltip,
+                onSelected: (value) => switch (value) {
+                  'edit' => onEdit(),
+                  'remove' => onRemove(),
+                  _ => null,
+                },
+                itemBuilder: (_) => [
+                  if (canEdit)
+                    PopupMenuItem(value: 'edit', child: Text(l10n.editMember)),
+                  if (canRemove)
+                    PopupMenuItem(
+                      value: 'remove',
+                      child: Text(
+                        l10n.removeMember,
+                        style: TextStyle(color: brand.danger),
+                      ),
+                    ),
+                ],
+              )
+            else
+              const SizedBox(width: 10),
+          ],
         ),
       ),
     );
+
+    return KeyedSubtree(
+      key: ValueKey('member_card_${member.id}'),
+      child: canEdit
+          ? BattutaPressable(
+              onTap: onEdit,
+              pressedScale: 0.995,
+              semanticLabel: member.name,
+              child: content,
+            )
+          : content,
+    );
   }
-}
-
-class _SummaryStat extends StatelessWidget {
-  const _SummaryStat({
-    required this.count,
-    required this.label,
-    required this.color,
-  });
-
-  final String count;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(
-        count,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: color,
-        ),
-      ),
-      Text(
-        label,
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 11),
-      ),
-    ],
-  );
 }

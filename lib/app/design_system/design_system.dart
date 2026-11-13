@@ -4,8 +4,10 @@ library;
 
 export 'package:battuta/app/design_system/brand/battuta_mark.dart';
 export 'package:battuta/app/design_system/brand/brand_intro.dart';
+export 'package:battuta/app/design_system/components/stage_controls.dart';
 export 'package:battuta/app/design_system/components/stage_empty_state.dart';
 export 'package:battuta/app/design_system/components/stage_navigation.dart';
+export 'package:battuta/app/design_system/components/stage_surfaces.dart';
 export 'package:battuta/app/design_system/motion/entrance.dart';
 export 'package:battuta/app/design_system/motion/page_transitions.dart';
 export 'package:battuta/app/design_system/motion/pressable.dart';

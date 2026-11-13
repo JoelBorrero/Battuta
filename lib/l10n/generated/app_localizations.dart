@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// Sync now action button
   ///
   /// In en, this message translates to:
-  /// **'Sync Now'**
+  /// **'Sync now'**
   String get syncNow;
 
   /// Sign out action button
@@ -968,6 +968,24 @@ abstract class AppLocalizations {
   /// **'Tap Tempo'**
   String get tapTempo;
 
+  /// Helper text on the tap tempo card of the song editor
+  ///
+  /// In en, this message translates to:
+  /// **'Tap along with the beat. Wait 3 seconds to start over.'**
+  String get tapTempoHint;
+
+  /// Label inside the round tap tempo button
+  ///
+  /// In en, this message translates to:
+  /// **'TAP'**
+  String get tapButtonLabel;
+
+  /// Footer hint at the bottom of the song editor about entering chords
+  ///
+  /// In en, this message translates to:
+  /// **'Type chords as symbols separated by spaces or bars, like C G/B Am F.'**
+  String get chordEntryHint;
+
   /// Input label and tooltip for adding a tag
   ///
   /// In en, this message translates to:
@@ -1211,8 +1229,38 @@ abstract class AppLocalizations {
   /// Hint instructing user how to add songs to setlist
   ///
   /// In en, this message translates to:
-  /// **'Tap \"Add Song\" below to build your set.'**
+  /// **'Tap + to add songs and build your set.'**
   String get tapAddSongHint;
+
+  /// Caption of the song-count stat tile on the setlist detail
+  ///
+  /// In en, this message translates to:
+  /// **'Songs'**
+  String get setlistStatSongs;
+
+  /// Caption of the average-tempo stat tile on the setlist detail
+  ///
+  /// In en, this message translates to:
+  /// **'Avg BPM'**
+  String get setlistStatAvgBpm;
+
+  /// Section header above the ordered songs of a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get setlistOrderHeader;
+
+  /// Hint next to the Order header on an editable setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder'**
+  String get setlistDragHint;
+
+  /// Rehearsal note line of a setlist song
+  ///
+  /// In en, this message translates to:
+  /// **'Note: {note}'**
+  String setlistItemNote(String note);
 
   /// Tooltip for removing song from setlist
   ///
@@ -1241,32 +1289,44 @@ abstract class AppLocalizations {
   /// AppBar title for scanner screen
   ///
   /// In en, this message translates to:
-  /// **'Scan Lead Sheet'**
+  /// **'Scan sheet music'**
   String get scanLeadSheet;
 
   /// Landing page title for OMR feature
   ///
   /// In en, this message translates to:
-  /// **'OMR Scanner'**
+  /// **'Turn paper into charts'**
   String get omrScannerTitle;
 
   /// Landing page subtitle explaining OMR capabilities
   ///
   /// In en, this message translates to:
-  /// **'Point your camera at a lead sheet or pick an image to extract\nchords, melody, and structure using Gemini AI.'**
+  /// **'Scan printed sheet music or a chord chart. Chords, melody and structure are extracted with Gemini AI.'**
   String get omrScannerSubtitle;
 
   /// Button to launch camera capture
   ///
   /// In en, this message translates to:
-  /// **'Open Camera'**
+  /// **'Capture from camera'**
   String get openCamera;
 
   /// Button to launch photo gallery picker
   ///
   /// In en, this message translates to:
-  /// **'Choose from Library'**
+  /// **'Choose from photos'**
   String get chooseFromLibrary;
+
+  /// Caption under the capture-from-camera action on the scanner
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph a page on the music stand'**
+  String get openCameraCaption;
+
+  /// Caption under the choose-from-photos action on the scanner
+  ///
+  /// In en, this message translates to:
+  /// **'An image from this device'**
+  String get chooseFromLibraryCaption;
 
   /// Snackbar confirming imported score saved to repertoire
   ///
@@ -4644,6 +4704,12 @@ abstract class AppLocalizations {
   /// **'Repertoire to show'**
   String get repertoireScopeLabel;
 
+  /// Search field on the Repertoire page; opens the song search
+  ///
+  /// In en, this message translates to:
+  /// **'Search title, artist or tag'**
+  String get repertoireSearchHint;
+
   /// orgSettingsTooltip
   ///
   /// In en, this message translates to:
@@ -5855,6 +5921,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjust photo'**
   String get photoCropTitle;
+
+  /// App bar title of the song detail page
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get songScreenTitle;
+
+  /// Original key in the song subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Original: {key}'**
+  String songOriginalKey(String key);
+
+  /// Label of the tempo stat tile
+  ///
+  /// In en, this message translates to:
+  /// **'BPM'**
+  String get songStatBpm;
+
+  /// Label of the time signature stat tile
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get songStatTime;
+
+  /// Label of the inline transpose stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Transpose'**
+  String get transposeLabel;
+
+  /// Menu action that saves the previewed transposition
+  ///
+  /// In en, this message translates to:
+  /// **'Transpose & save'**
+  String get transposeAndSave;
+
+  /// Bottom action that adds the song to a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Add to setlist'**
+  String get addToSetlist;
+
+  /// Empty state of the add-to-setlist sheet
+  ///
+  /// In en, this message translates to:
+  /// **'No setlists to add this song to yet. Create one in the Setlists tab.'**
+  String get addToSetlistEmpty;
+
+  /// Snackbar after adding the song to a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Added to {setlist}'**
+  String addedToSetlist(String setlist);
+
+  /// Marks a setlist that already holds the song
+  ///
+  /// In en, this message translates to:
+  /// **'Already added'**
+  String get alreadyInSetlist;
+
+  /// Tooltip of the overflow menu
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get moreOptions;
+
+  /// General settings group header
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get generalSection;
+
+  /// Dark theme option, named for the stage
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get themeStage;
+
+  /// Light theme option, named for the rehearsal room
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal'**
+  String get themeRehearsal;
+
+  /// Language option that follows the device language
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get languageSystemDefault;
+
+  /// Settings group header for account, server and sync
+  ///
+  /// In en, this message translates to:
+  /// **'Account and sync'**
+  String get accountSyncSection;
+
+  /// Row that opens the cloud server configuration
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get serverLabel;
+
+  /// Sync status card title when the device is offline
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get syncOfflineTitle;
+
+  /// Sync status card note when idle
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is also saved on this device'**
+  String get syncSavedOnDevice;
+
+  /// Sync status card note with the time of the last sync
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced at {time}'**
+  String syncLastSyncedAt(String time);
+
+  /// Settings: slider label for the chord chart text size
+  ///
+  /// In en, this message translates to:
+  /// **'Chart text size'**
+  String get chartTextSizeLabel;
+
+  /// Settings: switch to spell transposed notes with flats
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer flats when transposing'**
+  String get preferFlatsLabel;
+
+  /// Settings: switch to keep the screen on in the Live view
+  ///
+  /// In en, this message translates to:
+  /// **'Keep screen awake on stage'**
+  String get keepScreenAwakeLabel;
+
+  /// Title of the Team tab
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get teamTitle;
+
+  /// Roster group title when no band is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get rosterEveryone;
+
+  /// Calendar: go to the previous month
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get previousMonthTooltip;
+
+  /// Calendar: go to the next month
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get nextMonthTooltip;
+
+  /// Calendar: the selected day has no services
+  ///
+  /// In en, this message translates to:
+  /// **'No services on this day.'**
+  String get noServicesOnDay;
+
+  /// Live session badge shown while a sync session is connected
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get liveBadge;
+
+  /// Ends the live sync session (stops hosting or disconnects)
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get endSessionAction;
+
+  /// Suffix on the queued section chip, after a middle dot
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get sectionChipNext;
+
+  /// Title of the dialog confirming End on the Live page
+  ///
+  /// In en, this message translates to:
+  /// **'End the live session?'**
+  String get endSessionConfirmTitle;
+
+  /// Body of the dialog confirming End on the Live page
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone following this session will be disconnected.'**
+  String get endSessionConfirmBody;
 }
 
 class _AppLocalizationsDelegate

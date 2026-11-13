@@ -1,7 +1,9 @@
 /// One service of the Calendar tab: when and where, and its lineup.
 library;
 
+import 'package:battuta/app/design_system/components/stage_surfaces.dart';
 import 'package:battuta/app/theme/battuta_brand.dart';
+import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/team/domain/entities/service_event.dart';
 import 'package:battuta/features/team/presentation/providers/calendar_actions.dart';
@@ -63,9 +65,13 @@ class ServiceEventCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final brand = BattutaBrand.of(context);
     final names = ref.watch(memberNamesProvider);
-    final stamp = stampNames(context, event.dateTime);
+    final bandName = event.bandId == null
+        ? null
+        : (ref.watch(activeBandsProvider).value ?? const [])
+              .where((b) => b.id == event.bandId)
+              .map((b) => b.name)
+              .firstOrNull;
     final materialLocalizations = MaterialLocalizations.of(context);
-    final highlight = isNext ? brand.accentInk : brand.inkMuted;
     final setlistTitle = event.setlistId == null
         ? null
         : (ref.watch(setlistsProvider).value ?? const [])
@@ -88,191 +94,170 @@ class ServiceEventCard extends ConsumerWidget {
       ],
     );
 
-    return Container(
-      key: ValueKey('service_card_${event.id}'),
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: brand.cardDecoration(selected: isNext),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 58,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isNext ? brand.accentWash : brand.cardRaised,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isNext ? brand.accent : brand.border,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      stamp.weekday,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: highlight,
-                      ),
-                    ),
-                    Text(
-                      '${event.dateTime.day}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isNext ? brand.accentInk : brand.ink,
-                      ),
-                    ),
-                    Text(
-                      stamp.month,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: brand.inkMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (isNext) ...[
-                      const SizedBox(height: 4),
-                      StatusTag(
-                        label: l10n.nextServiceBadge,
-                        color: brand.accentInk,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: StageCard(
+        key: ValueKey('service_card_${event.id}'),
+        padding: const EdgeInsets.all(14),
+        selected: isNext,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 56,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        materialLocalizations.formatTimeOfDay(
+                          TimeOfDay.fromDateTime(event.dateTime),
+                        ),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: isNext ? brand.accentInk : brand.ink,
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 4,
-                      children: [
-                        info(
-                          Icons.access_time,
-                          materialLocalizations.formatTimeOfDay(
-                            TimeOfDay.fromDateTime(event.dateTime),
-                          ),
-                        ),
-                        info(
-                          event.type.icon,
-                          event.recurrence.isRepeating
-                              ? '${event.type.localizedShortName(context)} • ${event.recurrence.localizedShortName(context)}'
-                              : event.type.localizedShortName(context),
-                          color: brand.accentInk,
-                        ),
-                        if (event.location != null)
-                          info(Icons.location_on_outlined, event.location!),
-                        if (setlistTitle != null)
-                          info(Icons.queue_music_outlined, setlistTitle),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              if (canEdit)
-                PopupMenuButton<String>(
-                  key: ValueKey('event_menu_${event.id}'),
-                  constraints: const BoxConstraints(minWidth: 44),
-                  icon: const Icon(Icons.more_vert, size: 20),
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      showServiceFormDialog(context, event: event);
-                    } else if (value == 'delete') {
-                      _delete(context, ref);
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      key: ValueKey('event_edit_${event.id}'),
-                      value: 'edit',
-                      child: Text(l10n.editService),
-                    ),
-                    if (!event.isProjected)
-                      PopupMenuItem(
-                        key: ValueKey('event_delete_${event.id}'),
-                        value: 'delete',
-                        child: Text(
-                          l10n.deleteService,
-                          style: TextStyle(color: theme.colorScheme.error),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                  ],
-                ),
-            ],
-          ),
-          if (event.notes != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              event.notes!,
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: brand.inkMuted,
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
-          Divider(height: 1, color: brand.borderSubtle),
-          const SizedBox(height: 6),
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              Text(
-                '${l10n.bandLineupTitle} (${event.assignments.length})',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (canEdit)
-                TextButton.icon(
-                  key: ValueKey('assign_musician_btn_${event.id}'),
-                  style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
-                  icon: const Icon(Icons.person_add_alt_1, size: 16),
-                  label: Text(
-                    l10n.assignMusician,
-                    overflow: TextOverflow.ellipsis,
+                      if (isNext) ...[
+                        const SizedBox(height: 4),
+                        StatusTag(
+                          label: l10n.nextServiceBadge,
+                          color: brand.accentInk,
+                        ),
+                      ],
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 4,
+                        children: [
+                          if (bandName != null)
+                            info(Icons.layers_outlined, bandName),
+                          info(
+                            event.type.icon,
+                            event.recurrence.isRepeating
+                                ? '${event.type.localizedShortName(context)} • ${event.recurrence.localizedShortName(context)}'
+                                : event.type.localizedShortName(context),
+                            color: brand.accentInk,
+                          ),
+                          if (event.location != null)
+                            info(Icons.location_on_outlined, event.location!),
+                          if (setlistTitle != null)
+                            info(Icons.queue_music_outlined, setlistTitle),
+                        ],
+                      ),
+                    ],
                   ),
-                  onPressed: () => pickAndAssign(context, ref, event),
                 ),
-            ],
-          ),
-          if (event.assignments.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Text(
-                l10n.noMusiciansAssignedYet,
+                if (canEdit)
+                  PopupMenuButton<String>(
+                    key: ValueKey('event_menu_${event.id}'),
+                    constraints: const BoxConstraints(minWidth: 44),
+                    icon: const Icon(Icons.more_vert, size: 20),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        showServiceFormDialog(context, event: event);
+                      } else if (value == 'delete') {
+                        _delete(context, ref);
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        key: ValueKey('event_edit_${event.id}'),
+                        value: 'edit',
+                        child: Text(l10n.editService),
+                      ),
+                      if (!event.isProjected)
+                        PopupMenuItem(
+                          key: ValueKey('event_delete_${event.id}'),
+                          value: 'delete',
+                          child: Text(
+                            l10n.deleteService,
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+            ),
+            if (event.notes != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                event.notes!,
                 style: TextStyle(
                   fontSize: 12,
                   fontStyle: FontStyle.italic,
                   color: brand.inkMuted,
                 ),
               ),
+            ],
+            const SizedBox(height: 10),
+            Divider(height: 1, color: brand.borderSubtle),
+            const SizedBox(height: 6),
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                Text(
+                  '${l10n.bandLineupTitle} (${event.assignments.length})',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (canEdit)
+                  TextButton.icon(
+                    key: ValueKey('assign_musician_btn_${event.id}'),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(44, 44),
+                    ),
+                    icon: const Icon(Icons.person_add_alt_1, size: 16),
+                    label: Text(
+                      l10n.assignMusician,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onPressed: () => pickAndAssign(context, ref, event),
+                  ),
+              ],
             ),
-          for (final assignment in event.assignments)
-            _LineupRow(
-              event: event,
-              assignment: assignment,
-              name: names[assignment.memberId] ?? l10n.lineupMemberUnknown,
-              canEdit: canEdit,
-            ),
-        ],
+            if (event.assignments.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(
+                  l10n.noMusiciansAssignedYet,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: brand.inkMuted,
+                  ),
+                ),
+              ),
+            for (final assignment in event.assignments)
+              _LineupRow(
+                event: event,
+                assignment: assignment,
+                name: names[assignment.memberId] ?? l10n.lineupMemberUnknown,
+                canEdit: canEdit,
+              ),
+          ],
+        ),
       ),
     );
   }

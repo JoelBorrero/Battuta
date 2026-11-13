@@ -1,4 +1,5 @@
 import 'package:battuta/app/theme/app_theme.dart';
+import 'package:battuta/app/theme/battuta_brand.dart';
 import 'package:battuta/features/sync/domain/models/sync_cue_payload.dart';
 import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +60,7 @@ void main() {
         final container = tester.widget<Container>(containerFinder);
         final decoration = container.decoration as BoxDecoration;
 
-        expect(decoration.color, AppTheme.obsidian);
+        expect(decoration.color, BattutaBrand.dark.card);
         expect(decoration.border?.top.color, AppTheme.amberAccent);
       },
     );
@@ -80,7 +81,7 @@ void main() {
       final container = tester.widget<Container>(containerFinder);
       final decoration = container.decoration as BoxDecoration;
 
-      expect(decoration.color, AppTheme.pureWhiteSurface);
+      expect(decoration.color, BattutaBrand.light.card);
       expect(decoration.border?.top.color, AppTheme.amberAccent);
     });
 
@@ -178,11 +179,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Intro'), findsOneWidget);
-        expect(find.text('Verso'), findsOneWidget);
-        expect(find.text('Coro'), findsOneWidget);
+        expect(find.text('INTRO'), findsOneWidget);
+        expect(find.text('VERSO'), findsOneWidget);
+        expect(find.text('CORO'), findsOneWidget);
 
-        await tester.tap(find.text('Coro'));
+        await tester.tap(find.text('CORO'));
         expect(queuedSection, 'Coro');
 
         // Tap jump bolt icon
@@ -192,5 +193,27 @@ void main() {
         expect(jumpedSection, 'Coro');
       },
     );
+
+    testWidgets('queued chip reads "· NEXT" and the active one stays plain', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          mode: ThemeMode.dark,
+          child: DirectorControlBar(
+            sections: const ['Intro', 'Verso', 'Coro'],
+            activeSectionId: 'Verso',
+            queuedSectionId: 'coro',
+            onQueueSection: (_) {},
+            onJumpSection: (_) {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('CORO · NEXT'), findsOneWidget);
+      expect(find.text('VERSO'), findsOneWidget);
+      expect(find.text('INTRO'), findsOneWidget);
+    });
   });
 }

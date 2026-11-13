@@ -54,3 +54,6 @@ supabase/.temp/
 
 # Widget Preview related
 .widget_preview/
+
+# Local visual-check harness output
+test/_scratch/

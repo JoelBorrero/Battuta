@@ -140,7 +140,7 @@
   "@syncStatusLabel": {
     "description": "Sync status tile label"
   },
-  "syncNow": "Sync Now",
+  "syncNow": "Sync now",
   "@syncNow": {
     "description": "Sync now action button"
   },
@@ -683,6 +683,18 @@
   "@tapTempo": {
     "description": "Tap tempo button label"
   },
+  "tapTempoHint": "Tap along with the beat. Wait 3 seconds to start over.",
+  "@tapTempoHint": {
+    "description": "Helper text on the tap tempo card of the song editor"
+  },
+  "tapButtonLabel": "TAP",
+  "@tapButtonLabel": {
+    "description": "Label inside the round tap tempo button"
+  },
+  "chordEntryHint": "Type chords as symbols separated by spaces or bars, like C G/B Am F.",
+  "@chordEntryHint": {
+    "description": "Footer hint at the bottom of the song editor about entering chords"
+  },
   "addTag": "Add Tag",
   "@addTag": {
     "description": "Input label and tooltip for adding a tag"
@@ -868,9 +880,34 @@
   "@setlistEmpty": {
     "description": "Empty state for setlist without songs"
   },
-  "tapAddSongHint": "Tap \"Add Song\" below to build your set.",
+  "tapAddSongHint": "Tap + to add songs and build your set.",
   "@tapAddSongHint": {
     "description": "Hint instructing user how to add songs to setlist"
+  },
+  "setlistStatSongs": "Songs",
+  "@setlistStatSongs": {
+    "description": "Caption of the song-count stat tile on the setlist detail"
+  },
+  "setlistStatAvgBpm": "Avg BPM",
+  "@setlistStatAvgBpm": {
+    "description": "Caption of the average-tempo stat tile on the setlist detail"
+  },
+  "setlistOrderHeader": "Order",
+  "@setlistOrderHeader": {
+    "description": "Section header above the ordered songs of a setlist"
+  },
+  "setlistDragHint": "Drag to reorder",
+  "@setlistDragHint": {
+    "description": "Hint next to the Order header on an editable setlist"
+  },
+  "setlistItemNote": "Note: {note}",
+  "@setlistItemNote": {
+    "description": "Rehearsal note line of a setlist song",
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
   },
   "removeFromSetlistTooltip": "Remove from setlist",
   "@removeFromSetlistTooltip": {
@@ -903,25 +940,33 @@
     "description": "Tooltip for editing setlist metadata"
   },
 
-  "scanLeadSheet": "Scan Lead Sheet",
+  "scanLeadSheet": "Scan sheet music",
   "@scanLeadSheet": {
     "description": "AppBar title for scanner screen"
   },
-  "omrScannerTitle": "OMR Scanner",
+  "omrScannerTitle": "Turn paper into charts",
   "@omrScannerTitle": {
     "description": "Landing page title for OMR feature"
   },
-  "omrScannerSubtitle": "Point your camera at a lead sheet or pick an image to extract\nchords, melody, and structure using Gemini AI.",
+  "omrScannerSubtitle": "Scan printed sheet music or a chord chart. Chords, melody and structure are extracted with Gemini AI.",
   "@omrScannerSubtitle": {
     "description": "Landing page subtitle explaining OMR capabilities"
   },
-  "openCamera": "Open Camera",
+  "openCamera": "Capture from camera",
   "@openCamera": {
     "description": "Button to launch camera capture"
   },
-  "chooseFromLibrary": "Choose from Library",
+  "chooseFromLibrary": "Choose from photos",
   "@chooseFromLibrary": {
     "description": "Button to launch photo gallery picker"
+  },
+  "openCameraCaption": "Photograph a page on the music stand",
+  "@openCameraCaption": {
+    "description": "Caption under the capture-from-camera action on the scanner"
+  },
+  "chooseFromLibraryCaption": "An image from this device",
+  "@chooseFromLibraryCaption": {
+    "description": "Caption under the choose-from-photos action on the scanner"
   },
   "addedToRepertoireSuccess": "Added \"{title}\" to Repertoire!",
   "@addedToRepertoireSuccess": {
@@ -3299,6 +3344,8 @@
   "@repertoireScopeOrganization": {"description": "repertoireScopeOrganization", "placeholders": {"name": {"type": "String"}}},
   "repertoireScopeLabel": "Repertoire to show",
   "@repertoireScopeLabel": {"description": "repertoireScopeLabel"},
+  "repertoireSearchHint": "Search title, artist or tag",
+  "@repertoireSearchHint": {"description": "Search field on the Repertoire page; opens the song search"},
   "orgSettingsTooltip": "Organization settings",
   "@orgSettingsTooltip": {"description": "orgSettingsTooltip"},
   "orgRepertoireEmptyTitle": "No songs in this repertoire yet",
@@ -3850,5 +3897,153 @@
   "photoCropTitle": "Adjust photo",
   "@photoCropTitle": {
     "description": "Title of the native crop screen for profile photos and logos"
+  },
+  "songScreenTitle": "Song",
+  "@songScreenTitle": {
+    "description": "App bar title of the song detail page"
+  },
+  "songOriginalKey": "Original: {key}",
+  "@songOriginalKey": {
+    "description": "Original key in the song subtitle",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "songStatBpm": "BPM",
+  "@songStatBpm": {
+    "description": "Label of the tempo stat tile"
+  },
+  "songStatTime": "Time",
+  "@songStatTime": {
+    "description": "Label of the time signature stat tile"
+  },
+  "transposeLabel": "Transpose",
+  "@transposeLabel": {
+    "description": "Label of the inline transpose stepper"
+  },
+  "transposeAndSave": "Transpose & save",
+  "@transposeAndSave": {
+    "description": "Menu action that saves the previewed transposition"
+  },
+  "addToSetlist": "Add to setlist",
+  "@addToSetlist": {
+    "description": "Bottom action that adds the song to a setlist"
+  },
+  "addToSetlistEmpty": "No setlists to add this song to yet. Create one in the Setlists tab.",
+  "@addToSetlistEmpty": {
+    "description": "Empty state of the add-to-setlist sheet"
+  },
+  "addedToSetlist": "Added to {setlist}",
+  "@addedToSetlist": {
+    "description": "Snackbar after adding the song to a setlist",
+    "placeholders": {
+      "setlist": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyInSetlist": "Already added",
+  "@alreadyInSetlist": {
+    "description": "Marks a setlist that already holds the song"
+  },
+  "moreOptions": "More options",
+  "@moreOptions": {
+    "description": "Tooltip of the overflow menu"
+  },
+  "generalSection": "General",
+  "@generalSection": {
+    "description": "General settings group header"
+  },
+  "themeStage": "Stage",
+  "@themeStage": {
+    "description": "Dark theme option, named for the stage"
+  },
+  "themeRehearsal": "Rehearsal",
+  "@themeRehearsal": {
+    "description": "Light theme option, named for the rehearsal room"
+  },
+  "languageSystemDefault": "System",
+  "@languageSystemDefault": {
+    "description": "Language option that follows the device language"
+  },
+  "accountSyncSection": "Account and sync",
+  "@accountSyncSection": {
+    "description": "Settings group header for account, server and sync"
+  },
+  "serverLabel": "Server",
+  "@serverLabel": {
+    "description": "Row that opens the cloud server configuration"
+  },
+  "syncOfflineTitle": "Offline",
+  "@syncOfflineTitle": {
+    "description": "Sync status card title when the device is offline"
+  },
+  "syncSavedOnDevice": "Everything is also saved on this device",
+  "@syncSavedOnDevice": {
+    "description": "Sync status card note when idle"
+  },
+  "syncLastSyncedAt": "Last synced at {time}",
+  "@syncLastSyncedAt": {
+    "description": "Sync status card note with the time of the last sync",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "14:30"
+      }
+    }
+  },
+  "chartTextSizeLabel": "Chart text size",
+  "@chartTextSizeLabel": {
+    "description": "Settings: slider label for the chord chart text size"
+  },
+  "preferFlatsLabel": "Prefer flats when transposing",
+  "@preferFlatsLabel": {
+    "description": "Settings: switch to spell transposed notes with flats"
+  },
+  "keepScreenAwakeLabel": "Keep screen awake on stage",
+  "@keepScreenAwakeLabel": {
+    "description": "Settings: switch to keep the screen on in the Live view"
+  },
+  "teamTitle": "Team",
+  "@teamTitle": {
+    "description": "Title of the Team tab"
+  },
+  "rosterEveryone": "Everyone",
+  "@rosterEveryone": {
+    "description": "Roster group title when no band is selected"
+  },
+  "previousMonthTooltip": "Previous month",
+  "@previousMonthTooltip": {
+    "description": "Calendar: go to the previous month"
+  },
+  "nextMonthTooltip": "Next month",
+  "@nextMonthTooltip": {
+    "description": "Calendar: go to the next month"
+  },
+  "noServicesOnDay": "No services on this day.",
+  "@noServicesOnDay": {
+    "description": "Calendar: the selected day has no services"
+  },
+  "liveBadge": "LIVE",
+  "@liveBadge": {
+    "description": "Live session badge shown while a sync session is connected"
+  },
+  "endSessionAction": "End",
+  "@endSessionAction": {
+    "description": "Ends the live sync session (stops hosting or disconnects)"
+  },
+  "sectionChipNext": "NEXT",
+  "@sectionChipNext": {
+    "description": "Suffix on the queued section chip, after a middle dot"
+  },
+  "endSessionConfirmTitle": "End the live session?",
+  "@endSessionConfirmTitle": {
+    "description": "Title of the dialog confirming End on the Live page"
+  },
+  "endSessionConfirmBody": "Everyone following this session will be disconnected.",
+  "@endSessionConfirmBody": {
+    "description": "Body of the dialog confirming End on the Live page"
   }
 }

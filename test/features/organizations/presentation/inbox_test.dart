@@ -1,3 +1,4 @@
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/routes/app_router.dart';
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/features/auth/domain/entities/auth_user.dart';
@@ -54,7 +55,11 @@ void main() {
     organizations: r,
   );
 
-  Future<void> pumpApp(WidgetTester tester, AppHarness h, {double width = 1024}) async {
+  Future<void> pumpApp(
+    WidgetTester tester,
+    AppHarness h, {
+    double width = 1024,
+  }) async {
     tester.view.physicalSize = Size(width, 2048);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -70,12 +75,13 @@ void main() {
   ProviderContainer container(WidgetTester tester) =>
       ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
 
-  String location(WidgetTester tester) => container(tester)
-      .read(appRouterProvider)
-      .routeInformationProvider
-      .value
-      .uri
-      .toString();
+  String location(WidgetTester tester) =>
+      container(tester)
+          .read(appRouterProvider)
+          .routeInformationProvider
+          .value
+          .uri
+          .toString();
 
   testWidgets('the bell shows the unread count on every tab', (tester) async {
     final r = repo()
@@ -94,7 +100,11 @@ void main() {
     for (final path in ['/team', '/live', '/settings']) {
       container(tester).read(appRouterProvider).go(path);
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('inbox_btn')), findsOneWidget, reason: path);
+      expect(
+        find.byKey(const ValueKey('inbox_btn')),
+        findsOneWidget,
+        reason: path,
+      );
       expect(find.text('2'), findsOneWidget, reason: path);
     }
   });
@@ -147,9 +157,14 @@ void main() {
     expect(find.text('2 d ago'), findsOneWidget);
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('notification_new'))).dy,
-      lessThan(tester.getTopLeft(find.byKey(const ValueKey('notification_old'))).dy),
+      lessThan(
+        tester.getTopLeft(find.byKey(const ValueKey('notification_old'))).dy,
+      ),
     );
-    expect(find.byKey(const ValueKey('notification_unread_new')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('notification_unread_new')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('every notification type renders in the inbox', (tester) async {
@@ -168,7 +183,10 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(ValueKey('notification_n-${type.name}')),
         200,
-        scrollable: find.descendant(of: list, matching: find.byType(Scrollable)),
+        scrollable: find.descendant(
+          of: list,
+          matching: find.byType(Scrollable),
+        ),
       );
     }
     expect(tester.takeException(), isNull);
@@ -229,10 +247,10 @@ void main() {
     ) async {
       await open(tester, note('n1', NotificationType.eventAssigned));
       expect(find.byType(TeamPage), findsOneWidget);
-      final segmented = tester.widget<SegmentedButton<int>>(
-        find.byType(SegmentedButton<int>),
+      final segmented = tester.widget<StageSegmentedControl<int>>(
+        find.byType(StageSegmentedControl<int>),
       );
-      expect(segmented.selected, {1});
+      expect(segmented.selected, 1);
     });
 
     testWidgets('archive notifications open the organization settings', (
@@ -268,12 +286,13 @@ void main() {
       expect(location(tester), '/repertoire/ver-7');
     });
 
-    String pushedLocation(WidgetTester tester) => container(tester)
-        .read(appRouterProvider)
-        .routerDelegate
-        .currentConfiguration
-        .last
-        .matchedLocation;
+    String pushedLocation(WidgetTester tester) =>
+        container(tester)
+            .read(appRouterProvider)
+            .routerDelegate
+            .currentConfiguration
+            .last
+            .matchedLocation;
 
     testWidgets('a copy of my version opens its song', (tester) async {
       await open(
@@ -308,7 +327,10 @@ void main() {
         tester,
         note('n1', NotificationType.roleChanged, orgId: 'org-gone'),
       );
-      expect(find.text('You are no longer in that organization.'), findsOneWidget);
+      expect(
+        find.text('You are no longer in that organization.'),
+        findsOneWidget,
+      );
       expect(find.byType(InboxPage), findsOneWidget);
     });
 
@@ -322,28 +344,32 @@ void main() {
     });
   });
 
-  testWidgets('offline: the inbox opens from the cache and read marks fail softly', (
-    tester,
-  ) async {
-    final r = repo()
-      ..offline = true
-      ..setNotifications([note('n1', NotificationType.unknown, orgId: null)]);
-    final h = harness(r);
-    addTearDown(h.dispose);
-    await pumpApp(tester, h);
-    await openInbox(tester);
+  testWidgets(
+    'offline: the inbox opens from the cache and read marks fail softly',
+    (tester) async {
+      final r = repo()
+        ..offline = true
+        ..setNotifications([note('n1', NotificationType.unknown, orgId: null)]);
+      final h = harness(r);
+      addTearDown(h.dispose);
+      await pumpApp(tester, h);
+      await openInbox(tester);
 
-    expect(find.text('You have a new notification'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('inbox_mark_all_read_btn')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('notification_unread_n1')), findsOneWidget);
-    expect(find.text('You have a new notification'), findsOneWidget);
-    expect(
-      r.calls.where((c) => c.startsWith('markNotificationsRead')),
-      isNotEmpty,
-    );
-    expect(backendFailure(BackendErrorCode.offline).message, 'offline');
-  });
+      expect(find.text('You have a new notification'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('inbox_mark_all_read_btn')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('notification_unread_n1')),
+        findsOneWidget,
+      );
+      expect(find.text('You have a new notification'), findsOneWidget);
+      expect(
+        r.calls.where((c) => c.startsWith('markNotificationsRead')),
+        isNotEmpty,
+      );
+      expect(backendFailure(BackendErrorCode.offline).message, 'offline');
+    },
+  );
 
   testWidgets('shows the empty state', (tester) async {
     final h = harness(repo());
@@ -399,7 +425,10 @@ void main() {
             'n1',
             NotificationType.invitation,
             orgId: 'org-9',
-            payload: {'invitation_id': 'inv-1', 'organization_name': 'Youth Band'},
+            payload: {
+              'invitation_id': 'inv-1',
+              'organization_name': 'Youth Band',
+            },
           ),
         ]);
       final h = harness(r);
@@ -408,8 +437,12 @@ void main() {
       await openInbox(tester);
 
       expect(
-        tester.getTopLeft(find.byKey(const ValueKey('invitation_card_inv-1'))).dy,
-        lessThan(tester.getTopLeft(find.byKey(const ValueKey('notification_n1'))).dy),
+        tester
+            .getTopLeft(find.byKey(const ValueKey('invitation_card_inv-1')))
+            .dy,
+        lessThan(
+          tester.getTopLeft(find.byKey(const ValueKey('notification_n1'))).dy,
+        ),
       );
       await tester.tap(find.byKey(const ValueKey('invitation_accept_inv-1')));
       await tester.pumpAndSettle();
@@ -448,34 +481,35 @@ void main() {
       expect(badge, findsNothing);
     });
 
-    testWidgets('an unread notification of an answered invitation is not counted', (
-      tester,
-    ) async {
-      final r = repo()
-        ..setMyInvitations([
-          const Invitation(
-            id: 'inv-1',
-            organizationId: 'org-9',
-            invitedUserId: 'u-me',
-            status: InvitationStatus.declined,
-            organizationName: 'Youth Band',
-          ),
-        ])
-        ..setNotifications([
-          note(
-            'n1',
-            NotificationType.invitation,
-            orgId: 'org-9',
-            payload: {'invitation_id': 'inv-1'},
-          ),
-        ]);
-      final h = harness(r);
-      addTearDown(h.dispose);
-      await pumpApp(tester, h);
+    testWidgets(
+      'an unread notification of an answered invitation is not counted',
+      (tester) async {
+        final r = repo()
+          ..setMyInvitations([
+            const Invitation(
+              id: 'inv-1',
+              organizationId: 'org-9',
+              invitedUserId: 'u-me',
+              status: InvitationStatus.declined,
+              organizationName: 'Youth Band',
+            ),
+          ])
+          ..setNotifications([
+            note(
+              'n1',
+              NotificationType.invitation,
+              orgId: 'org-9',
+              payload: {'invitation_id': 'inv-1'},
+            ),
+          ]);
+        final h = harness(r);
+        addTearDown(h.dispose);
+        await pumpApp(tester, h);
 
-      expect(find.byKey(const ValueKey('inbox_btn')), findsOneWidget);
-      expect(find.text('1'), findsNothing);
-    });
+        expect(find.byKey(const ValueKey('inbox_btn')), findsOneWidget);
+        expect(find.text('1'), findsNothing);
+      },
+    );
 
     testWidgets('an accept error is shown', (tester) async {
       final r = repo()..setMyInvitations([_invitation]);
@@ -488,7 +522,10 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('invitation_accept_inv-1')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('invitation_card_inv-1')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('invitation_card_inv-1')),
+        findsOneWidget,
+      );
       expect(container(tester).read(activeOrganizationIdProvider), 'org-1');
     });
   });
@@ -502,8 +539,7 @@ void main() {
               id: 'inv-1',
               organizationId: 'org-9',
               invitedUserId: 'u-me',
-              organizationName:
-                  'An extremely long organization name that keeps going and going',
+              organizationName: 'An extremely long organization name that keeps going and going',
             ),
           ])
           ..setNotifications([

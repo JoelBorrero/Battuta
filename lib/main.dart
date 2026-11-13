@@ -7,12 +7,22 @@ library;
 import 'package:battuta/app/app.dart';
 import 'package:battuta/core/services/supabase_client_manager.dart';
 import 'package:battuta/core/utils/logger.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Bundled JetBrains Mono (keys and chords) ships with its license.
+  LicenseRegistry.addLicense(() async* {
+    final text = await rootBundle.loadString(
+      'assets/fonts/JetBrainsMono-LICENSE.txt',
+    );
+    yield LicenseEntryWithLineBreaks(const ['JetBrains Mono'], text);
+  });
 
   // Initialize runtime environment configuration
   EnvConfig.init(Environment.dev);

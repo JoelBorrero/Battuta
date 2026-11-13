@@ -32,7 +32,7 @@ class StageDestination {
 }
 
 const double _pillWidth = 56;
-const double _pillHeight = 32;
+const double _pillHeight = 30;
 
 /// Bottom navigation bar for compact layouts.
 class StageNavigationBar extends StatelessWidget {
@@ -254,10 +254,9 @@ class _StageItem extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: AppTheme.primaryFontFamily,
                   fontFamilyFallback: AppTheme.fontFamilyFallbacks,
-                  fontSize: 11,
+                  fontSize: 12,
                   height: 1.2,
-                  letterSpacing: 0.1,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   color: color,
                 ),
                 child: Text(
