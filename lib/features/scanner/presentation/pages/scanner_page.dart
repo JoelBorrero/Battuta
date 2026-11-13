@@ -4,6 +4,7 @@
 /// (tickets #86e3yy41t, #86e3yy421, and #86e3yy428).
 library;
 
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_score_mapper.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
 import 'package:battuta/features/scanner/domain/entities/pitch_only_result.dart';
@@ -29,11 +30,7 @@ class ScannerPage extends ConsumerWidget {
     ScanFlowModal.show(
       context,
       onScoreExtracted: (Score score) async {
-        final linked = await linkSongBeforeSave(
-          context,
-          ref,
-          score.toSong(),
-        );
+        final linked = await linkSongBeforeSave(context, ref, score.toSong());
         if (linked == null) return;
         final song = linked;
         await ref.read(repertoireProvider.notifier).addSong(song);
@@ -92,58 +89,246 @@ class ScannerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final brand = BattutaBrand.of(context);
+    final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n?.scanLeadSheet ?? 'Scan Lead Sheet')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.document_scanner_outlined,
-                size: 80,
-                color: theme.colorScheme.primary.withValues(alpha: 0.5),
+      appBar: AppBar(title: Text(l10n?.scanLeadSheet ?? 'Scan sheet music')),
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                BattutaSpace.lg,
+                BattutaSpace.xs,
+                BattutaSpace.lg,
+                BattutaSpace.xl,
               ),
-              const SizedBox(height: 24),
-              Text(
-                l10n?.omrScannerTitle ?? 'OMR Scanner',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+              children: [
+                const _CaptureViewfinder(),
+                const SizedBox(height: 18),
+                Text(
+                  l10n?.omrScannerTitle ?? 'Turn paper into charts',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    color: brand.ink,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n?.omrScannerSubtitle ??
-                    'Point your camera at a lead sheet or pick an image to extract\n'
-                    'chords, melody, and structure using Gemini AI.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 6),
+                Text(
+                  l10n?.omrScannerSubtitle ??
+                      'Scan printed sheet music or a chord chart. Chords, '
+                          'melody and structure are extracted with Gemini AI.',
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: brand.inkMuted,
+                    height: 1.5,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              FilledButton.icon(
-                key: const Key('open_camera_button'),
-                onPressed: () => _openScanModal(context, ref, fromCamera: true),
-                icon: const Icon(Icons.camera_alt),
-                label: Text(l10n?.openCamera ?? 'Open Camera'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                key: const Key('choose_gallery_button'),
-                onPressed: () =>
-                    _openScanModal(context, ref, fromCamera: false),
-                icon: const Icon(Icons.photo_library_outlined),
-                label: Text(l10n?.chooseFromLibrary ?? 'Choose from Library'),
-              ),
-            ],
+                const SizedBox(height: BattutaSpace.lg),
+                _ScanActionTile(
+                  key: const Key('open_camera_button'),
+                  icon: Icons.photo_camera_outlined,
+                  title: l10n?.openCamera ?? 'Capture from camera',
+                  caption:
+                      l10n?.openCameraCaption ??
+                      'Photograph a page on the music stand',
+                  primary: true,
+                  onTap: () => _openScanModal(context, ref, fromCamera: true),
+                ),
+                const SizedBox(height: BattutaSpace.sm),
+                _ScanActionTile(
+                  key: const Key('choose_gallery_button'),
+                  icon: Icons.image_outlined,
+                  title: l10n?.chooseFromLibrary ?? 'Choose from photos',
+                  caption:
+                      l10n?.chooseFromLibraryCaption ??
+                      'An image from this device',
+                  onTap: () => _openScanModal(context, ref, fromCamera: false),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// One capture source: an icon tile, a title and a caption in a pressable card.
+class _ScanActionTile extends StatelessWidget {
+  const _ScanActionTile({
+    required this.icon,
+    required this.title,
+    required this.caption,
+    required this.onTap,
+    super.key,
+    this.primary = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final String caption;
+  final VoidCallback onTap;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = BattutaBrand.of(context);
+    final textTheme = Theme.of(context).textTheme;
+    return StageCard(
+      onTap: onTap,
+      selected: primary,
+      semanticLabel: title,
+      padding: const EdgeInsets.all(14),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: BattutaSpace.minTouchTarget,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: primary ? brand.accent : brand.cardRaised,
+                borderRadius: BorderRadius.circular(BattutaRadius.sm + 2),
+              ),
+              child: Icon(
+                icon,
+                size: 22,
+                color: primary ? brand.onAccent : brand.ink,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: brand.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    caption,
+                    style: textTheme.bodySmall?.copyWith(color: brand.inkMuted),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Static viewfinder illustration: staff lines, amber corner brackets and a
+/// scan line. Decorative only, so it is excluded from semantics.
+class _CaptureViewfinder extends StatelessWidget {
+  const _CaptureViewfinder();
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = BattutaBrand.of(context);
+    return ExcludeSemantics(
+      child: Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: brand.card,
+          border: Border.all(color: brand.border),
+          borderRadius: BorderRadius.circular(BattutaRadius.lg),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: CustomPaint(
+          painter: _ViewfinderPainter(
+            accent: brand.accent,
+            line: brand.inkDim,
+            lineDim: brand.border,
+          ),
+          size: Size.infinite,
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewfinderPainter extends CustomPainter {
+  const _ViewfinderPainter({
+    required this.accent,
+    required this.line,
+    required this.lineDim,
+  });
+
+  final Color accent;
+  final Color line;
+  final Color lineDim;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Three staves of five lines, centred.
+    const staffWidth = 220.0;
+    const lineGap = 6.0;
+    const staffGap = 14.0;
+    const staffHeight = lineGap * 4 + 1;
+    const total = staffHeight * 3 + staffGap * 2;
+    final left = (size.width - staffWidth) / 2;
+    final top = (size.height - total) / 2;
+    for (var s = 0; s < 3; s++) {
+      final paint = Paint()
+        ..color = s == 2 ? lineDim : line
+        ..strokeWidth = 1;
+      final y0 = top + s * (staffHeight + staffGap);
+      for (var l = 0; l < 5; l++) {
+        final y = y0 + l * lineGap;
+        canvas.drawLine(Offset(left, y), Offset(left + staffWidth, y), paint);
+      }
+    }
+
+    // Scan line.
+    final scanX = size.width / 2 + 30;
+    canvas.drawLine(
+      Offset(scanX, 0),
+      Offset(scanX, size.height),
+      Paint()
+        ..color = accent
+        ..strokeWidth = 2,
+    );
+
+    // Corner brackets.
+    final bracket = Paint()
+      ..color = accent
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    const inset = 16.0;
+    const arm = 26.0;
+    const r = 8.0;
+    for (final (sx, sy) in const [
+      (1.0, 1.0),
+      (-1.0, 1.0),
+      (1.0, -1.0),
+      (-1.0, -1.0),
+    ]) {
+      final cx = sx > 0 ? inset : size.width - inset;
+      final cy = sy > 0 ? inset : size.height - inset;
+      final path = Path()
+        ..moveTo(cx + sx * arm, cy)
+        ..lineTo(cx + sx * r, cy)
+        ..quadraticBezierTo(cx, cy, cx, cy + sy * r)
+        ..lineTo(cx, cy + sy * arm);
+      canvas.drawPath(path, bracket);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ViewfinderPainter old) =>
+      old.accent != accent || old.line != line || old.lineDim != lineDim;
 }

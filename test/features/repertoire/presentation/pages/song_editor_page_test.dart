@@ -156,7 +156,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      final tapBtn = find.text('Tap Tempo');
+      final tapBtn = find.byKey(const Key('song_tap_tempo_button'));
 
       // Tap 3 times with ~500ms intervals (120 BPM)
       await tester.tap(tapBtn);
@@ -166,9 +166,40 @@ void main() {
       await tester.tap(tapBtn);
       await tester.pumpAndSettle();
 
-      // Tempo should be near 120 BPM
+      // Taps moved the tempo off its 120 BPM default (the test clock is real,
+      // so the exact value depends on tap spacing).
       expect(find.textContaining('BPM'), findsOneWidget);
+      expect(find.text('120 BPM'), findsNothing);
     });
+
+    for (final width in [320.0, 1180.0]) {
+      testWidgets('lays out without overflow at ${width.toInt()} wide', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 900);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(buildSubject(songId: 'song-test-1'));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        for (final tooltip in [
+          'Duplicate section',
+          'Delete Section',
+          'Increase repeats',
+          'Decrease BPM',
+        ]) {
+          final size = tester.getSize(find.byTooltip(tooltip));
+          expect(size.width, greaterThanOrEqualTo(44), reason: tooltip);
+          expect(size.height, greaterThanOrEqualTo(44), reason: tooltip);
+        }
+        expect(
+          tester.getSize(find.byKey(const Key('song_tap_tempo_button'))),
+          const Size(72, 72),
+        );
+      });
+    }
 
     testWidgets(
       'inserting section with matching name pre-loads chords and lyrics from previous section',
@@ -227,31 +258,30 @@ void main() {
       },
     );
 
-    testWidgets(
-      'duplicating a section creates an exact clone right below it',
-      (tester) async {
-        tester.view.physicalSize = const Size(1024, 2048);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('duplicating a section creates an exact clone right below it', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(buildSubject(songId: 'song-test-1'));
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(buildSubject(songId: 'song-test-1'));
+      await tester.pumpAndSettle();
 
-        expect(find.text('Song Sections (1)'), findsOneWidget);
-        expect(find.text('The falling leaves...'), findsOneWidget);
+      expect(find.text('Song Sections (1)'), findsOneWidget);
+      expect(find.text('The falling leaves...'), findsOneWidget);
 
-        // Tap Duplicate section icon
-        final duplicateBtn = find.byTooltip('Duplicate section');
-        expect(duplicateBtn, findsOneWidget);
-        await tester.tap(duplicateBtn);
-        await tester.pumpAndSettle();
+      // Tap Duplicate section icon
+      final duplicateBtn = find.byTooltip('Duplicate section');
+      expect(duplicateBtn, findsOneWidget);
+      await tester.tap(duplicateBtn);
+      await tester.pumpAndSettle();
 
-        // Verify section was cloned
-        expect(find.text('Song Sections (2)'), findsOneWidget);
-        expect(find.text('The falling leaves...'), findsNWidgets(2));
-        expect(find.text('Duplicated Verse'), findsOneWidget);
-      },
-    );
+      // Verify section was cloned
+      expect(find.text('Song Sections (2)'), findsOneWidget);
+      expect(find.text('The falling leaves...'), findsNWidgets(2));
+      expect(find.text('Duplicated Verse'), findsOneWidget);
+    });
 
     testWidgets(
       'pre-load chip appears when renaming empty section to match existing section',

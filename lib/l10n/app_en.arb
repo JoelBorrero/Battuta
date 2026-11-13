@@ -683,6 +683,18 @@
   "@tapTempo": {
     "description": "Tap tempo button label"
   },
+  "tapTempoHint": "Tap along with the beat. Wait 3 seconds to start over.",
+  "@tapTempoHint": {
+    "description": "Helper text on the tap tempo card of the song editor"
+  },
+  "tapButtonLabel": "TAP",
+  "@tapButtonLabel": {
+    "description": "Label inside the round tap tempo button"
+  },
+  "chordEntryHint": "Type chords as symbols separated by spaces or bars, like C G/B Am F.",
+  "@chordEntryHint": {
+    "description": "Footer hint at the bottom of the song editor about entering chords"
+  },
   "addTag": "Add Tag",
   "@addTag": {
     "description": "Input label and tooltip for adding a tag"
@@ -928,25 +940,33 @@
     "description": "Tooltip for editing setlist metadata"
   },
 
-  "scanLeadSheet": "Scan Lead Sheet",
+  "scanLeadSheet": "Scan sheet music",
   "@scanLeadSheet": {
     "description": "AppBar title for scanner screen"
   },
-  "omrScannerTitle": "OMR Scanner",
+  "omrScannerTitle": "Turn paper into charts",
   "@omrScannerTitle": {
     "description": "Landing page title for OMR feature"
   },
-  "omrScannerSubtitle": "Point your camera at a lead sheet or pick an image to extract\nchords, melody, and structure using Gemini AI.",
+  "omrScannerSubtitle": "Scan printed sheet music or a chord chart. Chords, melody and structure are extracted with Gemini AI.",
   "@omrScannerSubtitle": {
     "description": "Landing page subtitle explaining OMR capabilities"
   },
-  "openCamera": "Open Camera",
+  "openCamera": "Capture from camera",
   "@openCamera": {
     "description": "Button to launch camera capture"
   },
-  "chooseFromLibrary": "Choose from Library",
+  "chooseFromLibrary": "Choose from photos",
   "@chooseFromLibrary": {
     "description": "Button to launch photo gallery picker"
+  },
+  "openCameraCaption": "Photograph a page on the music stand",
+  "@openCameraCaption": {
+    "description": "Caption under the capture-from-camera action on the scanner"
+  },
+  "chooseFromLibraryCaption": "An image from this device",
+  "@chooseFromLibraryCaption": {
+    "description": "Caption under the choose-from-photos action on the scanner"
   },
   "addedToRepertoireSuccess": "Added \"{title}\" to Repertoire!",
   "@addedToRepertoireSuccess": {

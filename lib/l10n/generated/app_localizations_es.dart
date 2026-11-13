@@ -485,6 +485,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tapTempo => 'Pulsar Tempo';
 
   @override
+  String get tapTempoHint =>
+      'Pulsa al ritmo del tempo. Espera 3 segundos para empezar de nuevo.';
+
+  @override
+  String get tapButtonLabel => 'TAP';
+
+  @override
+  String get chordEntryHint =>
+      'Escribe los acordes como símbolos separados por espacios o barras, como C G/B Am F.';
+
+  @override
   String get addTag => 'Añadir Etiqueta';
 
   @override
@@ -654,20 +665,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get editSetlistInfoTooltip => 'Editar información de la lista';
 
   @override
-  String get scanLeadSheet => 'Escanear Partitura';
+  String get scanLeadSheet => 'Escanear partitura';
 
   @override
-  String get omrScannerTitle => 'Escáner OMR';
+  String get omrScannerTitle => 'Convierte el papel en partituras';
 
   @override
   String get omrScannerSubtitle =>
-      'Apunta la cámara a una partitura o elige una imagen para extraer\nacordes, melodía y estructura con Gemini AI.';
+      'Escanea una partitura impresa o un cifrado. Los acordes, la melodía y la estructura se extraen con Gemini AI.';
 
   @override
-  String get openCamera => 'Abrir Cámara';
+  String get openCamera => 'Capturar con la cámara';
 
   @override
-  String get chooseFromLibrary => 'Elegir de la Galería';
+  String get chooseFromLibrary => 'Elegir de las fotos';
+
+  @override
+  String get openCameraCaption => 'Fotografía una página en el atril';
+
+  @override
+  String get chooseFromLibraryCaption => 'Una imagen de este dispositivo';
 
   @override
   String addedToRepertoireSuccess(String title) {

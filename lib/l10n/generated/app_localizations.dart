@@ -968,6 +968,24 @@ abstract class AppLocalizations {
   /// **'Tap Tempo'**
   String get tapTempo;
 
+  /// Helper text on the tap tempo card of the song editor
+  ///
+  /// In en, this message translates to:
+  /// **'Tap along with the beat. Wait 3 seconds to start over.'**
+  String get tapTempoHint;
+
+  /// Label inside the round tap tempo button
+  ///
+  /// In en, this message translates to:
+  /// **'TAP'**
+  String get tapButtonLabel;
+
+  /// Footer hint at the bottom of the song editor about entering chords
+  ///
+  /// In en, this message translates to:
+  /// **'Type chords as symbols separated by spaces or bars, like C G/B Am F.'**
+  String get chordEntryHint;
+
   /// Input label and tooltip for adding a tag
   ///
   /// In en, this message translates to:
@@ -1271,32 +1289,44 @@ abstract class AppLocalizations {
   /// AppBar title for scanner screen
   ///
   /// In en, this message translates to:
-  /// **'Scan Lead Sheet'**
+  /// **'Scan sheet music'**
   String get scanLeadSheet;
 
   /// Landing page title for OMR feature
   ///
   /// In en, this message translates to:
-  /// **'OMR Scanner'**
+  /// **'Turn paper into charts'**
   String get omrScannerTitle;
 
   /// Landing page subtitle explaining OMR capabilities
   ///
   /// In en, this message translates to:
-  /// **'Point your camera at a lead sheet or pick an image to extract\nchords, melody, and structure using Gemini AI.'**
+  /// **'Scan printed sheet music or a chord chart. Chords, melody and structure are extracted with Gemini AI.'**
   String get omrScannerSubtitle;
 
   /// Button to launch camera capture
   ///
   /// In en, this message translates to:
-  /// **'Open Camera'**
+  /// **'Capture from camera'**
   String get openCamera;
 
   /// Button to launch photo gallery picker
   ///
   /// In en, this message translates to:
-  /// **'Choose from Library'**
+  /// **'Choose from photos'**
   String get chooseFromLibrary;
+
+  /// Caption under the capture-from-camera action on the scanner
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph a page on the music stand'**
+  String get openCameraCaption;
+
+  /// Caption under the choose-from-photos action on the scanner
+  ///
+  /// In en, this message translates to:
+  /// **'An image from this device'**
+  String get chooseFromLibraryCaption;
 
   /// Snackbar confirming imported score saved to repertoire
   ///

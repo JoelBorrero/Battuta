@@ -5,16 +5,14 @@
 /// with chord chart parsing, reordering, and lyrics.
 library;
 
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/localization/backend_error_messages.dart';
-import 'package:battuta/app/theme/app_theme.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
-import 'package:battuta/features/repertoire/domain/entities/chord_cell.dart';
-import 'package:battuta/features/repertoire/domain/entities/chord_quality.dart';
 import 'package:battuta/features/repertoire/domain/entities/musical_key.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
 import 'package:battuta/features/repertoire/domain/entities/song_section.dart';
-import 'package:battuta/features/repertoire/domain/services/song_transposer.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
+import 'package:battuta/features/repertoire/presentation/widgets/song_editor_section_card.dart';
 import 'package:battuta/features/sharing/domain/entities/song_suggestion.dart';
 import 'package:battuta/features/sharing/presentation/widgets/move_to_song_sheet.dart';
 import 'package:battuta/features/sharing/presentation/widgets/sharing_sheet.dart';
@@ -55,7 +53,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   int _tempo = 120;
   (int, int) _timeSignature = (4, 4);
   List<String> _tags = [];
-  final List<_EditableSection> _sections = [];
+  final List<EditableSection> _sections = [];
 
   bool _initialized = false;
   bool _isSaving = false;
@@ -67,6 +65,9 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
 
   // Tap-tempo timestamp tracker
   final List<DateTime> _tapTimestamps = [];
+
+  /// Beat dots shown under the tap-tempo button.
+  static const int _tapDotCount = 8;
 
   static const List<(int, int)> _supportedTimeSignatures = [
     (4, 4),
@@ -90,7 +91,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     } else if (widget.songId == null) {
       // Creation mode: seed with a single default verse
       _sections.add(
-        _EditableSection(
+        EditableSection(
           id: 'sec_${DateTime.now().millisecondsSinceEpoch}',
           name: 'Verse 1',
           chords: [],
@@ -130,7 +131,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     _sections.clear();
     for (final s in song.sections) {
       _sections.add(
-        _EditableSection(
+        EditableSection(
           id: s.id,
           name: s.name,
           chords: List.from(s.chords),
@@ -143,7 +144,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
 
     if (_sections.isEmpty) {
       _sections.add(
-        _EditableSection(
+        EditableSection(
           id: 'sec_${DateTime.now().millisecondsSinceEpoch}',
           name: 'Verse 1',
           chords: [],
@@ -160,6 +161,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
 
     // Keep taps from the last 3 seconds only
     _tapTimestamps.removeWhere((t) => now.difference(t).inMilliseconds > 3000);
+    setState(() {});
 
     if (_tapTimestamps.length >= 2) {
       var totalDeltaMs = 0;
@@ -188,7 +190,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     }
   }
 
-  _EditableSection? _findPreviousSection(String name, [int? beforeIndex]) {
+  EditableSection? _findPreviousSection(String name, [int? beforeIndex]) {
     final searchLimit = beforeIndex ?? _sections.length;
     final trimmedName = name.trim().toLowerCase();
     if (trimmedName.isEmpty || trimmedName == 'new section') return null;
@@ -206,7 +208,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     final l10n = AppLocalizations.of(context);
     final previous = _findPreviousSection(defaultName, insertIndex);
 
-    final newSection = _EditableSection(
+    final newSection = EditableSection(
       id: 'sec_${DateTime.now().millisecondsSinceEpoch}_${_sections.length}',
       name: defaultName,
       chords: previous != null
@@ -271,7 +273,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
     }
   }
 
-  void _copySectionContent(int targetIndex, _EditableSection source) {
+  void _copySectionContent(int targetIndex, EditableSection source) {
     if (targetIndex < 0 || targetIndex >= _sections.length) return;
     final l10n = AppLocalizations.of(context);
     final target = _sections[targetIndex];
@@ -550,6 +552,7 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
   }
 
   Widget _buildScaffold(ThemeData theme, bool isEditing) {
+    final brand = BattutaBrand.of(context);
     final me = ref.watch(currentAccountIdProvider);
     final canEdit = _canEdit(me);
     final titleLocked = canEdit && !_canEditTitle(me);
@@ -571,6 +574,13 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
               onPressed: _isSaving ? null : _confirmDelete,
             ),
           FilledButton.icon(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(BattutaRadius.sm + 2),
+              ),
+            ),
             onPressed: (_isSaving || !canEdit) ? null : _saveSong,
             icon: _isSaving
                 ? const SizedBox(
@@ -590,996 +600,535 @@ class _SongEditorPageState extends ConsumerState<SongEditorPage> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          children: [
-            if (!canEdit)
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.lock_outline,
-                      size: 18,
-                      color: theme.colorScheme.primary,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                BattutaSpace.lg,
+                BattutaSpace.sm,
+                BattutaSpace.lg,
+                BattutaSpace.xxl,
+              ),
+              children: [
+                if (!canEdit)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: BattutaSpace.md),
+                    child: StageCard(
+                      padding: const EdgeInsets.all(BattutaSpace.md),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lock_outline,
+                            size: 18,
+                            color: brand.accentInk,
+                          ),
+                          const SizedBox(width: BattutaSpace.sm),
+                          Expanded(
+                            child: Text(
+                              l10n?.readOnlyVersionEditorNotice ??
+                                  'Only the owner can edit this version.',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: brand.ink,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                  ),
+                // ── Primary Metadata ──
+                TextFormField(
+                  key: const Key('song_title_field'),
+                  controller: _titleController,
+                  readOnly: fieldsLocked,
+                  decoration: InputDecoration(
+                    helperText: titleLocked ? l10n?.songTitleLockedHint : null,
+                    helperMaxLines: 3,
+                    labelText: l10n?.songTitleLabel ?? 'Song Title *',
+                    hintText: l10n?.songTitleHint ?? 'e.g. Amazing Grace',
+                    prefixIcon: const Icon(Icons.title),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return l10n?.songTitleValidation ??
+                          'Please enter a song title';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: BattutaSpace.md),
+                TextFormField(
+                  key: const Key('song_artist_field'),
+                  controller: _artistController,
+                  readOnly: fieldsLocked,
+                  decoration: InputDecoration(
+                    labelText:
+                        l10n?.artistComposerLabel ?? 'Artist / Composer *',
+                    hintText: l10n?.artistComposerHint ?? 'e.g. John Newton',
+                    prefixIcon: const Icon(Icons.person),
+                  ),
+                  validator: (val) {
+                    if (_linked != null) return null;
+                    if (val == null || val.trim().isEmpty) {
+                      return l10n?.artistValidation ??
+                          'Please enter an artist or composer';
+                    }
+                    return null;
+                  },
+                ),
+                if (!isEditing && canEdit)
+                  Padding(
+                    padding: const EdgeInsets.only(top: BattutaSpace.md),
+                    child: SongSuggestionsPanel(
+                      titleController: _titleController,
+                      selected: _linked,
+                      onSelected: _onSongPicked,
+                    ),
+                  ),
+                if (original != null &&
+                    canEdit &&
+                    me != null &&
+                    original.ownerId == me)
+                  Padding(
+                    padding: const EdgeInsets.only(top: BattutaSpace.md),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          key: const ValueKey('editor_sharing_btn'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(44, 44),
+                          ),
+                          icon: const Icon(Icons.share_outlined, size: 18),
+                          label: Text(l10n?.sharingButton ?? 'Sharing'),
+                          onPressed: () =>
+                              showSharingSheet(context, ref, original.id),
+                        ),
+                        if (original.songWorkId != null)
+                          OutlinedButton.icon(
+                            key: const ValueKey('editor_move_btn'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(44, 44),
+                            ),
+                            icon: const Icon(
+                              Icons.drive_file_move_outline,
+                              size: 18,
+                            ),
+                            label: Text(
+                              l10n?.moveToSongButton ?? 'Move to another song',
+                            ),
+                            onPressed: () => _moveToAnotherSong(original),
+                          ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: BattutaSpace.lg),
+
+                // ── Musical Attributes (Key, Meter, Tempo) ──
+                StageSectionHeader(
+                  title: l10n?.musicalSetup ?? 'Musical Setup',
+                  padding: const EdgeInsets.only(bottom: BattutaSpace.sm),
+                ),
+                _buildKeyMeterRow(l10n),
+                const SizedBox(height: BattutaSpace.md),
+                _buildTempoCard(theme, brand, l10n),
+                const SizedBox(height: BattutaSpace.lg),
+
+                // ── Tags ──
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        key: const Key('song_tag_input'),
+                        controller: _tagInputController,
+                        decoration: InputDecoration(
+                          labelText: l10n?.addTag ?? 'Add Tag',
+                          hintText:
+                              l10n?.tagHint ?? 'e.g. worship, rock, ballad',
+                        ),
+                        onSubmitted: (_) => _addTag(),
+                      ),
+                    ),
+                    const SizedBox(width: BattutaSpace.sm),
+                    IconButton.filled(
+                      icon: const Icon(Icons.add),
+                      tooltip: l10n?.addTag ?? 'Add Tag',
+                      constraints: const BoxConstraints(
+                        minWidth: BattutaSpace.minTouchTarget,
+                        minHeight: BattutaSpace.minTouchTarget,
+                      ),
+                      onPressed: _addTag,
+                    ),
+                  ],
+                ),
+                if (_tags.isNotEmpty) ...[
+                  const SizedBox(height: BattutaSpace.sm),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: _tags.map((tag) {
+                      return Chip(
+                        label: Text(tag),
+                        onDeleted: () {
+                          setState(() => _tags.remove(tag));
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+                const SizedBox(height: BattutaSpace.lg),
+
+                // ── Notes ──
+                TextFormField(
+                  controller: _notesController,
+                  decoration: InputDecoration(
+                    labelText:
+                        l10n?.notesInstructionsLabel ??
+                        'Notes / Performance Instructions',
+                    hintText:
+                        l10n?.notesInstructionsHint ??
+                        'e.g. Capo 3rd fret, slow acoustic intro...',
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: BattutaSpace.xl),
+
+                // ── Sections header ──
+                Row(
+                  children: [
                     Expanded(
                       child: Text(
-                        l10n?.readOnlyVersionEditorNotice ??
-                            'Only the owner can edit this version.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface,
+                        l10n?.songSectionsCount(_sections.length) ??
+                            'Song Sections (${_sections.length})',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
+                    ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(
+                          BattutaSpace.minTouchTarget,
+                          BattutaSpace.minTouchTarget,
+                        ),
+                        foregroundColor: brand.accentInk,
+                      ),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n?.addSection ?? 'Add Section'),
+                      onPressed: () => _addSection(),
                     ),
                   ],
                 ),
-              ),
-            // ── Primary Metadata ──
-            TextFormField(
-              key: const Key('song_title_field'),
-              controller: _titleController,
-              readOnly: fieldsLocked,
-              decoration: InputDecoration(
-                helperText: titleLocked ? l10n?.songTitleLockedHint : null,
-                helperMaxLines: 3,
-                labelText: l10n?.songTitleLabel ?? 'Song Title *',
-                hintText: l10n?.songTitleHint ?? 'e.g. Amazing Grace',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.title),
-              ),
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) {
-                  return l10n?.songTitleValidation ??
-                      'Please enter a song title';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              key: const Key('song_artist_field'),
-              controller: _artistController,
-              readOnly: fieldsLocked,
-              decoration: InputDecoration(
-                labelText: l10n?.artistComposerLabel ?? 'Artist / Composer *',
-                hintText: l10n?.artistComposerHint ?? 'e.g. John Newton',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.person),
-              ),
-              validator: (val) {
-                if (_linked != null) return null;
-                if (val == null || val.trim().isEmpty) {
-                  return l10n?.artistValidation ??
-                      'Please enter an artist or composer';
-                }
-                return null;
-              },
-            ),
-            if (!isEditing && canEdit)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: SongSuggestionsPanel(
-                  titleController: _titleController,
-                  selected: _linked,
-                  onSelected: _onSongPicked,
-                ),
-              ),
-            if (original != null &&
-                canEdit &&
-                me != null &&
-                original.ownerId == me)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    OutlinedButton.icon(
-                      key: const ValueKey('editor_sharing_btn'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(44, 44),
-                      ),
-                      icon: const Icon(Icons.share_outlined, size: 18),
-                      label: Text(l10n?.sharingButton ?? 'Sharing'),
-                      onPressed: () =>
-                          showSharingSheet(context, ref, original.id),
-                    ),
-                    if (original.songWorkId != null)
-                      OutlinedButton.icon(
-                        key: const ValueKey('editor_move_btn'),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(44, 44),
-                        ),
-                        icon: const Icon(
-                          Icons.drive_file_move_outline,
-                          size: 18,
-                        ),
-                        label: Text(
-                          l10n?.moveToSongButton ?? 'Move to another song',
-                        ),
-                        onPressed: () => _moveToAnotherSong(original),
-                      ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 16),
+                const SizedBox(height: BattutaSpace.sm),
 
-            // ── Musical Attributes (Key, Tempo, Meter) ──
-            Card(
-              elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.5,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n?.musicalSetup ?? 'Musical Setup',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                // Quick Section Templates
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Text(
+                        l10n?.quickAdd ?? 'Quick add: ',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: brand.inkMuted,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        // Musical Key Selector
-                        Expanded(
-                          flex: 3,
-                          child: DropdownButtonFormField<String>(
-                            key: const Key('song_key_dropdown'),
-                            isExpanded: true,
-                            initialValue:
-                                MusicalKey.allKeys.any(
-                                  (k) => k.name == _selectedKey,
-                                )
-                                ? _selectedKey
-                                : MusicalKey.cMajor.name,
-                            decoration: InputDecoration(
-                              labelText: l10n?.keyLabel ?? 'Key',
-                              border: const OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            items: MusicalKey.allKeys.map((k) {
-                              return DropdownMenuItem(
-                                value: k.name,
-                                child: Text(
-                                  k.name,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() => _selectedKey = val);
-                              }
-                            },
+                      const SizedBox(width: 4),
+                      for (final name in [
+                        'Intro',
+                        'Verse 1',
+                        'Verse 2',
+                        'Pre-Chorus',
+                        'Chorus',
+                        'Bridge',
+                        'Outro',
+                      ])
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ActionChip(
+                            avatar: _findPreviousSection(name) != null
+                                ? Icon(
+                                    Icons.replay,
+                                    size: 14,
+                                    color: brand.accentInk,
+                                  )
+                                : null,
+                            label: Text(name),
+                            onPressed: () => _addSection(name),
                           ),
                         ),
-                        const SizedBox(width: 8),
-
-                        // Time Signature Selector
-                        Expanded(
-                          flex: 3,
-                          child: DropdownButtonFormField<(int, int)>(
-                            key: const Key('song_meter_dropdown'),
-                            isExpanded: true,
-                            initialValue: _timeSignature,
-                            decoration: InputDecoration(
-                              labelText: l10n?.meterLabel ?? 'Meter',
-                              border: const OutlineInputBorder(),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            items: _supportedTimeSignatures.map((sig) {
-                              final (num, den) = sig;
-                              return DropdownMenuItem(
-                                value: sig,
-                                child: Text(
-                                  '$num/$den',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() => _timeSignature = val);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Tempo Stepper & Tap Tempo
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              IconButton.filledTonal(
-                                icon: const Icon(Icons.remove),
-                                tooltip: l10n?.decreaseBpm ?? 'Decrease BPM',
-                                onPressed: () {
-                                  if (_tempo > 30) {
-                                    setState(() => _tempo--);
-                                  }
-                                },
-                              ),
-                              Expanded(
-                                child: Text(
-                                  '$_tempo BPM',
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              IconButton.filledTonal(
-                                icon: const Icon(Icons.add),
-                                tooltip: l10n?.increaseBpm ?? 'Increase BPM',
-                                onPressed: () {
-                                  if (_tempo < 300) {
-                                    setState(() => _tempo++);
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        OutlinedButton.icon(
-                          onPressed: _recordTapTempo,
-                          icon: const Icon(Icons.touch_app),
-                          label: Text(l10n?.tapTempo ?? 'Tap Tempo'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // ── Tags Section ──
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    key: const Key('song_tag_input'),
-                    controller: _tagInputController,
-                    decoration: InputDecoration(
-                      labelText: l10n?.addTag ?? 'Add Tag',
-                      hintText: l10n?.tagHint ?? 'e.g. worship, rock, ballad',
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                    ),
-                    onSubmitted: (_) => _addTag(),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  icon: const Icon(Icons.add),
-                  tooltip: l10n?.addTag ?? 'Add Tag',
-                  onPressed: _addTag,
+                const SizedBox(height: BattutaSpace.md),
+
+                // Section Cards
+                if (_sections.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(BattutaSpace.xl),
+                    child: Center(
+                      child: Text(
+                        l10n?.noSectionsAddedHint ?? 'No sections added. Tap "+ Add Section" to build your song.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: brand.inkMuted,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _sections.length,
+                    onReorderItem: _moveSection,
+                    itemBuilder: (context, index) {
+                      final section = _sections[index];
+                      return SongEditorSectionCard(
+                        key: ValueKey(section.id),
+                        index: index,
+                        totalSections: _sections.length,
+                        section: section,
+                        onDelete: () => _removeSection(index),
+                        onDuplicate: () => _duplicateSection(index),
+                        onCopyFrom: (source) =>
+                            _copySectionContent(index, source),
+                        otherSections: _sections
+                            .where((s) => s.id != section.id)
+                            .toList(),
+                        onFindPreviousMatch: (name) =>
+                            _findPreviousSection(name, index),
+                        onMoveUp: index > 0
+                            ? () => _moveSection(index, index - 1)
+                            : null,
+                        onMoveDown: index < _sections.length - 1
+                            ? () => _moveSection(index, index + 1)
+                            : null,
+                        onChordsUpdated: () => setState(() {}),
+                      );
+                    },
+                  ),
+
+                Text(
+                  l10n?.chordEntryHint ??
+                      'Type chords as symbols separated by spaces or bars, '
+                          'like C G/B Am F.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: brand.inkMuted,
+                  ),
                 ),
               ],
             ),
-            if (_tags.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: _tags.map((tag) {
-                  return Chip(
-                    label: Text(tag),
-                    onDeleted: () {
-                      setState(() => _tags.remove(tag));
-                    },
-                  );
-                }).toList(),
-              ),
-            ],
-            const SizedBox(height: 16),
+          ),
+        ),
+      ),
+    );
+  }
 
-            // ── Notes Section ──
-            TextFormField(
-              controller: _notesController,
-              decoration: InputDecoration(
-                labelText:
-                    l10n?.notesInstructionsLabel ??
-                    'Notes / Performance Instructions',
-                hintText:
-                    l10n?.notesInstructionsHint ??
-                    'e.g. Capo 3rd fret, slow acoustic intro...',
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 24),
+  /// Key (mono, amber) and meter selectors side by side.
+  Widget _buildKeyMeterRow(AppLocalizations? l10n) {
+    final brand = BattutaBrand.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            key: const Key('song_key_dropdown'),
+            isExpanded: true,
+            initialValue: MusicalKey.allKeys.any((k) => k.name == _selectedKey)
+                ? _selectedKey
+                : MusicalKey.cMajor.name,
+            decoration: InputDecoration(labelText: l10n?.keyLabel ?? 'Key'),
+            items: MusicalKey.allKeys.map((k) {
+              return DropdownMenuItem(
+                value: k.name,
+                child: Text(
+                  k.name,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontFamily: AppTheme.monoFontFamily,
+                    fontWeight: FontWeight.w700,
+                    color: brand.accentInk,
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: (val) {
+              if (val != null) {
+                setState(() => _selectedKey = val);
+              }
+            },
+          ),
+        ),
+        const SizedBox(width: BattutaSpace.sm),
+        Expanded(
+          child: DropdownButtonFormField<(int, int)>(
+            key: const Key('song_meter_dropdown'),
+            isExpanded: true,
+            initialValue: _timeSignature,
+            decoration: InputDecoration(labelText: l10n?.meterLabel ?? 'Meter'),
+            items: _supportedTimeSignatures.map((sig) {
+              final (num, den) = sig;
+              return DropdownMenuItem(
+                value: sig,
+                child: Text(
+                  '$num/$den',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              );
+            }).toList(),
+            onChanged: (val) {
+              if (val != null) {
+                setState(() => _timeSignature = val);
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
-            // ── Sections Header ──
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  /// Tempo stepper plus the round tap-tempo button and its beat dots.
+  Widget _buildTempoCard(
+    ThemeData theme,
+    BattutaBrand brand,
+    AppLocalizations? l10n,
+  ) {
+    final taps = _tapTimestamps.length.clamp(0, _tapDotCount);
+    return StageCard(
+      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n?.songSectionsCount(_sections.length) ??
-                      'Song Sections (${_sections.length})',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  l10n?.tapTempo ?? 'Tap Tempo',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                FilledButton.tonalIcon(
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n?.addSection ?? 'Add Section'),
-                  onPressed: () => _addSection(),
+                const SizedBox(height: 2),
+                Text(
+                  l10n?.tapTempoHint ??
+                      'Tap along with the beat. Wait 3 seconds to start over.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: brand.inkMuted,
+                  ),
+                ),
+                const SizedBox(height: BattutaSpace.sm),
+                Row(
+                  children: [
+                    _TempoStepButton(
+                      icon: Icons.remove,
+                      tooltip: l10n?.decreaseBpm ?? 'Decrease BPM',
+                      onPressed: () {
+                        if (_tempo > 30) {
+                          setState(() => _tempo--);
+                        }
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        '$_tempo BPM',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    _TempoStepButton(
+                      icon: Icons.add,
+                      tooltip: l10n?.increaseBpm ?? 'Increase BPM',
+                      onPressed: () {
+                        if (_tempo < 300) {
+                          setState(() => _tempo++);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: BattutaSpace.sm),
+                ExcludeSemantics(
+                  child: Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      for (var i = 0; i < _tapDotCount; i++)
+                        Container(
+                          width: 18,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: i < taps ? brand.accent : brand.cardRaised,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-
-            // Quick Section Templates
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  Text(
-                    l10n?.quickAdd ?? 'Quick add: ',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(width: 4),
-                  for (final name in [
-                    'Intro',
-                    'Verse 1',
-                    'Verse 2',
-                    'Pre-Chorus',
-                    'Chorus',
-                    'Bridge',
-                    'Outro',
-                  ])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: ActionChip(
-                        avatar: _findPreviousSection(name) != null
-                            ? const Icon(
-                                Icons.replay,
-                                size: 14,
-                                color: AppTheme.amberAccent,
-                              )
-                            : null,
-                        label: Text(name),
-                        onPressed: () => _addSection(name),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Section Cards
-            if (_sections.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Center(
-                  child: Text(
-                    l10n?.noSectionsAddedHint ?? 'No sections added. Tap "+ Add Section" to build your song.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+          ),
+          const SizedBox(width: BattutaSpace.md),
+          Tooltip(
+            message: l10n?.tapTempo ?? 'Tap Tempo',
+            child: BattutaPressable(
+              key: const Key('song_tap_tempo_button'),
+              onTap: _recordTapTempo,
+              semanticLabel: l10n?.tapTempo ?? 'Tap Tempo',
+              child: Container(
+                width: 72,
+                height: 72,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: brand.accentWash,
+                  border: Border.all(color: brand.accent, width: 2),
+                ),
+                child: Text(
+                  l10n?.tapButtonLabel ?? 'TAP',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                    color: brand.accentInk,
                   ),
                 ),
-              )
-            else
-              ReorderableListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _sections.length,
-                onReorderItem: _moveSection,
-                itemBuilder: (context, index) {
-                  final section = _sections[index];
-                  return _SectionCard(
-                    key: ValueKey(section.id),
-                    index: index,
-                    totalSections: _sections.length,
-                    section: section,
-                    onDelete: () => _removeSection(index),
-                    onDuplicate: () => _duplicateSection(index),
-                    onCopyFrom: (source) => _copySectionContent(index, source),
-                    otherSections: _sections
-                        .where((s) => s.id != section.id)
-                        .toList(),
-                    onFindPreviousMatch: (name) =>
-                        _findPreviousSection(name, index),
-                    onMoveUp: index > 0
-                        ? () => _moveSection(index, index - 1)
-                        : null,
-                    onMoveDown: index < _sections.length - 1
-                        ? () => _moveSection(index, index + 1)
-                        : null,
-                    onChordsUpdated: () => setState(() {}),
-                  );
-                },
               ),
-
-            const SizedBox(height: 48),
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _EditableSection {
-  _EditableSection({
-    required this.id,
-    required String name,
-    required this.chords,
-    required String lyrics,
-    String rehearsalNotes = '',
-    this.repeatCount = 1,
-  }) : nameController = TextEditingController(text: name),
-       lyricsController = TextEditingController(text: lyrics),
-       notesController = TextEditingController(text: rehearsalNotes),
-       quickChordsController = TextEditingController(
-         text: chords.map((c) => c.displayLabel).join(' '),
-       );
-
-  final String id;
-  final TextEditingController nameController;
-  final TextEditingController lyricsController;
-  final TextEditingController notesController;
-  final TextEditingController quickChordsController;
-  List<ChordCell> chords;
-  int repeatCount;
-
-  _EditableSection clone({String? newId, String? newName}) {
-    return _EditableSection(
-      id: newId ?? 'sec_${DateTime.now().millisecondsSinceEpoch}',
-      name: newName ?? nameController.text,
-      chords: chords.map((c) => c.copyWith()).toList(),
-      lyrics: lyricsController.text,
-      rehearsalNotes: notesController.text,
-      repeatCount: repeatCount,
-    );
-  }
-
-  void dispose() {
-    nameController.dispose();
-    lyricsController.dispose();
-    notesController.dispose();
-    quickChordsController.dispose();
-  }
-}
-
-class _SectionCard extends StatefulWidget {
-  const _SectionCard({
-    required super.key,
-    required this.index,
-    required this.totalSections,
-    required this.section,
-    required this.onDelete,
-    required this.onDuplicate,
-    required this.onCopyFrom,
-    required this.otherSections,
-    required this.onFindPreviousMatch,
-    required this.onMoveUp,
-    required this.onMoveDown,
-    required this.onChordsUpdated,
+/// A 44 pt tonal stepper button for the tempo control.
+class _TempoStepButton extends StatelessWidget {
+  const _TempoStepButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
   });
 
-  final int index;
-  final int totalSections;
-  final _EditableSection section;
-  final VoidCallback onDelete;
-  final VoidCallback onDuplicate;
-  final ValueChanged<_EditableSection> onCopyFrom;
-  final List<_EditableSection> otherSections;
-  final _EditableSection? Function(String name) onFindPreviousMatch;
-  final VoidCallback? onMoveUp;
-  final VoidCallback? onMoveDown;
-  final VoidCallback onChordsUpdated;
-
-  @override
-  State<_SectionCard> createState() => _SectionCardState();
-}
-
-class _SectionCardState extends State<_SectionCard> {
-  @override
-  void initState() {
-    super.initState();
-    widget.section.nameController.addListener(_onNameChanged);
-  }
-
-  @override
-  void didUpdateWidget(_SectionCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.section != widget.section) {
-      oldWidget.section.nameController.removeListener(_onNameChanged);
-      widget.section.nameController.addListener(_onNameChanged);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.section.nameController.removeListener(_onNameChanged);
-    super.dispose();
-  }
-
-  void _onNameChanged() {
-    if (mounted) setState(() {});
-  }
-
-  void _applyQuickChords() {
-    final text = widget.section.quickChordsController.text;
-    final parsed = ChordParser.parseProgression(text);
-    setState(() {
-      widget.section.chords = parsed;
-    });
-    widget.onChordsUpdated();
-  }
-
-  void _showAddChordDialog() {
-    final l10n = AppLocalizations.of(context);
-    String root = 'C';
-    ChordQuality quality = ChordQuality.major;
-    int beats = 4;
-    String? bass;
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (dialogCtx, setDialogState) {
-            return AlertDialog(
-              title: Text(l10n?.addChord ?? 'Add Chord'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      initialValue: root,
-                      decoration: InputDecoration(
-                        labelText: l10n?.rootNote ?? 'Root Note',
-                      ),
-                      items:
-                          const [
-                                'C',
-                                'C#',
-                                'Db',
-                                'D',
-                                'D#',
-                                'Eb',
-                                'E',
-                                'F',
-                                'F#',
-                                'Gb',
-                                'G',
-                                'G#',
-                                'Ab',
-                                'A',
-                                'A#',
-                                'Bb',
-                                'B',
-                              ]
-                              .map(
-                                (r) => DropdownMenuItem(
-                                  value: r,
-                                  child: Text(
-                                    r,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                      onChanged: (val) {
-                        if (val != null) setDialogState(() => root = val);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<ChordQuality>(
-                      isExpanded: true,
-                      initialValue: quality,
-                      decoration: InputDecoration(
-                        labelText: l10n?.quality ?? 'Quality',
-                      ),
-                      items: ChordQuality.values
-                          .map(
-                            (q) => DropdownMenuItem(
-                              value: q,
-                              child: Text(
-                                '${q.displayName} (${q.symbol})',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setDialogState(() => quality = val);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String?>(
-                      isExpanded: true,
-                      initialValue: bass,
-                      decoration: InputDecoration(
-                        labelText: l10n?.bassNote ?? 'Bass Note (Slash Chord)',
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: null,
-                          child: Text(
-                            l10n?.noneOption ?? 'None',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        ...[
-                          'C',
-                          'C#',
-                          'D',
-                          'Eb',
-                          'E',
-                          'F',
-                          'F#',
-                          'G',
-                          'Ab',
-                          'A',
-                          'Bb',
-                          'B',
-                        ].map(
-                          (b) => DropdownMenuItem(
-                            value: b,
-                            child: Text(
-                              b,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-                      ],
-                      onChanged: (val) => setDialogState(() => bass = val),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Text(l10n?.beatsLabel ?? 'Beats: '),
-                        for (final b in [1, 2, 3, 4, 6])
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: ChoiceChip(
-                              label: Text('$b'),
-                              selected: beats == b,
-                              onSelected: (_) =>
-                                  setDialogState(() => beats = b),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogCtx).pop(),
-                  child: Text(l10n?.cancel ?? 'Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final chord = ChordCell(
-                      root: root,
-                      quality: quality,
-                      bass: bass,
-                      beats: beats,
-                    );
-                    setState(() {
-                      widget.section.chords.add(chord);
-                      widget.section.quickChordsController.text = widget
-                          .section
-                          .chords
-                          .map((c) => c.displayLabel)
-                          .join(' ');
-                    });
-                    widget.onChordsUpdated();
-                    Navigator.of(dialogCtx).pop();
-                  },
-                  child: Text(l10n?.add ?? 'Add'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final sec = widget.section;
-    final previousMatch = widget.onFindPreviousMatch(sec.nameController.text);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Title & Controls Bar
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: sec.nameController,
-                    decoration: InputDecoration(
-                      labelText: l10n?.sectionName ?? 'Section Name',
-                      isDense: true,
-                      border: const UnderlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Repeat count badge/stepper
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, size: 20),
-                      tooltip: l10n?.decreaseRepeats ?? 'Decrease repeats',
-                      onPressed: sec.repeatCount > 1
-                          ? () {
-                              setState(() => sec.repeatCount--);
-                              widget.onChordsUpdated();
-                            }
-                          : null,
-                    ),
-                    Text(
-                      '${sec.repeatCount}x',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline, size: 20),
-                      tooltip: l10n?.increaseRepeats ?? 'Increase repeats',
-                      onPressed: () {
-                        setState(() => sec.repeatCount++);
-                        widget.onChordsUpdated();
-                      },
-                    ),
-                  ],
-                ),
-
-                // Move up / down
-                if (widget.onMoveUp != null)
-                  IconButton(
-                    icon: const Icon(Icons.arrow_upward, size: 20),
-                    tooltip: l10n?.moveUp ?? 'Move up',
-                    onPressed: widget.onMoveUp,
-                  ),
-                if (widget.onMoveDown != null)
-                  IconButton(
-                    icon: const Icon(Icons.arrow_downward, size: 20),
-                    tooltip: l10n?.moveDown ?? 'Move down',
-                    onPressed: widget.onMoveDown,
-                  ),
-
-                // Duplicate Section
-                IconButton(
-                  icon: const Icon(Icons.copy_rounded, size: 20),
-                  tooltip: l10n?.duplicateSection ?? 'Duplicate section',
-                  onPressed: widget.onDuplicate,
-                ),
-
-                // Copy from other section menu (if other sections exist with content)
-                if (widget.otherSections.any(
-                  (s) =>
-                      s.chords.isNotEmpty || s.lyricsController.text.isNotEmpty,
-                ))
-                  PopupMenuButton<_EditableSection>(
-                    icon: const Icon(Icons.content_copy, size: 20),
-                    tooltip:
-                        l10n?.copyFromExistingSection ??
-                        'Copy from another section...',
-                    onSelected: widget.onCopyFrom,
-                    itemBuilder: (context) {
-                      return widget.otherSections
-                          .where(
-                            (s) =>
-                                s.chords.isNotEmpty ||
-                                s.lyricsController.text.isNotEmpty,
-                          )
-                          .map((s) {
-                            final chordPreview = s.chords.isEmpty
-                                ? ''
-                                : ' (${s.chords.take(4).map((c) => c.displayLabel).join(' ')})';
-                            return PopupMenuItem<_EditableSection>(
-                              value: s,
-                              child: Text(
-                                '${s.nameController.text.trim().isEmpty ? "Section" : s.nameController.text.trim()}$chordPreview',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          })
-                          .toList();
-                    },
-                  ),
-
-                // Delete Section
-                IconButton(
-                  icon: Icon(
-                    Icons.delete,
-                    color: theme.colorScheme.error,
-                    size: 20,
-                  ),
-                  tooltip: l10n?.deleteSection ?? 'Delete Section',
-                  onPressed: widget.onDelete,
-                ),
-              ],
-            ),
-
-            // Pre-load helper chip when current section is empty and previous match exists
-            if (previousMatch != null &&
-                sec.chords.isEmpty &&
-                sec.lyricsController.text.trim().isEmpty) ...[
-              const SizedBox(height: 6),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: ActionChip(
-                  avatar: const Icon(
-                    Icons.auto_awesome,
-                    size: 16,
-                    color: AppTheme.amberAccent,
-                  ),
-                  label: Text(
-                    l10n?.preloadFromPrevious(
-                          previousMatch.nameController.text.trim(),
-                        ) ??
-                        'Pre-load from previous ${previousMatch.nameController.text.trim()}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      sec.chords = previousMatch.chords
-                          .map((c) => c.copyWith())
-                          .toList();
-                      sec.quickChordsController.text = sec.chords
-                          .map((c) => c.displayLabel)
-                          .join(' ');
-                      sec.lyricsController.text =
-                          previousMatch.lyricsController.text;
-                      sec.notesController.text =
-                          previousMatch.notesController.text;
-                      sec.repeatCount = previousMatch.repeatCount;
-                    });
-                    widget.onChordsUpdated();
-                  },
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-
-            // Chord Progression Editor Row
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: sec.quickChordsController,
-                    decoration: InputDecoration(
-                      labelText:
-                          l10n?.chordsFieldLabel ??
-                          'Chords (e.g. C | G/B | Am | F)',
-                      hintText:
-                          l10n?.chordsFieldHint ??
-                          'Type chord symbols separated by spaces or bars',
-                      isDense: true,
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.check_circle_outline),
-                        tooltip:
-                            l10n?.applyChordsTooltip ?? 'Apply chords text',
-                        onPressed: _applyQuickChords,
-                      ),
-                    ),
-                    onSubmitted: (_) => _applyQuickChords(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filledTonal(
-                  icon: const Icon(Icons.music_note),
-                  tooltip: l10n?.addChordBuilderTooltip ?? 'Add chord builder',
-                  onPressed: _showAddChordDialog,
-                ),
-              ],
-            ),
-
-            // Display Chord Cells
-            if (sec.chords.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (var cIdx = 0; cIdx < sec.chords.length; cIdx++)
-                    Chip(
-                      label: Text(
-                        '${sec.chords[cIdx].displayLabel} (${sec.chords[cIdx].beats}b)',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      onDeleted: () {
-                        setState(() {
-                          sec.chords.removeAt(cIdx);
-                          sec.quickChordsController.text = sec.chords
-                              .map((c) => c.displayLabel)
-                              .join(' ');
-                        });
-                        widget.onChordsUpdated();
-                      },
-                    ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 12),
-
-            // Lyrics
-            TextFormField(
-              controller: sec.lyricsController,
-              decoration: InputDecoration(
-                labelText: l10n?.sectionLyricsLabel ?? 'Section Lyrics',
-                hintText:
-                    l10n?.sectionLyricsHint ?? 'Enter lyrics line by line...',
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 8),
-
-            // Rehearsal Notes
-            TextFormField(
-              controller: sec.notesController,
-              decoration: InputDecoration(
-                labelText:
-                    l10n?.rehearsalNotesLabel ?? 'Rehearsal Notes (optional)',
-                hintText:
-                    l10n?.rehearsalNotesHint ??
-                    'e.g. Guitar solo starts here...',
-                isDense: true,
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 1,
-            ),
-          ],
-        ),
+    return IconButton.filledTonal(
+      icon: Icon(icon),
+      tooltip: tooltip,
+      constraints: const BoxConstraints(
+        minWidth: BattutaSpace.minTouchTarget,
+        minHeight: BattutaSpace.minTouchTarget,
       ),
+      onPressed: onPressed,
     );
   }
 }

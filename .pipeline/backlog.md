@@ -192,3 +192,10 @@ Product / ops:
 - End duplicates "Stop Host Server" / "Disconnect"; keep one when the performance view lands.
 - The Live End test binds a real loopback socket with fixed 100 ms delays; poll for the state (or fake the
   `LanWebSocketSyncService`) to avoid CI flakiness.
+
+## From 020: editor and scanner layout
+- Song editor tap-tempo beat dots stay lit while idle (pruning runs only on the next tap), contradicting the
+  "wait 3 seconds to start over" hint; prune with a timer.
+- Tag and chord `Chip` delete icons in the song editor are well under 44 pt.
+- Tap tempo calls `DateTime.now()` directly; add a clock seam so the test can assert the exact BPM.
+- The editor's Duplicate and Copy-from section icons look alike.
