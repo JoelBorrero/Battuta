@@ -37,37 +37,45 @@ class RepertoireScopeBar extends ConsumerWidget {
           key: const ValueKey('scope_picker'),
           semanticLabel: '${l10n.repertoireScopeLabel}: $name',
           onTap: () => _openSheet(context, organizations),
-          builder: (context, pressed) => AnimatedContainer(
-            duration: BattutaMotion.resolve(context, BattutaMotion.tick),
-            curve: BattutaMotion.downbeat,
-            height: 40,
-            padding: const EdgeInsetsDirectional.only(
-              start: 6,
-              end: BattutaSpace.md,
-            ),
-            decoration: ShapeDecoration(
-              color: pressed ? brand.cardRaised : brand.card,
-              shape: StadiumBorder(side: BorderSide(color: brand.border)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _ScopeLogo(organization: selected, size: 28),
-                const SizedBox(width: BattutaSpace.sm),
-                Flexible(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: brand.ink,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+          // The pressable fills the whole 44 pt box; the pill is 40 pt inside.
+          builder: (context, pressed) => SizedBox(
+            height: 44,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              widthFactor: 1,
+              child: AnimatedContainer(
+                duration: BattutaMotion.resolve(context, BattutaMotion.tick),
+                curve: BattutaMotion.downbeat,
+                height: 40,
+                padding: const EdgeInsetsDirectional.only(
+                  start: 6,
+                  end: BattutaSpace.md,
                 ),
-                const SizedBox(width: BattutaSpace.xs),
-                Icon(Icons.expand_more, size: 18, color: brand.inkMuted),
-              ],
+                decoration: ShapeDecoration(
+                  color: pressed ? brand.cardRaised : brand.card,
+                  shape: StadiumBorder(side: BorderSide(color: brand.border)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _ScopeLogo(organization: selected, size: 28),
+                    const SizedBox(width: BattutaSpace.sm),
+                    Flexible(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: brand.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: BattutaSpace.xs),
+                    Icon(Icons.expand_more, size: 18, color: brand.inkMuted),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

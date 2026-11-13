@@ -88,7 +88,7 @@ class PracticePlayerBar extends ConsumerWidget {
           final isNarrow = constraints.maxWidth < 420;
           return Card(
             elevation: 0,
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 8),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
@@ -148,41 +148,46 @@ class PracticePlayerBar extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton.filledTonal(
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(
-                                audioState.metronomeEnabled
-                                    ? Icons.timer
-                                    : Icons.timer_outlined,
-                                color: audioState.metronomeEnabled
-                                    ? theme.colorScheme.primary
-                                    : null,
-                              ),
-                              tooltip:
-                                  l10n?.metronomeClickTooltip(song.tempo) ??
-                                  'Metronome Click (${song.tempo} BPM)',
-                              onPressed: notifier.toggleMetronome,
-                            ),
-                            const SizedBox(width: 8),
-                            FilledButton.tonalIcon(
-                              style: FilledButton.styleFrom(
+                        SizedBox(
+                          width: double.infinity,
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              IconButton.filledTonal(
                                 visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 8,
+                                icon: Icon(
+                                  audioState.metronomeEnabled
+                                      ? Icons.timer
+                                      : Icons.timer_outlined,
+                                  color: audioState.metronomeEnabled
+                                      ? theme.colorScheme.primary
+                                      : null,
                                 ),
+                                tooltip:
+                                    l10n?.metronomeClickTooltip(song.tempo) ??
+                                    'Metronome Click (${song.tempo} BPM)',
+                                onPressed: notifier.toggleMetronome,
                               ),
-                              icon: const Icon(Icons.add_link, size: 16),
-                              label: Text(
-                                l10n?.attachAudioAction ?? 'Attach Audio',
+                              FilledButton.tonalIcon(
+                                style: FilledButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                icon: const Icon(Icons.add_link, size: 16),
+                                label: Text(
+                                  l10n?.attachAudioAction ?? 'Attach Audio',
+                                ),
+                                onPressed: () =>
+                                    _showAttachAudioDialog(context, ref),
                               ),
-                              onPressed: () =>
-                                  _showAttachAudioDialog(context, ref),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     )
@@ -275,7 +280,7 @@ class PracticePlayerBar extends ConsumerWidget {
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(

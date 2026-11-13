@@ -148,8 +148,12 @@ Product / ops:
 ## From 013: repertoire redesign
 - The Repertoire ⋮ menu labels are hard-coded English ('More options', 'Import Song / Leadsheet',
   'Export Repertoire...'); move them to l10n.
+  Same for the Song detail ⋮ export labels (ChordPro / JSON copy, PDF / MIDI export).
 - `song_import_modal.dart` still has a `Color(0x222E86DE)` literal; replace with a brand role.
 - Wide windows lost the one-tap import / scan icons (now in the ⋮ menu); show them in the search row at
   ≥ 480 pt if users miss them.
 - Live performance view (song N of M, beat meter, lyric prompter, Previous / Cue / Next) is planned as its
-  own task after the redesign series; it needs new session state (see 019).
+  own task after the redesign series; it needs new session state (see 019). `LiveSessionPage` today is a
+  static demo with a hard-coded song (`way-maker`). When Live can open a given song / setlist, add the
+  mockups' "Go live" (Song detail, primary in the action bar) and "Start live session" (Setlist detail).
+  Both were left out of 014/015 so no button promises something it can't do.

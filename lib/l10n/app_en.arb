@@ -3852,5 +3852,59 @@
   "photoCropTitle": "Adjust photo",
   "@photoCropTitle": {
     "description": "Title of the native crop screen for profile photos and logos"
+  },
+  "songScreenTitle": "Song",
+  "@songScreenTitle": {
+    "description": "App bar title of the song detail page"
+  },
+  "songOriginalKey": "Original: {key}",
+  "@songOriginalKey": {
+    "description": "Original key in the song subtitle",
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "songStatBpm": "BPM",
+  "@songStatBpm": {
+    "description": "Label of the tempo stat tile"
+  },
+  "songStatTime": "Time",
+  "@songStatTime": {
+    "description": "Label of the time signature stat tile"
+  },
+  "transposeLabel": "Transpose",
+  "@transposeLabel": {
+    "description": "Label of the inline transpose stepper"
+  },
+  "transposeAndSave": "Transpose & save",
+  "@transposeAndSave": {
+    "description": "Menu action that saves the previewed transposition"
+  },
+  "addToSetlist": "Add to setlist",
+  "@addToSetlist": {
+    "description": "Bottom action that adds the song to a setlist"
+  },
+  "addToSetlistEmpty": "No setlists to add this song to yet. Create one in the Setlists tab.",
+  "@addToSetlistEmpty": {
+    "description": "Empty state of the add-to-setlist sheet"
+  },
+  "addedToSetlist": "Added to {setlist}",
+  "@addedToSetlist": {
+    "description": "Snackbar after adding the song to a setlist",
+    "placeholders": {
+      "setlist": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyInSetlist": "Already added",
+  "@alreadyInSetlist": {
+    "description": "Marks a setlist that already holds the song"
+  },
+  "moreOptions": "More options",
+  "@moreOptions": {
+    "description": "Tooltip of the overflow menu"
   }
 }

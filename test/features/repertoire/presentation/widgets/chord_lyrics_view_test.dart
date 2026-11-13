@@ -62,74 +62,108 @@ void main() {
   }
 
   group('ChordLyricsView', () {
-    testWidgets('renders sections, chord badges, and lyrics tokens in Both mode', (
+    testWidgets(
+      'renders sections, chord badges, and lyrics tokens in Both mode',
+      (tester) async {
+        await tester.pumpWidget(buildSubject(song: testSong));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Verse 1'), findsOneWidget);
+        expect(find.text('G'), findsNWidgets(2)); // In lyrics [G] twice
+        expect(find.text('C'), findsOneWidget); // In lyrics [C] once
+        expect(find.text('Amazing'), findsOneWidget);
+        expect(find.text('grace'), findsOneWidget);
+      },
+    );
+
+    testWidgets('hides Align Chords when edits cannot be saved', (
       tester,
     ) async {
-      await tester.pumpWidget(buildSubject(song: testSong));
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ChordLyricsView(
+                song: testSong,
+                transpositionSemitones: 0,
+                viewMode: SongViewMode.both,
+              ),
+            ),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('Verse 1'), findsOneWidget);
-      expect(find.text('G'), findsNWidgets(2)); // In lyrics [G] twice
-      expect(find.text('C'), findsOneWidget); // In lyrics [C] once
       expect(find.text('Amazing'), findsOneWidget);
-      expect(find.text('grace'), findsOneWidget);
+      expect(find.text('Align Chords'), findsNothing);
     });
 
-    testWidgets('renders empty placeholder for section with no lyrics in Both mode', (
-      tester,
-    ) async {
+    testWidgets('shows Align Chords when edits can be saved', (tester) async {
       await tester.pumpWidget(buildSubject(song: testSong));
       await tester.pumpAndSettle();
 
-      expect(find.text('Chorus'), findsOneWidget);
-      expect(
-        find.textContaining('No lyrics or chord alignment for this section yet'),
-        findsOneWidget,
-      );
+      expect(find.text('Align Chords'), findsWidgets);
     });
 
-    testWidgets('renders Lyrics Only mode with stripped lyrics and no chord badges', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        buildSubject(song: testSong, viewMode: SongViewMode.lyricsOnly),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders empty placeholder for section with no lyrics in Both mode',
+      (tester) async {
+        await tester.pumpWidget(buildSubject(song: testSong));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Verse 1'), findsOneWidget);
-      // Clean lyrics without brackets or isolated chords
-      expect(
-        find.text('Amazing grace how sweet the sound'),
-        findsOneWidget,
-      );
-      // Align Chords button should NOT be rendered in Lyrics Only mode
-      expect(find.text('Align Chords'), findsNothing);
-      // Section without lyrics displays instrumental badge
-      expect(find.text('Chorus'), findsOneWidget);
-      expect(find.text('Instrumental (No lyrics)'), findsOneWidget);
-    });
+        expect(find.text('Chorus'), findsOneWidget);
+        expect(
+          find.textContaining(
+            'No lyrics or chord alignment for this section yet',
+          ),
+          findsOneWidget,
+        );
+      },
+    );
 
-    testWidgets('renders Chords Only mode with progression blocks and no lyrics', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        buildSubject(song: testSong, viewMode: SongViewMode.chordsOnly),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders Lyrics Only mode with stripped lyrics and no chord badges',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(song: testSong, viewMode: SongViewMode.lyricsOnly),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Verse 1'), findsOneWidget);
-      expect(find.text('G'), findsOneWidget);
-      expect(find.text('C'), findsOneWidget);
-      expect(find.text('4 beats'), findsNWidgets(2));
-      // Lyrics text must NOT be rendered in Chords Only mode
-      expect(find.textContaining('Amazing grace'), findsNothing);
-      // Section without chords displays clean notice
-      expect(find.text('Chorus'), findsOneWidget);
-      expect(
-        find.text('No chords entered for this section.'),
-        findsOneWidget,
-      );
-    });
+        expect(find.text('Verse 1'), findsOneWidget);
+        // Clean lyrics without brackets or isolated chords
+        expect(find.text('Amazing grace how sweet the sound'), findsOneWidget);
+        // Align Chords button should NOT be rendered in Lyrics Only mode
+        expect(find.text('Align Chords'), findsNothing);
+        // Section without lyrics displays instrumental badge
+        expect(find.text('Chorus'), findsOneWidget);
+        expect(find.text('Instrumental (No lyrics)'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'renders Chords Only mode with progression blocks and no lyrics',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(song: testSong, viewMode: SongViewMode.chordsOnly),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Verse 1'), findsOneWidget);
+        expect(find.text('G'), findsOneWidget);
+        expect(find.text('C'), findsOneWidget);
+        expect(find.text('4 beats'), findsNWidgets(2));
+        // Lyrics text must NOT be rendered in Chords Only mode
+        expect(find.textContaining('Amazing grace'), findsNothing);
+        // Section without chords displays clean notice
+        expect(find.text('Chorus'), findsOneWidget);
+        expect(
+          find.text('No chords entered for this section.'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('transposes chords when transpositionSemitones is applied', (
       tester,
@@ -170,45 +204,49 @@ void main() {
       expect(amazingText.style?.color, equals(const Color(0xFFF2F2F2)));
     });
 
-    testWidgets('tapping Align Chords opens KaraokeChordAlignmentModal with readable words in Dark Mode', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData.dark(),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: ChordLyricsView(
-                song: testSong,
-                transpositionSemitones: 0,
-                viewMode: SongViewMode.both,
-                onSongUpdated: (_) {},
+    testWidgets(
+      'tapping Align Chords opens KaraokeChordAlignmentModal with readable words in Dark Mode',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData.dark(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ChordLyricsView(
+                  song: testSong,
+                  transpositionSemitones: 0,
+                  viewMode: SongViewMode.both,
+                  onSongUpdated: (_) {},
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // Tap first "Align Chords" button
-      final alignButtons = find.widgetWithText(OutlinedButton, 'Align Chords');
-      expect(alignButtons, findsWidgets);
+        // Tap first "Align Chords" button
+        final alignButtons = find.widgetWithText(
+          OutlinedButton,
+          'Align Chords',
+        );
+        expect(alignButtons, findsWidgets);
 
-      await tester.tap(alignButtons.first);
-      await tester.pumpAndSettle();
+        await tester.tap(alignButtons.first);
+        await tester.pumpAndSettle();
 
-      expect(find.byType(KaraokeChordAlignmentModal), findsOneWidget);
-      expect(find.text('Karaoke Chord Alignment'), findsOneWidget);
+        expect(find.byType(KaraokeChordAlignmentModal), findsOneWidget);
+        expect(find.text('Karaoke Chord Alignment'), findsOneWidget);
 
-      // Verify that words inside the alignment modal are high-contrast off-white
-      final modalWordFinder = find.descendant(
-        of: find.byType(KaraokeChordAlignmentModal),
-        matching: find.text('Amazing'),
-      );
-      final modalWordText = tester.widget<Text>(modalWordFinder);
-      expect(modalWordText.style?.color, equals(const Color(0xFFF2F2F2)));
-    });
+        // Verify that words inside the alignment modal are high-contrast off-white
+        final modalWordFinder = find.descendant(
+          of: find.byType(KaraokeChordAlignmentModal),
+          matching: find.text('Amazing'),
+        );
+        final modalWordText = tester.widget<Text>(modalWordFinder);
+        expect(modalWordText.style?.color, equals(const Color(0xFFF2F2F2)));
+      },
+    );
   });
 }

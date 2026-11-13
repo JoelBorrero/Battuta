@@ -32,9 +32,11 @@ class StageSegmentedControl<T> extends StatelessWidget {
   final T selected;
   final ValueChanged<T> onChanged;
 
-  static const double height = 48;
+  /// 52 pt tall so each segment (height minus the 1 pt border and the 3 pt
+  /// padding on both sides) keeps a 44 pt hit area.
+  static const double height = 52;
 
-  /// Inner thumb height per the designs (38pt) is height - 2 * 4 - 2.
+  static const double _inset = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +48,7 @@ class StageSegmentedControl<T> extends StatelessWidget {
 
     return Container(
       height: height,
-      padding: const EdgeInsets.all(BattutaSpace.xs),
+      padding: const EdgeInsets.all(_inset),
       decoration: BoxDecoration(
         color: brand.card,
         borderRadius: BorderRadius.circular(12),
@@ -274,39 +276,49 @@ class StageFilterPill extends StatelessWidget {
         onTap: onTap,
         pressedScale: 0.95,
         semanticLabel: label,
-        child: AnimatedContainer(
-          duration: BattutaMotion.resolve(context, BattutaMotion.beat),
-          curve: BattutaMotion.downbeat,
-          height: 36,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: selected ? brand.accentWash : brand.card,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: selected ? brand.accent : brand.border,
-              width: selected ? 1.5 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (dot != null) ...[
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: dot),
-                ),
-                const SizedBox(width: 6),
-              ],
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                  color: selected ? brand.accentInk : brand.ink,
+        // The pill is 36 pt; the hit area grows to 44 pt.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Align(
+            widthFactor: 1,
+            child: AnimatedContainer(
+              duration: BattutaMotion.resolve(context, BattutaMotion.beat),
+              curve: BattutaMotion.downbeat,
+              height: 36,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: selected ? brand.accentWash : brand.card,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: selected ? brand.accent : brand.border,
+                  width: selected ? 1.5 : 1,
                 ),
               ),
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (dot != null) ...[
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: dot,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      color: selected ? brand.accentInk : brand.ink,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

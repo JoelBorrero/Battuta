@@ -3328,4 +3328,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoCropTitle => 'Adjust photo';
+
+  @override
+  String get songScreenTitle => 'Song';
+
+  @override
+  String songOriginalKey(String key) {
+    return 'Original: $key';
+  }
+
+  @override
+  String get songStatBpm => 'BPM';
+
+  @override
+  String get songStatTime => 'Time';
+
+  @override
+  String get transposeLabel => 'Transpose';
+
+  @override
+  String get transposeAndSave => 'Transpose & save';
+
+  @override
+  String get addToSetlist => 'Add to setlist';
+
+  @override
+  String get addToSetlistEmpty =>
+      'No setlists to add this song to yet. Create one in the Setlists tab.';
+
+  @override
+  String addedToSetlist(String setlist) {
+    return 'Added to $setlist';
+  }
+
+  @override
+  String get alreadyInSetlist => 'Already added';
+
+  @override
+  String get moreOptions => 'More options';
 }

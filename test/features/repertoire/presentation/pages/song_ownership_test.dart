@@ -42,7 +42,10 @@ void main() {
   group('songEditRedirect', () {
     test('sends the editor of somebody else\'s version to the viewer', () {
       expect(
-        songEditRedirect(song: song('v1', owner: 'u-x'), accountId: 'u-me'),
+        songEditRedirect(
+          song: song('v1', owner: 'u-x'),
+          accountId: 'u-me',
+        ),
         '/repertoire/v1',
       );
       expect(
@@ -53,7 +56,10 @@ void main() {
 
     test('lets owners, local-mode songs and unknown songs through', () {
       expect(
-        songEditRedirect(song: song('v1', owner: 'u-me'), accountId: 'u-me'),
+        songEditRedirect(
+          song: song('v1', owner: 'u-me'),
+          accountId: 'u-me',
+        ),
         isNull,
       );
       expect(songEditRedirect(song: song('v1'), accountId: 'u-me'), isNull);
@@ -103,8 +109,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            if (signedIn)
-              ...signedInOverrides(orgs, repertoire: repertoire),
+            if (signedIn) ...signedInOverrides(orgs, repertoire: repertoire),
             songRepositoryProvider.overrideWithValue(songs),
           ],
           child: MaterialApp(
@@ -117,16 +122,26 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('my own version shows edit and delete, even as a plain member', (
-      tester,
-    ) async {
-      await pump(tester, const SongDetailPage(songId: 'v-mine'));
+    Future<void> openMenu(WidgetTester tester) async {
+      await tester.tap(find.byKey(const ValueKey('song_menu')));
+      await tester.pumpAndSettle();
+    }
 
-      expect(find.byTooltip('Edit Song'), findsOneWidget);
-      expect(find.byTooltip('Delete Song'), findsOneWidget);
-      expect(find.byTooltip('Notation Editor'), findsOneWidget);
-      expect(find.byKey(const ValueKey('read_only_version_banner')), findsNothing);
-    });
+    testWidgets(
+      'my own version shows edit and delete, even as a plain member',
+      (tester) async {
+        await pump(tester, const SongDetailPage(songId: 'v-mine'));
+
+        expect(find.byTooltip('Edit Song'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('read_only_version_banner')),
+          findsNothing,
+        );
+        await openMenu(tester);
+        expect(find.text('Delete Song'), findsOneWidget);
+        expect(find.text('Notation Editor'), findsOneWidget);
+      },
+    );
 
     testWidgets('a version of somebody else is a viewer with "Owned by"', (
       tester,
@@ -134,13 +149,18 @@ void main() {
       await pump(tester, const SongDetailPage(songId: 'v-foreign'));
 
       expect(find.byTooltip('Edit Song'), findsNothing);
-      expect(find.byTooltip('Delete Song'), findsNothing);
-      expect(find.byTooltip('Notation Editor'), findsNothing);
       expect(find.text('Edit in Notation Editor'), findsNothing);
-      expect(find.byKey(const ValueKey('read_only_version_banner')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('read_only_version_banner')),
+        findsOneWidget,
+      );
       expect(find.text('Owned by Grace'), findsOneWidget);
       // Reading and transposing stay available.
-      expect(find.byTooltip('Transpose Key'), findsOneWidget);
+      expect(find.byTooltip('Up 1 semitone'), findsOneWidget);
+      await openMenu(tester);
+      expect(find.text('Delete Song'), findsNothing);
+      expect(find.text('Notation Editor'), findsNothing);
+      expect(find.text('Copy JSON'), findsOneWidget);
     });
 
     testWidgets('transposing somebody else\'s version offers no save', (
@@ -148,48 +168,55 @@ void main() {
     ) async {
       await pump(tester, const SongDetailPage(songId: 'v-foreign'));
 
-      await tester.tap(find.byTooltip('Transpose Key'));
-      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Up 1 semitone'));
       await tester.pumpAndSettle();
+      expect(find.text('+1'), findsOneWidget);
 
-      expect(find.textContaining('Save Transposed Key'), findsNothing);
-      expect(find.text('Done'), findsOneWidget);
-
-      await tester.tap(find.text('Done'));
-      await tester.pumpAndSettle();
-      // Nothing was written.
-      final stored = (await songs.getSongById('v-foreign')).getOrElse(
-        (_) => throw 'x',
+      await openMenu(tester);
+      final item = tester.widget<PopupMenuItem<String>>(
+        find.widgetWithText(PopupMenuItem<String>, 'Transpose & save'),
       );
+      expect(item.enabled, isFalse);
+      // Nothing was written.
+      final stored = (await songs.getSongById('v-foreign'))
+          .getOrElse((_) => throw 'x');
       expect(stored.key, 'G');
     });
 
     testWidgets('transposing my own version saves the new key', (tester) async {
       await pump(tester, const SongDetailPage(songId: 'v-mine'));
 
-      await tester.tap(find.byTooltip('Transpose Key'));
-      await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Up 1 semitone'));
       await tester.pumpAndSettle();
-      await tester.tap(find.textContaining('Save Transposed Key'));
+      await openMenu(tester);
+      await tester.tap(find.text('Transpose & save'));
       await tester.pumpAndSettle();
 
-      final stored = (await songs.getSongById('v-mine')).getOrElse(
-        (_) => throw 'x',
-      );
+      final stored = (await songs.getSongById('v-mine'))
+          .getOrElse((_) => throw 'x');
       expect(stored.key, isNot('G'));
     });
 
-    testWidgets('an owner nobody told me about is "another user"', (tester) async {
+    testWidgets('an owner nobody told me about is "another user"', (
+      tester,
+    ) async {
       await pump(tester, const SongDetailPage(songId: 'v-unknown'));
       expect(find.text('Owned by another user'), findsOneWidget);
     });
 
-    testWidgets('local mode: songs without an owner are editable', (tester) async {
-      await pump(tester, const SongDetailPage(songId: 'v-local'), signedIn: false);
+    testWidgets('local mode: songs without an owner are editable', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        const SongDetailPage(songId: 'v-local'),
+        signedIn: false,
+      );
       expect(find.byTooltip('Edit Song'), findsOneWidget);
-      expect(find.byKey(const ValueKey('read_only_version_banner')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('read_only_version_banner')),
+        findsNothing,
+      );
     });
 
     testWidgets('the editor of my version can save', (tester) async {
@@ -212,9 +239,8 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
-      final saved = (await songs.getSongById('v-mine')).getOrElse(
-        (_) => throw 'x',
-      );
+      final saved = (await songs.getSongById('v-mine'))
+          .getOrElse((_) => throw 'x');
       expect(saved.title, 'Renamed by a member');
     });
 
@@ -222,7 +248,10 @@ void main() {
       await pump(tester, const SongEditorPage(songId: 'v-foreign'));
 
       expect(find.text('View Only'), findsOneWidget);
-      expect(find.text('Only the owner can edit this version.'), findsOneWidget);
+      expect(
+        find.text('Only the owner can edit this version.'),
+        findsOneWidget,
+      );
       expect(find.byTooltip('Delete Song'), findsNothing);
       expect(
         tester.widget<FilledButton>(_buttonLabelled('View Only')).onPressed,
@@ -245,8 +274,9 @@ void main() {
           user: const AuthUser(id: 'u-me', email: 'me@example.com'),
         ),
       );
-      Future<void> insert(String id, String? owner) =>
-          harness.db.into(harness.db.songs).insert(
+      Future<void> insert(String id, String? owner) => harness.db
+          .into(harness.db.songs)
+          .insert(
             SongsCompanion.insert(
               id: id,
               title: 'Song $id',
@@ -269,7 +299,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       await tester.pumpWidget(harness.build());
       await tester.pumpAndSettle();
-      return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
+      return ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
     }
 
     testWidgets('the editor of somebody else\'s version never opens', (
@@ -281,7 +313,10 @@ void main() {
 
       expect(find.byType(SongEditorPage), findsNothing);
       expect(find.byType(SongDetailPage), findsOneWidget);
-      expect(find.byKey(const ValueKey('read_only_version_banner')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('read_only_version_banner')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('neither does its notation editor', (tester) async {

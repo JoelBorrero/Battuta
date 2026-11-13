@@ -126,7 +126,7 @@ tempo. Pass `tone: colorScheme.error` for error states.
 ### Stage controls
 | Widget | Use |
 |---|---|
-| `StageSegmentedControl<T>` | Mutually exclusive **modes** (Director / Follower). A solid amber thumb glides on `downbeat`; 48 pt tall. Material `SegmentedButton` stays for filters and settings (themed amber). |
+| `StageSegmentedControl<T>` | Mutually exclusive **modes** (Director / Follower). A solid amber thumb glides on `downbeat`; 52 pt tall (3 pt inset, so each segment is a 44 pt hit area). Material `SegmentedButton` stays for filters and settings (themed amber). |
 | `StageStatusPill(label:, active:, tone:)` | Connection or live state. The dot pings **once** when it becomes active, with no infinite pulse. |
 
 ### Status roles
@@ -156,14 +156,14 @@ the matching translucent fill for pills and banners.
 
 | Design element | Widget |
 |---|---|
-| Large root title (28/800, 60pt header) | `StageAppBar.large(title:)` |
+| Large root title (28/800, steps down to 22 before ellipsizing; 60pt header) | `StageAppBar.large(title:)` |
 | Detail header (56pt, 20/700, no rule) | theme `appBarTheme` |
 | Section label (13/700, tracked, uppercase) | `StageSectionHeader` (semantics keep original casing) |
 | Grouped rows (52pt, full-width dividers) | `StageGroup` + `StageRow` |
 | Key badge (amber wash, JetBrains Mono) | `StageKeyPill` |
 | Stat tiles (22/800 value, 13 muted label, r16) | `StageStatTile` / `StageStatRow` |
 | Segmented control (r12, thumb r9) | `StageSegmentedControl` |
-| Filter pill (amber outline + wash when selected) | `StageFilterPill` |
+| Filter pill (amber outline + wash when selected; 36 pt pill, 44 pt hit area) | `StageFilterPill` |
 | Bottom action bar (52pt, r14 buttons) | `StageActionBar` (+ `.primary()` / `.secondary()`) |
 | Add button (56pt, r16, icon only) | theme `floatingActionButtonTheme` + `FloatingActionButton` |
 

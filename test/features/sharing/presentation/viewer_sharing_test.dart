@@ -30,13 +30,13 @@ SongVersionListing listing(
 
 void main() {
   group('actions on the viewer', () {
-    testWidgets('my version offers sharing, fork and move', (tester) async {
+    testWidgets('my version offers sharing and move, no fork', (tester) async {
       final h = SharingHarness(songs: [versionOf('v1')]);
       await h.pump(tester, const SongDetailPage(songId: 'v1'));
 
       expect(find.byKey(const ValueKey('sharing_btn')), findsOneWidget);
       expect(find.text('Sharing · Private'), findsOneWidget);
-      expect(find.byKey(const ValueKey('fork_btn')), findsOneWidget);
+      expect(find.byKey(const ValueKey('fork_btn')), findsNothing);
       expect(find.byKey(const ValueKey('move_song_btn')), findsOneWidget);
       expect(find.text('Move to another song'), findsOneWidget);
     });
@@ -51,19 +51,16 @@ void main() {
       expect(find.text('Sharing · Public'), findsOneWidget);
     });
 
-    testWidgets(
-      'somebody else\'s version: only fork',
-      (tester) async {
-        final h = SharingHarness(
-          songs: [versionOf('v1', owner: 'u-x', creator: 'u-x')],
-        );
-        await h.pump(tester, const SongDetailPage(songId: 'v1'));
+    testWidgets('somebody else\'s version: only fork', (tester) async {
+      final h = SharingHarness(
+        songs: [versionOf('v1', owner: 'u-x', creator: 'u-x')],
+      );
+      await h.pump(tester, const SongDetailPage(songId: 'v1'));
 
-        expect(find.byKey(const ValueKey('sharing_btn')), findsNothing);
-        expect(find.byKey(const ValueKey('fork_btn')), findsOneWidget);
-        expect(find.byKey(const ValueKey('move_song_btn')), findsNothing);
-      },
-    );
+      expect(find.byKey(const ValueKey('sharing_btn')), findsNothing);
+      expect(find.byKey(const ValueKey('fork_btn')), findsOneWidget);
+      expect(find.byKey(const ValueKey('move_song_btn')), findsNothing);
+    });
 
     testWidgets('a local-mode song can only be forked', (tester) async {
       final h = SharingHarness(

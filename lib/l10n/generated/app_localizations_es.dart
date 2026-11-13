@@ -3353,4 +3353,42 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get photoCropTitle => 'Ajustar foto';
+
+  @override
+  String get songScreenTitle => 'Canción';
+
+  @override
+  String songOriginalKey(String key) {
+    return 'Original: $key';
+  }
+
+  @override
+  String get songStatBpm => 'BPM';
+
+  @override
+  String get songStatTime => 'Compás';
+
+  @override
+  String get transposeLabel => 'Transponer';
+
+  @override
+  String get transposeAndSave => 'Transponer y guardar';
+
+  @override
+  String get addToSetlist => 'Añadir a lista';
+
+  @override
+  String get addToSetlistEmpty =>
+      'Aún no hay listas donde añadir esta canción. Crea una en la pestaña Listas.';
+
+  @override
+  String addedToSetlist(String setlist) {
+    return 'Añadida a $setlist';
+  }
+
+  @override
+  String get alreadyInSetlist => 'Ya añadida';
+
+  @override
+  String get moreOptions => 'Más opciones';
 }

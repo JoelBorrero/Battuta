@@ -1,3 +1,4 @@
+import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/core/errors/backend_error_code.dart';
 import 'package:battuta/features/organizations/domain/entities/organization.dart';
@@ -209,6 +210,35 @@ void main() {
       // The sheet closed and the pill follows the choice.
       expect(find.byKey(const ValueKey('scope_mine')), findsNothing);
       expect(find.text('Youth Band repertoire'), findsOneWidget);
+    });
+
+    testWidgets('the pressable covers the whole 44 pt pill box', (
+      tester,
+    ) async {
+      await pump(tester);
+      final size = tester.getSize(find.byKey(const ValueKey('scope_picker')));
+      expect(size.height, greaterThanOrEqualTo(44));
+      // A tap on the top edge of the 44 pt box (above the 40 pt pill) opens it.
+      final rect = tester.getRect(find.byKey(const ValueKey('scope_picker')));
+      await tester.tapAt(Offset(rect.left + 20, rect.top + 1));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('scope_mine')), findsOneWidget);
+    });
+
+    testWidgets('the pill sits at the start and only the pill is tappable', (
+      tester,
+    ) async {
+      await pump(tester);
+      final rect = tester.getRect(find.byKey(const ValueKey('scope_picker')));
+      final page = tester.getRect(find.byType(RepertoirePage));
+      // Start-aligned at the page gutter, not as wide as the screen.
+      expect(rect.left, BattutaSpace.lg);
+      expect(rect.width, lessThan(page.width / 2));
+
+      // Empty space right of the pill does nothing.
+      await tester.tapAt(Offset(rect.right + 5, rect.center.dy));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('scope_mine')), findsNothing);
     });
 
     testWidgets('my library holds what I own, not other users\' versions', (

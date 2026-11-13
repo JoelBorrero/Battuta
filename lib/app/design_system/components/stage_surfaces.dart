@@ -545,20 +545,48 @@ class StageLargeTitle extends StatelessWidget {
 
   final String title;
 
+  /// Design size and the smallest size the title shrinks to before it
+  /// ellipsizes.
+  static const double maxFontSize = 28;
+  static const double minFontSize = 22;
+
+  TextStyle _style(BuildContext context, double size) => TextStyle(
+    fontFamily: AppTheme.primaryFontFamily,
+    fontFamilyFallback: AppTheme.fontFamilyFallbacks,
+    fontSize: size,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.4,
+    color: BattutaBrand.of(context).ink,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontFamily: AppTheme.primaryFontFamily,
-        fontFamilyFallback: AppTheme.fontFamilyFallbacks,
-        fontSize: 28,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.4,
-        color: BattutaBrand.of(context).ink,
-      ),
+    final textScaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        var size = maxFontSize;
+        if (constraints.hasBoundedWidth) {
+          while (size > minFontSize) {
+            final painter = TextPainter(
+              text: TextSpan(text: title, style: _style(context, size)),
+              textDirection: direction,
+              textScaler: textScaler,
+              maxLines: 1,
+            )..layout();
+            final fits = painter.width <= constraints.maxWidth;
+            painter.dispose();
+            if (fits) break;
+            size -= 1;
+          }
+        }
+        return Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: _style(context, size),
+        );
+      },
     );
   }
 }

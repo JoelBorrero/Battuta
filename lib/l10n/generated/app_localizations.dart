@@ -5861,6 +5861,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjust photo'**
   String get photoCropTitle;
+
+  /// App bar title of the song detail page
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get songScreenTitle;
+
+  /// Original key in the song subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Original: {key}'**
+  String songOriginalKey(String key);
+
+  /// Label of the tempo stat tile
+  ///
+  /// In en, this message translates to:
+  /// **'BPM'**
+  String get songStatBpm;
+
+  /// Label of the time signature stat tile
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get songStatTime;
+
+  /// Label of the inline transpose stepper
+  ///
+  /// In en, this message translates to:
+  /// **'Transpose'**
+  String get transposeLabel;
+
+  /// Menu action that saves the previewed transposition
+  ///
+  /// In en, this message translates to:
+  /// **'Transpose & save'**
+  String get transposeAndSave;
+
+  /// Bottom action that adds the song to a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Add to setlist'**
+  String get addToSetlist;
+
+  /// Empty state of the add-to-setlist sheet
+  ///
+  /// In en, this message translates to:
+  /// **'No setlists to add this song to yet. Create one in the Setlists tab.'**
+  String get addToSetlistEmpty;
+
+  /// Snackbar after adding the song to a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Added to {setlist}'**
+  String addedToSetlist(String setlist);
+
+  /// Marks a setlist that already holds the song
+  ///
+  /// In en, this message translates to:
+  /// **'Already added'**
+  String get alreadyInSetlist;
+
+  /// Tooltip of the overflow menu
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get moreOptions;
 }
 
 class _AppLocalizationsDelegate

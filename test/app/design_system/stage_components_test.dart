@@ -167,6 +167,88 @@ void main() {
     });
   });
 
+  group('StageSegmentedControl hit area', () {
+    testWidgets('every segment is at least 44 pt tall', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          SizedBox(
+            width: 300,
+            child: StageSegmentedControl<int>(
+              selected: 0,
+              onChanged: (_) {},
+              segments: const [
+                StageSegment(value: 0, label: 'One'),
+                StageSegment(value: 1, label: 'Two'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final pressables = find.byType(BattutaPressable);
+      expect(pressables, findsNWidgets(2));
+      for (final element in pressables.evaluate()) {
+        final size = (element.renderObject! as RenderBox).size;
+        expect(size.height, greaterThanOrEqualTo(BattutaSpace.minTouchTarget));
+        expect(size.width, greaterThanOrEqualTo(BattutaSpace.minTouchTarget));
+      }
+    });
+  });
+
+  group('StageFilterPill hit area', () {
+    testWidgets('the tap box is at least 44 pt tall, the pill 36 pt', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _host(
+          StageFilterPill(label: 'Both', selected: false, onTap: () => taps++),
+        ),
+      );
+      final box = tester.getSize(find.byType(BattutaPressable));
+      expect(box.height, greaterThanOrEqualTo(BattutaSpace.minTouchTarget));
+      expect(tester.getSize(find.byType(AnimatedContainer)).height, 36);
+      // A tap just above the visible pill still hits.
+      final rect = tester.getRect(find.byType(BattutaPressable));
+      await tester.tapAt(Offset(rect.center.dx, rect.top + 2));
+      expect(taps, 1);
+    });
+  });
+
+  group('StageLargeTitle', () {
+    Future<double> pumpTitle(
+      WidgetTester tester,
+      String title,
+      double width,
+    ) async {
+      await tester.pumpWidget(
+        _host(SizedBox(width: width, child: StageLargeTitle(title))),
+      );
+      return tester.widget<Text>(find.text(title)).style!.fontSize!;
+    }
+
+    testWidgets('keeps 28 pt when it fits', (tester) async {
+      expect(await pumpTitle(tester, 'Repertoire', 300), 28);
+    });
+
+    testWidgets('scales down instead of ellipsizing, never below 22', (
+      tester,
+    ) async {
+      final size = await pumpTitle(tester, 'Repertoire', 120);
+      expect(size, lessThan(28));
+      expect(size, greaterThanOrEqualTo(22));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('ellipsizes only below the 22 pt floor', (tester) async {
+      final size = await pumpTitle(tester, 'Repertoire', 40);
+      expect(size, 22);
+      expect(
+        tester.widget<Text>(find.text('Repertoire')).overflow,
+        TextOverflow.ellipsis,
+      );
+    });
+  });
+
   group('StageStatusPill', () {
     testWidgets('pings once when active and settles', (tester) async {
       await tester.pumpWidget(_host(const StageStatusPill(label: 'IDLE')));

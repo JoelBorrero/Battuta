@@ -47,19 +47,21 @@ class SongSharingActions extends ConsumerWidget {
               ),
               onPressed: () => showSharingSheet(context, ref, song.id),
             ),
-          OutlinedButton.icon(
-            key: const ValueKey('fork_btn'),
-            style: style(),
-            icon: const Icon(Icons.call_split, size: 18),
-            label: Text(l10n.forkButton),
-            onPressed: () => forkVersionFlow(
-              context,
-              ref,
-              versionId: song.id,
-              sourceLabel: song.label,
-              cachedSource: song,
+          // Forking one's own version into one's own library is pointless.
+          if (!owned)
+            OutlinedButton.icon(
+              key: const ValueKey('fork_btn'),
+              style: style(),
+              icon: const Icon(Icons.call_split, size: 18),
+              label: Text(l10n.forkButton),
+              onPressed: () => forkVersionFlow(
+                context,
+                ref,
+                versionId: song.id,
+                sourceLabel: song.label,
+                cachedSource: song,
+              ),
             ),
-          ),
           if (canMove)
             OutlinedButton.icon(
               key: const ValueKey('move_song_btn'),
