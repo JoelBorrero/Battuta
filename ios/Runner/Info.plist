@@ -84,7 +84,23 @@
 				<string>com.battuta.battuta</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.battuta.battuta.live</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>battuta-live</string>
+			</array>
+		</dict>
 	</array>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_battuta-live._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Battuta finds and joins live sessions run by your band on the same Wi-Fi.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Battuta uses the camera to take your profile photo, an organization logo or a photo of a lead sheet to scan.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

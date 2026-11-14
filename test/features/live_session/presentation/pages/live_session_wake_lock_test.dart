@@ -2,11 +2,13 @@ import 'package:battuta/core/platform/screen_wake_lock.dart';
 import 'package:battuta/core/services/device_preferences_storage.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
 import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
+import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../support/device_prefs_fakes.dart';
+import '../../../../support/live_fakes.dart';
 import '../../../../support/memory_storage.dart';
 
 void main() {
@@ -25,6 +27,10 @@ void main() {
       overrides: [
         screenWakeLockProvider.overrideWithValue(lock),
         devicePreferencesStorageProvider.overrideWithValue(storage),
+        liveSessionDiscoveryProvider.overrideWithValue(
+          FakeLiveSessionDiscovery(),
+        ),
+        lanAddressResolverProvider.overrideWithValue(FakeLanAddressResolver()),
       ],
     );
     addTearDown(c.dispose);

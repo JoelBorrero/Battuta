@@ -8,6 +8,10 @@ library;
 
 import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/core/platform/screen_wake_lock.dart';
+import 'package:battuta/features/live_session/presentation/widgets/director_host_card.dart';
+import 'package:battuta/features/live_session/presentation/widgets/join_by_address_sheet.dart';
+import 'package:battuta/features/live_session/presentation/widgets/live_connect_texts.dart';
+import 'package:battuta/features/live_session/presentation/widgets/nearby_sessions_list.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
@@ -25,7 +29,8 @@ class LiveSessionPage extends ConsumerStatefulWidget {
   ConsumerState<LiveSessionPage> createState() => _LiveSessionPageState();
 }
 
-class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
+class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
+    with WidgetsBindingObserver {
   /// End stops the band's session, so a stray tap mid-song must not do it.
   Future<void> _confirmEnd(
     BuildContext context,
@@ -57,9 +62,51 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
     if (confirmed == true) await end();
   }
 
-  final _hostController = TextEditingController(text: '127.0.0.1');
-  final _portController = TextEditingController(text: '8080');
+  /// Asks before a `battuta-live://` link replaces the running session.
+  Future<void> _confirmSwitch() async {
+    if (_switchPromptOpen || !mounted) return;
+    final address = ref.read(liveSyncControllerProvider).pendingJoin;
+    if (address == null) return;
+    _switchPromptOpen = true;
+    final l10n = AppLocalizations.of(context);
+    final join = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n?.liveSwitchTitle ?? 'Leave the current session?'),
+        content: Text(
+          l10n?.liveSwitchBody(address.display) ??
+              'Leave the current session and join ${address.display}?',
+        ),
+        actions: [
+          TextButton(
+            key: const ValueKey('live_switch_cancel'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancel'),
+          ),
+          TextButton(
+            key: const ValueKey('live_switch_join'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n?.liveSwitchJoin ?? 'Join'),
+          ),
+        ],
+      ),
+    );
+    _switchPromptOpen = false;
+    if (!mounted) return;
+    if (join == true) {
+      await _syncNotifier.confirmPendingJoin();
+    } else {
+      _syncNotifier.cancelPendingJoin();
+    }
+  }
+
+  bool _switchPromptOpen = false;
+
+  final _nameController = TextEditingController();
+  bool _nameInitialized = false;
   static const int _currentMeasure = 14;
+
+  late final LiveSyncNotifier _syncNotifier;
 
   late final ScreenWakeLock _wakeLock;
   // Wake lock calls run one after the other so a late enable can never
@@ -70,8 +117,51 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _syncNotifier = ref.read(liveSyncControllerProvider.notifier);
     _wakeLock = ref.read(screenWakeLockProvider);
     _setWakeLock(ref.read(stagePreferencesProvider).keepScreenAwake);
+    // Browsing changes provider state, which must not happen mid-build.
+    Future<void>.microtask(_syncBrowsing);
+    // A link that opened this page may already be waiting for an answer.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _confirmSwitch());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_nameInitialized) {
+      _nameInitialized = true;
+      _nameController.text =
+          AppLocalizations.of(context)?.liveDefaultSessionName ??
+          'Live session';
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // iOS may have closed the host's server while the app was suspended.
+    if (state == AppLifecycleState.resumed) _syncNotifier.ensureHosting();
+  }
+
+  /// Followers that are not in a session list the sessions nearby.
+  void _syncBrowsing() {
+    if (!mounted) return;
+    final s = ref.read(liveSyncControllerProvider);
+    final browse =
+        !s.isDirector &&
+        (s.status == LiveSyncStatus.disconnected ||
+            s.status == LiveSyncStatus.error);
+    if (browse) {
+      _syncNotifier.startBrowsing();
+    } else {
+      _syncNotifier.stopBrowsing();
+    }
+  }
+
+  Future<void> _joinByAddress() async {
+    final address = await showJoinByAddressSheet(context);
+    if (address != null) await _syncNotifier.joinAddress(address);
   }
 
   void _setWakeLock(bool on) {
@@ -92,9 +182,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
   @override
   void dispose() {
     _disposed = true;
+    WidgetsBinding.instance.removeObserver(this);
     _setWakeLock(false);
-    _hostController.dispose();
-    _portController.dispose();
+    // Deferred: provider state must not change while the tree is torn down.
+    Future<void>.microtask(_syncNotifier.stopBrowsing);
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -115,8 +207,19 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
       stagePreferencesProvider.select((p) => p.keepScreenAwake),
       (_, on) => _setWakeLock(on),
     );
+    ref.listen(
+      liveSyncControllerProvider.select((s) => (s.isDirector, s.status)),
+      (_, _) => _syncBrowsing(),
+    );
+    ref.listen(liveSyncControllerProvider.select((s) => s.pendingJoin), (
+      _,
+      pending,
+    ) {
+      if (pending != null) _confirmSwitch();
+    });
     final l10n = AppLocalizations.of(context);
     final brand = BattutaBrand.of(context);
+    final deviceName = ref.watch(liveDeviceNameProvider);
     final syncState = ref.watch(liveSyncControllerProvider);
     final syncNotifier = ref.read(liveSyncControllerProvider.notifier);
 
@@ -129,18 +232,19 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
       'Final',
     ];
 
-    final connectionLabel = syncState.isConnected
-        ? (syncState.isDirector
-              ? (l10n?.hostingStatus ?? 'HOSTING')
-              : (l10n?.syncedStatus ?? 'SYNCED'))
-        : (l10n?.standaloneStatus ?? 'STANDALONE');
+    final connectionLabel = switch (syncState.status) {
+      LiveSyncStatus.connected =>
+        syncState.isDirector
+            ? (l10n?.hostingStatus ?? 'HOSTING')
+            : (l10n?.syncedStatus ?? 'SYNCED'),
+      LiveSyncStatus.connecting => l10n?.liveConnectingStatus ?? 'CONNECTING',
+      LiveSyncStatus.reconnecting =>
+        l10n?.liveReconnectingStatus ?? 'RECONNECTING',
+      _ => l10n?.standaloneStatus ?? 'STANDALONE',
+    };
+    // Leave must stay available while the follower is trying to come back.
+    final inSession = syncState.isConnected || syncState.isReconnecting;
 
-    final stopStyle = FilledButton.styleFrom(
-      backgroundColor: brand.wash(brand.danger),
-      foregroundColor: brand.danger,
-      minimumSize: const Size(44, 44),
-      side: BorderSide(color: brand.danger.withValues(alpha: 0.6)),
-    );
     final startStyle = FilledButton.styleFrom(
       backgroundColor: brand.accent,
       foregroundColor: brand.onAccent,
@@ -181,11 +285,13 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                             letterSpacing: 0.6,
                             color: syncState.isConnected
                                 ? brand.success
-                                : brand.inkMuted,
+                                : (syncState.isReconnecting
+                                      ? brand.accentInk
+                                      : brand.inkMuted),
                           ),
                         ),
                       ),
-                      if (syncState.isConnected) ...[
+                      if (inSession) ...[
                         const SizedBox(width: 8),
                         BattutaPressable(
                           key: const ValueKey('live_end_button'),
@@ -221,7 +327,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
                   // ── Mode Switcher (Director vs Follower) ──
                   StageSegmentedControl<LiveSyncMode>(
                     selected: syncState.mode,
-                    onChanged: syncNotifier.setSyncMode,
+                    // A running session is ended first, so the card below
+                    // never disagrees with what the device is doing.
+                    onChanged: (mode) {
+                      if (!inSession) syncNotifier.setSyncMode(mode);
+                    },
                     segments: [
                       StageSegment(
                         value: LiveSyncMode.director,
@@ -339,162 +449,42 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage> {
 
                   const SizedBox(height: 14),
 
-                  // ── Network Setup & Connection Card ──
-                  StageCard(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          syncState.isDirector
-                              ? (l10n?.localLanDirectorServer ??
-                                    'LOCAL LAN DIRECTOR SERVER')
-                              : (l10n?.connectToDirectorDevice ??
-                                    'CONNECT TO DIRECTOR DEVICE'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.6,
-                            color: brand.inkMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (syncState.isDirector) ...[
-                          Text(
-                            syncState.isConnected
-                                ? (l10n?.serverRunningOnPort(
-                                        syncState.serverPort ?? 0,
-                                      ) ??
-                                      'Server running on ephemeral port ${syncState.serverPort}. Band member tablets can connect on this local Wi-Fi.')
-                                : (l10n?.startZeroConfigServer ??
-                                      'Start a zero-configuration local WebSocket server so all band members follow your live cues.'),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                          const SizedBox(height: 14),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: [
-                              FilledButton.icon(
-                                style: syncState.isConnected
-                                    ? stopStyle
-                                    : startStyle,
-                                icon: Icon(
-                                  syncState.isConnected
-                                      ? Icons.stop
-                                      : Icons.play_arrow,
-                                ),
-                                label: Text(
-                                  syncState.isConnected
-                                      ? (l10n?.stopHostServer ??
-                                            'Stop Host Server')
-                                      : (l10n?.startLanHost ??
-                                            'Start LAN Host'),
-                                ),
-                                onPressed: () async {
-                                  if (syncState.isConnected) {
-                                    await syncNotifier.disconnect();
-                                  } else {
-                                    await syncNotifier.startDirectorServer(
-                                      port: 0,
-                                    );
-                                  }
-                                },
-                              ),
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size(44, 44),
-                                ),
-                                icon: const Icon(
-                                  Icons.notifications_active_outlined,
-                                ),
-                                label: Text(
-                                  l10n?.triggerTestCue ?? 'Trigger Test Cue',
-                                ),
-                                onPressed: _triggerSampleCue,
-                              ),
-                            ],
-                          ),
-                        ] else ...[
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: TextField(
-                                  controller: _hostController,
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        l10n?.directorHostIp ??
-                                        'Director Host IP',
-                                    hintText: '192.168.1.X',
-                                    border: const OutlineInputBorder(),
-                                    isDense: true,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                flex: 2,
-                                child: TextField(
-                                  controller: _portController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: l10n?.portLabel ?? 'Port',
-                                    hintText: '8080',
-                                    border: const OutlineInputBorder(),
-                                    isDense: true,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          FilledButton.icon(
-                            style: syncState.isConnected
-                                ? stopStyle
-                                : startStyle,
-                            icon: Icon(
-                              syncState.isConnected
-                                  ? Icons.link_off
-                                  : Icons.link,
-                            ),
-                            label: Text(
-                              syncState.isConnected
-                                  ? (l10n?.disconnect ?? 'Disconnect')
-                                  : (l10n?.connectAsFollower ??
-                                        'Connect as Follower'),
-                            ),
-                            onPressed: () async {
-                              if (syncState.isConnected) {
-                                await syncNotifier.disconnect();
-                              } else {
-                                final host = _hostController.text.trim();
-                                final port =
-                                    int.tryParse(_portController.text.trim()) ??
-                                    8080;
-                                try {
-                                  await syncNotifier.connect(host, port);
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          l10n?.connectionFailed(
-                                                e.toString(),
-                                              ) ??
-                                              'Connection failed: $e',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              }
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                  // ── Host (director) or find a session (follower) ──
+                  if (syncState.isDirector)
+                    DirectorHostCard(
+                      nameController: _nameController,
+                      hosting: syncState.isConnected,
+                      deviceName: deviceName,
+                      joinAddress: syncState.joinAddress,
+                      followers: syncState.followers,
+                      issue: syncState.issue,
+                      onHost: () => syncNotifier.startHosting(
+                        sessionName: _nameController.text.trim().isEmpty
+                            ? (l10n?.liveDefaultSessionName ?? 'Live session')
+                            : _nameController.text.trim(),
+                      ),
+                      onStop: syncNotifier.disconnect,
+                      onTestCue: _triggerSampleCue,
+                    )
+                  else ...[
+                    if (!inSession &&
+                        syncState.status != LiveSyncStatus.connecting)
+                      NearbySessionsList(
+                        sessions: syncState.sessions,
+                        searching: syncState.searching,
+                        timedOut: syncState.searchTimedOut,
+                        onJoin: syncNotifier.joinSession,
+                        onJoinByAddress: _joinByAddress,
+                      ),
+                    if (syncState.issue != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        liveIssueText(l10n, syncState.issue!),
+                        key: const ValueKey('live_issue'),
+                        style: TextStyle(fontSize: 13, color: brand.danger),
+                      ),
+                    ],
+                  ],
 
                   // ── Pending Follower Override Requests (LeaderLock) ──
                   if (syncState.isDirector &&

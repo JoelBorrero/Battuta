@@ -6119,6 +6119,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Everyone following this session will be disconnected.'**
   String get endSessionConfirmBody;
+
+  /// Header above the list of Live sessions found on the network
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby sessions'**
+  String get liveNearbySessions;
+
+  /// Shown while browsing for nearby Live sessions
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for sessions…'**
+  String get liveSearching;
+
+  /// Empty state when no Live session was found within 5 seconds
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions found nearby'**
+  String get liveNoSessionsFound;
+
+  /// Hint under the no-sessions empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the host for the address, or check that you are on the same Wi-Fi.'**
+  String get liveNoSessionsHint;
+
+  /// Joins a nearby Live session
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get liveJoinAction;
+
+  /// Shown on a nearby session that uses a newer protocol
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a newer Battuta'**
+  String get liveSessionIncompatible;
+
+  /// Opens the sheet to type a host address
+  ///
+  /// In en, this message translates to:
+  /// **'Join by address'**
+  String get liveJoinByAddress;
+
+  /// Field label for the host address
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get liveAddressLabel;
+
+  /// Placeholder of the host address field
+  ///
+  /// In en, this message translates to:
+  /// **'192.168.1.20 or 192.168.1.20:47320'**
+  String get liveAddressHint;
+
+  /// Help text under the host address field
+  ///
+  /// In en, this message translates to:
+  /// **'You can also paste a battuta-live:// link.'**
+  String get liveAddressHelp;
+
+  /// Join by address: nothing typed
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the address shown on the host device.'**
+  String get liveAddressErrorEmpty;
+
+  /// Join by address: bad host
+  ///
+  /// In en, this message translates to:
+  /// **'That address is not valid. Use something like 192.168.1.20.'**
+  String get liveAddressErrorHost;
+
+  /// Join by address: bad port
+  ///
+  /// In en, this message translates to:
+  /// **'The port must be a number between 1 and 65535.'**
+  String get liveAddressErrorPort;
+
+  /// Join by address: link with another scheme
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a Battuta Live link.'**
+  String get liveAddressErrorLink;
+
+  /// Error when joining a Live session times out
+  ///
+  /// In en, this message translates to:
+  /// **'The host did not answer in 5 seconds. Check that you are on the same Wi-Fi.'**
+  String get liveConnectTimeout;
+
+  /// Error when joining a Live session fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the host. Check the address and that the session is running.'**
+  String get liveConnectUnreachable;
+
+  /// Error when the host server cannot start
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start hosting. Try again.'**
+  String get liveHostFailed;
+
+  /// Hosting needs a local network address
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to Wi-Fi or turn on your hotspot to host'**
+  String get liveNoNetwork;
+
+  /// Header of the host card
+  ///
+  /// In en, this message translates to:
+  /// **'Host a session'**
+  String get liveHostTitle;
+
+  /// Explains hosting on the host card
+  ///
+  /// In en, this message translates to:
+  /// **'Band members on the same Wi-Fi or hotspot will see your session in their Live tab.'**
+  String get liveHostIntro;
+
+  /// Field label for the hosted session name
+  ///
+  /// In en, this message translates to:
+  /// **'Session name'**
+  String get liveSessionNameLabel;
+
+  /// Default name of a hosted session
+  ///
+  /// In en, this message translates to:
+  /// **'Live session'**
+  String get liveDefaultSessionName;
+
+  /// Starts hosting a Live session
+  ///
+  /// In en, this message translates to:
+  /// **'Host session'**
+  String get liveHostAction;
+
+  /// Stops hosting a Live session
+  ///
+  /// In en, this message translates to:
+  /// **'Stop hosting'**
+  String get liveStopHosting;
+
+  /// Hosted session name and device name
+  ///
+  /// In en, this message translates to:
+  /// **'{session} · {device}'**
+  String liveHostingAs(String session, String device);
+
+  /// Dialog title when a link asks to join another Live session
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the current session?'**
+  String get liveSwitchTitle;
+
+  /// Dialog body when a link asks to join another Live session
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the current session and join {address}?'**
+  String liveSwitchBody(String address);
+
+  /// Confirms leaving the current Live session to join another
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get liveSwitchJoin;
+
+  /// Number of followers connected to the host
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No devices connected} =1{1 device connected} other{{count} devices connected}}'**
+  String liveDevicesConnected(int count);
+
+  /// Follower that did not send a device name
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed device'**
+  String get liveUnnamedDevice;
+
+  /// Header of the host's address fallback
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t see it? Join by address'**
+  String get liveCantSeeIt;
+
+  /// Copies the host address
+  ///
+  /// In en, this message translates to:
+  /// **'Copy address'**
+  String get liveAddressCopy;
+
+  /// Confirmation after copying the host address
+  ///
+  /// In en, this message translates to:
+  /// **'Address copied'**
+  String get liveAddressCopied;
+
+  /// Accessibility label of the join QR
+  ///
+  /// In en, this message translates to:
+  /// **'QR code to join this session'**
+  String get liveQrSemantics;
+
+  /// Hint under the join QR
+  ///
+  /// In en, this message translates to:
+  /// **'Scan it with the phone camera to open Battuta and join.'**
+  String get liveQrHint;
+
+  /// Connection badge while joining
+  ///
+  /// In en, this message translates to:
+  /// **'CONNECTING'**
+  String get liveConnectingStatus;
+
+  /// Connection badge while the follower reconnects
+  ///
+  /// In en, this message translates to:
+  /// **'RECONNECTING'**
+  String get liveReconnectingStatus;
 }
 
 class _AppLocalizationsDelegate

@@ -240,3 +240,19 @@ Effort: S small, M medium, L needs data / backend. Shared fixes first, they recu
   Weekly / Monthly, interval, weekday chips, monthly by weekday or date, lookahead, next-dates summary) needs
   data-model and backend work: schedules store only fixed patterns today (L); sentence-case copy and the
   footnote (S).
+
+## From 022: find and join Live sessions
+- The device name can arrive after Host is tapped (profile loading); `ref.listen` updates the service but
+  doesn't re-advertise, so the mDNS name / TXT `director` stay stale until the next host start. Re-call
+  `advertise` while hosting (`live_sync_provider.dart`).
+- `disconnect()` / `joinAddress()` during an in-flight `startHosting` could leave a server and an
+  advertisement running (hard to reach from the UI). Bump a hosting generation in both.
+- `BonsoirSessionDiscovery.advertise` returns early when stopped during `initialize()` without stopping
+  the already-initialized broadcast.
+- A second concurrent `startHosting` with a different session name returns the first call's result.
+- Widget tests use real loopback sockets (need `runAsync` + pumps to drain close timers); a fake transport
+  would make them faster.
+- `ensureHosting` on resume doesn't re-resolve a changed LAN IP (Wi-Fi switched while backgrounded).
+- Old unused l10n keys (`serverRunningOnPort`, `startZeroConfigServer`, `directorHostIp`, `portLabel`,
+  `connectionFailed`, `connectAsFollower`, …) are still in the arb files.
+- Automatic discovery fails on Wi-Fi that blocks multicast; Join by address is the fallback until 025.

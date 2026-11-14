@@ -3494,4 +3494,140 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get endSessionConfirmBody =>
       'Todos los que siguen esta sesión se desconectarán.';
+
+  @override
+  String get liveNearbySessions => 'Sesiones cercanas';
+
+  @override
+  String get liveSearching => 'Buscando sesiones…';
+
+  @override
+  String get liveNoSessionsFound => 'No se encontraron sesiones cerca';
+
+  @override
+  String get liveNoSessionsHint =>
+      'Pide la dirección al anfitrión o revisa que estén en la misma red Wi-Fi.';
+
+  @override
+  String get liveJoinAction => 'Unirse';
+
+  @override
+  String get liveSessionIncompatible =>
+      'Requiere una versión más nueva de Battuta';
+
+  @override
+  String get liveJoinByAddress => 'Unirse por dirección';
+
+  @override
+  String get liveAddressLabel => 'Dirección';
+
+  @override
+  String get liveAddressHint => '192.168.1.20 o 192.168.1.20:47320';
+
+  @override
+  String get liveAddressHelp =>
+      'También puedes pegar un enlace battuta-live://.';
+
+  @override
+  String get liveAddressErrorEmpty =>
+      'Escribe la dirección que muestra el dispositivo anfitrión.';
+
+  @override
+  String get liveAddressErrorHost =>
+      'Esa dirección no es válida. Usa algo como 192.168.1.20.';
+
+  @override
+  String get liveAddressErrorPort =>
+      'El puerto debe ser un número entre 1 y 65535.';
+
+  @override
+  String get liveAddressErrorLink => 'Ese no es un enlace de Battuta Live.';
+
+  @override
+  String get liveConnectTimeout =>
+      'El anfitrión no respondió en 5 segundos. Revisa que estén en la misma red Wi-Fi.';
+
+  @override
+  String get liveConnectUnreachable =>
+      'No se pudo conectar con el anfitrión. Revisa la dirección y que la sesión esté activa.';
+
+  @override
+  String get liveHostFailed =>
+      'No se pudo iniciar la sesión. Inténtalo de nuevo.';
+
+  @override
+  String get liveNoNetwork =>
+      'Conéctate a Wi-Fi o activa tu punto de acceso para organizar la sesión';
+
+  @override
+  String get liveHostTitle => 'Organizar una sesión';
+
+  @override
+  String get liveHostIntro =>
+      'Los músicos en la misma red Wi-Fi o punto de acceso verán tu sesión en su pestaña En vivo.';
+
+  @override
+  String get liveSessionNameLabel => 'Nombre de la sesión';
+
+  @override
+  String get liveDefaultSessionName => 'Sesión en vivo';
+
+  @override
+  String get liveHostAction => 'Organizar sesión';
+
+  @override
+  String get liveStopHosting => 'Detener sesión';
+
+  @override
+  String liveHostingAs(String session, String device) {
+    return '$session · $device';
+  }
+
+  @override
+  String get liveSwitchTitle => '¿Salir de la sesión actual?';
+
+  @override
+  String liveSwitchBody(String address) {
+    return '¿Salir de la sesión actual y unirte a $address?';
+  }
+
+  @override
+  String get liveSwitchJoin => 'Unirme';
+
+  @override
+  String liveDevicesConnected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dispositivos conectados',
+      one: '1 dispositivo conectado',
+      zero: 'Ningún dispositivo conectado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get liveUnnamedDevice => 'Dispositivo sin nombre';
+
+  @override
+  String get liveCantSeeIt => '¿No lo ves? Únete por dirección';
+
+  @override
+  String get liveAddressCopy => 'Copiar dirección';
+
+  @override
+  String get liveAddressCopied => 'Dirección copiada';
+
+  @override
+  String get liveQrSemantics => 'Código QR para unirse a esta sesión';
+
+  @override
+  String get liveQrHint =>
+      'Escanéalo con la cámara del teléfono para abrir Battuta y unirte.';
+
+  @override
+  String get liveConnectingStatus => 'CONECTANDO';
+
+  @override
+  String get liveReconnectingStatus => 'RECONECTANDO';
 }

@@ -3469,4 +3469,137 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get endSessionConfirmBody =>
       'Everyone following this session will be disconnected.';
+
+  @override
+  String get liveNearbySessions => 'Nearby sessions';
+
+  @override
+  String get liveSearching => 'Looking for sessions…';
+
+  @override
+  String get liveNoSessionsFound => 'No sessions found nearby';
+
+  @override
+  String get liveNoSessionsHint =>
+      'Ask the host for the address, or check that you are on the same Wi-Fi.';
+
+  @override
+  String get liveJoinAction => 'Join';
+
+  @override
+  String get liveSessionIncompatible => 'Needs a newer Battuta';
+
+  @override
+  String get liveJoinByAddress => 'Join by address';
+
+  @override
+  String get liveAddressLabel => 'Address';
+
+  @override
+  String get liveAddressHint => '192.168.1.20 or 192.168.1.20:47320';
+
+  @override
+  String get liveAddressHelp => 'You can also paste a battuta-live:// link.';
+
+  @override
+  String get liveAddressErrorEmpty =>
+      'Enter the address shown on the host device.';
+
+  @override
+  String get liveAddressErrorHost =>
+      'That address is not valid. Use something like 192.168.1.20.';
+
+  @override
+  String get liveAddressErrorPort =>
+      'The port must be a number between 1 and 65535.';
+
+  @override
+  String get liveAddressErrorLink => 'That is not a Battuta Live link.';
+
+  @override
+  String get liveConnectTimeout =>
+      'The host did not answer in 5 seconds. Check that you are on the same Wi-Fi.';
+
+  @override
+  String get liveConnectUnreachable =>
+      'Could not reach the host. Check the address and that the session is running.';
+
+  @override
+  String get liveHostFailed => 'Could not start hosting. Try again.';
+
+  @override
+  String get liveNoNetwork =>
+      'Connect to Wi-Fi or turn on your hotspot to host';
+
+  @override
+  String get liveHostTitle => 'Host a session';
+
+  @override
+  String get liveHostIntro =>
+      'Band members on the same Wi-Fi or hotspot will see your session in their Live tab.';
+
+  @override
+  String get liveSessionNameLabel => 'Session name';
+
+  @override
+  String get liveDefaultSessionName => 'Live session';
+
+  @override
+  String get liveHostAction => 'Host session';
+
+  @override
+  String get liveStopHosting => 'Stop hosting';
+
+  @override
+  String liveHostingAs(String session, String device) {
+    return '$session · $device';
+  }
+
+  @override
+  String get liveSwitchTitle => 'Leave the current session?';
+
+  @override
+  String liveSwitchBody(String address) {
+    return 'Leave the current session and join $address?';
+  }
+
+  @override
+  String get liveSwitchJoin => 'Join';
+
+  @override
+  String liveDevicesConnected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count devices connected',
+      one: '1 device connected',
+      zero: 'No devices connected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get liveUnnamedDevice => 'Unnamed device';
+
+  @override
+  String get liveCantSeeIt => 'Can’t see it? Join by address';
+
+  @override
+  String get liveAddressCopy => 'Copy address';
+
+  @override
+  String get liveAddressCopied => 'Address copied';
+
+  @override
+  String get liveQrSemantics => 'QR code to join this session';
+
+  @override
+  String get liveQrHint =>
+      'Scan it with the phone camera to open Battuta and join.';
+
+  @override
+  String get liveConnectingStatus => 'CONNECTING';
+
+  @override
+  String get liveReconnectingStatus => 'RECONNECTING';
 }

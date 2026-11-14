@@ -9,12 +9,52 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../domain/models/live_join_address.dart';
 import '../domain/models/sync_cue_payload.dart';
 import '../domain/services/live_sync_service.dart';
 
+/// Why a follower could not join.
+enum LiveConnectFailure { timeout, unreachable }
+
+/// Thrown by [LanWebSocketSyncService.connect]. [message] is English, for
+/// logs; the UI maps [reason] to a localized string.
+class LiveConnectException implements Exception {
+  const LiveConnectException(this.reason, this.message);
+
+  final LiveConnectFailure reason;
+  final String message;
+
+  @override
+  String toString() => 'LiveConnectException: $message';
+}
+
 class LanWebSocketSyncService implements LiveSyncService {
-  LanWebSocketSyncService({LiveSyncMode initialMode = LiveSyncMode.follower})
-    : _mode = initialMode;
+  LanWebSocketSyncService({
+    LiveSyncMode initialMode = LiveSyncMode.follower,
+    this.deviceName = 'Battuta',
+    this.connectTimeout = const Duration(seconds: 5),
+    this.reconnectDelays = const [
+      Duration(seconds: 1),
+      Duration(seconds: 2),
+      Duration(seconds: 5),
+    ],
+  }) : _mode = initialMode;
+
+  /// Sent to the director as `hello` so it can list who is connected.
+  String deviceName;
+
+  /// How long a follower waits for the director before giving up.
+  final Duration connectTimeout;
+
+  /// Waits between reconnect attempts; the last one repeats until Leave.
+  final List<Duration> reconnectDelays;
+
+  /// Address and port of the director this follower belongs to, kept so a
+  /// dropped connection can be re-established. `null` when not following.
+  ({String host, int port})? _target;
+
+  /// Bumped on every connect / disconnect so a stale reconnect loop stops.
+  int _generation = 0;
 
   LiveSyncStatus _status = LiveSyncStatus.disconnected;
   LiveSyncMode _mode;
@@ -26,9 +66,11 @@ class LanWebSocketSyncService implements LiveSyncService {
 
   HttpServer? _server;
   final List<WebSocket> _connectedClients = [];
+  final Map<WebSocket, String> _clientNames = {};
   WebSocket? _clientSocket;
   StreamSubscription<dynamic>? _clientSub;
 
+  final _followersController = StreamController<List<String>>.broadcast();
   final _statusController = StreamController<LiveSyncStatus>.broadcast();
   final _activeSectionController = StreamController<String>.broadcast();
   final _queuedSectionController = StreamController<String>.broadcast();
@@ -73,26 +115,75 @@ class LanWebSocketSyncService implements LiveSyncService {
   /// Current bound server port if director server is running, or null.
   int? get serverPort => _server?.port;
 
+  /// The address the director server is bound to, or null.
+  InternetAddress? get serverAddress => _server?.address;
+
   /// Number of active connected follower clients (Director mode).
   int get connectedFollowersCount => _connectedClients.length;
+
+  /// Device names of the connected followers, in connection order. A follower
+  /// that has not said hello yet is listed as an empty name.
+  List<String> get followerNames => [
+    for (final c in _connectedClients) _clientNames[c] ?? '',
+  ];
+
+  /// Emits [followerNames] whenever a follower joins, leaves or says hello.
+  Stream<List<String>> get followersStream => _followersController.stream;
 
   @override
   void setSyncMode(LiveSyncMode mode) {
     _mode = mode;
   }
 
-  /// Starts the Director WebSocket server on [address] and [port].
+  /// Starts the Director WebSocket server on [address] (an [InternetAddress]
+  /// or host string; every IPv4 interface by default, so other devices can reach it) and [port].
   ///
-  /// Passing `port: 0` binds to an available ephemeral port on the host.
+  /// When [port] is taken an ephemeral port is used instead; passing
+  /// `port: 0` asks for one straight away. Returns the bound port.
   Future<int> startDirectorServer({
-    String address = '127.0.0.1',
-    int port = 0,
-  }) async {
+    Object? address,
+    int port = liveDefaultPort,
+  }) {
+    // Calls run one after the other: each one closes what the previous one
+    // bound before binding, so two taps never leave a server behind.
+    final previous = _hostTail;
+    final run = previous == null
+        ? _bindDirectorServer(address, port)
+        : previous.then((_) => _bindDirectorServer(address, port));
+    final tail = run.then<void>((_) {}, onError: (Object _) {});
+    _hostTail = tail;
+    unawaited(
+      tail.whenComplete(() {
+        if (identical(_hostTail, tail)) _hostTail = null;
+      }),
+    );
+    return run;
+  }
+
+  /// The last queued hosting start, or `null` when none is running.
+  Future<void>? _hostTail;
+
+  Future<int> _bindDirectorServer(Object? address, int port) async {
     await disconnect();
     _mode = LiveSyncMode.director;
     _setStatus(LiveSyncStatus.connecting);
 
-    final server = await HttpServer.bind(address, port);
+    final Object bindAddress = address ?? InternetAddress.anyIPv4;
+    HttpServer server;
+    try {
+      server = await HttpServer.bind(bindAddress, port);
+    } on SocketException {
+      if (port == 0) {
+        _setStatus(LiveSyncStatus.error);
+        rethrow;
+      }
+      try {
+        server = await HttpServer.bind(bindAddress, 0);
+      } on SocketException {
+        _setStatus(LiveSyncStatus.error);
+        rethrow;
+      }
+    }
     _server = server;
 
     server
@@ -111,43 +202,124 @@ class LanWebSocketSyncService implements LiveSyncService {
   @override
   Future<void> connect(String host, int port, {String? token}) async {
     await disconnect();
+    final generation = _generation;
     _setStatus(LiveSyncStatus.connecting);
 
+    _target = (host: host, port: port);
     try {
-      final wsUrl = 'ws://$host:$port';
-      final socket = await WebSocket.connect(wsUrl);
-      _clientSocket = socket;
-      _setStatus(LiveSyncStatus.connected);
-
-      _clientSub = socket.listen(
-        (dynamic data) => _handleFollowerIncomingMessage(data),
-        onDone: () {
-          _setStatus(LiveSyncStatus.disconnected);
-        },
-        onError: (Object _) {
-          _setStatus(LiveSyncStatus.error);
-        },
-      );
-    } catch (_) {
-      _setStatus(LiveSyncStatus.error);
+      await _openSocket(host, port, generation);
+    } on LiveConnectException {
+      // A newer connect / Leave owns the state now; only report to the caller.
+      if (generation == _generation) {
+        _target = null;
+        _setStatus(LiveSyncStatus.error);
+      }
       rethrow;
+    }
+  }
+
+  /// Opens the follower socket and starts listening. Throws
+  /// [LiveConnectException] on timeout or when nothing answers.
+  Future<void> _openSocket(String host, int port, int generation) async {
+    final attempt = WebSocket.connect('ws://$host:$port');
+    final WebSocket socket;
+    try {
+      socket = await attempt.timeout(connectTimeout);
+    } on TimeoutException {
+      // The attempt may still finish later; never leave that socket open.
+      unawaited(attempt.then((s) => s.close()).catchError((Object _) => null));
+      throw const LiveConnectException(
+        LiveConnectFailure.timeout,
+        'The director did not answer in time.',
+      );
+    } on Exception catch (error) {
+      throw LiveConnectException(
+        LiveConnectFailure.unreachable,
+        'Could not reach the director: $error',
+      );
+    }
+
+    if (generation != _generation) {
+      // Left (or joined elsewhere) while connecting.
+      await socket.close();
+      return;
+    }
+    _clientSocket = socket;
+    // A new socket may reach a relaunched director whose numbering starts
+    // over, so nothing seen on the old one counts any more.
+    _lastSeenSequenceNumber = -1;
+    _activeSectionId = null;
+    _queuedSectionId = null;
+    _setStatus(LiveSyncStatus.connected);
+    _sendToDirector({'type': 'hello', 'deviceName': deviceName});
+
+    _clientSub = socket.listen(
+      (dynamic data) => _handleFollowerIncomingMessage(data),
+      onDone: () => _onFollowerSocketClosed(socket),
+      onError: (Object _) => _onFollowerSocketClosed(socket),
+    );
+  }
+
+  void _onFollowerSocketClosed(WebSocket socket) {
+    if (!identical(socket, _clientSocket) || _target == null) return;
+    _clientSocket = null;
+    _clientSub = null;
+    unawaited(_reconnect(_generation));
+  }
+
+  /// Retries until it connects or [disconnect] / [connect] bumps the
+  /// generation (Leave).
+  Future<void> _reconnect(int generation) async {
+    final target = _target;
+    if (target == null || reconnectDelays.isEmpty) {
+      _setStatus(LiveSyncStatus.disconnected);
+      return;
+    }
+    _setStatus(LiveSyncStatus.reconnecting);
+    var attempt = 0;
+    while (generation == _generation) {
+      final index = attempt < reconnectDelays.length
+          ? attempt
+          : reconnectDelays.length - 1;
+      await Future<void>.delayed(reconnectDelays[index]);
+      if (generation != _generation) return;
+      try {
+        await _openSocket(target.host, target.port, generation);
+        return;
+      } on LiveConnectException {
+        attempt++;
+      }
+    }
+  }
+
+  static Future<void> _closeQuietly(WebSocket socket) async {
+    try {
+      await socket.close().timeout(const Duration(seconds: 1));
+    } catch (_) {
+      // Already gone or unresponsive: nothing more to do.
     }
   }
 
   @override
   Future<void> disconnect() async {
-    _clientSub?.cancel();
+    _generation++;
+    _target = null;
+    await _clientSub?.cancel();
     _clientSub = null;
 
-    if (_clientSocket != null) {
-      await _clientSocket?.close();
-      _clientSocket = null;
-    }
+    final socket = _clientSocket;
+    _clientSocket = null;
 
-    for (final client in _connectedClients) {
-      await client.close();
-    }
+    final clients = List.of(_connectedClients);
     _connectedClients.clear();
+    _clientNames.clear();
+    // In parallel and bounded: a peer that vanished from Wi-Fi never answers
+    // the close handshake, and Leave / End must not wait for it.
+    await Future.wait([
+      if (socket != null) _closeQuietly(socket),
+      for (final client in clients) _closeQuietly(client),
+    ]);
+    if (clients.isNotEmpty) _followersController.add(const []);
 
     if (_server != null) {
       await _server?.close(force: true);
@@ -280,17 +452,21 @@ class LanWebSocketSyncService implements LiveSyncService {
 
   void _handleDirectorIncomingClient(WebSocket client) {
     _connectedClients.add(client);
+    _followersController.add(followerNames);
+
+    void dropped() {
+      if (_connectedClients.remove(client)) {
+        _clientNames.remove(client);
+        _followersController.add(followerNames);
+      }
+    }
 
     client.listen(
       (dynamic data) {
         _handleDirectorIncomingMessage(client, data);
       },
-      onDone: () {
-        _connectedClients.remove(client);
-      },
-      onError: (Object _) {
-        _connectedClients.remove(client);
-      },
+      onDone: dropped,
+      onError: (Object _) => dropped(),
     );
   }
 
@@ -299,7 +475,13 @@ class LanWebSocketSyncService implements LiveSyncService {
       final json = jsonDecode(data.toString()) as Map<String, dynamic>;
       final type = json['type'] as String?;
 
-      if (type == 'follower_request') {
+      if (type == 'hello') {
+        final name = (json['deviceName'] as String?)?.trim() ?? '';
+        if (_connectedClients.contains(sender)) {
+          _clientNames[sender] = name;
+          _followersController.add(followerNames);
+        }
+      } else if (type == 'follower_request') {
         // LeaderLock conflict resolution: Follower override attempts are
         // not executed directly on the live stage, but queued as requests.
         final req = SyncCuePayload(
@@ -391,5 +573,6 @@ class LanWebSocketSyncService implements LiveSyncService {
     await _queuedSectionController.close();
     await _cueController.close();
     await _followerRequestController.close();
+    await _followersController.close();
   }
 }

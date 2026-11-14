@@ -4045,5 +4045,171 @@
   "endSessionConfirmBody": "Everyone following this session will be disconnected.",
   "@endSessionConfirmBody": {
     "description": "Body of the dialog confirming End on the Live page"
+  },
+  "liveNearbySessions": "Nearby sessions",
+  "@liveNearbySessions": {
+    "description": "Header above the list of Live sessions found on the network"
+  },
+  "liveSearching": "Looking for sessions…",
+  "@liveSearching": {
+    "description": "Shown while browsing for nearby Live sessions"
+  },
+  "liveNoSessionsFound": "No sessions found nearby",
+  "@liveNoSessionsFound": {
+    "description": "Empty state when no Live session was found within 5 seconds"
+  },
+  "liveNoSessionsHint": "Ask the host for the address, or check that you are on the same Wi-Fi.",
+  "@liveNoSessionsHint": {
+    "description": "Hint under the no-sessions empty state"
+  },
+  "liveJoinAction": "Join",
+  "@liveJoinAction": {
+    "description": "Joins a nearby Live session"
+  },
+  "liveSessionIncompatible": "Needs a newer Battuta",
+  "@liveSessionIncompatible": {
+    "description": "Shown on a nearby session that uses a newer protocol"
+  },
+  "liveJoinByAddress": "Join by address",
+  "@liveJoinByAddress": {
+    "description": "Opens the sheet to type a host address"
+  },
+  "liveAddressLabel": "Address",
+  "@liveAddressLabel": {
+    "description": "Field label for the host address"
+  },
+  "liveAddressHint": "192.168.1.20 or 192.168.1.20:47320",
+  "@liveAddressHint": {
+    "description": "Placeholder of the host address field"
+  },
+  "liveAddressHelp": "You can also paste a battuta-live:// link.",
+  "@liveAddressHelp": {
+    "description": "Help text under the host address field"
+  },
+  "liveAddressErrorEmpty": "Enter the address shown on the host device.",
+  "@liveAddressErrorEmpty": {
+    "description": "Join by address: nothing typed"
+  },
+  "liveAddressErrorHost": "That address is not valid. Use something like 192.168.1.20.",
+  "@liveAddressErrorHost": {
+    "description": "Join by address: bad host"
+  },
+  "liveAddressErrorPort": "The port must be a number between 1 and 65535.",
+  "@liveAddressErrorPort": {
+    "description": "Join by address: bad port"
+  },
+  "liveAddressErrorLink": "That is not a Battuta Live link.",
+  "@liveAddressErrorLink": {
+    "description": "Join by address: link with another scheme"
+  },
+  "liveConnectTimeout": "The host did not answer in 5 seconds. Check that you are on the same Wi-Fi.",
+  "@liveConnectTimeout": {
+    "description": "Error when joining a Live session times out"
+  },
+  "liveConnectUnreachable": "Could not reach the host. Check the address and that the session is running.",
+  "@liveConnectUnreachable": {
+    "description": "Error when joining a Live session fails"
+  },
+  "liveHostFailed": "Could not start hosting. Try again.",
+  "@liveHostFailed": {
+    "description": "Error when the host server cannot start"
+  },
+  "liveNoNetwork": "Connect to Wi-Fi or turn on your hotspot to host",
+  "@liveNoNetwork": {
+    "description": "Hosting needs a local network address"
+  },
+  "liveHostTitle": "Host a session",
+  "@liveHostTitle": {
+    "description": "Header of the host card"
+  },
+  "liveHostIntro": "Band members on the same Wi-Fi or hotspot will see your session in their Live tab.",
+  "@liveHostIntro": {
+    "description": "Explains hosting on the host card"
+  },
+  "liveSessionNameLabel": "Session name",
+  "@liveSessionNameLabel": {
+    "description": "Field label for the hosted session name"
+  },
+  "liveDefaultSessionName": "Live session",
+  "@liveDefaultSessionName": {
+    "description": "Default name of a hosted session"
+  },
+  "liveHostAction": "Host session",
+  "@liveHostAction": {
+    "description": "Starts hosting a Live session"
+  },
+  "liveStopHosting": "Stop hosting",
+  "@liveStopHosting": {
+    "description": "Stops hosting a Live session"
+  },
+  "liveHostingAs": "{session} · {device}",
+  "@liveHostingAs": {
+    "description": "Hosted session name and device name",
+    "placeholders": {
+      "session": {
+        "type": "String"
+      },
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "liveSwitchTitle": "Leave the current session?",
+  "@liveSwitchTitle": {
+    "description": "Dialog title when a link asks to join another Live session"
+  },
+  "liveSwitchBody": "Leave the current session and join {address}?",
+  "@liveSwitchBody": {
+    "description": "Dialog body when a link asks to join another Live session",
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "liveSwitchJoin": "Join",
+  "@liveSwitchJoin": {
+    "description": "Confirms leaving the current Live session to join another"
+  },
+  "liveDevicesConnected": "{count, plural, =0{No devices connected} =1{1 device connected} other{{count} devices connected}}",
+  "@liveDevicesConnected": {
+    "description": "Number of followers connected to the host",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveUnnamedDevice": "Unnamed device",
+  "@liveUnnamedDevice": {
+    "description": "Follower that did not send a device name"
+  },
+  "liveCantSeeIt": "Can’t see it? Join by address",
+  "@liveCantSeeIt": {
+    "description": "Header of the host's address fallback"
+  },
+  "liveAddressCopy": "Copy address",
+  "@liveAddressCopy": {
+    "description": "Copies the host address"
+  },
+  "liveAddressCopied": "Address copied",
+  "@liveAddressCopied": {
+    "description": "Confirmation after copying the host address"
+  },
+  "liveQrSemantics": "QR code to join this session",
+  "@liveQrSemantics": {
+    "description": "Accessibility label of the join QR"
+  },
+  "liveQrHint": "Scan it with the phone camera to open Battuta and join.",
+  "@liveQrHint": {
+    "description": "Hint under the join QR"
+  },
+  "liveConnectingStatus": "CONNECTING",
+  "@liveConnectingStatus": {
+    "description": "Connection badge while joining"
+  },
+  "liveReconnectingStatus": "RECONNECTING",
+  "@liveReconnectingStatus": {
+    "description": "Connection badge while the follower reconnects"
   }
 }
