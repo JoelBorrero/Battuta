@@ -67,6 +67,21 @@ void main() {
     expect(storage.values['battuta_keep_screen_awake'], 'false');
   });
 
+  testWidgets('the bars per line control sets and saves the density', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(container.read(stagePreferencesProvider).barsPerLine, 2);
+    expect(find.text('Bars per chart line'), findsOneWidget);
+
+    final control = find.byKey(const ValueKey('bars_per_line_control'));
+    await tester.tap(find.descendant(of: control, matching: find.text('4')));
+    await tester.pumpAndSettle();
+
+    expect(container.read(stagePreferencesProvider).barsPerLine, 4);
+    expect(storage.values['battuta_bars_per_line'], '4');
+  });
+
   testWidgets('the rows are at least 44 pt tall and expose toggle state', (
     tester,
   ) async {

@@ -7,6 +7,7 @@ library;
 
 import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/localization/backend_error_messages.dart';
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/features/audio/presentation/widgets/practice_player_bar.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/domain/entities/song.dart';
@@ -409,6 +410,16 @@ class _SongDetailPageState extends ConsumerState<SongDetailPage> {
           ),
           bottomNavigationBar: StageActionBar(
             children: [
+              OutlinedButton(
+                key: const ValueKey('song_go_live'),
+                style: StageActionBar.secondary(context),
+                onPressed: () => context.push(AppRoutes.performSong(song.id)),
+                child: Text(
+                  l10n?.livePerfGoLive ?? 'Go live',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               FilledButton(
                 key: const ValueKey('add_to_setlist'),
                 style: StageActionBar.primary(),

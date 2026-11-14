@@ -256,3 +256,15 @@ Effort: S small, M medium, L needs data / backend. Shared fixes first, they recu
 - Old unused l10n keys (`serverRunningOnPort`, `startZeroConfigServer`, `directorHostIp`, `portLabel`,
   `connectionFailed`, `connectAsFollower`, …) are still in the arb files.
 - Automatic discovery fails on Wi-Fi that blocks multicast; Join by address is the fallback until 025.
+
+## From 023: perform a whole setlist
+- Rotating or resizing mid-song jumps back to the top of the current section (up to one section is replayed);
+  keep the offset within the section instead.
+- Next turns primary as soon as the last section is fully visible, a few seconds before the scroll ends.
+- While the reading line ramps down from the top, the second section becomes current after about half of the
+  first.
+- Unused `livePerfNextSong`, `triggerTestCue`, `DirectorControlBar` and `emitLookaheadCue`; remove them in 024 when
+  the director's cue controls come back from the real plan.
+- Real-socket LAN widget tests (`tapping a nearby session joins it`, `follower reconnects after the director
+  restarts`) flake under parallel load.
+- Widget tests can't catch device pace bugs (the Ahem font changes heights); re-time on a device after pace changes.

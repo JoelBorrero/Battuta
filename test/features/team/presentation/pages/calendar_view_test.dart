@@ -153,6 +153,30 @@ void main() {
       expect(rehearsalY, lessThan(firstSundayY));
     });
 
+    testWidgets('Go live shows only on a service that has a setlist', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        schedules: FakeScheduleRepository(
+          events: [
+            CalendarEvent(
+              id: 'evt-with',
+              organizationId: 'org-1',
+              title: 'With setlist',
+              dateTime: DateTime(2026, 11, 13, 19),
+              setlistId: 'set-1',
+            ),
+            rehearsal(),
+          ],
+        ),
+      );
+
+      expect(key('go_live_btn_evt-with'), findsOneWidget);
+      expect(key('go_live_btn_evt-1'), findsNothing);
+      expect(find.text('Go live'), findsOneWidget);
+    });
+
     testWidgets('the month grid marks days with services and selects days', (
       tester,
     ) async {

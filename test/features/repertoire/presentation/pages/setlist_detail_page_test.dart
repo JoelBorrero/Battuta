@@ -9,6 +9,7 @@ import 'package:battuta/features/repertoire/presentation/providers/repertoire_pr
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   late InMemorySongRepository songRepo;
@@ -300,5 +301,86 @@ void main() {
         expect(handle.height, greaterThanOrEqualTo(44));
       });
     }
+
+    group('Start live session', () {
+      Future<List<String>> pumpWithRouter(
+        WidgetTester tester,
+        String setlistId,
+      ) async {
+        final opened = <String>[];
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) =>
+                  SetlistDetailPage(setlistId: setlistId),
+            ),
+            GoRoute(
+              path: '/live/perform',
+              builder: (context, state) {
+                opened.add(state.uri.toString());
+                return const Scaffold(body: Text('performing'));
+              },
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              songRepositoryProvider.overrideWithValue(songRepo),
+              setlistRepositoryProvider.overrideWithValue(setlistRepo),
+            ],
+            child: MaterialApp.router(routerConfig: router),
+          ),
+        );
+        await tester.pumpAndSettle();
+        return opened;
+      }
+
+      testWidgets('opens the performance of this setlist', (tester) async {
+        final opened = await pumpWithRouter(tester, 'setlist-1');
+
+        expect(find.text('Start live session'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('setlist_start_live_hint')),
+          findsNothing,
+        );
+        await tester.tap(find.byKey(const ValueKey('setlist_start_live')));
+        await tester.pumpAndSettle();
+
+        expect(opened, ['/live/perform?setlist=setlist-1']);
+        expect(find.text('performing'), findsOneWidget);
+      });
+
+      testWidgets('is disabled, with a hint, when the setlist is empty', (
+        tester,
+      ) async {
+        await setlistRepo.saveSetlist(
+          Setlist(
+            id: 'setlist-empty',
+            title: 'Empty Service',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
+        final opened = await pumpWithRouter(tester, 'setlist-empty');
+
+        final button = tester.widget<FilledButton>(
+          find.byKey(const ValueKey('setlist_start_live')),
+        );
+        expect(button.onPressed, isNull);
+        expect(
+          find.byKey(const ValueKey('setlist_start_live_hint')),
+          findsOneWidget,
+        );
+        await tester.tap(
+          find.byKey(const ValueKey('setlist_start_live')),
+          warnIfMissed: false,
+        );
+        await tester.pumpAndSettle();
+        expect(opened, isEmpty);
+      });
+    });
   });
 }

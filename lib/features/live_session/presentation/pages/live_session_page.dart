@@ -1,9 +1,10 @@
 /// Battuta — Live Stage Session & Real-Time Sync Page.
 ///
 /// Provides stage synchronization controls for directors and band members:
-/// - Director Mode: Local LAN WebSocket host, LeaderLock section broadcasting, and cue lookahead.
+/// - Start a session: perform a setlist on this device (see the performance page).
+/// - Director Mode: Local LAN WebSocket host and LeaderLock section requests.
 /// - Follower Mode: Real-time section following, upcoming cue banner, and request queuing.
-/// - Integrated [StageCueBanner] and [DirectorControlBar].
+/// - Integrated [StageCueBanner].
 library;
 
 import 'package:battuta/app/design_system/design_system.dart';
@@ -12,6 +13,7 @@ import 'package:battuta/features/live_session/presentation/widgets/director_host
 import 'package:battuta/features/live_session/presentation/widgets/join_by_address_sheet.dart';
 import 'package:battuta/features/live_session/presentation/widgets/live_connect_texts.dart';
 import 'package:battuta/features/live_session/presentation/widgets/nearby_sessions_list.dart';
+import 'package:battuta/features/live_session/presentation/widgets/performance_start_card.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
 import 'package:battuta/features/settings/presentation/providers/stage_preferences_provider.dart';
@@ -104,7 +106,6 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
 
   final _nameController = TextEditingController();
   bool _nameInitialized = false;
-  static const int _currentMeasure = 14;
 
   late final LiveSyncNotifier _syncNotifier;
 
@@ -190,17 +191,6 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
     super.dispose();
   }
 
-  void _triggerSampleCue() {
-    final notifier = ref.read(liveSyncControllerProvider.notifier);
-    notifier.emitLookaheadCue(
-      songId: 'way-maker',
-      currentSectionId: 'verso-1',
-      nextSectionLabel: 'NEXT: CORO GLORIOSO',
-      currentMeasureIndex: _currentMeasure,
-      lookaheadMeasures: 2,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen(
@@ -222,15 +212,6 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
     final deviceName = ref.watch(liveDeviceNameProvider);
     final syncState = ref.watch(liveSyncControllerProvider);
     final syncNotifier = ref.read(liveSyncControllerProvider.notifier);
-
-    const activeSections = [
-      'Intro',
-      'Verso 1',
-      'Coro',
-      'Verso 2',
-      'Puente',
-      'Final',
-    ];
 
     final connectionLabel = switch (syncState.status) {
       LiveSyncStatus.connected =>
@@ -324,6 +305,11 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
 
                   const SizedBox(height: 12),
 
+                  // ── Start a performance on this device ──
+                  const PerformanceStartCard(),
+
+                  const SizedBox(height: 14),
+
                   // ── Mode Switcher (Director vs Follower) ──
                   StageSegmentedControl<LiveSyncMode>(
                     selected: syncState.mode,
@@ -353,7 +339,6 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
                     StageCueBanner(
                       key: ValueKey(syncState.activeCue!.sequenceNumber),
                       cue: syncState.activeCue!,
-                      currentMeasure: _currentMeasure,
                       onDismiss: syncNotifier.dismissCue,
                       onJumpNow: () {
                         final label = syncState.activeCue!.nextSectionLabel;
@@ -365,89 +350,92 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
                     const SizedBox(height: 14),
                   ],
 
-                  // ── Current Live Stage Section Prompter ──
-                  StageCard(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n?.onStageNow ?? 'ON STAGE NOW',
-                          style: TextStyle(
-                            fontSize: 12,
-                            letterSpacing: 0.6,
-                            fontWeight: FontWeight.w700,
-                            color: brand.inkMuted,
+                  // ── What the director has on stage (in a session) ──
+                  if (inSession) ...[
+                    StageCard(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n?.onStageNow ?? 'ON STAGE NOW',
+                            style: TextStyle(
+                              fontSize: 12,
+                              letterSpacing: 0.6,
+                              fontWeight: FontWeight.w700,
+                              color: brand.inkMuted,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: brand.accent,
-                                shape: BoxShape.circle,
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: brand.accent,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                syncState.activeSectionId ??
-                                    (l10n?.introPreRoll ?? 'INTRO / PRE-ROLL'),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  syncState.activeSectionId ??
+                                      (l10n?.introPreRoll ??
+                                          'INTRO / PRE-ROLL'),
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.3,
+                                    color: brand.accentInk,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                l10n?.queuedNext ?? 'Queued Next:',
                                 style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3,
-                                  color: brand.accentInk,
+                                  fontSize: 13,
+                                  color: brand.inkMuted,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 6,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(
-                              l10n?.queuedNext ?? 'Queued Next:',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: brand.inkMuted,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: brand.accentWash,
-                                borderRadius: BorderRadius.circular(
-                                  BattutaRadius.xs,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: brand.accentWash,
+                                  borderRadius: BorderRadius.circular(
+                                    BattutaRadius.xs,
+                                  ),
+                                ),
+                                child: Text(
+                                  syncState.queuedSectionLabel ??
+                                      (l10n?.waitingForCue ??
+                                          'None (Waiting for cue)'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: brand.accentInk,
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                syncState.queuedSectionLabel ??
-                                    (l10n?.waitingForCue ??
-                                        'None (Waiting for cue)'),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: brand.accentInk,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 14),
+                  ],
 
                   // ── Host (director) or find a session (follower) ──
                   if (syncState.isDirector)
@@ -464,7 +452,6 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
                             : _nameController.text.trim(),
                       ),
                       onStop: syncNotifier.disconnect,
-                      onTestCue: _triggerSampleCue,
                     )
                   else ...[
                     if (!inSession &&
@@ -547,22 +534,6 @@ class _LiveSessionPageState extends ConsumerState<LiveSessionPage>
                 ],
               ),
             ),
-          ),
-
-          // ── Pinned Stage Director Control Bar ──
-          DirectorControlBar(
-            sections: activeSections,
-            activeSectionId: syncState.activeSectionId,
-            queuedSectionId: syncState.queuedSectionLabel,
-            onQueueSection: (section) {
-              syncNotifier.queueNextSection(section);
-            },
-            onJumpSection: (section) {
-              syncNotifier.jumpNowSection(section);
-            },
-            onClearQueue: () {
-              syncNotifier.queueNextSection('');
-            },
           ),
         ],
       ),

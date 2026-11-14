@@ -6341,6 +6341,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'RECONNECTING'**
   String get liveReconnectingStatus;
+
+  /// Setlist action that opens the performance view
+  ///
+  /// In en, this message translates to:
+  /// **'Start live session'**
+  String get livePerfStartSession;
+
+  /// Button that opens a song or service in the performance view
+  ///
+  /// In en, this message translates to:
+  /// **'Go live'**
+  String get livePerfGoLive;
+
+  /// Hint under the disabled start button of an empty setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Add songs to this setlist to go live.'**
+  String get livePerfStartEmptyHint;
+
+  /// Header of the start section of the Live tab
+  ///
+  /// In en, this message translates to:
+  /// **'Start a session'**
+  String get livePerfHubTitle;
+
+  /// Intro of the start section of the Live tab
+  ///
+  /// In en, this message translates to:
+  /// **'Play a setlist with the chart scrolling at the tempo of each song.'**
+  String get livePerfHubIntro;
+
+  /// Sub-header: services that have a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming services'**
+  String get livePerfHubServices;
+
+  /// Sub-header: the setlists that can be performed
+  ///
+  /// In en, this message translates to:
+  /// **'Setlists'**
+  String get livePerfHubSetlists;
+
+  /// Empty state of the start section of the Live tab
+  ///
+  /// In en, this message translates to:
+  /// **'No setlists yet. Build one in Repertoire to play it here.'**
+  String get livePerfHubNoSetlists;
+
+  /// Songs in a setlist
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 song} other{{count} songs}}'**
+  String livePerfSongCount(int count);
+
+  /// Header of the performance view
+  ///
+  /// In en, this message translates to:
+  /// **'Song {index} of {count}'**
+  String livePerfSongOf(int index, int count);
+
+  /// Name of the next section, always visible
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {label}'**
+  String livePerfNextCue(String label);
+
+  /// Shown on the last section of a song
+  ///
+  /// In en, this message translates to:
+  /// **'Next song: {title}'**
+  String livePerfNextSongCue(String title);
+
+  /// Shown on the last section of the last song
+  ///
+  /// In en, this message translates to:
+  /// **'Last section of the set'**
+  String get livePerfLastSection;
+
+  /// Transport: previous section
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get livePerfPrevious;
+
+  /// Transport: next section
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get livePerfNext;
+
+  /// Transport: next song, once the chart has reached its end
+  ///
+  /// In en, this message translates to:
+  /// **'Next song'**
+  String get livePerfNextSong;
+
+  /// Transport: finish the set, on the last section
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get livePerfFinish;
+
+  /// Transport: start auto-scroll
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get livePerfPlay;
+
+  /// Transport: pause auto-scroll
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get livePerfPause;
+
+  /// Tooltip: scroll slower
+  ///
+  /// In en, this message translates to:
+  /// **'Slower'**
+  String get livePerfSlower;
+
+  /// Tooltip: scroll faster
+  ///
+  /// In en, this message translates to:
+  /// **'Faster'**
+  String get livePerfFaster;
+
+  /// Tempo and the speed adjustment of the player
+  ///
+  /// In en, this message translates to:
+  /// **'♩ {bpm} · {percent}%'**
+  String livePerfPace(int bpm, int percent);
+
+  /// Shown when the last song is done
+  ///
+  /// In en, this message translates to:
+  /// **'Set complete'**
+  String get livePerfSetComplete;
+
+  /// Plays the set again from the first song
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get livePerfRestart;
+
+  /// Leaves the performance view
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get livePerfClose;
+
+  /// Card for a song of the setlist that is not available here
+  ///
+  /// In en, this message translates to:
+  /// **'Not on this device'**
+  String get livePerfMissingSong;
+
+  /// Body of the missing song card
+  ///
+  /// In en, this message translates to:
+  /// **'This song is not available here. Go to the next one.'**
+  String get livePerfMissingBody;
+
+  /// Name of the only section of a song that has none
+  ///
+  /// In en, this message translates to:
+  /// **'Whole song'**
+  String get livePerfWholeSong;
+
+  /// Confirmation title when leaving the performance view
+  ///
+  /// In en, this message translates to:
+  /// **'End this live session?'**
+  String get livePerfEndTitle;
+
+  /// Confirmation body when leaving the performance view
+  ///
+  /// In en, this message translates to:
+  /// **'You can start it again from the Live tab.'**
+  String get livePerfEndBody;
+
+  /// Title when the setlist or song cannot be found
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to play here'**
+  String get livePerfNotFound;
+
+  /// Body when the setlist or song cannot be found
+  ///
+  /// In en, this message translates to:
+  /// **'The setlist or song is not on this device.'**
+  String get livePerfNotFoundBody;
+
+  /// Header of the setlist outline beside the chart
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist'**
+  String get livePerfOutlineTitle;
+
+  /// Accessibility label of the section chips
+  ///
+  /// In en, this message translates to:
+  /// **'Sections'**
+  String get livePerfSectionsLabel;
+
+  /// Settings: how many bars one chart line lasts when auto-scrolling
+  ///
+  /// In en, this message translates to:
+  /// **'Bars per chart line'**
+  String get barsPerLineLabel;
 }
 
 class _AppLocalizationsDelegate

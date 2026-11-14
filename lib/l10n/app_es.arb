@@ -1183,5 +1183,176 @@
   "liveQrSemantics": "Código QR para unirse a esta sesión",
   "liveQrHint": "Escanéalo con la cámara del teléfono para abrir Battuta y unirte.",
   "liveConnectingStatus": "CONECTANDO",
-  "liveReconnectingStatus": "RECONECTANDO"
+  "liveReconnectingStatus": "RECONECTANDO",
+  "livePerfStartSession": "Iniciar sesión en vivo",
+  "@livePerfStartSession": {
+    "description": "Setlist action that opens the performance view"
+  },
+  "livePerfGoLive": "En vivo",
+  "@livePerfGoLive": {
+    "description": "Button that opens a song or service in the performance view"
+  },
+  "livePerfStartEmptyHint": "Agrega canciones a este repertorio para ir en vivo.",
+  "@livePerfStartEmptyHint": {
+    "description": "Hint under the disabled start button of an empty setlist"
+  },
+  "livePerfHubTitle": "Iniciar una sesión",
+  "@livePerfHubTitle": {
+    "description": "Header of the start section of the Live tab"
+  },
+  "livePerfHubIntro": "Toca un repertorio con la partitura avanzando al tempo de cada canción.",
+  "@livePerfHubIntro": {
+    "description": "Intro of the start section of the Live tab"
+  },
+  "livePerfHubServices": "Próximos servicios",
+  "@livePerfHubServices": {
+    "description": "Sub-header: services that have a setlist"
+  },
+  "livePerfHubSetlists": "Repertorios",
+  "@livePerfHubSetlists": {
+    "description": "Sub-header: the setlists that can be performed"
+  },
+  "livePerfHubNoSetlists": "Aún no hay repertorios. Crea uno en Repertorio para tocarlo aquí.",
+  "@livePerfHubNoSetlists": {
+    "description": "Empty state of the start section of the Live tab"
+  },
+  "livePerfSongCount": "{count, plural, =1{1 canción} other{{count} canciones}}",
+  "@livePerfSongCount": {
+    "description": "Songs in a setlist",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livePerfSongOf": "Canción {index} de {count}",
+  "@livePerfSongOf": {
+    "description": "Header of the performance view",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livePerfNextCue": "Sigue: {label}",
+  "@livePerfNextCue": {
+    "description": "Name of the next section, always visible",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "livePerfNextSongCue": "Siguiente canción: {title}",
+  "@livePerfNextSongCue": {
+    "description": "Shown on the last section of a song",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "livePerfLastSection": "Última sección del repertorio",
+  "@livePerfLastSection": {
+    "description": "Shown on the last section of the last song"
+  },
+  "livePerfPrevious": "Anterior",
+  "@livePerfPrevious": {
+    "description": "Transport: previous section"
+  },
+  "livePerfNext": "Siguiente",
+  "@livePerfNext": {
+    "description": "Transport: next section"
+  },
+  "livePerfNextSong": "Siguiente canción",
+  "@livePerfNextSong": {
+    "description": "Transport: next song, once the chart has reached its end"
+  },
+  "livePerfFinish": "Terminar",
+  "@livePerfFinish": {
+    "description": "Transport: finish the set, on the last section"
+  },
+  "livePerfPlay": "Reproducir",
+  "@livePerfPlay": {
+    "description": "Transport: start auto-scroll"
+  },
+  "livePerfPause": "Pausar",
+  "@livePerfPause": {
+    "description": "Transport: pause auto-scroll"
+  },
+  "livePerfSlower": "Más lento",
+  "@livePerfSlower": {
+    "description": "Tooltip: scroll slower"
+  },
+  "livePerfFaster": "Más rápido",
+  "@livePerfFaster": {
+    "description": "Tooltip: scroll faster"
+  },
+  "livePerfPace": "♩ {bpm} · {percent}%",
+  "@livePerfPace": {
+    "description": "Tempo and the speed adjustment of the player",
+    "placeholders": {
+      "bpm": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "livePerfSetComplete": "Repertorio completo",
+  "@livePerfSetComplete": {
+    "description": "Shown when the last song is done"
+  },
+  "livePerfRestart": "Reiniciar",
+  "@livePerfRestart": {
+    "description": "Plays the set again from the first song"
+  },
+  "livePerfClose": "Cerrar",
+  "@livePerfClose": {
+    "description": "Leaves the performance view"
+  },
+  "livePerfMissingSong": "No está en este dispositivo",
+  "@livePerfMissingSong": {
+    "description": "Card for a song of the setlist that is not available here"
+  },
+  "livePerfMissingBody": "Esta canción no está disponible aquí. Pasa a la siguiente.",
+  "@livePerfMissingBody": {
+    "description": "Body of the missing song card"
+  },
+  "livePerfWholeSong": "Toda la canción",
+  "@livePerfWholeSong": {
+    "description": "Name of the only section of a song that has none"
+  },
+  "livePerfEndTitle": "¿Terminar esta sesión en vivo?",
+  "@livePerfEndTitle": {
+    "description": "Confirmation title when leaving the performance view"
+  },
+  "livePerfEndBody": "Puedes iniciarla de nuevo desde la pestaña En vivo.",
+  "@livePerfEndBody": {
+    "description": "Confirmation body when leaving the performance view"
+  },
+  "livePerfNotFound": "No hay nada que tocar aquí",
+  "@livePerfNotFound": {
+    "description": "Title when the setlist or song cannot be found"
+  },
+  "livePerfNotFoundBody": "El repertorio o la canción no está en este dispositivo.",
+  "@livePerfNotFoundBody": {
+    "description": "Body when the setlist or song cannot be found"
+  },
+  "livePerfOutlineTitle": "Repertorio",
+  "@livePerfOutlineTitle": {
+    "description": "Header of the setlist outline beside the chart"
+  },
+  "livePerfSectionsLabel": "Secciones",
+  "@livePerfSectionsLabel": {
+    "description": "Accessibility label of the section chips"
+  },
+  "barsPerLineLabel": "Compases por línea",
+  "@barsPerLineLabel": {
+    "description": "Settings: how many bars one chart line lasts when auto-scrolling"
+  }
 }

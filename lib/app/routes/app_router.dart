@@ -15,6 +15,7 @@ import 'package:battuta/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:battuta/features/auth/presentation/pages/welcome_page.dart';
 import 'package:battuta/features/auth/presentation/providers/account_notice_provider.dart';
 import 'package:battuta/features/auth/presentation/providers/app_entry_provider.dart';
+import 'package:battuta/features/live_session/presentation/pages/live_performance_page.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
 import 'package:battuta/features/organizations/domain/services/invite_link_parser.dart';
 import 'package:battuta/features/organizations/presentation/pages/inbox_page.dart';
@@ -171,6 +172,16 @@ GoRouter appRouter(Ref ref) {
         path: AppRoutes.discover,
         name: 'discover',
         builder: (context, state) => const DiscoverPage(),
+      ),
+
+      // Performing a setlist or a song: full screen, no tab bar.
+      GoRoute(
+        path: AppRoutes.livePerform,
+        name: 'livePerform',
+        builder: (context, state) => LivePerformancePage(
+          setlistId: state.uri.queryParameters['setlist'],
+          songId: state.uri.queryParameters['song'],
+        ),
       ),
 
       // ── Shell for bottom navigation ────────────────────────────────

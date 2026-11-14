@@ -74,7 +74,7 @@ class ChordLyricsView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final section in song.sections)
-          _SectionChordLyricsCard(
+          ChordSectionCard(
             key: ValueKey(section.id),
             section: section,
             transpositionSemitones: transpositionSemitones,
@@ -115,9 +115,10 @@ class ChordLyricsView extends StatelessWidget {
   }
 }
 
-/// A flush, stage-ready card displaying a single song section.
-class _SectionChordLyricsCard extends StatelessWidget {
-  const _SectionChordLyricsCard({
+/// A flush, stage-ready card displaying a single song section. Public so the
+/// live performance chart lays out the same cards.
+class ChordSectionCard extends StatelessWidget {
+  const ChordSectionCard({
     required this.section,
     required this.transpositionSemitones,
     required this.viewMode,

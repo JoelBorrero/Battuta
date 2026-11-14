@@ -96,6 +96,10 @@ void main() {
 
     expect(find.byKey(const ValueKey('inbox_btn')), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
+    // The badge, not another "2" on the page (e.g. a Settings segment).
+    Finder badge() =>
+        find.descendant(of: find.byType(Badge), matching: find.text('2'));
+    expect(badge(), findsOneWidget);
 
     for (final path in ['/team', '/live', '/settings']) {
       container(tester).read(appRouterProvider).go(path);
@@ -105,7 +109,7 @@ void main() {
         findsOneWidget,
         reason: path,
       );
-      expect(find.text('2'), findsOneWidget, reason: path);
+      expect(badge(), findsOneWidget, reason: path);
     }
   });
 

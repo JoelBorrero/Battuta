@@ -326,16 +326,24 @@ class _SetlistDetailPageState extends ConsumerState<SetlistDetailPage> {
           ],
         ],
       ),
-      // A bottom action bar (e.g. "Start live session") can take this slot
-      // once the live view can open a setlist; until then only the read-only
-      // notice lives here.
-      bottomNavigationBar: loaded != null && !canEdit
-          ? _ReadOnlyBar(
-              message:
-                  l10n?.setlistReadOnlyNotice ??
-                  'Only organization admins can edit this setlist.',
-            )
-          : null,
+      bottomNavigationBar: loaded == null
+          ? null
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!canEdit)
+                  _ReadOnlyBar(
+                    message:
+                        l10n?.setlistReadOnlyNotice ??
+                        'Only organization admins can edit this setlist.',
+                  ),
+                _StartLiveBar(
+                  hasSongs: loaded.items.isNotEmpty,
+                  onStart: () =>
+                      context.push(AppRoutes.performSetlist(loaded.id)),
+                ),
+              ],
+            ),
       body: setlistAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -581,7 +589,52 @@ class _MenuRow extends StatelessWidget {
   }
 }
 
-/// Bottom notice shown instead of actions when the setlist is read-only.
+/// Bottom action: perform the setlist. Disabled, with a hint, when it is empty.
+class _StartLiveBar extends StatelessWidget {
+  const _StartLiveBar({required this.hasSongs, required this.onStart});
+
+  final bool hasSongs;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final brand = BattutaBrand.of(context);
+    return StageActionBar(
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!hasSongs) ...[
+              Text(
+                l10n?.livePerfStartEmptyHint ??
+                    'Add songs to this setlist to go live.',
+                key: const ValueKey('setlist_start_live_hint'),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: brand.inkMuted),
+              ),
+              const SizedBox(height: BattutaSpace.sm),
+            ],
+            FilledButton.icon(
+              key: const ValueKey('setlist_start_live'),
+              style: StageActionBar.primary(),
+              icon: const Icon(Icons.play_arrow),
+              label: Text(
+                l10n?.livePerfStartSession ?? 'Start live session',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onPressed: hasSongs ? onStart : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Bottom notice shown when the setlist is read-only.
 class _ReadOnlyBar extends StatelessWidget {
   const _ReadOnlyBar({required this.message});
 
@@ -597,6 +650,7 @@ class _ReadOnlyBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.all(BattutaSpace.lg),
           child: Row(

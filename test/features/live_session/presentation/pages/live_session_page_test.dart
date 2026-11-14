@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:battuta/core/database/database_providers.dart';
 import 'package:battuta/core/platform/screen_wake_lock.dart';
 import 'package:battuta/features/live_session/presentation/pages/live_session_page.dart';
+import 'package:battuta/features/repertoire/data/repositories/in_memory_setlist_repository.dart';
+import 'package:battuta/features/repertoire/domain/entities/setlist.dart';
+import 'package:battuta/features/repertoire/domain/entities/setlist_item.dart';
 import 'package:battuta/features/sync/data/lan_websocket_sync_service.dart';
 import 'package:battuta/features/sync/domain/models/live_session.dart';
 import 'package:battuta/features/sync/presentation/providers/live_sync_provider.dart';
-import 'package:battuta/features/sync/presentation/widgets/stage_cue_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,7 +25,7 @@ void main() {
     resolver = FakeLanAddressResolver();
   });
 
-  Widget buildSubject() {
+  Widget buildSubject({List<Setlist> setlists = const []}) {
     // Never reach the wake lock plugin, mDNS or the real network interfaces
     // from a widget test.
     return ProviderScope(
@@ -31,6 +34,9 @@ void main() {
         liveSessionDiscoveryProvider.overrideWithValue(discovery),
         lanAddressResolverProvider.overrideWithValue(resolver),
         liveDeviceNameProvider.overrideWithValue('Test iPad'),
+        setlistRepositoryProvider.overrideWithValue(
+          InMemorySetlistRepository(initialSetlists: setlists),
+        ),
       ],
       child: const MaterialApp(home: LiveSessionPage()),
     );
@@ -61,7 +67,9 @@ void main() {
         expect(find.text('Looking for sessions…'), findsOneWidget);
         expect(find.text('Join by address'), findsOneWidget);
         expect(find.text('Director Host IP'), findsNothing);
-        expect(find.text('ON STAGE NOW'), findsOneWidget);
+        // Standalone: nothing is on stage yet, and no demo content.
+        expect(find.text('ON STAGE NOW'), findsNothing);
+        expect(find.byKey(const ValueKey('live_start_card')), findsOneWidget);
       },
     );
 
@@ -80,8 +88,7 @@ void main() {
       // Director view is displayed; browsing stops
       expect(find.text('HOST A SESSION'), findsOneWidget);
       expect(find.text('Host session'), findsOneWidget);
-      expect(find.text('Trigger Test Cue'), findsOneWidget);
-      expect(find.byType(DirectorControlBar), findsOneWidget);
+      expect(find.text('Trigger Test Cue'), findsNothing);
       expect(discovery.browsing, isFalse);
 
       // Tap back to Follower mode
@@ -92,43 +99,59 @@ void main() {
       expect(discovery.browsing, isTrue);
     });
 
-    testWidgets(
-      'switches to Director mode and triggers test cue to display StageCueBanner',
-      (tester) async {
-        await tester.pumpWidget(buildSubject());
-        await tester.pumpAndSettle();
+    testWidgets('offers to start a session from a setlist', (tester) async {
+      await tester.pumpWidget(
+        buildSubject(
+          setlists: [
+            Setlist(
+              id: 'set-1',
+              title: 'Sunday Worship',
+              items: const [
+                SetlistItem(id: 'i1', songId: 's1', orderIndex: 0),
+                SetlistItem(id: 'i2', songId: 's2', orderIndex: 1),
+              ],
+              createdAt: DateTime(2026),
+              updatedAt: DateTime(2026),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        // Switch to Director mode
-        await tester.tap(find.text('Director (Host)'));
-        await tester.pumpAndSettle();
+      expect(find.text('START A SESSION'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('live_start_setlist_set-1')),
+        findsOneWidget,
+      );
+      expect(find.text('Sunday Worship'), findsOneWidget);
+      expect(find.text('2 songs'), findsOneWidget);
+      expect(find.byKey(const ValueKey('live_start_empty')), findsNothing);
+      // Joining a director still works from the same page.
+      expect(find.text('Join by address'), findsOneWidget);
+    });
 
-        // Verify sections in DirectorControlBar
-        expect(find.text('INTRO'), findsOneWidget);
-        expect(find.text('VERSO 1'), findsOneWidget);
-        expect(find.text('CORO'), findsOneWidget);
-        expect(find.text('PUENTE'), findsOneWidget);
-        expect(find.text('FINAL'), findsOneWidget);
+    testWidgets('says so when there are no setlists to start', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
 
-        // Tap Trigger Test Cue
-        await tester.tap(find.text('Trigger Test Cue'));
-        await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('live_start_empty')), findsOneWidget);
+    });
 
-        // StageCueBanner should appear
-        expect(find.byType(StageCueBanner), findsOneWidget);
-        expect(
-          find.descendant(
-            of: find.byType(StageCueBanner),
-            matching: find.text('NEXT: CORO GLORIOSO'),
-          ),
-          findsOneWidget,
-        );
-        expect(find.text('JUMP'), findsOneWidget);
-        expect(
-          find.byKey(const ValueKey('stage_cue_dismiss_button')),
-          findsOneWidget,
-        );
-      },
-    );
+    testWidgets('has no demo content (fake sections, test cue)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Director (Host)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Trigger Test Cue'), findsNothing);
+      for (final fake in ['INTRO', 'VERSO 1', 'CORO', 'PUENTE', 'FINAL']) {
+        expect(find.text(fake), findsNothing);
+      }
+      expect(find.text('way-maker'), findsNothing);
+    });
+
     testWidgets(
       'shows the muted LIVE badge and no End action when standalone',
       (tester) async {
@@ -350,6 +373,9 @@ void main() {
 
       // The follower leaves; the host stops.
       await tester.runAsync(follower.disconnect);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('live_host_toggle')),
+      );
       await tester.tap(find.byKey(const ValueKey('live_host_toggle')));
       await tester.pumpAndSettle();
       await tester.runAsync(
@@ -374,16 +400,6 @@ void main() {
       expect(discovery.advertised, isNull);
     });
 
-    testWidgets('queueing a section marks its chip as NEXT', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('CORO'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('CORO · NEXT'), findsOneWidget);
-    });
-
     for (final width in [320.0, 1180.0]) {
       testWidgets('lays out without overflow at ${width.toInt()} pt', (
         tester,
@@ -398,10 +414,7 @@ void main() {
         expect(tester.takeException(), isNull);
 
         await hostSession(tester);
-        await tester.tap(find.text('Trigger Test Cue'));
-        await tester.pumpAndSettle();
 
-        expect(find.byType(StageCueBanner), findsOneWidget);
         expect(find.byKey(const ValueKey('live_join_qr')), findsOneWidget);
         expect(tester.takeException(), isNull);
       });

@@ -4211,5 +4211,176 @@
   "liveReconnectingStatus": "RECONNECTING",
   "@liveReconnectingStatus": {
     "description": "Connection badge while the follower reconnects"
+  },
+  "livePerfStartSession": "Start live session",
+  "@livePerfStartSession": {
+    "description": "Setlist action that opens the performance view"
+  },
+  "livePerfGoLive": "Go live",
+  "@livePerfGoLive": {
+    "description": "Button that opens a song or service in the performance view"
+  },
+  "livePerfStartEmptyHint": "Add songs to this setlist to go live.",
+  "@livePerfStartEmptyHint": {
+    "description": "Hint under the disabled start button of an empty setlist"
+  },
+  "livePerfHubTitle": "Start a session",
+  "@livePerfHubTitle": {
+    "description": "Header of the start section of the Live tab"
+  },
+  "livePerfHubIntro": "Play a setlist with the chart scrolling at the tempo of each song.",
+  "@livePerfHubIntro": {
+    "description": "Intro of the start section of the Live tab"
+  },
+  "livePerfHubServices": "Upcoming services",
+  "@livePerfHubServices": {
+    "description": "Sub-header: services that have a setlist"
+  },
+  "livePerfHubSetlists": "Setlists",
+  "@livePerfHubSetlists": {
+    "description": "Sub-header: the setlists that can be performed"
+  },
+  "livePerfHubNoSetlists": "No setlists yet. Build one in Repertoire to play it here.",
+  "@livePerfHubNoSetlists": {
+    "description": "Empty state of the start section of the Live tab"
+  },
+  "livePerfSongCount": "{count, plural, =1{1 song} other{{count} songs}}",
+  "@livePerfSongCount": {
+    "description": "Songs in a setlist",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livePerfSongOf": "Song {index} of {count}",
+  "@livePerfSongOf": {
+    "description": "Header of the performance view",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livePerfNextCue": "Next: {label}",
+  "@livePerfNextCue": {
+    "description": "Name of the next section, always visible",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "livePerfNextSongCue": "Next song: {title}",
+  "@livePerfNextSongCue": {
+    "description": "Shown on the last section of a song",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "livePerfLastSection": "Last section of the set",
+  "@livePerfLastSection": {
+    "description": "Shown on the last section of the last song"
+  },
+  "livePerfPrevious": "Previous",
+  "@livePerfPrevious": {
+    "description": "Transport: previous section"
+  },
+  "livePerfNext": "Next",
+  "@livePerfNext": {
+    "description": "Transport: next section"
+  },
+  "livePerfNextSong": "Next song",
+  "@livePerfNextSong": {
+    "description": "Transport: next song, once the chart has reached its end"
+  },
+  "livePerfFinish": "Finish",
+  "@livePerfFinish": {
+    "description": "Transport: finish the set, on the last section"
+  },
+  "livePerfPlay": "Play",
+  "@livePerfPlay": {
+    "description": "Transport: start auto-scroll"
+  },
+  "livePerfPause": "Pause",
+  "@livePerfPause": {
+    "description": "Transport: pause auto-scroll"
+  },
+  "livePerfSlower": "Slower",
+  "@livePerfSlower": {
+    "description": "Tooltip: scroll slower"
+  },
+  "livePerfFaster": "Faster",
+  "@livePerfFaster": {
+    "description": "Tooltip: scroll faster"
+  },
+  "livePerfPace": "♩ {bpm} · {percent}%",
+  "@livePerfPace": {
+    "description": "Tempo and the speed adjustment of the player",
+    "placeholders": {
+      "bpm": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "livePerfSetComplete": "Set complete",
+  "@livePerfSetComplete": {
+    "description": "Shown when the last song is done"
+  },
+  "livePerfRestart": "Restart",
+  "@livePerfRestart": {
+    "description": "Plays the set again from the first song"
+  },
+  "livePerfClose": "Close",
+  "@livePerfClose": {
+    "description": "Leaves the performance view"
+  },
+  "livePerfMissingSong": "Not on this device",
+  "@livePerfMissingSong": {
+    "description": "Card for a song of the setlist that is not available here"
+  },
+  "livePerfMissingBody": "This song is not available here. Go to the next one.",
+  "@livePerfMissingBody": {
+    "description": "Body of the missing song card"
+  },
+  "livePerfWholeSong": "Whole song",
+  "@livePerfWholeSong": {
+    "description": "Name of the only section of a song that has none"
+  },
+  "livePerfEndTitle": "End this live session?",
+  "@livePerfEndTitle": {
+    "description": "Confirmation title when leaving the performance view"
+  },
+  "livePerfEndBody": "You can start it again from the Live tab.",
+  "@livePerfEndBody": {
+    "description": "Confirmation body when leaving the performance view"
+  },
+  "livePerfNotFound": "Nothing to play here",
+  "@livePerfNotFound": {
+    "description": "Title when the setlist or song cannot be found"
+  },
+  "livePerfNotFoundBody": "The setlist or song is not on this device.",
+  "@livePerfNotFoundBody": {
+    "description": "Body when the setlist or song cannot be found"
+  },
+  "livePerfOutlineTitle": "Setlist",
+  "@livePerfOutlineTitle": {
+    "description": "Header of the setlist outline beside the chart"
+  },
+  "livePerfSectionsLabel": "Sections",
+  "@livePerfSectionsLabel": {
+    "description": "Accessibility label of the section chips"
+  },
+  "barsPerLineLabel": "Bars per chart line",
+  "@barsPerLineLabel": {
+    "description": "Settings: how many bars one chart line lasts when auto-scrolling"
   }
 }

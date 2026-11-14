@@ -3630,4 +3630,131 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get liveReconnectingStatus => 'RECONECTANDO';
+
+  @override
+  String get livePerfStartSession => 'Iniciar sesión en vivo';
+
+  @override
+  String get livePerfGoLive => 'En vivo';
+
+  @override
+  String get livePerfStartEmptyHint =>
+      'Agrega canciones a este repertorio para ir en vivo.';
+
+  @override
+  String get livePerfHubTitle => 'Iniciar una sesión';
+
+  @override
+  String get livePerfHubIntro =>
+      'Toca un repertorio con la partitura avanzando al tempo de cada canción.';
+
+  @override
+  String get livePerfHubServices => 'Próximos servicios';
+
+  @override
+  String get livePerfHubSetlists => 'Repertorios';
+
+  @override
+  String get livePerfHubNoSetlists =>
+      'Aún no hay repertorios. Crea uno en Repertorio para tocarlo aquí.';
+
+  @override
+  String livePerfSongCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones',
+      one: '1 canción',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String livePerfSongOf(int index, int count) {
+    return 'Canción $index de $count';
+  }
+
+  @override
+  String livePerfNextCue(String label) {
+    return 'Sigue: $label';
+  }
+
+  @override
+  String livePerfNextSongCue(String title) {
+    return 'Siguiente canción: $title';
+  }
+
+  @override
+  String get livePerfLastSection => 'Última sección del repertorio';
+
+  @override
+  String get livePerfPrevious => 'Anterior';
+
+  @override
+  String get livePerfNext => 'Siguiente';
+
+  @override
+  String get livePerfNextSong => 'Siguiente canción';
+
+  @override
+  String get livePerfFinish => 'Terminar';
+
+  @override
+  String get livePerfPlay => 'Reproducir';
+
+  @override
+  String get livePerfPause => 'Pausar';
+
+  @override
+  String get livePerfSlower => 'Más lento';
+
+  @override
+  String get livePerfFaster => 'Más rápido';
+
+  @override
+  String livePerfPace(int bpm, int percent) {
+    return '♩ $bpm · $percent%';
+  }
+
+  @override
+  String get livePerfSetComplete => 'Repertorio completo';
+
+  @override
+  String get livePerfRestart => 'Reiniciar';
+
+  @override
+  String get livePerfClose => 'Cerrar';
+
+  @override
+  String get livePerfMissingSong => 'No está en este dispositivo';
+
+  @override
+  String get livePerfMissingBody =>
+      'Esta canción no está disponible aquí. Pasa a la siguiente.';
+
+  @override
+  String get livePerfWholeSong => 'Toda la canción';
+
+  @override
+  String get livePerfEndTitle => '¿Terminar esta sesión en vivo?';
+
+  @override
+  String get livePerfEndBody =>
+      'Puedes iniciarla de nuevo desde la pestaña En vivo.';
+
+  @override
+  String get livePerfNotFound => 'No hay nada que tocar aquí';
+
+  @override
+  String get livePerfNotFoundBody =>
+      'El repertorio o la canción no está en este dispositivo.';
+
+  @override
+  String get livePerfOutlineTitle => 'Repertorio';
+
+  @override
+  String get livePerfSectionsLabel => 'Secciones';
+
+  @override
+  String get barsPerLineLabel => 'Compases por línea';
 }

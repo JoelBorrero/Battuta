@@ -378,7 +378,7 @@ void main() {
       );
     });
 
-    testWidgets('Add to setlist is the single full-width primary action', (
+    testWidgets('Add to setlist is the one filled action beside Go live', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(400, 800);
@@ -387,8 +387,8 @@ void main() {
 
       await tester.pumpWidget(buildSubject(songId: 'song-detail-1'));
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('go_live')), findsNothing);
-      expect(find.text('Go live'), findsNothing);
+      expect(find.byKey(const ValueKey('song_go_live')), findsOneWidget);
+      expect(find.text('Go live'), findsOneWidget);
       expect(
         find.descendant(
           of: find.byType(StageActionBar),
@@ -396,11 +396,11 @@ void main() {
         ),
         findsOneWidget,
       );
-      // 400 wide minus the 16 pt gutters of the bar.
-      expect(
-        tester.getSize(find.byKey(const ValueKey('add_to_setlist'))).width,
-        400 - 2 * BattutaSpace.lg,
-      );
+      // The two actions share the 400 pt bar minus gutters and the gap.
+      final goLive = tester.getSize(find.byKey(const ValueKey('song_go_live')));
+      final add = tester.getSize(find.byKey(const ValueKey('add_to_setlist')));
+      expect(goLive.width, add.width);
+      expect(goLive.width * 2 + BattutaSpace.sm, 400 - 2 * BattutaSpace.lg);
     });
 
     testWidgets('practice audio card lines up with the other cards', (

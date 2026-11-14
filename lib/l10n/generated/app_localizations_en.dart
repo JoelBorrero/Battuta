@@ -3602,4 +3602,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveReconnectingStatus => 'RECONNECTING';
+
+  @override
+  String get livePerfStartSession => 'Start live session';
+
+  @override
+  String get livePerfGoLive => 'Go live';
+
+  @override
+  String get livePerfStartEmptyHint => 'Add songs to this setlist to go live.';
+
+  @override
+  String get livePerfHubTitle => 'Start a session';
+
+  @override
+  String get livePerfHubIntro =>
+      'Play a setlist with the chart scrolling at the tempo of each song.';
+
+  @override
+  String get livePerfHubServices => 'Upcoming services';
+
+  @override
+  String get livePerfHubSetlists => 'Setlists';
+
+  @override
+  String get livePerfHubNoSetlists =>
+      'No setlists yet. Build one in Repertoire to play it here.';
+
+  @override
+  String livePerfSongCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String livePerfSongOf(int index, int count) {
+    return 'Song $index of $count';
+  }
+
+  @override
+  String livePerfNextCue(String label) {
+    return 'Next: $label';
+  }
+
+  @override
+  String livePerfNextSongCue(String title) {
+    return 'Next song: $title';
+  }
+
+  @override
+  String get livePerfLastSection => 'Last section of the set';
+
+  @override
+  String get livePerfPrevious => 'Previous';
+
+  @override
+  String get livePerfNext => 'Next';
+
+  @override
+  String get livePerfNextSong => 'Next song';
+
+  @override
+  String get livePerfFinish => 'Finish';
+
+  @override
+  String get livePerfPlay => 'Play';
+
+  @override
+  String get livePerfPause => 'Pause';
+
+  @override
+  String get livePerfSlower => 'Slower';
+
+  @override
+  String get livePerfFaster => 'Faster';
+
+  @override
+  String livePerfPace(int bpm, int percent) {
+    return '♩ $bpm · $percent%';
+  }
+
+  @override
+  String get livePerfSetComplete => 'Set complete';
+
+  @override
+  String get livePerfRestart => 'Restart';
+
+  @override
+  String get livePerfClose => 'Close';
+
+  @override
+  String get livePerfMissingSong => 'Not on this device';
+
+  @override
+  String get livePerfMissingBody =>
+      'This song is not available here. Go to the next one.';
+
+  @override
+  String get livePerfWholeSong => 'Whole song';
+
+  @override
+  String get livePerfEndTitle => 'End this live session?';
+
+  @override
+  String get livePerfEndBody => 'You can start it again from the Live tab.';
+
+  @override
+  String get livePerfNotFound => 'Nothing to play here';
+
+  @override
+  String get livePerfNotFoundBody =>
+      'The setlist or song is not on this device.';
+
+  @override
+  String get livePerfOutlineTitle => 'Setlist';
+
+  @override
+  String get livePerfSectionsLabel => 'Sections';
+
+  @override
+  String get barsPerLineLabel => 'Bars per chart line';
 }

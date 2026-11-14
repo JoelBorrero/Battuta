@@ -64,7 +64,7 @@ void main() {
   testWidgets(
     'SettingsPage renders Cloud Synchronization section and handles Sync Now tap',
     (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(390, 844);
+      tester.view.physicalSize = const Size(390, 1000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
@@ -100,7 +100,7 @@ void main() {
   testWidgets('Tapping the signed-out account row opens the sign-in page', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 844);
+    tester.view.physicalSize = const Size(390, 1000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
@@ -142,7 +142,7 @@ void main() {
   testWidgets('Tapping Supabase Connection opens SupabaseConfigDialog', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 844);
+    tester.view.physicalSize = const Size(390, 1000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 

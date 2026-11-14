@@ -143,6 +143,18 @@ final class AppRoutes {
 
   // ── Live session sub-routes ───────────────────────────────────────────
 
+  /// Performs a setlist or a song on this device (full screen, outside the
+  /// tabs). Query: `setlist=<id>` or `song=<id>`.
+  static const String livePerform = '/live/perform';
+
+  /// The performance of setlist [setlistId].
+  static String performSetlist(String setlistId) =>
+      '$livePerform?setlist=${Uri.encodeQueryComponent(setlistId)}';
+
+  /// The performance of the single song [songId].
+  static String performSong(String songId) =>
+      '$livePerform?song=${Uri.encodeQueryComponent(songId)}';
+
   /// Live session detail / lobby.
   ///
   /// Path parameter: `sessionId`.

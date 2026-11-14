@@ -65,6 +65,10 @@ void main() {
         find.byKey(const ValueKey('licenses_tile')),
         300,
       );
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('settings_version')),
+        300,
+      );
       expect(tester.takeException(), isNull);
       expect(find.byKey(const ValueKey('settings_version')), findsOneWidget);
     });

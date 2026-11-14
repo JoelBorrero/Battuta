@@ -2,6 +2,7 @@
 library;
 
 import 'package:battuta/app/design_system/components/stage_surfaces.dart';
+import 'package:battuta/app/routes/app_routes.dart';
 import 'package:battuta/app/theme/battuta_brand.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/repertoire/presentation/providers/repertoire_provider.dart';
@@ -14,6 +15,7 @@ import 'package:battuta/features/team/presentation/widgets/service_form_dialog.d
 import 'package:battuta/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ServiceEventCard extends ConsumerWidget {
   const ServiceEventCard({
@@ -204,6 +206,24 @@ class ServiceEventCard extends ConsumerWidget {
                   fontSize: 12,
                   fontStyle: FontStyle.italic,
                   color: brand.inkMuted,
+                ),
+              ),
+            ],
+            if (event.setlistId != null) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: OutlinedButton.icon(
+                  key: ValueKey('go_live_btn_${event.id}'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(44, 44),
+                    foregroundColor: brand.accentInk,
+                    side: BorderSide(color: brand.accent),
+                  ),
+                  icon: const Icon(Icons.play_arrow, size: 18),
+                  label: Text(l10n.livePerfGoLive),
+                  onPressed: () =>
+                      context.push(AppRoutes.performSetlist(event.setlistId!)),
                 ),
               ),
             ],

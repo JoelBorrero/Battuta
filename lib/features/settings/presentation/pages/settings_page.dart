@@ -7,6 +7,7 @@ library;
 import 'package:battuta/app/design_system/design_system.dart';
 import 'package:battuta/app/localization/locale_provider.dart';
 import 'package:battuta/app/theme/theme_provider.dart';
+import 'package:battuta/features/live_session/domain/scroll_pace.dart';
 import 'package:battuta/features/organizations/presentation/providers/active_organization_providers.dart';
 import 'package:battuta/features/organizations/presentation/widgets/inbox_button.dart';
 import 'package:battuta/features/profile/presentation/widgets/profile_avatar_button.dart';
@@ -92,6 +93,25 @@ class SettingsPage extends ConsumerWidget {
                       scale: prefs.chartTextScale,
                       label: l10n?.chartTextSizeLabel ?? 'Chart text size',
                       onChanged: prefsNotifier.setChartTextScale,
+                    ),
+                    const SizedBox(height: BattutaSpace.lg),
+                    Text(
+                      l10n?.barsPerLineLabel ?? 'Bars per chart line',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: brand.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    StageSegmentedControl<int>(
+                      key: const ValueKey('bars_per_line_control'),
+                      selected: prefs.barsPerLine,
+                      onChanged: prefsNotifier.setBarsPerLine,
+                      segments: [
+                        for (final bars in ScrollPace.barsPerLineChoices)
+                          StageSegment(value: bars, label: '$bars'),
+                      ],
                     ),
                   ],
                 ),

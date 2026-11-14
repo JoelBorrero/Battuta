@@ -22,7 +22,6 @@ class DirectorHostCard extends StatelessWidget {
     required this.issue,
     required this.onHost,
     required this.onStop,
-    required this.onTestCue,
     super.key,
   });
 
@@ -34,7 +33,6 @@ class DirectorHostCard extends StatelessWidget {
   final LiveConnectIssue? issue;
   final VoidCallback onHost;
   final VoidCallback onStop;
-  final VoidCallback onTestCue;
 
   @override
   Widget build(BuildContext context) {
@@ -149,14 +147,6 @@ class DirectorHostCard extends StatelessWidget {
                       : (l10n?.liveHostAction ?? 'Host session'),
                 ),
                 onPressed: hosting ? onStop : onHost,
-              ),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(44, 44),
-                ),
-                icon: const Icon(Icons.notifications_active_outlined),
-                label: Text(l10n?.triggerTestCue ?? 'Trigger Test Cue'),
-                onPressed: onTestCue,
               ),
             ],
           ),
